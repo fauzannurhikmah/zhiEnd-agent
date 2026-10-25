@@ -1,6 +1,18 @@
 <script lang="ts">
   import type { ChatMessage, AppConfig } from '../types';
-  import { Bot, User, Send, StopCircle, Trash2, Sparkles, CheckCircle2, AlertCircle, Wrench, Terminal } from 'lucide-svelte';
+  import { 
+    Send, 
+    StopCircle, 
+    Trash2, 
+    Sparkles, 
+    Wrench, 
+    ArrowUp, 
+    Search, 
+    Compass, 
+    Bug, 
+    GitCommit,
+    Check
+  } from 'lucide-svelte';
 
   let {
     messages,
@@ -37,162 +49,179 @@
 
   function setPrompt(val: string) {
     promptInput = val;
+    handleSend();
   }
 
-  // Auto-scroll when messages update
   $effect(() => {
     if (messages.length && messagesContainer) {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
   });
 
-  const quickChips = [
-    { label: 'Review Code', icon: '🔍', prompt: 'Lakukan code review mendalam pada project ini, temukan potensi bug, issue keamanan, atau performa.' },
-    { label: 'Jelaskan Project', icon: '🧭', prompt: 'Jelaskan struktur project ini, fungsi utama dari tiap file, dan arsitekturnya.' },
-    { label: 'Cari & Fix Bug', icon: '🐛', prompt: 'Cari file yang ada error atau warning, lalu perbaiki bug tersebut dan buat kode lebih clean.' },
-    { label: 'Buat Tests', icon: '🧪', prompt: 'Buatkan unit test atau testing script yang relevan untuk file utama pada project ini.' },
-    { label: 'Commit & Push', icon: '🚀', prompt: 'Periksa git status, buat commit pesan yang rapi dan deskriptif, lalu push ke origin GitHub.' }
+  const suggestions = [
+    {
+      title: 'Review Codebase',
+      desc: 'Analisis mendalam arsitektur, potensi bug, dan performa kode',
+      icon: Search,
+      prompt: 'Lakukan code review mendalam pada project ini, temukan potensi bug, issue keamanan, atau performa.'
+    },
+    {
+      title: 'Jelaskan Alur Project',
+      desc: 'Pelajari struktur modul, dependensi, dan logika utama aplikasi',
+      icon: Compass,
+      prompt: 'Jelaskan struktur project ini, fungsi utama dari tiap file, dan arsitekturnya.'
+    },
+    {
+      title: 'Cari & Perbaiki Bug',
+      desc: 'Identifikasi error dan perbaiki kode secara autonomous',
+      icon: Bug,
+      prompt: 'Cari file yang ada error atau warning, lalu perbaiki bug tersebut dan buat kode lebih clean.'
+    },
+    {
+      title: 'Commit & Push GitHub',
+      desc: 'Stage file berubah, buat commit pesan rapi, dan push ke remote',
+      icon: GitCommit,
+      prompt: 'Periksa git status, buat commit pesan yang rapi dan deskriptif, lalu push ke origin GitHub.'
+    }
   ];
 </script>
 
-<div class="flex flex-col h-full gap-3 overflow-hidden">
-  <!-- Messages Scroll Area -->
-  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto pr-2 flex flex-col gap-3.5">
-    
-    <!-- Welcome Card -->
-    <div class="glass-panel p-5 rounded-2xl flex flex-col gap-3.5 bg-gradient-to-br from-slate-900/90 via-slate-900/70 to-indigo-950/20 border border-slate-800/80">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 text-2xl">
-          🤖
-        </div>
-        <div>
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            zhiEnd AI Coding Agent
-            <span class="text-[10px] font-mono bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full">Antigravity Core</span>
-          </h2>
-          <p class="text-xs text-slate-400 mt-0.5">
-            Asisten AI autonomous yang siap membantu eksplorasi, penulisan kode, debugging, dan sinkronisasi GitHub di project <code class="text-indigo-300 font-mono">{config?.activeProject || 'lokal'}</code>.
+<div class="h-full flex flex-col justify-between overflow-hidden relative">
+  <!-- Content Viewport -->
+  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto px-4 py-6">
+    {#if messages.length === 0}
+      <!-- Empty State: Centered Minimalist Hero (Linear Style) -->
+      <div class="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center gap-6 animate-in fade-in duration-300">
+        <div class="flex flex-col gap-2">
+          <div class="inline-flex items-center justify-center gap-1.5 self-center px-2.5 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-400">
+            <Sparkles class="w-3 h-3 text-zinc-300" /> Antigravity 1.4.7
+          </div>
+          <h1 class="text-2xl font-semibold tracking-tight text-zinc-100">
+            Ada yang bisa dibantu untuk project ini?
+          </h1>
+          <p class="text-xs text-zinc-400 max-w-md mx-auto">
+            zhiEnd Agent siap membaca, mengedit file, menjalankan perintah shell, hingga melakukan push ke GitHub.
           </p>
         </div>
-      </div>
 
-      <div class="flex flex-wrap gap-2 text-[11px] pt-1">
-        <span class="px-2.5 py-1 rounded-full bg-slate-800/60 border border-slate-700/60 text-slate-300 flex items-center gap-1.5">
-          <CheckCircle2 class="w-3.5 h-3.5 text-emerald-400" /> Auto-Edit File & Terminal
-        </span>
-        <span class="px-2.5 py-1 rounded-full bg-slate-800/60 border border-slate-700/60 text-slate-300 flex items-center gap-1.5">
-          <CheckCircle2 class="w-3.5 h-3.5 text-emerald-400" /> Remote WhatsApp & Telegram
-        </span>
-        <span class="px-2.5 py-1 rounded-full bg-slate-800/60 border border-slate-700/60 text-slate-300 flex items-center gap-1.5">
-          <CheckCircle2 class="w-3.5 h-3.5 text-emerald-400" /> Git Sync & Push
-        </span>
-      </div>
-    </div>
+        <!-- Central Hero Prompt Box -->
+        <div class="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl p-3 shadow-xl flex flex-col gap-3 transition-colors focus-within:border-zinc-700">
+          <textarea
+            bind:value={promptInput}
+            onkeydown={handleKeyDown}
+            placeholder="Tulis instruksi coding Anda (contoh: 'Perbaiki endpoint login', 'Refactor styling navbar', 'Tulis unit test')..."
+            rows="3"
+            class="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none resize-none"
+          ></textarea>
 
-    <!-- Messages List -->
-    {#each messages as msg (msg.id)}
-      <div class="flex flex-col {msg.sender === 'user' ? 'items-end' : 'items-start'} max-w-[92%] {msg.sender === 'user' ? 'self-end' : 'self-start w-full'}">
-        <div class="flex items-center gap-1.5 mb-1 px-1 text-[11px] text-slate-400 font-mono">
-          {#if msg.sender === 'user'}
-            <span>Anda</span> <User class="w-3 h-3 text-indigo-400" />
-          {:else}
-            <Bot class="w-3 h-3 text-violet-400" /> <span>Antigravity</span>
-          {/if}
-        </div>
-
-        <div class="p-3.5 rounded-xl text-xs leading-relaxed {msg.sender === 'user' ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-br-none shadow-md shadow-indigo-600/20' : 'glass-panel text-slate-200 rounded-bl-none border border-slate-800/80 shadow-md shadow-black/30 w-full'}">
-          {#if msg.tools && msg.tools.length > 0}
-            <div class="flex flex-wrap gap-1.5 mb-2 pb-2 border-b border-slate-800">
-              {#each msg.tools as tool}
-                <span class="bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono px-2 py-0.5 rounded flex items-center gap-1">
-                  <Wrench class="w-2.5 h-2.5" /> {tool}
-                </span>
-              {/each}
-            </div>
-          {/if}
-
-          <div class="whitespace-pre-wrap font-sans">
-            {msg.text}
+          <div class="flex items-center justify-between pt-1 border-t border-zinc-800/60 text-xs">
+            <span class="text-[11px] text-zinc-500 font-mono">
+              Tekan <kbd class="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">Ctrl + Enter</kbd>
+            </span>
+            <button
+              onclick={handleSend}
+              disabled={isBusy || !promptInput.trim()}
+              class="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 disabled:opacity-40 text-zinc-950 font-semibold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+            >
+              <span>Kirim</span>
+              <ArrowUp class="w-3.5 h-3.5" />
+            </button>
           </div>
+        </div>
 
-          {#if msg.isStreaming}
-            <div class="flex items-center gap-2 mt-2 pt-2 border-t border-slate-800/60 text-[11px] text-violet-400 font-mono">
-              <span class="w-2 h-2 rounded-full bg-violet-400 animate-ping"></span>
-              Sedang memproses instruksi...
-            </div>
-          {/if}
+        <!-- Suggestion Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full text-left pt-2">
+          {#each suggestions as s}
+            <button
+              onclick={() => setPrompt(s.prompt)}
+              class="p-3 rounded-xl bg-zinc-900/40 hover:bg-zinc-900/90 border border-zinc-800/60 hover:border-zinc-700 flex flex-col gap-1 transition text-left cursor-pointer group"
+            >
+              <div class="flex items-center gap-2 text-xs font-semibold text-zinc-200 group-hover:text-white">
+                <s.icon class="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-200" />
+                <span>{s.title}</span>
+              </div>
+              <p class="text-[11px] text-zinc-500 leading-snug">{s.desc}</p>
+            </button>
+          {/each}
         </div>
       </div>
-    {/each}
+    {:else}
+      <!-- Active Messages Stream -->
+      <div class="max-w-3xl mx-auto flex flex-col gap-6 pb-24">
+        {#each messages as msg (msg.id)}
+          <div class="flex flex-col gap-1.5 {msg.sender === 'user' ? 'items-end' : 'items-start'}">
+            <span class="text-[10px] font-mono text-zinc-500 px-1">
+              {msg.sender === 'user' ? 'Anda' : 'Antigravity'}
+            </span>
+
+            <div class="max-w-[88%] text-xs leading-relaxed {msg.sender === 'user' ? 'bg-zinc-800 text-zinc-100 px-4 py-3 rounded-2xl rounded-tr-none' : 'text-zinc-200 w-full'}">
+              {#if msg.tools && msg.tools.length > 0}
+                <div class="flex flex-wrap gap-1.5 mb-2.5">
+                  {#each msg.tools as tool}
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[10px] font-mono text-zinc-400">
+                      <Wrench class="w-2.5 h-2.5 text-zinc-500" /> {tool}
+                    </span>
+                  {/each}
+                </div>
+              {/if}
+
+              <div class="whitespace-pre-wrap font-sans text-[13px] leading-relaxed">
+                {msg.text}
+              </div>
+
+              {#if msg.isStreaming}
+                <div class="flex items-center gap-2 mt-3 text-xs text-zinc-400 font-mono">
+                  <span class="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-pulse"></span>
+                  Memproses instruksi...
+                </div>
+              {/if}
+            </div>
+          </div>
+        {/each}
+      </div>
+    {/if}
   </div>
 
-  <!-- Bottom Input & Quick Actions Area -->
-  <div class="glass-panel p-3 rounded-xl flex flex-col gap-2.5 border border-slate-800/80 shadow-lg shadow-black/40">
-    <!-- Quick Action Chips -->
-    <div class="flex items-center gap-2 overflow-x-auto pb-1">
-      {#each quickChips as chip}
-        <button
-          onclick={() => setPrompt(chip.prompt)}
-          class="shrink-0 flex items-center gap-1.5 bg-slate-800/50 hover:bg-indigo-500/15 hover:border-indigo-500/40 border border-slate-700/60 text-slate-300 hover:text-indigo-200 px-2.5 py-1 rounded-full text-[11px] font-medium transition cursor-pointer"
-        >
-          <span>{chip.icon}</span>
-          <span>{chip.label}</span>
-        </button>
-      {/each}
-    </div>
+  <!-- Floating Sticky Bottom Input (Shown when messages exist) -->
+  {#if messages.length > 0}
+    <div class="absolute bottom-4 inset-x-0 px-4 pointer-events-none">
+      <div class="max-w-3xl mx-auto bg-zinc-900/90 backdrop-blur-md border border-zinc-800 rounded-xl p-2 shadow-2xl pointer-events-auto flex items-end gap-2">
+        <textarea
+          bind:value={promptInput}
+          onkeydown={handleKeyDown}
+          placeholder="Tulis instruksi selanjutnya..."
+          rows="1"
+          class="flex-1 bg-transparent text-xs text-zinc-100 placeholder-zinc-500 outline-none resize-none px-2 py-1.5"
+        ></textarea>
 
-    <!-- Textarea bar -->
-    <div class="flex items-end gap-2">
-      <textarea
-        bind:value={promptInput}
-        onkeydown={handleKeyDown}
-        placeholder="Tulis instruksi coding Anda (contoh: 'Perbaiki bug di navbar', 'Buatkan route baru di server', 'Commit & push')..."
-        rows="2"
-        class="flex-1 bg-slate-900/80 border border-slate-800 focus:border-indigo-500 rounded-lg p-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none resize-none transition"
-      ></textarea>
+        <div class="flex items-center gap-1.5 shrink-0">
+          {#if isBusy}
+            <button
+              onclick={onCancelTask}
+              class="p-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 transition cursor-pointer"
+              title="Hentikan Task"
+            >
+              <StopCircle class="w-4 h-4" />
+            </button>
+          {/if}
 
-      <div class="flex items-center gap-1.5 shrink-0">
-        {#if isBusy}
           <button
-            onclick={onCancelTask}
-            class="p-2.5 rounded-lg bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-400 transition cursor-pointer"
-            title="Batalkan Tugas Agent"
+            onclick={onClearMessages}
+            class="p-2 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
+            title="Bersihkan Percakapan"
           >
-            <StopCircle class="w-4 h-4" />
+            <Trash2 class="w-4 h-4" />
           </button>
-        {/if}
 
-        <button
-          onclick={onClearMessages}
-          class="p-2.5 rounded-lg bg-slate-800/60 hover:bg-slate-700/70 border border-slate-700/60 text-slate-400 hover:text-slate-200 transition cursor-pointer"
-          title="Bersihkan Percakapan"
-        >
-          <Trash2 class="w-4 h-4" />
-        </button>
-
-        <button
-          onclick={handleSend}
-          disabled={isBusy || !promptInput.trim()}
-          class="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-semibold text-xs flex items-center gap-1.5 shadow-md shadow-indigo-600/30 transition cursor-pointer active:scale-95"
-        >
-          <span>Kirim</span>
-          <Send class="w-3.5 h-3.5" />
-        </button>
+          <button
+            onclick={handleSend}
+            disabled={isBusy || !promptInput.trim()}
+            class="p-2 rounded-lg bg-white hover:bg-zinc-200 disabled:opacity-40 text-zinc-950 font-bold transition cursor-pointer"
+          >
+            <ArrowUp class="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
-
-    <!-- Status footer -->
-    <div class="flex items-center justify-between text-[10px] text-slate-500 px-1 font-mono">
-      <span class="flex items-center gap-1.5">
-        {#if isBusy}
-          <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <span class="text-amber-400 font-semibold">Agent sedang memproses...</span>
-        {:else}
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span>Standby & Ready</span>
-        {/if}
-      </span>
-      <span>Tekan <kbd class="px-1 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">Ctrl</kbd> + <kbd class="px-1 py-0.5 bg-slate-800 rounded border border-slate-700 text-slate-300">Enter</kbd> untuk kirim</span>
-    </div>
-  </div>
+  {/if}
 </div>

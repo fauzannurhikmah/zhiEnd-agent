@@ -4,7 +4,7 @@
   import type { AppConfig, GitStatus, CommitInfo, TunnelStatus, TelegramStatus, WhatsAppStatus, ChatMessage, FileItem } from './types';
   import { api, PIN_STORAGE_KEY } from './services/api';
 
-  import Header from './components/Header.svelte';
+  import Sidebar from './components/Sidebar.svelte';
   import ChatView from './components/ChatView.svelte';
   import GitView from './components/GitView.svelte';
   import RemoteView from './components/RemoteView.svelte';
@@ -14,9 +14,9 @@
   import PushModal from './components/PushModal.svelte';
   import PinModal from './components/PinModal.svelte';
 
-  import { Terminal, GitBranch, TowerControl, FolderTree } from 'lucide-svelte';
+  import { UploadCloud, GitBranch } from 'lucide-svelte';
 
-  // Navigation state
+  // Navigation tab
   let currentTab = $state<'chat' | 'git' | 'remote' | 'files'>('chat');
 
   // Application Data States
@@ -27,7 +27,7 @@
   let telegramStatus = $state<TelegramStatus | null>(null);
   let whatsappStatus = $state<WhatsAppStatus | null>(null);
   let projectFiles = $state<FileItem[]>([]);
-  let systemLogs = $state<string[]>(['[System] zhiEnd Agent Svelte 5 + Hono ready.']);
+  let systemLogs = $state<string[]>(['[System] zhiEnd Agent ready.']);
 
   // Chat States
   let messages = $state<ChatMessage[]>([]);
@@ -88,17 +88,16 @@
     socket = io();
 
     socket.on('connect', () => {
-      addLog('Socket.io connected to Hono backend.');
+      addLog('Socket connected to backend.');
     });
 
     socket.on('disconnect', () => {
-      addLog('Socket.io disconnected.');
+      addLog('Socket disconnected.');
     });
 
     socket.on('agent_task_start', (data) => {
       isAgentBusy = true;
       addLog(`[Task Started] ${data.prompt.slice(0, 60)}...`);
-      // Add active streaming message
       messages = [...messages, {
         id: data.taskId,
         sender: 'agent',
@@ -140,7 +139,6 @@
         }
       }
       addLog(`[Task Completed] Status: ${data.status} in ${data.duration}`);
-      // Auto refresh git status to show changed files
       api.getGitStatus().then(st => gitStatus = st);
     });
 
@@ -183,9 +181,7 @@
     });
   }
 
-  // --- ACTIONS ---
   async function handleSendMessage(text: string) {
-    // Add user message
     messages = [...messages, {
       id: 'usr_' + Date.now(),
       sender: 'user',
@@ -201,7 +197,7 @@
       messages = [...messages, {
         id: 'err_' + Date.now(),
         sender: 'agent',
-        text: `⚠️ Gagal mengirim prompt: ${e.message}`,
+        text: `⚠️ Gagal: ${e.message}`,
         timestamp: Date.now()
       }];
     }
@@ -240,173 +236,158 @@
   }
 </script>
 
-<div class="flex flex-col h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 select-none">
-  <!-- Top Navigation Header -->
-  <Header
+<div class="flex h-screen w-screen overflow-hidden bg-zinc-950 text-zinc-100 antialiased font-sans">
+  <!-- Minimalist Clean Sidebar -->
+  <Sidebar
+    {currentTab}
     {config}
     {gitStatus}
     {telegramStatus}
     {whatsappStatus}
     {tunnelStatus}
+    {isAgentBusy}
+    onSelectTab={(tab) => currentTab = tab}
     onOpenProjectModal={() => isProjectModalOpen = true}
     onOpenSettingsModal={() => isSettingsOpen = true}
-    onQuickPush={handleExecutePush}
     onModelChange={async (newModel) => {
       if (config) config.antigravity.defaultModel = newModel;
       await api.updateConfig({ defaultModel: newModel } as any);
-      addLog(`Model aktif diubah ke: ${newModel}`);
+      addLog(`Model aktif: ${newModel}`);
     }}
   />
 
-  <!-- Main View Tabs Nav -->
-  <div class="px-4 pt-2 border-b border-slate-800/80 flex items-center justify-between">
-    <div class="flex items-center gap-1">
-      <button
-        onclick={() => currentTab = 'chat'}
-        class="flex items-center gap-2 px-3.5 py-2 rounded-t-lg font-semibold text-xs transition cursor-pointer border-t border-x {currentTab === 'chat' ? 'bg-slate-900 border-slate-700/80 text-white shadow-sm' : 'border-transparent text-slate-400 hover:text-slate-200'}"
-      >
-        <Terminal class="w-3.5 h-3.5 text-indigo-400" />
-        <span>AI Coding Agent</span>
-        {#if isAgentBusy}
-          <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-        {/if}
-      </button>
-
-      <button
-        onclick={() => currentTab = 'git'}
-        class="flex items-center gap-2 px-3.5 py-2 rounded-t-lg font-semibold text-xs transition cursor-pointer border-t border-x {currentTab === 'git' ? 'bg-slate-900 border-slate-700/80 text-white shadow-sm' : 'border-transparent text-slate-400 hover:text-slate-200'}"
-      >
-        <GitBranch class="w-3.5 h-3.5 text-emerald-400" />
-        <span>Git & GitHub Hub</span>
-        {#if gitStatus?.files?.length}
-          <span class="px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-mono font-bold">
-            {gitStatus.files.length}
+  <!-- Main Content Workspace Area -->
+  <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-zinc-950">
+    <!-- Top Subtle Breadcrumb Header -->
+    <header class="h-11 px-4 border-b border-zinc-800/60 flex items-center justify-between shrink-0 select-none">
+      <div class="flex items-center gap-2 text-xs font-mono text-zinc-400">
+        <span class="text-zinc-500">zhiEnd</span>
+        <span class="text-zinc-600">/</span>
+        <span class="text-zinc-200 truncate max-w-sm">{config?.activeProject?.split(/\\|\//).pop() || 'workspace'}</span>
+        {#if gitStatus?.isRepo}
+          <span class="text-zinc-600">/</span>
+          <span class="flex items-center gap-1 text-zinc-400">
+            <GitBranch class="w-3 h-3 text-zinc-500" /> {gitStatus.branch}
           </span>
         {/if}
-      </button>
+      </div>
 
-      <button
-        onclick={() => currentTab = 'remote'}
-        class="flex items-center gap-2 px-3.5 py-2 rounded-t-lg font-semibold text-xs transition cursor-pointer border-t border-x {currentTab === 'remote' ? 'bg-slate-900 border-slate-700/80 text-white shadow-sm' : 'border-transparent text-slate-400 hover:text-slate-200'}"
-      >
-        <TowerControl class="w-3.5 h-3.5 text-violet-400" />
-        <span>Remote & Mobile Hub</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button
+          onclick={handleExecutePush}
+          class="flex items-center gap-1.5 px-3 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium transition cursor-pointer active:scale-95"
+          title="Git Push to GitHub"
+        >
+          <UploadCloud class="w-3 h-3 text-zinc-400" /> Push
+        </button>
+      </div>
+    </header>
 
-      <button
-        onclick={() => currentTab = 'files'}
-        class="flex items-center gap-2 px-3.5 py-2 rounded-t-lg font-semibold text-xs transition cursor-pointer border-t border-x {currentTab === 'files' ? 'bg-slate-900 border-slate-700/80 text-white shadow-sm' : 'border-transparent text-slate-400 hover:text-slate-200'}"
-      >
-        <FolderTree class="w-3.5 h-3.5 text-amber-400" />
-        <span>Files & Logs</span>
-      </button>
-    </div>
-  </div>
-
-  <!-- Main Viewports -->
-  <main class="flex-1 p-3 overflow-hidden">
-    {#if currentTab === 'chat'}
-      <ChatView
-        {messages}
-        isBusy={isAgentBusy}
-        {config}
-        onSendMessage={handleSendMessage}
-        onCancelTask={async () => {
-          await api.cancelTask();
-        }}
-        onClearMessages={() => messages = []}
-      />
-    {:else if currentTab === 'git'}
-      <GitView
-        {gitStatus}
-        {commits}
-        onRefresh={async () => gitStatus = await api.getGitStatus()}
-        onStageFiles={async (files) => {
-          await api.stageFiles(files);
-          gitStatus = await api.getGitStatus();
-        }}
-        onUnstageFiles={async (files) => {
-          await api.unstageFiles(files);
-          gitStatus = await api.getGitStatus();
-        }}
-        onCommit={async (msg) => {
-          const res = await api.commit(msg);
-          if (res.success) {
+    <!-- Main Viewport Area -->
+    <main class="flex-1 overflow-hidden p-3 min-h-0">
+      {#if currentTab === 'chat'}
+        <ChatView
+          {messages}
+          isBusy={isAgentBusy}
+          {config}
+          onSendMessage={handleSendMessage}
+          onCancelTask={async () => {
+            await api.cancelTask();
+          }}
+          onClearMessages={() => messages = []}
+        />
+      {:else if currentTab === 'git'}
+        <GitView
+          {gitStatus}
+          {commits}
+          onRefresh={async () => gitStatus = await api.getGitStatus()}
+          onStageFiles={async (files) => {
+            await api.stageFiles(files);
             gitStatus = await api.getGitStatus();
-            commits = (await api.getRecentCommits()).commits || [];
-            return true;
-          } else {
-            alert('Commit gagal: ' + (res.error || 'Unknown error'));
-            return false;
-          }
-        }}
-        onPush={handleExecutePush}
-        onPull={async () => {
-          const res = await api.pull();
-          alert(res.success ? 'Git Pull Sukses:\n' + (res.stdout || 'Up to date') : 'Git Pull Gagal:\n' + (res.error || res.stderr));
-          gitStatus = await api.getGitStatus();
-        }}
-        onGenerateAiCommit={async () => {
-          const res = await api.generateAiCommit();
-          return res.message;
-        }}
-        onLoadDiff={async (file, staged) => {
-          const res = await api.getGitDiff(file, staged);
-          return res.diff;
-        }}
-      />
-    {:else if currentTab === 'remote'}
-      <RemoteView
-        {whatsappStatus}
-        {telegramStatus}
-        {tunnelStatus}
-        {config}
-        onStartWhatsApp={async () => {
-          await api.startWhatsApp();
-          whatsappStatus = await api.getWhatsAppStatus();
-        }}
-        onLogoutWhatsApp={async () => {
-          if (!confirm('Putuskan koneksi WhatsApp?')) return;
-          await api.logoutWhatsApp();
-          whatsappStatus = await api.getWhatsAppStatus();
-        }}
-        onStartTelegram={async (token) => {
-          const res = await api.startTelegram(token);
-          if (!res.success) alert('Gagal: ' + (res.error || 'Token tidak valid'));
-          telegramStatus = await api.getTelegramStatus();
-        }}
-        onStopTelegram={async () => {
-          await api.stopTelegram();
-          telegramStatus = await api.getTelegramStatus();
-        }}
-        onSaveTelegramToken={async (token, allowedUsers) => {
-          await api.updateConfig({ telegram: { token, allowedUsers } } as any);
-          alert('Pengaturan Telegram tersimpan.');
-        }}
-        onStartTunnel={async (subdomain) => {
-          const res = await api.startTunnel(subdomain);
-          if (!res.success) alert('Gagal memulai tunnel: ' + res.error);
-          tunnelStatus = await api.getNetworkInfo();
-        }}
-        onStopTunnel={async () => {
-          await api.stopTunnel();
-          tunnelStatus = await api.getNetworkInfo();
-        }}
-        onSaveSecurityPin={async (pin) => {
-          await api.updateConfig({ securityPin: pin });
-          localStorage.setItem(PIN_STORAGE_KEY, pin);
-          alert('Security PIN disimpan.');
-        }}
-      />
-    {:else if currentTab === 'files'}
-      <FileLogsView
-        files={projectFiles}
-        logs={systemLogs}
-        onRefreshFiles={async () => projectFiles = (await api.getProjectFiles()).files || []}
-        onClearLogs={() => systemLogs = []}
-      />
-    {/if}
-  </main>
+          }}
+          onUnstageFiles={async (files) => {
+            await api.unstageFiles(files);
+            gitStatus = await api.getGitStatus();
+          }}
+          onCommit={async (msg) => {
+            const res = await api.commit(msg);
+            if (res.success) {
+              gitStatus = await api.getGitStatus();
+              commits = (await api.getRecentCommits()).commits || [];
+              return true;
+            } else {
+              alert('Commit gagal: ' + (res.error || 'Unknown error'));
+              return false;
+            }
+          }}
+          onPush={handleExecutePush}
+          onPull={async () => {
+            const res = await api.pull();
+            alert(res.success ? 'Git Pull Sukses:\n' + (res.stdout || 'Up to date') : 'Git Pull Gagal:\n' + (res.error || res.stderr));
+            gitStatus = await api.getGitStatus();
+          }}
+          onGenerateAiCommit={async () => {
+            const res = await api.generateAiCommit();
+            return res.message;
+          }}
+          onLoadDiff={async (file, staged) => {
+            const res = await api.getGitDiff(file, staged);
+            return res.diff;
+          }}
+        />
+      {:else if currentTab === 'remote'}
+        <RemoteView
+          {whatsappStatus}
+          {telegramStatus}
+          {tunnelStatus}
+          {config}
+          onStartWhatsApp={async () => {
+            await api.startWhatsApp();
+            whatsappStatus = await api.getWhatsAppStatus();
+          }}
+          onLogoutWhatsApp={async () => {
+            if (!confirm('Putuskan koneksi WhatsApp?')) return;
+            await api.logoutWhatsApp();
+            whatsappStatus = await api.getWhatsAppStatus();
+          }}
+          onStartTelegram={async (token) => {
+            const res = await api.startTelegram(token);
+            if (!res.success) alert('Gagal: ' + (res.error || 'Token tidak valid'));
+            telegramStatus = await api.getTelegramStatus();
+          }}
+          onStopTelegram={async () => {
+            await api.stopTelegram();
+            telegramStatus = await api.getTelegramStatus();
+          }}
+          onSaveTelegramToken={async (token, allowedUsers) => {
+            await api.updateConfig({ telegram: { token, allowedUsers } } as any);
+            alert('Pengaturan Telegram tersimpan.');
+          }}
+          onStartTunnel={async (subdomain) => {
+            const res = await api.startTunnel(subdomain);
+            if (!res.success) alert('Gagal memulai tunnel: ' + res.error);
+            tunnelStatus = await api.getNetworkInfo();
+          }}
+          onStopTunnel={async () => {
+            await api.stopTunnel();
+            tunnelStatus = await api.getNetworkInfo();
+          }}
+          onSaveSecurityPin={async (pin) => {
+            await api.updateConfig({ securityPin: pin });
+            localStorage.setItem(PIN_STORAGE_KEY, pin);
+            alert('Security PIN disimpan.');
+          }}
+        />
+      {:else if currentTab === 'files'}
+        <FileLogsView
+          files={projectFiles}
+          logs={systemLogs}
+          onRefreshFiles={async () => projectFiles = (await api.getProjectFiles()).files || []}
+          onClearLogs={() => systemLogs = []}
+        />
+      {/if}
+    </main>
+  </div>
 
   <!-- Modals -->
   <SettingsModal
@@ -417,7 +398,7 @@
       const res = await api.updateConfig(updates);
       if (res.success) {
         config = res.config;
-        addLog('Semua pengaturan sistem berhasil diperbarui.');
+        addLog('Pengaturan berhasil diperbarui.');
         return true;
       }
       return false;
