@@ -54,7 +54,7 @@
   });
 </script>
 
-<aside class="w-64 bg-zinc-950/80 backdrop-blur-xl border-r border-white/[0.08] flex flex-col justify-between shrink-0 select-none">
+<aside class="relative z-10 w-64 bg-zinc-950/80 backdrop-blur-xl border-r border-white/[0.08] flex flex-col justify-between shrink-0 select-none">
   <!-- Top: Logo & Workspace -->
   <div class="flex flex-col gap-3 p-3">
     <!-- Brand with subtle gradient glow -->

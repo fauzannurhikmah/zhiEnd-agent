@@ -236,7 +236,19 @@
   }
 </script>
 
-<div class="flex h-screen w-screen overflow-hidden bg-zinc-950 text-zinc-100 antialiased font-sans">
+<div class="relative flex h-screen w-screen overflow-hidden bg-[#07090e] text-zinc-100 antialiased font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+  <!-- Modern Cinematic Background: Smooth Floating Blobs + Interactive Dot Grid Matrix -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <!-- Aurora Blob 1 (Indigo/Violet) -->
+    <div class="absolute w-[680px] h-[680px] -top-32 left-[15%] rounded-full blob-aurora-1 opacity-25 blur-[120px]"></div>
+    <!-- Aurora Blob 2 (Cyan/Sky) -->
+    <div class="absolute w-[560px] h-[560px] top-[28%] right-[8%] rounded-full blob-aurora-2 opacity-20 blur-[130px]"></div>
+    <!-- Aurora Blob 3 (Fuchsia/Violet) -->
+    <div class="absolute w-[620px] h-[620px] -bottom-28 left-[35%] rounded-full blob-aurora-3 opacity-15 blur-[140px]"></div>
+    <!-- Cinematic Matrix Dot Grid -->
+    <div class="absolute inset-0 cinematic-dot-grid opacity-70"></div>
+  </div>
+
   <!-- Minimalist Clean Sidebar -->
   <Sidebar
     {currentTab}
@@ -257,9 +269,9 @@
   />
 
   <!-- Main Content Workspace Area -->
-  <div class="flex-1 flex flex-col min-w-0 overflow-hidden bg-zinc-950">
+  <div class="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden bg-transparent">
     <!-- Top Subtle Breadcrumb Header -->
-    <header class="h-11 px-4 border-b border-zinc-800/60 flex items-center justify-between shrink-0 select-none">
+    <header class="h-11 px-4 border-b border-white/[0.08] bg-zinc-950/40 backdrop-blur-md flex items-center justify-between shrink-0 select-none">
       <div class="flex items-center gap-2 text-xs font-mono text-zinc-400">
         <span class="text-zinc-500">zhiEnd</span>
         <span class="text-zinc-600">/</span>

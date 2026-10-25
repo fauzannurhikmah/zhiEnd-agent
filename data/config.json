@@ -1,8 +1,12 @@
 {
   "port": 3888,
   "securityPin": "",
-  "activeProject": "d:\\Works\\zhiEnd-agent",
+  "activeProject": "D:\\Works\\Sehati\\erp-pos",
   "recentProjects": [
+    "D:\\Works\\Sehati\\erp-pos",
+    "D:\\Works\\project stock market\\stock-intel-ingestion",
+    "D:\\Works\\Sehati",
+    "D:\\Works\\nextgen-portfolio",
     "d:\\Works\\zhiEnd-agent",
     "d:/Works/zhiEnd-agent"
   ],
