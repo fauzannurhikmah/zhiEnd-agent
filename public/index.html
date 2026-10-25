@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>zhiEnd Agent — Autonomous AI Coding & Remote Hub</title>
+  
+  <!-- Modern Typography (Inter & JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome & Highlight.js for rich styling -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="dark-theme">
+  <!-- Security PIN Modal Overlay (if PIN is enabled) -->
+  <div id="pinOverlay" class="pin-overlay hidden">
+    <div class="pin-card glass-panel">
+      <div class="pin-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <h2>zhiEnd Agent Security</h2>
+      <p>Masukkan Security PIN untuk mengakses workspace dan kontrol remote.</p>
+      <div class="pin-input-group">
+        <input type="password" id="pinInput" placeholder="••••" maxlength="12" autofocus>
+        <button id="pinSubmitBtn" class="btn btn-primary"><i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+      <div id="pinError" class="pin-error hidden">PIN tidak sesuai. Silakan coba lagi.</div>
+    </div>
+  </div>
+
+  <div class="app-layout">
+    <!-- Top Header -->
+    <header class="app-header glass-panel">
+      <div class="header-left">
+        <div class="brand">
+          <div class="brand-logo">
+            <i class="fa-solid fa-bolt-lightning"></i>
+          </div>
+          <div class="brand-info">
+            <span class="brand-name">zhiEnd<span class="highlight">Agent</span></span>
+            <span class="brand-engine"><i class="fa-solid fa-microchip"></i> Antigravity Core</span>
+          </div>
+        </div>
+
+        <div class="workspace-pill" id="projectPickerBtn" title="Klik untuk ganti project">
+          <i class="fa-regular fa-folder-open folder-icon"></i>
+          <div class="workspace-details">
+            <span class="workspace-label">ACTIVE WORKSPACE</span>
+            <span class="workspace-path" id="activeProjectPath">Loading...</span>
+          </div>
+          <span class="branch-badge" id="headerGitBadge"><i class="fa-solid fa-code-branch"></i> <span id="headerBranchName">main</span></span>
+          <i class="fa-solid fa-chevron-down arrow-icon"></i>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <!-- Model Selector -->
+        <div class="model-select-wrapper">
+          <i class="fa-solid fa-wand-magic-sparkles model-icon"></i>
+          <select id="modelSelector" class="custom-select" title="Pilih Model AI Antigravity">
+            <option value="gemini-3.8-flash-high">Gemini 3.8 Flash (High)</option>
+            <option value="gemini-3.8-flash-medium">Gemini 3.8 Flash (Medium)</option>
+            <option value="gemini-3.8-flash-low">Gemini 3.8 Flash (Fast)</option>
+            <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
+            <option value="claude-opus-4-6-thinking">Claude Opus 4.6</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Status badges for Remote Channels -->
+        <div class="remote-pills">
+          <div class="status-pill" id="statusPillTelegram" title="Telegram Bot Status">
+            <i class="fa-brands fa-telegram"></i>
+            <span class="pill-dot"></span>
+            <span class="pill-text">TG Bot</span>
+          </div>
+          <div class="status-pill" id="statusPillWhatsapp" title="WhatsApp Bot Status">
+            <i class="fa-brands fa-whatsapp"></i>
+            <span class="pill-dot"></span>
+            <span class="pill-text">WA Bot</span>
+          </div>
+          <div class="status-pill" id="statusPillTunnel" title="Public Remote Tunnel">
+            <i class="fa-solid fa-globe"></i>
+            <span class="pill-dot"></span>
+            <span class="pill-text">Remote URL</span>
+          </div>
+        </div>
+
+        <button id="quickPushBtn" class="btn btn-sm btn-gradient-emerald" title="Quick Git Push">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i> Push
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="nav-bar">
+      <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="tab-chat">
+          <i class="fa-solid fa-terminal"></i>
+          <span>AI Coding Agent</span>
+          <span class="pulse-indicator" id="agentBusyIndicator" style="display:none;"></span>
+        </button>
+        <button class="nav-tab" data-tab="tab-git">
+          <i class="fa-solid fa-code-commit"></i>
+          <span>Git & GitHub Hub</span>
+          <span class="badge" id="gitChangesCount" style="display:none;">0</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-remote">
+          <i class="fa-solid fa-tower-broadcast"></i>
+          <span>Remote & Mobile Hub</span>
+        </button>
+        <button class="nav-tab" data-tab="tab-files">
+          <i class="fa-solid fa-folder-tree"></i>
+          <span>Files & Logs</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Workspace Content Area -->
+    <main class="main-content">
+
+      <!-- TAB 1: AI CODING AGENT CHAT -->
+      <section id="tab-chat" class="tab-pane active">
+        <div class="chat-container">
+          <!-- Chat Messages Scroll Area -->
+          <div class="messages-viewport" id="messagesViewport">
+            <!-- Welcome Card -->
+            <div class="welcome-card glass-panel">
+              <div class="welcome-header">
+                <div class="agent-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                  <h2>Halo, Saya zhiEnd Agent!</h2>
+                  <p>Asisten AI coding autonomous berbasis <strong>Antigravity Core</strong>. Saya dapat membaca kode, membuat file, memperbaiki bug, menjalankan perintah terminal, dan melakukan commit serta push ke GitHub.</p>
+                </div>
+              </div>
+              <div class="welcome-actions">
+                <span class="welcome-badge"><i class="fa-solid fa-shield-check"></i> Safe Auto-Execution</span>
+                <span class="welcome-badge"><i class="fa-solid fa-mobile-screen"></i> Remote WA & Telegram Ready</span>
+                <span class="welcome-badge"><i class="fa-solid fa-code-merge"></i> Git & GitHub Sync</span>
+              </div>
+            </div>
+
+            <!-- Messages list -->
+            <div id="messagesList" class="messages-list"></div>
+            <div id="scrollAnchor"></div>
+          </div>
+
+          <!-- Bottom Control & Prompt Area -->
+          <div class="prompt-container glass-panel">
+            <!-- Quick Action Chips -->
+            <div class="quick-chips">
+              <button class="chip" data-prompt="Lakukan code review mendalam pada project ini, temukan potensi bug, issue keamanan, atau performa.">
+                <i class="fa-solid fa-magnifying-glass-chart"></i> Review Code
+              </button>
+              <button class="chip" data-prompt="Jelaskan struktur project ini, fungsi utama dari tiap file, dan arsitekturnya.">
+                <i class="fa-solid fa-compass-drafting"></i> Jelaskan Project
+              </button>
+              <button class="chip" data-prompt="Cari file yang ada error atau warning, lalu perbaiki bug tersebut dan buat kode lebih clean.">
+                <i class="fa-solid fa-bug"></i> Cari & Fix Bug
+              </button>
+              <button class="chip" data-prompt="Buatkan unit test atau testing script yang relevan untuk file utama pada project ini.">
+                <i class="fa-solid fa-flask"></i> Buat Tests
+              </button>
+              <button class="chip" data-prompt="Periksa git status, buat commit pesan yang rapi dan deskriptif, lalu push ke origin GitHub.">
+                <i class="fa-brands fa-github"></i> Commit & Push GitHub
+              </button>
+            </div>
+
+            <div class="prompt-input-bar">
+              <textarea id="promptTextarea" placeholder="Tulis instruksi coding Anda (misal: 'Tambahkan validasi email di auth.js', 'Perbaiki UI navbar', 'Push perubahan ke repo')..." rows="2"></textarea>
+              <div class="prompt-buttons">
+                <button id="cancelAgentBtn" class="btn btn-icon btn-danger hidden" title="Hentikan Proses Agent">
+                  <i class="fa-solid fa-stop"></i>
+                </button>
+                <button id="clearChatBtn" class="btn btn-icon btn-secondary" title="Bersihkan Chat">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <button id="sendPromptBtn" class="btn btn-primary" title="Kirim Prompt">
+                  <span>Kirim</span>
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div class="prompt-footer">
+              <span id="agentActiveStatus"><i class="fa-solid fa-circle-check text-success"></i> Standby & Ready</span>
+              <span class="shortcut-tip"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> untuk kirim cepat</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: GIT & GITHUB HUB -->
+      <section id="tab-git" class="tab-pane">
+        <div class="git-container">
+          <!-- Git Top Stats Panel -->
+          <div class="git-stats-bar glass-panel">
+            <div class="stat-item">
+              <span class="stat-label"><i class="fa-solid fa-code-branch"></i> Current Branch</span>
+              <span class="stat-value text-emerald" id="gitCurrentBranch">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label"><i class="fa-brands fa-github"></i> Remote GitHub</span>
+              <span class="stat-value" id="gitRemoteUrl">Not set</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label"><i class="fa-solid fa-arrow-up-right-dots"></i> Sync Status</span>
+              <span class="stat-value" id="gitSyncStatus"><span class="badge badge-neutral">0 ahead</span> <span class="badge badge-neutral">0 behind</span></span>
+            </div>
+            <div class="git-quick-actions">
+              <button id="gitPullBtn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-down"></i> Pull</button>
+              <button id="gitRefreshBtn" class="btn btn-secondary btn-sm" title="Refresh Git Status"><i class="fa-solid fa-rotate"></i> Refresh</button>
+              <button id="gitPushBigBtn" class="btn btn-primary btn-sm btn-gradient-emerald"><i class="fa-solid fa-arrow-up-from-bracket"></i> Push to GitHub</button>
+            </div>
+          </div>
+
+          <!-- Git Workspace Split: Changes List & Diff Viewer -->
+          <div class="git-split-view">
+            <!-- Left: Files changed & commit box -->
+            <div class="git-files-panel glass-panel">
+              <div class="panel-header">
+                <h3><i class="fa-solid fa-list-check"></i> Changes (<span id="gitFilesCount">0</span>)</h3>
+                <div class="header-btns">
+                  <button id="stageAllBtn" class="btn-link">Stage All</button>
+                  <button id="unstageAllBtn" class="btn-link">Unstage All</button>
+                </div>
+              </div>
+
+              <div id="gitFilesList" class="git-files-list">
+                <div class="empty-state">
+                  <i class="fa-solid fa-circle-check text-success"></i>
+                  <p>Working tree bersih! Tidak ada perubahan file.</p>
+                </div>
+              </div>
+
+              <!-- Commit Form -->
+              <div class="commit-form-box">
+                <div class="commit-header">
+                  <span>Commit Message</span>
+                  <button id="generateAiCommitBtn" class="btn-link text-violet">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI Generate Message
+                  </button>
+                </div>
+                <textarea id="commitMessageInput" placeholder="Contoh: feat: update responsive layout navbar" rows="2"></textarea>
+                <button id="commitBtn" class="btn btn-primary w-100">
+                  <i class="fa-solid fa-check"></i> Commit Changes
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Diff View -->
+            <div class="git-diff-panel glass-panel">
+              <div class="diff-header">
+                <div class="diff-title">
+                  <i class="fa-solid fa-file-code"></i>
+                  <span id="diffFileName">Select a file to inspect diff</span>
+                </div>
+                <span class="diff-mode-badge" id="diffStatusBadge">Diff Viewer</span>
+              </div>
+              <div class="diff-content" id="diffContent">
+                <pre><code class="language-diff">Pilih salah satu file di panel kiri untuk melihat perubahan baris kode (diff).</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Commits History -->
+          <div class="recent-commits-panel glass-panel">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Commits</h3>
+            <div id="recentCommitsList" class="recent-commits-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: REMOTE & MOBILE HUB -->
+      <section id="tab-remote" class="tab-pane">
+        <div class="remote-grid">
+          
+          <!-- CARD 1: WhatsApp Bot Remote Control -->
+          <div class="remote-card glass-panel">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-brands fa-whatsapp text-emerald icon-lg"></i>
+                <div>
+                  <h3>WhatsApp Remote Control</h3>
+                  <p>Kontrol & minta coding langsung dari chat WhatsApp</p>
+                </div>
+              </div>
+              <span id="waStatusBadge" class="badge badge-neutral">Checking...</span>
+            </div>
+
+            <div class="card-body">
+              <div id="waQrContainer" class="qr-box hidden">
+                <p class="qr-instructions">Buka WhatsApp di HP Anda > Perangkat Tertaut (Linked Devices) > Tautkan Perangkat > Pindai kode QR ini:</p>
+                <div class="qr-image-wrapper">
+                  <img id="waQrImage" src="" alt="WhatsApp QR Code">
+                </div>
+                <span class="qr-refresh-hint"><i class="fa-solid fa-arrows-rotate"></i> QR diperbarui otomatis</span>
+              </div>
+
+              <div id="waConnectedBox" class="connected-box hidden">
+                <div class="user-profile">
+                  <i class="fa-solid fa-circle-user avatar-icon"></i>
+                  <div>
+                    <strong id="waUserName">Terhubung</strong>
+                    <span id="waUserNumber" class="text-muted">Nomor WhatsApp</span>
+                  </div>
+                </div>
+                <button id="waLogoutBtn" class="btn btn-danger btn-sm"><i class="fa-solid fa-power-off"></i> Putuskan Hubungan (Logout)</button>
+              </div>
+
+              <div id="waStartBox" class="start-box">
+                <button id="waConnectBtn" class="btn btn-primary w-100"><i class="fa-solid fa-link"></i> Hubungkan WhatsApp</button>
+              </div>
+
+              <div class="cheatsheet-box">
+                <h4><i class="fa-solid fa-terminal"></i> Cheatsheet Perintah WhatsApp:</h4>
+                <ul>
+                  <li><code>!code &lt;instruksi&gt;</code> - Minta agent membuat/mengubah kode</li>
+                  <li><code>!git</code> - Cek status file & branch git</li>
+                  <li><code>!diff</code> - Cek perubahan file</li>
+                  <li><code>!commit &lt;pesan&gt;</code> - Stage dan commit</li>
+                  <li><code>!push</code> - Push langsung ke GitHub</li>
+                  <li><code>!project &lt;path&gt;</code> - Pindah ke project lain</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 2: Telegram Bot Remote Control -->
+          <div class="remote-card glass-panel">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-brands fa-telegram text-sky icon-lg"></i>
+                <div>
+                  <h3>Telegram Bot Remote</h3>
+                  <p>Remote coding melalui bot Telegram dengan respons instan</p>
+                </div>
+              </div>
+              <span id="tgStatusBadge" class="badge badge-neutral">Stopped</span>
+            </div>
+
+            <div class="card-body">
+              <div class="form-group">
+                <label for="tgBotToken">Bot Token (dari @BotFather):</label>
+                <div class="input-with-btn">
+                  <input type="password" id="tgBotToken" placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ">
+                  <button id="tgSaveTokenBtn" class="btn btn-secondary">Simpan</button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="tgAllowedUsers">Allowed User IDs (Opsional, pisahkan koma):</label>
+                <input type="text" id="tgAllowedUsers" placeholder="contoh: 12345678, @username">
+                <small class="form-hint">Jika kosong, bot dapat menerima perintah dari Anda secara langsung.</small>
+              </div>
+
+              <div class="tg-actions">
+                <button id="tgStartBtn" class="btn btn-primary"><i class="fa-solid fa-play"></i> Jalankan Bot</button>
+                <button id="tgStopBtn" class="btn btn-danger hidden"><i class="fa-solid fa-stop"></i> Hentikan Bot</button>
+                <a id="tgOpenLink" href="#" target="_blank" class="btn btn-secondary hidden"><i class="fa-solid fa-paper-plane"></i> Buka Chat Bot</a>
+              </div>
+
+              <div class="cheatsheet-box">
+                <h4><i class="fa-solid fa-terminal"></i> Cheatsheet Perintah Telegram:</h4>
+                <ul>
+                  <li>Kirim pesan apa saja atau <code>/code &lt;perintah&gt;</code></li>
+                  <li><code>/git</code> - Cek status repo</li>
+                  <li><code>/commit &lt;pesan&gt;</code> - Buat commit</li>
+                  <li><code>/push</code> - Push ke GitHub</li>
+                  <li><code>/project &lt;path&gt;</code> - Ganti project aktif</li>
+                  <li><code>/cancel</code> - Batalkan proses agent</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- CARD 3: Public Remote Tunnel & LAN Access -->
+          <div class="remote-card glass-panel">
+            <div class="card-header">
+              <div class="card-title">
+                <i class="fa-solid fa-tower-broadcast text-violet icon-lg"></i>
+                <div>
+                  <h3>Akses Luar & Jaringan Lokal</h3>
+                  <p>Akses dashboard Web UI ini dari HP atau laptop lain di luar rumah</p>
+                </div>
+              </div>
+              <span id="tunnelStatusBadge" class="badge badge-neutral">Local Only</span>
+            </div>
+
+            <div class="card-body">
+              <!-- Local Network Access -->
+              <div class="access-subcard">
+                <h4><i class="fa-solid fa-wifi"></i> 1. Akses Lokal (Satu Wi-Fi):</h4>
+                <div class="url-copy-box">
+                  <span id="localUrlText" class="url-text">http://localhost:3888</span>
+                  <button id="copyLocalUrlBtn" class="btn btn-sm btn-secondary"><i class="fa-regular fa-copy"></i> Salin</button>
+                </div>
+                <div class="mini-qr" id="localQrWrapper">
+                  <img id="localQrImg" src="" alt="Local Access QR">
+                  <span>Pindai dengan kamera HP di Wi-Fi yang sama</span>
+                </div>
+              </div>
+
+              <!-- Public Internet Tunnel -->
+              <div class="access-subcard">
+                <h4><i class="fa-solid fa-globe"></i> 2. Akses Luar / Internet (Public Tunnel):</h4>
+                <div class="form-group">
+                  <label for="tunnelSubdomain">Custom Subdomain (Opsional):</label>
+                  <input type="text" id="tunnelSubdomain" placeholder="contoh: zhiend-agent">
+                </div>
+                
+                <div id="tunnelActionBox">
+                  <button id="startTunnelBtn" class="btn btn-primary w-100"><i class="fa-solid fa-cloud-arrow-up"></i> Buka Akses Publik (Start Tunnel)</button>
+                  <button id="stopTunnelBtn" class="btn btn-danger w-100 hidden"><i class="fa-solid fa-ban"></i> Tutup Akses Publik (Stop Tunnel)</button>
+                </div>
+
+                <div id="publicUrlBox" class="url-copy-box hidden">
+                  <span id="publicUrlText" class="url-text">https://...</span>
+                  <button id="copyPublicUrlBtn" class="btn btn-sm btn-secondary"><i class="fa-regular fa-copy"></i> Salin</button>
+                </div>
+
+                <div class="mini-qr hidden" id="publicQrWrapper">
+                  <img id="publicQrImg" src="" alt="Public Access QR">
+                  <span>Pindai dari HP mana saja via internet</span>
+                </div>
+              </div>
+
+              <!-- Security PIN Settings -->
+              <div class="access-subcard">
+                <h4><i class="fa-solid fa-shield-halved"></i> 3. Kunci Keamanan PIN:</h4>
+                <div class="form-group">
+                  <label for="settingPinInput">PIN Akses Web UI (Cegah akses tidak sah):</label>
+                  <div class="input-with-btn">
+                    <input type="password" id="settingPinInput" placeholder="Masukkan 4-6 digit PIN">
+                    <button id="savePinBtn" class="btn btn-secondary">Simpan PIN</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 4: FILES & LOGS -->
+      <section id="tab-files" class="tab-pane">
+        <div class="files-logs-split">
+          <!-- Left: File tree -->
+          <div class="file-tree-panel glass-panel">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-folder-tree"></i> Project Explorer</h3>
+              <button id="refreshFilesBtn" class="btn-link"><i class="fa-solid fa-rotate"></i> Refresh</button>
+            </div>
+            <div id="fileTreeContainer" class="file-tree-container">
+              <div class="loading-state">Memuat struktur file...</div>
+            </div>
+          </div>
+
+          <!-- Right: Execution Logs & Terminal Stream -->
+          <div class="logs-panel glass-panel">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-terminal"></i> Antigravity Agent & System Stream</h3>
+              <button id="clearLogsBtn" class="btn-link">Clear Logs</button>
+            </div>
+            <div id="terminalLogs" class="terminal-logs">
+              <div class="log-line info">[System] zhiEnd Agent Ready. Antigravity core linked.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Project Selector Modal -->
+  <div id="projectModal" class="modal-overlay hidden">
+    <div class="modal-card glass-panel">
+      <div class="modal-header">
+        <h3><i class="fa-regular fa-folder-open"></i> Ganti / Tambah Project Workspace</h3>
+        <button id="closeProjectModalBtn" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="newProjectPathInput">Path Direktori Project di Komputer Anda:</label>
+          <div class="input-with-btn">
+            <input type="text" id="newProjectPathInput" placeholder="Contoh: D:\Works\my-project atau D:/Works/zhiEnd-agent">
+            <button id="selectCustomPathBtn" class="btn btn-primary">Buka</button>
+          </div>
+        </div>
+
+        <div class="recent-projects-section">
+          <h4>Project Terakhir Dibuka:</h4>
+          <div id="recentProjectsList" class="recent-projects-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Git Push Output Modal -->
+  <div id="pushModal" class="modal-overlay hidden">
+    <div class="modal-card glass-panel push-modal-card">
+      <div class="modal-header">
+        <h3 id="pushModalTitle"><i class="fa-solid fa-arrow-up-from-bracket"></i> Git Push to GitHub</h3>
+        <button id="closePushModalBtn" class="btn-icon"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div id="pushStatusIndicator" class="push-status-box">
+          <i class="fa-solid fa-circle-notch fa-spin text-emerald icon-lg"></i>
+          <span>Sedang melakukan git push ke remote GitHub...</span>
+        </div>
+        <pre id="pushOutputLogs" class="push-output-logs"></pre>
+      </div>
+      <div class="modal-footer">
+        <button id="pushDoneBtn" class="btn btn-primary w-100">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CDN Scripts: Socket.io, Marked, Highlight.js, Canvas-Confetti -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.1/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <!-- App Application Scripts -->
+  <script src="js/chat.js"></script>
+  <script src="js/git.js"></script>
+  <script src="js/bots.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
