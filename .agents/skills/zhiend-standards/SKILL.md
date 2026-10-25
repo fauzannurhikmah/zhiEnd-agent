@@ -77,3 +77,7 @@ To avoid dull, monochrome looks while preventing random or inconsistent colors, 
    - Use `$effect()` for DOM side-effects.
 3. **Hono Route Organization**:
    - Modular routes, JSON envelope consistency, and security PIN validation middleware on `/api/*`.
+4. **Hierarchical Tree Patterns**:
+   - Folders and workspaces must be organized hierarchically with parents (`D:\Works\Parent`) and child subfolders (`├── child-a`, `└── child-b`), both individually selectable.
+5. **No Native OS Select Form Elements**:
+   - Never use ugly native `<select>` / `<option>` elements. Use custom floating popover dropdowns with glassmorphism (`backdrop-blur-2xl`), badge pills, active indicators, and click-outside dismissal.
