@@ -10,7 +10,8 @@
     FolderGit, 
     ChevronDown,
     Sparkles,
-    Plus
+    Plus,
+    Check
   } from 'lucide-svelte';
 
   let {
@@ -40,6 +41,15 @@
   } = $props();
 
   let activeModel = $state('gemini-3.8-flash-high');
+  let isModelDropdownOpen = $state(false);
+
+  const defaultModels = [
+    { id: 'gemini-3.8-flash-high', name: 'Gemini 3.8 Flash (High Reasoning)' },
+    { id: 'gemini-3.8-flash-medium', name: 'Gemini 3.8 Flash (Medium Reasoning)' },
+    { id: 'gemini-3.8-flash-low', name: 'Gemini 3.8 Flash (Fast / Low Reasoning)' },
+    { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6 (Thinking)' },
+    { id: 'claude-opus-4-6-thinking', name: 'Claude Opus 4.6 (Thinking)' }
+  ];
 
   $effect(() => {
     if (config?.antigravity?.defaultModel) {
@@ -51,6 +61,30 @@
     if (!config?.activeProject) return 'Workspace';
     const parts = config.activeProject.replace(/\\/g, '/').split('/').filter(Boolean);
     return parts[parts.length - 1] || config.activeProject;
+  });
+
+  function modelBaseName(name: string): string {
+    return name.replace(/\(.*\)/, '').trim();
+  }
+
+  function modelSubtitle(name: string, id: string): string {
+    const match = name.match(/\((.*)\)/);
+    return match ? match[1] : id;
+  }
+
+  function modelBadge(name: string): string {
+    const sub = modelSubtitle(name, '').toLowerCase();
+    if (sub.includes('high')) return 'High';
+    if (sub.includes('medium')) return 'Medium';
+    if (sub.includes('fast') || sub.includes('low')) return 'Fast';
+    if (sub.includes('thinking')) return 'Thinking';
+    return '';
+  }
+
+  const currentModelName = $derived(() => {
+    const models = config?.antigravity?.availableModels || defaultModels;
+    const found = models.find(m => m.id === activeModel);
+    return found ? found.name : activeModel;
   });
 </script>
 
@@ -165,25 +199,90 @@
 
   <!-- Bottom: Model, Remote indicator, Settings -->
   <div class="p-3 border-t border-white/[0.08] flex flex-col gap-2.5 bg-zinc-950/70">
-    <!-- Model Selector with gradient pill -->
-    <div class="flex items-center justify-between px-2.5 py-2 rounded-xl bg-zinc-900/70 border border-white/[0.08] text-xs">
-      <div class="flex items-center gap-2 min-w-0">
-        <Sparkles class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-        <select
-          bind:value={activeModel}
-          onchange={(e) => onModelChange((e.target as HTMLSelectElement).value)}
-          class="bg-transparent text-xs text-zinc-200 font-mono outline-none cursor-pointer truncate w-36"
-        >
-          {#if config?.antigravity?.availableModels}
-            {#each config.antigravity.availableModels as m}
-              <option value={m.id} class="bg-zinc-900 text-zinc-200">{m.name.replace(/ \(.*\)/, '')}</option>
+    <!-- Custom Floating Model Selector -->
+    <div class="relative">
+      <button
+        type="button"
+        onclick={() => isModelDropdownOpen = !isModelDropdownOpen}
+        class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/[0.08] hover:border-indigo-500/40 text-xs transition cursor-pointer group shadow-sm"
+        title="Pilih Model AI"
+      >
+        <div class="flex items-center gap-2 min-w-0">
+          <Sparkles class="w-3.5 h-3.5 text-indigo-400 shrink-0 group-hover:scale-110 transition-transform" />
+          <div class="flex items-center gap-1.5 truncate">
+            <span class="font-semibold text-zinc-200 text-xs truncate">
+              {modelBaseName(currentModelName())}
+            </span>
+            {#if modelBadge(currentModelName())}
+              <span class="text-[9px] px-1.5 py-0.2 rounded-md font-mono {activeModel.startsWith('claude') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/25' : 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/25'}">
+                {modelBadge(currentModelName())}
+              </span>
+            {/if}
+          </div>
+        </div>
+        <ChevronDown class="w-3.5 h-3.5 text-zinc-400 shrink-0 transition-transform duration-200 {isModelDropdownOpen ? 'rotate-180 text-indigo-400' : ''}" />
+      </button>
+
+      <!-- Floating Dropdown Popover -->
+      {#if isModelDropdownOpen}
+        <!-- Backdrop to close on outside click -->
+        <button
+          type="button"
+          class="fixed inset-0 z-40 cursor-default bg-transparent"
+          onclick={() => isModelDropdownOpen = false}
+          aria-label="Close model dropdown"
+        ></button>
+
+        <div class="absolute bottom-full mb-2 left-0 w-72 bg-zinc-950/95 backdrop-blur-2xl border border-white/[0.12] rounded-2xl p-2 shadow-2xl shadow-indigo-950/60 z-50 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150">
+          <div class="px-2.5 py-1.5 border-b border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-zinc-400">
+            <span class="font-bold uppercase tracking-wider text-zinc-300">Pilih Model AI</span>
+            <span class="text-indigo-400">Antigravity Core</span>
+          </div>
+
+          <div class="flex flex-col gap-1 max-h-60 overflow-y-auto pt-1 font-sans">
+            {#each (config?.antigravity?.availableModels || defaultModels) as m}
+              {@const isSelected = activeModel === m.id}
+              {@const isClaude = m.id.startsWith('claude')}
+              <button
+                type="button"
+                onclick={() => {
+                  activeModel = m.id;
+                  onModelChange(m.id);
+                  isModelDropdownOpen = false;
+                }}
+                class="w-full flex items-center justify-between p-2 rounded-xl text-left transition cursor-pointer {isSelected ? 'bg-indigo-600/20 border border-indigo-500/40 text-white' : 'hover:bg-zinc-900/80 border border-transparent text-zinc-300'}"
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-6 h-6 rounded-lg {isClaude ? 'bg-amber-500/15 text-amber-400' : 'bg-indigo-500/15 text-indigo-400'} flex items-center justify-center shrink-0">
+                    <Sparkles class="w-3 h-3" />
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs font-semibold truncate {isSelected ? 'text-white' : 'text-zinc-200'}">
+                        {modelBaseName(m.name)}
+                      </span>
+                      {#if modelBadge(m.name)}
+                        <span class="text-[9px] px-1.5 py-0.2 rounded font-mono {isClaude ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300'}">
+                          {modelBadge(m.name)}
+                        </span>
+                      {/if}
+                    </div>
+                    <span class="text-[10px] text-zinc-500 font-mono truncate">
+                      {modelSubtitle(m.name, m.id)}
+                    </span>
+                  </div>
+                </div>
+
+                {#if isSelected}
+                  <div class="w-4 h-4 rounded-full bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-indigo-500">
+                    <Check class="w-2.5 h-2.5 stroke-[3]" />
+                  </div>
+                {/if}
+              </button>
             {/each}
-          {:else}
-            <option value="gemini-3.8-flash-high" class="bg-zinc-900">Gemini 3.8 Flash</option>
-            <option value="claude-sonnet-4-6" class="bg-zinc-900">Claude Sonnet 4.6</option>
-          {/if}
-        </select>
-      </div>
+          </div>
+        </div>
+      {/if}
     </div>
 
     <!-- Tunnel / Settings footer -->

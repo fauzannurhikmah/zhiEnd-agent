@@ -118,13 +118,26 @@
     });
 
     socket.on('agent_step', (data) => {
-      if (data.stepType === 'tool_execution' && messages.length) {
+      const toolLabel = data.toolDesc || data.toolName;
+      if (toolLabel && messages.length) {
         const last = messages[messages.length - 1];
-        if (last.sender === 'agent' && !last.tools?.includes(data.stepType)) {
-          last.tools = [...(last.tools || []), `${data.stepType}: ${data.state}`];
+        if (last.sender === 'agent') {
+          if (!last.tools?.includes(toolLabel)) {
+            last.tools = [...(last.tools || []), toolLabel];
+            messages = [...messages];
+          }
+        }
+        addLog(`[Tool] ${toolLabel} (${data.state || 'RUN'})`);
+      }
+    });
+
+    socket.on('agent_raw', (data) => {
+      if (messages.length && data.text) {
+        const last = messages[messages.length - 1];
+        if (last.sender === 'agent' && !last.text) {
+          last.text = data.text;
           messages = [...messages];
         }
-        addLog(`[Tool] ${data.stepType} -> ${data.state}`);
       }
     });
 
@@ -133,7 +146,10 @@
       if (messages.length) {
         const last = messages[messages.length - 1];
         if (last.sender === 'agent') {
-          last.text = data.response || last.text || '(Selesai tanpa output teks)';
+          last.text = data.response || last.text || 'Tugas selesai dijalankan.';
+          if (data.toolsExecuted && data.toolsExecuted.length > 0) {
+            last.tools = data.toolsExecuted;
+          }
           last.isStreaming = false;
           messages = [...messages];
         }

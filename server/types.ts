@@ -66,6 +66,7 @@ export interface AgentTask {
   exitCode?: number | null;
   error?: string;
   conversationId?: string | null;
+  toolsExecuted?: string[];
 }
 
 export interface TunnelStatus {

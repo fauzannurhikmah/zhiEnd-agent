@@ -176,7 +176,11 @@
               {#if msg.isStreaming}
                 <div class="flex items-center gap-2 mt-3 pt-2 border-t border-white/[0.06] text-xs text-indigo-400 font-mono">
                   <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
-                  Memproses instruksi...
+                  {#if msg.tools && msg.tools.length > 0}
+                    <span>Eksekusi: <span class="text-zinc-200">{msg.tools[msg.tools.length - 1]}</span>...</span>
+                  {:else}
+                    <span>Memproses instruksi & merencanakan tugas...</span>
+                  {/if}
                 </div>
               {/if}
             </div>

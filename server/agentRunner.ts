@@ -61,7 +61,8 @@ export class AgentRunner extends EventEmitter {
       startTime: Date.now(),
       status: 'running',
       response: '',
-      conversationId: options.conversationId || null
+      conversationId: options.conversationId || null,
+      toolsExecuted: []
     };
 
     this.emit('task_start', {
@@ -72,6 +73,9 @@ export class AgentRunner extends EventEmitter {
     });
 
     return new Promise<AgentTask>((resolve, reject) => {
+      let stderrBuffer = '';
+      let rawBuffer = '';
+
       try {
         const proc = spawn(cliPath, args, {
           cwd: workingDir,
@@ -91,6 +95,7 @@ export class AgentRunner extends EventEmitter {
               const data = JSON.parse(line);
               this.handleStreamEvent(data);
             } catch {
+              rawBuffer += (rawBuffer ? '\n' : '') + line;
               this.emit('agent_raw', { taskId, text: line });
             }
           });
@@ -101,6 +106,7 @@ export class AgentRunner extends EventEmitter {
           rlErr.on('line', (line) => {
             line = line.trim();
             if (line) {
+              stderrBuffer += (stderrBuffer ? '\n' : '') + line;
               this.emit('agent_stderr', { taskId, text: line });
             }
           });
@@ -115,6 +121,20 @@ export class AgentRunner extends EventEmitter {
           this.activeTask.status = code === 0 ? 'completed' : 'failed';
           this.activeTask.exitCode = code;
 
+          // If no direct text was emitted, provide a rich, informative response
+          if (!this.activeTask.response?.trim()) {
+            if (rawBuffer.trim()) {
+              this.activeTask.response = rawBuffer.trim();
+            } else if (this.activeTask.toolsExecuted && this.activeTask.toolsExecuted.length > 0) {
+              this.activeTask.response = `✅ Tugas berhasil diselesaikan dengan eksekusi langkah:\n` +
+                this.activeTask.toolsExecuted.map(t => `• ${t}`).join('\n');
+            } else if (stderrBuffer.trim()) {
+              this.activeTask.response = `⚠️ Warning / Info:\n${stderrBuffer.trim()}`;
+            } else {
+              this.activeTask.response = `Proses selesai (exit code: ${code}).`;
+            }
+          }
+
           const finishedTask = { ...this.activeTask };
           this.history.unshift(finishedTask);
           if (this.history.length > 50) this.history.pop();
@@ -124,7 +144,8 @@ export class AgentRunner extends EventEmitter {
             status: finishedTask.status,
             response: finishedTask.response,
             duration: finishedTask.duration,
-            conversationId: finishedTask.conversationId
+            conversationId: finishedTask.conversationId,
+            toolsExecuted: finishedTask.toolsExecuted
           });
 
           this.activeTask = null;
@@ -138,7 +159,6 @@ export class AgentRunner extends EventEmitter {
             this.activeTask.error = err.message;
           }
           this.emit('task_error', { taskId, error: err.message });
-          const failedTask = this.activeTask;
           this.activeTask = null;
           reject(err);
         });
@@ -178,10 +198,43 @@ export class AgentRunner extends EventEmitter {
           });
         }
 
+        // Handle tool executions (run_command, read_file, write_to_file, etc.)
+        let toolDesc: string | undefined;
+        if (step.step_type === 'tool') {
+          const toolName = step.tool_name || step.tool_info?.name || 'tool';
+          const params = step.tool_info?.parameters || {};
+          
+          if (toolName === 'run_command' && params.CommandLine) {
+            toolDesc = `run: ${params.CommandLine}`;
+          } else if ((toolName === 'read_file' || toolName === 'view_file') && (params.Path || params.AbsolutePath)) {
+            const rawPath = params.Path || params.AbsolutePath || '';
+            const fname = rawPath.replace(/\\/g, '/').split('/').pop() || rawPath;
+            toolDesc = `read: ${fname}`;
+          } else if ((toolName === 'write_to_file' || toolName === 'replace_file_content') && (params.TargetFile || params.Path)) {
+            const rawPath = params.TargetFile || params.Path || '';
+            const fname = rawPath.replace(/\\/g, '/').split('/').pop() || rawPath;
+            toolDesc = `edit: ${fname}`;
+          } else if (toolName === 'list_dir' && params.DirectoryPath) {
+            const dir = params.DirectoryPath.replace(/\\/g, '/').split('/').pop() || params.DirectoryPath;
+            toolDesc = `ls: ${dir}`;
+          } else if (toolName === 'grep_search' && params.Query) {
+            toolDesc = `grep: ${params.Query}`;
+          } else {
+            toolDesc = toolName;
+          }
+
+          if (toolDesc && !this.activeTask.toolsExecuted?.includes(toolDesc)) {
+            this.activeTask.toolsExecuted = this.activeTask.toolsExecuted || [];
+            this.activeTask.toolsExecuted.push(toolDesc);
+          }
+        }
+
         this.emit('agent_step', {
           taskId,
           stepIndex: step.step_index,
           stepType: step.step_type,
+          toolName: step.tool_name || step.tool_info?.name,
+          toolDesc,
           state: step.state,
           usage: step.usage,
           textDelta: step.text_delta

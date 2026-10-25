@@ -511,6 +511,8 @@ try {
   agentRunner.on('agent_delta', (data) => io?.emit('agent_delta', data));
   agentRunner.on('agent_step', (data) => io?.emit('agent_step', data));
   agentRunner.on('agent_result', (data) => io?.emit('agent_result', data));
+  agentRunner.on('agent_raw', (data) => io?.emit('agent_raw', data));
+  agentRunner.on('agent_stderr', (data) => io?.emit('agent_stderr', data));
   agentRunner.on('task_end', (data) => io?.emit('agent_task_end', data));
   agentRunner.on('task_cancelled', (data) => io?.emit('agent_task_cancelled', data));
   agentRunner.on('task_error', (data) => io?.emit('agent_task_error', data));
