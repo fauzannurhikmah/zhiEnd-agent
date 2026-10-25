@@ -77,12 +77,27 @@ export interface WhatsAppStatus {
   error?: string | null;
 }
 
+export interface ProcessStep {
+  id: string;
+  type: 'thought' | 'edit' | 'write' | 'read' | 'run' | 'search' | 'list' | 'tool';
+  title: string;
+  detail?: string;
+  file?: string;
+  lines?: string;
+  command?: string;
+  instruction?: string;
+  thought?: string;
+  timestamp: number;
+}
+
 export interface ChatMessage {
   id: string;
   sender: 'user' | 'agent';
   text: string;
   timestamp: number;
   tools?: string[];
+  steps?: ProcessStep[];
+  thought?: string;
   isStreaming?: boolean;
 }
 

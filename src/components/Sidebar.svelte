@@ -148,42 +148,50 @@
       {/if}
     </div>
 
-    <!-- Active Workspace Dropdown Button & Clear Workspace -->
-    <div class="flex items-center gap-1.5">
-      <button
-        onclick={onOpenProjectModal}
-        class="flex-1 flex items-center justify-between p-2 rounded-xl bg-zinc-900/60 hover:bg-zinc-900/90 border border-white/[0.06] hover:border-white/[0.14] text-left transition cursor-pointer group"
-        title={config?.activeProject || 'Ganti Workspace (D:\\Works)'}
-      >
-        <div class="flex items-center gap-2 min-w-0">
+    <!-- Active Workspace Card & Create Button (Proportional & Clean) -->
+    <div class="flex items-center gap-1.5 w-full">
+      <div class="flex-1 min-w-0 flex items-center justify-between p-2 rounded-xl bg-zinc-900/60 hover:bg-zinc-900/90 border border-white/[0.06] hover:border-white/[0.14] transition group">
+        <button
+          onclick={onOpenProjectModal}
+          class="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
+          title={config?.activeProject || 'Ganti Workspace (D:\\Works)'}
+        >
           <FolderGit class="w-4 h-4 {isRootWorkspace() ? 'text-indigo-400' : 'text-emerald-400'} group-hover:scale-105 transition-transform shrink-0" />
-          <div class="flex flex-col min-w-0">
-            <span class="text-xs font-semibold text-zinc-100 truncate">{projectName()}</span>
+          <div class="flex flex-col min-w-0 flex-1">
+            <span class="text-xs font-semibold text-zinc-100 truncate block">{projectName()}</span>
             {#if isRootWorkspace()}
               <span class="text-[10px] text-indigo-400/80 font-mono">default root</span>
             {:else if gitStatus?.isRepo}
-              <span class="text-[10px] text-zinc-400 font-mono flex items-center gap-1">
-                <GitBranch class="w-2.5 h-2.5 text-sky-400" /> {gitStatus.branch || 'main'}
+              <span class="text-[10px] text-zinc-400 font-mono flex items-center gap-1 truncate">
+                <GitBranch class="w-2.5 h-2.5 text-sky-400 shrink-0" /> {gitStatus.branch || 'main'}
               </span>
             {/if}
           </div>
-        </div>
-        <ChevronDown class="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-      </button>
-
-      {#if !isRootWorkspace()}
-        <button
-          onclick={onResetToRoot}
-          class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-rose-500/20 border border-white/[0.06] hover:border-rose-500/40 text-zinc-400 hover:text-rose-300 transition cursor-pointer shrink-0"
-          title="Clear Workspace (Reset ke Root D:\Works)"
-        >
-          <X class="w-3.5 h-3.5" />
         </button>
-      {/if}
+
+        <div class="flex items-center gap-0.5 shrink-0 ml-1">
+          {#if !isRootWorkspace()}
+            <button
+              onclick={onResetToRoot}
+              class="p-1 rounded-md hover:bg-rose-500/20 text-zinc-500 hover:text-rose-300 transition cursor-pointer"
+              title="Clear Workspace (Kembali ke Root D:\Works)"
+            >
+              <X class="w-3.5 h-3.5" />
+            </button>
+          {/if}
+          <button
+            onclick={onOpenProjectModal}
+            class="p-1 text-zinc-500 group-hover:text-zinc-300 transition cursor-pointer"
+            title="Buka daftar project"
+          >
+            <ChevronDown class="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
 
       <button
         onclick={onOpenProjectModal}
-        class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-900 border border-white/[0.06] hover:border-indigo-500/40 text-zinc-400 hover:text-indigo-300 transition cursor-pointer shrink-0"
+        class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-900 border border-white/[0.06] hover:border-indigo-500/40 text-zinc-400 hover:text-indigo-300 transition cursor-pointer shrink-0 shadow-sm"
         title="Buka / Buat Project Baru di D:\Works"
       >
         <Plus class="w-3.5 h-3.5" />

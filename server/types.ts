@@ -54,6 +54,19 @@ export interface CommitInfo {
   message: string;
 }
 
+export interface ProcessStep {
+  id: string;
+  type: 'thought' | 'edit' | 'write' | 'read' | 'run' | 'search' | 'list' | 'tool';
+  title: string;
+  detail?: string;
+  file?: string;
+  lines?: string;
+  command?: string;
+  instruction?: string;
+  thought?: string;
+  timestamp: number;
+}
+
 export interface AgentTask {
   id: string;
   prompt: string;
@@ -67,6 +80,8 @@ export interface AgentTask {
   error?: string;
   conversationId?: string | null;
   toolsExecuted?: string[];
+  steps?: ProcessStep[];
+  thought?: string;
 }
 
 export interface TunnelStatus {

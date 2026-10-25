@@ -131,6 +131,8 @@
         text: '',
         timestamp: Date.now(),
         tools: [],
+        steps: [],
+        thought: '',
         isStreaming: true
       }];
     });
@@ -146,15 +148,23 @@
 
     socket.on('agent_step', (data) => {
       const toolLabel = data.toolDesc || data.toolName;
-      if (toolLabel && messages.length) {
+      if (messages.length) {
         const last = messages[messages.length - 1];
         if (last.sender === 'agent') {
-          if (!last.tools?.includes(toolLabel)) {
+          if (toolLabel && !last.tools?.includes(toolLabel)) {
             last.tools = [...(last.tools || []), toolLabel];
-            messages = [...messages];
           }
+          if (data.processStep) {
+            last.steps = [...(last.steps || []), data.processStep];
+          }
+          if (data.thought) {
+            last.thought = data.thought;
+          }
+          messages = [...messages];
         }
-        addLog(`[Tool] ${toolLabel} (${data.state || 'RUN'})`);
+        if (toolLabel) {
+          addLog(`[Tool] ${toolLabel} (${data.state || 'RUN'})`);
+        }
       }
     });
 

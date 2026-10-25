@@ -12,7 +12,14 @@
     Compass, 
     Bug, 
     GitCommit,
-    Check
+    Check,
+    Copy,
+    ChevronDown,
+    CheckCircle2,
+    FileCode,
+    Terminal,
+    FileEdit,
+    FileText
   } from 'lucide-svelte';
 
   let {
@@ -33,6 +40,34 @@
 
   let promptInput = $state('');
   let messagesContainer: HTMLDivElement;
+  let copiedMessageId = $state<string | null>(null);
+  let expandedProcesses = $state<Record<string, boolean>>({});
+
+  function toggleProcess(id: string) {
+    expandedProcesses[id] = !isProcessExpanded(id);
+    expandedProcesses = { ...expandedProcesses };
+  }
+
+  function isProcessExpanded(id: string, isStreaming?: boolean): boolean {
+    if (expandedProcesses[id] !== undefined) {
+      return expandedProcesses[id];
+    }
+    // Default expanded while streaming, collapsible once finished
+    return Boolean(isStreaming);
+  }
+
+  async function handleCopy(id: string, text: string) {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      copiedMessageId = id;
+      setTimeout(() => {
+        if (copiedMessageId === id) copiedMessageId = null;
+      }, 2000);
+    } catch (e) {
+      console.error('Failed to copy message:', e);
+    }
+  }
 
   function handleSend() {
     if (!promptInput.trim() || isBusy) return;
@@ -154,22 +189,119 @@
       <!-- Active Messages Stream -->
       <div class="max-w-3xl mx-auto flex flex-col gap-6 pb-24">
         {#each messages as msg (msg.id)}
-          <div class="flex flex-col gap-1.5 {msg.sender === 'user' ? 'items-end' : 'items-start'}">
-            <span class="text-[10px] font-mono text-zinc-500 px-1">
-              {msg.sender === 'user' ? 'Anda' : 'Antigravity'}
-            </span>
+          <div class="flex flex-col gap-1.5 {msg.sender === 'user' ? 'items-end' : 'items-start'} group">
+            <!-- Header Username (No copy button here) -->
+            <div class="flex items-center text-[10px] font-mono text-zinc-500 px-1 {msg.sender === 'user' ? 'max-w-[88%]' : 'w-full max-w-[88%]'}">
+              <span>{msg.sender === 'user' ? 'Anda' : 'Antigravity'}</span>
+            </div>
 
             <div class="max-w-[88%] text-xs leading-relaxed {msg.sender === 'user' ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-3 rounded-2xl rounded-tr-none shadow-md shadow-indigo-600/20' : 'bg-zinc-900/50 border border-white/[0.07] px-4 py-3.5 rounded-2xl text-zinc-200 w-full'}">
-              {#if msg.tools && msg.tools.length > 0}
-                <div class="flex flex-wrap gap-1.5 mb-2.5 pb-2 border-b border-white/[0.06]">
-                  {#each msg.tools as tool}
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-950 border border-indigo-500/20 text-[10px] font-mono text-indigo-300">
-                      <Wrench class="w-2.5 h-2.5 text-indigo-400" /> {tool}
-                    </span>
-                  {/each}
+              
+              <!-- Professional Execution & Reasoning Accordion (For Agent Responses) -->
+              {#if msg.sender !== 'user' && ((msg.steps && msg.steps.length > 0) || (msg.tools && msg.tools.length > 0) || msg.thought || msg.isStreaming)}
+                {@const isExp = isProcessExpanded(msg.id, msg.isStreaming)}
+                <div class="mb-3.5 rounded-xl border border-white/[0.08] bg-zinc-950/70 overflow-hidden shadow-sm">
+                  <!-- Accordion Header Button -->
+                  <button
+                    type="button"
+                    onclick={() => toggleProcess(msg.id)}
+                    class="w-full flex items-center justify-between px-3 py-2 bg-zinc-900/60 hover:bg-zinc-900 transition cursor-pointer text-left select-none"
+                  >
+                    <div class="flex items-center gap-2 min-w-0">
+                      {#if msg.isStreaming}
+                        <Sparkles class="w-3.5 h-3.5 text-indigo-400 animate-spin shrink-0" />
+                        <span class="text-xs font-semibold text-indigo-300">
+                          Sedang Menganalisis & Mengeksekusi...
+                        </span>
+                      {:else}
+                        <CheckCircle2 class="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                        <span class="text-xs font-semibold text-zinc-300">
+                          Proses & Eksekusi Selesai
+                        </span>
+                      {/if}
+                      <span class="text-[10px] font-mono text-zinc-400 px-1.5 py-0.2 rounded bg-zinc-800/80 border border-white/5">
+                        {(msg.steps?.length || msg.tools?.length || 1)} aktivitas
+                      </span>
+                    </div>
+
+                    <div class="flex items-center gap-1.5 text-zinc-400">
+                      <span class="text-[10px] font-sans text-zinc-500">
+                        {isExp ? 'Sembunyikan' : 'Detail'}
+                      </span>
+                      <ChevronDown class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 {isExp ? 'rotate-180' : ''}" />
+                    </div>
+                  </button>
+
+                  <!-- Accordion Body -->
+                  {#if isExp}
+                    <div class="p-3 border-t border-white/[0.06] flex flex-col gap-2.5 text-xs bg-zinc-950/40 animate-in fade-in duration-150">
+                      <!-- Reasoning / Thinking Box -->
+                      {#if msg.thought}
+                        <div class="p-2.5 rounded-lg bg-indigo-950/25 border border-indigo-500/25 text-zinc-300 italic text-[11px] leading-relaxed flex gap-2">
+                          <Sparkles class="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                          <div class="flex flex-col gap-0.5">
+                            <span class="text-[10px] font-semibold text-indigo-300 not-italic font-mono uppercase tracking-wider">
+                              Reasoning & Analisis
+                            </span>
+                            <span>{msg.thought}</span>
+                          </div>
+                        </div>
+                      {/if}
+
+                      <!-- Detailed Step Timeline -->
+                      {#if msg.steps && msg.steps.length > 0}
+                        <div class="space-y-1.5 pl-1 border-l-2 border-indigo-500/20 ml-2">
+                          {#each msg.steps as st}
+                            <div class="flex items-start gap-2.5 text-zinc-300 text-xs py-0.5 pl-2">
+                              <span class="w-1.5 h-1.5 rounded-full {st.type === 'edit' || st.type === 'write' ? 'bg-amber-400 shadow-sm shadow-amber-400/50' : st.type === 'run' ? 'bg-indigo-400' : 'bg-sky-400'} mt-1.5 shrink-0"></span>
+
+                              <div class="flex-1 flex flex-col min-w-0">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                  <span class="font-semibold text-zinc-200">{st.title}</span>
+
+                                  {#if st.file}
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-zinc-900 border border-white/10 text-[10px] font-mono text-zinc-300">
+                                      <FileCode class="w-2.5 h-2.5 text-indigo-400" /> {st.file}
+                                    </span>
+                                  {/if}
+
+                                  {#if st.lines}
+                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-amber-500/10 border border-amber-500/25 text-[10px] font-mono text-amber-300 font-semibold">
+                                      {st.lines}
+                                    </span>
+                                  {/if}
+
+                                  {#if st.command}
+                                    <code class="px-1.5 py-0.2 rounded bg-zinc-900 border border-white/10 text-[10px] font-mono text-indigo-300 max-w-sm truncate">
+                                      {st.command}
+                                    </code>
+                                  {/if}
+                                </div>
+
+                                {#if st.instruction}
+                                  <p class="text-[11px] text-zinc-400 italic mt-0.5">{st.instruction}</p>
+                                {:else if st.detail && st.detail !== st.command}
+                                  <p class="text-[11px] text-zinc-500 mt-0.5">{st.detail}</p>
+                                {/if}
+                              </div>
+                            </div>
+                          {/each}
+                        </div>
+                      {:else if msg.tools && msg.tools.length > 0}
+                        <div class="flex flex-wrap gap-1.5">
+                          {#each msg.tools as tool}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-900 border border-indigo-500/20 text-[10px] font-mono text-indigo-300">
+                              <Wrench class="w-2.5 h-2.5 text-indigo-400" /> {tool}
+                            </span>
+                          {/each}
+                        </div>
+                      {/if}
+                    </div>
+                  {/if}
                 </div>
               {/if}
 
+              <!-- Main Message Content -->
               {#if msg.sender === 'user'}
                 <div class="whitespace-pre-wrap font-sans text-[13px] leading-relaxed">
                   {msg.text}
@@ -180,16 +312,38 @@
                 </div>
               {/if}
 
+              <!-- Live Streaming Activity Indicator -->
               {#if msg.isStreaming}
                 <div class="flex items-center gap-2 mt-3 pt-2 border-t border-white/[0.06] text-xs text-indigo-400 font-mono">
                   <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
-                  {#if msg.tools && msg.tools.length > 0}
+                  {#if msg.steps && msg.steps.length > 0}
+                    <span>Eksekusi aktif: <span class="text-zinc-200 font-semibold">{msg.steps[msg.steps.length - 1].title}</span></span>
+                  {:else if msg.tools && msg.tools.length > 0}
                     <span>Eksekusi: <span class="text-zinc-200">{msg.tools[msg.tools.length - 1]}</span>...</span>
                   {:else}
                     <span>Memproses instruksi & merencanakan tugas...</span>
                   {/if}
                 </div>
               {/if}
+
+              <!-- Bottom Copy Button (Only Appears on Hover) -->
+              <div class="flex items-center justify-end pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <button
+                  type="button"
+                  onclick={() => handleCopy(msg.id, msg.text)}
+                  class="flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-indigo-300 transition cursor-pointer px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/[0.06] hover:border-indigo-500/30 shadow-sm"
+                  title="Salin isi pesan"
+                >
+                  {#if copiedMessageId === msg.id}
+                    <Check class="w-3.5 h-3.5 text-emerald-400" />
+                    <span class="text-emerald-400 font-medium text-[11px]">Tersalin!</span>
+                  {:else}
+                    <Copy class="w-3.5 h-3.5" />
+                    <span class="font-medium text-[11px]">Salin</span>
+                  {/if}
+                </button>
+              </div>
+
             </div>
           </div>
         {/each}

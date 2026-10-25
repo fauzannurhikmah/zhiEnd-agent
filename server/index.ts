@@ -435,22 +435,24 @@ app.post('/api/agent/cancel', (c) => {
 });
 
 // Dev Server Manager
+const SAFE_DEV_PORTS = [3000, 3001, 3002, 5174, 5175, 5176, 8000, 8080, 4173, 4200, 8888];
+let activeDevServerPid: number | null = null;
+
 app.get('/api/project/dev-server/status', async (c) => {
-  // Check common dev ports: 3000, 3001, 5173, 8080, 8000
-  const ports = [3000, 3001, 5173, 8080, 8000];
+  // Check common dev ports for target projects (Strictly NEVER include 5173 or 3888!)
   const activePorts: { port: number; url: string }[] = [];
 
-  for (const port of ports) {
+  for (const port of SAFE_DEV_PORTS) {
     try {
       const net = await import('net');
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve) => {
         const tester = net.createConnection({ port, host: '127.0.0.1' }, () => {
           activePorts.push({ port, url: `http://localhost:${port}` });
           tester.destroy();
           resolve();
         });
         tester.on('error', () => resolve());
-        tester.setTimeout(300, () => {
+        tester.setTimeout(250, () => {
           tester.destroy();
           resolve();
         });
@@ -467,22 +469,39 @@ app.get('/api/project/dev-server/status', async (c) => {
 
 app.post('/api/project/dev-server/start', async (c) => {
   const targetDir = config.activeProject;
-  if (!fs.existsSync(targetDir)) {
-    return c.json({ error: 'Direktori project tidak ditemukan' }, 404);
+  if (!targetDir || targetDir === 'D:\\Works' || targetDir === 'D:/Works' || !fs.existsSync(targetDir)) {
+    return c.json({ error: 'Pilih project yang valid terlebih dahulu' }, 400);
   }
 
-  // Detect package manager
+  // Detect project type
   let cmd = 'npm run dev';
-  if (fs.existsSync(path.join(targetDir, 'pnpm-lock.yaml'))) {
-    cmd = 'pnpm dev';
-  } else if (fs.existsSync(path.join(targetDir, 'yarn.lock'))) {
-    cmd = 'yarn dev';
+  const hasPackageJson = fs.existsSync(path.join(targetDir, 'package.json'));
+  const hasIndexHtml = fs.existsSync(path.join(targetDir, 'index.html'));
+
+  if (hasPackageJson) {
+    if (fs.existsSync(path.join(targetDir, 'pnpm-lock.yaml'))) {
+      cmd = 'pnpm dev';
+    } else if (fs.existsSync(path.join(targetDir, 'yarn.lock'))) {
+      cmd = 'yarn dev';
+    } else {
+      cmd = 'npm run dev';
+    }
+  } else if (hasIndexHtml) {
+    // Pure HTML & CSS static website without package.json -> serve on port 3000
+    cmd = 'npx -y serve -l 3000';
   }
 
   try {
     const { exec } = await import('child_process');
-    const psCmd = `powershell -Command "Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd ''${targetDir}''; ${cmd}' -WindowStyle Minimized"`;
-    exec(psCmd);
+    const psCmd = `powershell -Command "$p = Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd ''${targetDir}''; ${cmd}' -WindowStyle Minimized -PassThru; $p.Id"`;
+    exec(psCmd, (err, stdout) => {
+      if (!err && stdout.trim()) {
+        const pid = parseInt(stdout.trim(), 10);
+        if (!isNaN(pid) && pid > 0) {
+          activeDevServerPid = pid;
+        }
+      }
+    });
     return c.json({ success: true, message: `Menjalankan ${cmd} di background...`, command: cmd });
   } catch (err: any) {
     return c.json({ error: 'Gagal menjalankan dev server: ' + err.message }, 500);
@@ -491,8 +510,18 @@ app.post('/api/project/dev-server/start', async (c) => {
 
 app.post('/api/project/dev-server/stop', async (c) => {
   const { exec } = await import('child_process');
-  // Kill processes on ports 3000, 3001, 5173
-  const psCmd = `powershell -Command "Get-NetTCPConnection -LocalPort 3000, 3001, 5173 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"`;
+  
+  // 1. If we have activeDevServerPid, kill that process tree
+  if (activeDevServerPid) {
+    try {
+      exec(`taskkill /PID ${activeDevServerPid} /T /F`);
+    } catch {}
+    activeDevServerPid = null;
+  }
+
+  // 2. Kill processes ONLY on SAFE_DEV_PORTS (Strictly NEVER touch 5173 or 3888!)
+  const portsList = SAFE_DEV_PORTS.join(', ');
+  const psCmd = `powershell -Command "$agentPids = @(${process.pid}); Get-NetTCPConnection -LocalPort ${portsList} -ErrorAction SilentlyContinue | Where-Object { $agentPids -notcontains $_.OwningProcess } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"`;
   exec(psCmd);
   return c.json({ success: true, message: 'Dev server dihentikan.' });
 });
@@ -547,6 +576,100 @@ app.post('/api/bots/whatsapp/start', async (c) => {
 app.post('/api/bots/whatsapp/logout', async (c) => {
   const result = await whatsappBot.logout();
   return c.json(result);
+});
+
+function getFileMime(filePath: string): string {
+  const ext = path.extname(filePath).toLowerCase();
+  switch (ext) {
+    case '.html': case '.htm': return 'text/html; charset=utf-8';
+    case '.css': return 'text/css; charset=utf-8';
+    case '.js': case '.mjs': return 'application/javascript; charset=utf-8';
+    case '.json': return 'application/json; charset=utf-8';
+    case '.png': return 'image/png';
+    case '.jpg': case '.jpeg': return 'image/jpeg';
+    case '.gif': return 'image/gif';
+    case '.svg': return 'image/svg+xml';
+    case '.webp': return 'image/webp';
+    case '.ico': return 'image/x-icon';
+    case '.woff': return 'font/woff';
+    case '.woff2': return 'font/woff2';
+    case '.ttf': return 'font/ttf';
+    case '.mp4': return 'video/mp4';
+    case '.webm': return 'video/webm';
+    case '.mp3': return 'audio/mpeg';
+    case '.pdf': return 'application/pdf';
+    default: return 'application/octet-stream';
+  }
+}
+
+// Live Preview Gateway for Active Project or Sub-projects (Local, LAN, External)
+app.get('/preview', (c) => c.redirect('/preview/'));
+app.get('/preview/*', (c) => {
+  let targetDir = config.activeProject || 'D:\\Works';
+  let relPath = c.req.path.replace(/^\/preview\/?/, '');
+
+  let targetFile = path.join(targetDir, relPath || 'index.html');
+  if (fs.existsSync(targetDir) && fs.statSync(targetDir).isDirectory()) {
+    if (fs.existsSync(targetFile) && fs.statSync(targetFile).isDirectory()) {
+      targetFile = path.join(targetFile, 'index.html');
+    }
+  }
+
+  // If not found in activeProject, look in D:\Works/<relPath>
+  if (!fs.existsSync(targetFile)) {
+    const candidate = path.join('D:\\Works', relPath);
+    if (fs.existsSync(candidate)) {
+      targetFile = fs.statSync(candidate).isDirectory() ? path.join(candidate, 'index.html') : candidate;
+    }
+  }
+
+  // If still not found and in root D:\Works, search for recently created index.html in subdirectories
+  if (!fs.existsSync(targetFile) && targetDir.toLowerCase().replace(/\\/g, '/').replace(/\/+$/, '') === 'd:/works') {
+    try {
+      const items = fs.readdirSync('D:\\Works', { withFileTypes: true });
+      for (const item of items) {
+        if (item.isDirectory() && !item.name.startsWith('.') && !['node_modules', '$RECYCLE.BIN'].includes(item.name)) {
+          const subIndex = path.join('D:\\Works', item.name, 'index.html');
+          if (fs.existsSync(subIndex)) {
+            targetFile = subIndex;
+            break;
+          }
+        }
+      }
+    } catch {}
+  }
+
+  if (fs.existsSync(targetFile) && fs.statSync(targetFile).isFile()) {
+    const mime = getFileMime(targetFile);
+    const content = fs.readFileSync(targetFile);
+    return c.body(content, 200, {
+      'Content-Type': mime,
+      'Access-Control-Allow-Origin': '*'
+    });
+  }
+
+  return c.html(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>zhiEnd Live Preview</title>
+        <meta charset="utf-8" />
+        <style>
+          body { background: #07090e; color: #cbd5e1; font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+          .card { background: #0f172a; border: 1px solid rgba(99,102,241,0.3); border-radius: 16px; padding: 28px; max-width: 480px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+          h2 { color: #818cf8; margin-top: 0; }
+          code { background: #1e293b; padding: 2px 6px; border-radius: 6px; color: #38bdf8; font-size: 13px; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h2>⚡ zhiEnd Live Preview Gateway</h2>
+          <p>Belum ada file <code>index.html</code> yang ditemukan di workspace aktif:<br/><code>${targetDir}</code></p>
+          <p style="font-size: 12px; color: #64748b;">Buat file <code>index.html</code> atau pilih project spesifik melalui menu Workspace.</p>
+        </div>
+      </body>
+    </html>
+  `, 404);
 });
 
 // Static assets serving (dist from Svelte Vite build)

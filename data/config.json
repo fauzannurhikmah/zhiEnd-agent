@@ -1,8 +1,9 @@
 {
   "port": 3888,
   "securityPin": "",
-  "activeProject": "D:\\Works",
+  "activeProject": "D:\\Works\\developer-portfolio",
   "recentProjects": [
+    "D:\\Works\\developer-portfolio",
     "D:\\Works",
     "D:\\Works\\Sehati\\erp-warehouse",
     "D:\\Works\\porfolio\\fauzan-portfolio",
@@ -11,8 +12,7 @@
     "D:\\Works\\sanika",
     "D:\\Works\\Sehati\\CRM",
     "D:\\Works\\Sehati\\erp-pos",
-    "D:\\Works\\project stock market\\stock-intel-ingestion",
-    "D:\\Works\\Sehati"
+    "D:\\Works\\project stock market\\stock-intel-ingestion"
   ],
   "antigravity": {
     "cliPath": "C:\\Users\\zhien\\AppData\\Local\\agy\\bin\\agy.exe",
