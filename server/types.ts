@@ -1,0 +1,99 @@
+export interface AntigravityModel {
+  id: string;
+  name: string;
+}
+
+export interface AppConfig {
+  port: number;
+  securityPin: string;
+  activeProject: string;
+  recentProjects: string[];
+  antigravity: {
+    cliPath: string;
+    defaultModel: string;
+    availableModels: AntigravityModel[];
+  };
+  telegram: {
+    enabled: boolean;
+    botToken: string;
+    allowedUsers: string[];
+    botTokenSet?: boolean;
+  };
+  whatsapp: {
+    enabled: boolean;
+    allowedNumbers: string[];
+  };
+  tunnel: {
+    enabled: boolean;
+    provider: string;
+    subdomain: string;
+    publicUrl: string;
+  };
+}
+
+export interface GitFile {
+  path: string;
+  status: 'modified' | 'untracked' | 'added' | 'deleted' | 'renamed';
+  staged: boolean;
+}
+
+export interface GitStatus {
+  isRepo: boolean;
+  branch: string | null;
+  remoteUrl: string | null;
+  ahead: number;
+  behind: number;
+  files: GitFile[];
+  clean: boolean;
+}
+
+export interface CommitInfo {
+  hash: string;
+  author: string;
+  date: string;
+  message: string;
+}
+
+export interface AgentTask {
+  id: string;
+  prompt: string;
+  project: string;
+  model: string;
+  startTime: number;
+  status: 'running' | 'completed' | 'failed' | 'cancelled' | 'error';
+  response: string;
+  duration?: string;
+  exitCode?: number | null;
+  error?: string;
+  conversationId?: string | null;
+}
+
+export interface TunnelStatus {
+  localIp: string;
+  localUrl: string;
+  localQr: string | null;
+  publicUrl: string | null;
+  publicQr: string | null;
+  status: 'stopped' | 'connecting' | 'connected' | 'error';
+  error: string | null;
+}
+
+export interface TelegramStatus {
+  status: 'stopped' | 'running' | 'error';
+  botInfo?: { username?: string; id?: number } | null;
+  error?: string | null;
+}
+
+export interface WhatsAppStatus {
+  status: 'stopped' | 'connecting' | 'qr_ready' | 'connected' | 'error';
+  user?: { id?: string; name?: string; notify?: string } | null;
+  qrCodeDataUrl?: string | null;
+  error?: string | null;
+}
+
+export interface FileItem {
+  name: string;
+  path: string;
+  isDirectory: boolean;
+  children?: FileItem[] | null;
+}

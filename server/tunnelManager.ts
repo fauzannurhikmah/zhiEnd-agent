@@ -1,41 +1,46 @@
-const os = require('os');
-const localtunnel = require('localtunnel');
-const QRCode = require('qrcode');
-const EventEmitter = require('events');
+import os from 'os';
+import localtunnel from 'localtunnel';
+import QRCode from 'qrcode';
+import { EventEmitter } from 'events';
+import { TunnelStatus } from './types';
 
-class TunnelManager extends EventEmitter {
-  constructor(port = 3888) {
+export class TunnelManager extends EventEmitter {
+  public port: number;
+  private tunnel: any = null;
+  public publicUrl: string | null = null;
+  public tunnelStatus: TunnelStatus['status'] = 'stopped';
+  public errorMessage: string | null = null;
+
+  constructor(port: number = 3888) {
     super();
     this.port = port;
-    this.tunnel = null;
-    this.publicUrl = null;
-    this.tunnelStatus = 'stopped'; // 'stopped' | 'connecting' | 'connected' | 'error'
-    this.errorMessage = null;
   }
 
-  setPort(port) {
+  public setPort(port: number): void {
     this.port = port;
   }
 
-  getLocalIP() {
+  public getLocalIP(): string {
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)) {
-      for (const iface of interfaces[name]) {
-        // Skip over non-IPv4 and internal (i.e. 127.0.0.1) addresses
-        if (iface.family === 'IPv4' && !iface.internal) {
-          return iface.address;
+      const netList = interfaces[name];
+      if (netList) {
+        for (const iface of netList) {
+          if (iface.family === 'IPv4' && !iface.internal) {
+            return iface.address;
+          }
         }
       }
     }
     return '127.0.0.1';
   }
 
-  getLocalUrl() {
+  public getLocalUrl(): string {
     const ip = this.getLocalIP();
     return `http://${ip}:${this.port}`;
   }
 
-  async getQrCode(url) {
+  public async getQrCode(url: string | null): Promise<string | null> {
     if (!url) return null;
     try {
       return await QRCode.toDataURL(url, {
@@ -52,7 +57,7 @@ class TunnelManager extends EventEmitter {
     }
   }
 
-  async startTunnel(subdomain = '') {
+  public async startTunnel(subdomain: string = ''): Promise<{ success: boolean; url?: string; error?: string }> {
     if (this.tunnel) {
       await this.stopTunnel();
     }
@@ -62,7 +67,7 @@ class TunnelManager extends EventEmitter {
     this.emit('status_change', { status: this.tunnelStatus });
 
     try {
-      const options = { port: this.port };
+      const options: any = { port: this.port };
       if (subdomain && subdomain.trim()) {
         options.subdomain = subdomain.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
       }
@@ -78,7 +83,7 @@ class TunnelManager extends EventEmitter {
         this.emit('status_change', { status: this.tunnelStatus });
       });
 
-      this.tunnel.on('error', (err) => {
+      this.tunnel.on('error', (err: any) => {
         this.errorMessage = err.message;
         this.tunnelStatus = 'error';
         this.emit('status_change', { status: this.tunnelStatus, error: err.message });
@@ -93,7 +98,7 @@ class TunnelManager extends EventEmitter {
         success: true,
         url: this.publicUrl
       };
-    } catch (err) {
+    } catch (err: any) {
       this.tunnelStatus = 'error';
       this.errorMessage = err.message;
       this.emit('status_change', { status: this.tunnelStatus, error: err.message });
@@ -104,7 +109,7 @@ class TunnelManager extends EventEmitter {
     }
   }
 
-  async stopTunnel() {
+  public async stopTunnel(): Promise<{ success: boolean }> {
     if (this.tunnel) {
       try {
         await this.tunnel.close();
@@ -120,10 +125,10 @@ class TunnelManager extends EventEmitter {
     return { success: true };
   }
 
-  async getNetworkInfo() {
+  public async getNetworkInfo(): Promise<TunnelStatus> {
     const localUrl = this.getLocalUrl();
     const localQr = await this.getQrCode(localUrl);
-    let publicQr = null;
+    let publicQr: string | null = null;
     if (this.publicUrl) {
       publicQr = await this.getQrCode(this.publicUrl);
     }
@@ -139,5 +144,3 @@ class TunnelManager extends EventEmitter {
     };
   }
 }
-
-module.exports = TunnelManager;

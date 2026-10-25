@@ -1,0 +1,49 @@
+{
+  "port": 3888,
+  "securityPin": "",
+  "activeProject": "d:/Works/zhiEnd-agent",
+  "recentProjects": [
+    "d:/Works/zhiEnd-agent"
+  ],
+  "antigravity": {
+    "cliPath": "C:\\Users\\zhien\\AppData\\Local\\agy\\bin\\agy.exe",
+    "defaultModel": "gemini-3.8-flash-high",
+    "availableModels": [
+      {
+        "id": "gemini-3.8-flash-high",
+        "name": "Gemini 3.8 Flash (High Reasoning)"
+      },
+      {
+        "id": "gemini-3.8-flash-medium",
+        "name": "Gemini 3.8 Flash (Medium Reasoning)"
+      },
+      {
+        "id": "gemini-3.8-flash-low",
+        "name": "Gemini 3.8 Flash (Fast / Low Reasoning)"
+      },
+      {
+        "id": "claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6 (Thinking)"
+      },
+      {
+        "id": "claude-opus-4-6-thinking",
+        "name": "Claude Opus 4.6 (Thinking)"
+      }
+    ]
+  },
+  "telegram": {
+    "enabled": false,
+    "botToken": "",
+    "allowedUsers": []
+  },
+  "whatsapp": {
+    "enabled": false,
+    "allowedNumbers": []
+  },
+  "tunnel": {
+    "enabled": false,
+    "provider": "localtunnel",
+    "subdomain": "",
+    "publicUrl": ""
+  }
+}

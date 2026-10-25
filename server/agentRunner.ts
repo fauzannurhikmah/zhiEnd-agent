@@ -1,69 +1,77 @@
-const { spawn } = require('child_process');
-const readline = require('readline');
-const EventEmitter = require('events');
-const path = require('path');
-const fs = require('fs');
+import { spawn, ChildProcess } from 'child_process';
+import readline from 'readline';
+import { EventEmitter } from 'events';
+import { AppConfig, AgentTask } from './types';
 
-class AgentRunner extends EventEmitter {
-  constructor(config) {
+export interface RunOptions {
+  prompt: string;
+  cwd?: string;
+  model?: string;
+  conversationId?: string;
+  continueLast?: boolean;
+}
+
+export class AgentRunner extends EventEmitter {
+  private config: AppConfig;
+  public currentProcess: ChildProcess | null = null;
+  public activeTask: AgentTask | null = null;
+  public history: AgentTask[] = [];
+
+  constructor(config: AppConfig) {
     super();
     this.config = config;
-    this.currentProcess = null;
-    this.activeTask = null;
-    this.history = []; // stored turns: { id, timestamp, prompt, project, model, response, status, duration }
   }
 
-  updateConfig(config) {
+  public updateConfig(config: AppConfig): void {
     this.config = config;
   }
 
-  isBusy() {
+  public isBusy(): boolean {
     return this.currentProcess !== null;
   }
 
-  async run({ prompt, cwd, model, conversationId, continueLast = false }) {
+  public async run(options: RunOptions): Promise<AgentTask> {
     if (this.isBusy()) {
       throw new Error('Agent is already running a task. Please wait or cancel the current task.');
     }
 
-    const workingDir = cwd || this.config.activeProject || process.cwd();
+    const workingDir = options.cwd || this.config.activeProject || process.cwd();
     const cliPath = this.config.antigravity?.cliPath || 'agy.exe';
-    const selectedModel = model || this.config.antigravity?.defaultModel || 'gemini-3.8-flash-high';
+    const selectedModel = options.model || this.config.antigravity?.defaultModel || 'gemini-3.8-flash-high';
 
-    const args = [
-      '-p', prompt,
+    const args: string[] = [
+      '-p', options.prompt,
       '--output-format', 'stream-json',
       '--dangerously-skip-permissions',
       '--model', selectedModel
     ];
 
-    if (conversationId) {
-      args.push('--conversation', conversationId);
-    } else if (continueLast) {
+    if (options.conversationId) {
+      args.push('--conversation', options.conversationId);
+    } else if (options.continueLast) {
       args.push('-c');
     }
 
     const taskId = 'task_' + Date.now();
     this.activeTask = {
       id: taskId,
-      prompt,
+      prompt: options.prompt,
       project: workingDir,
       model: selectedModel,
       startTime: Date.now(),
       status: 'running',
       response: '',
-      conversationId: conversationId || null,
-      steps: []
+      conversationId: options.conversationId || null
     };
 
     this.emit('task_start', {
       taskId,
-      prompt,
+      prompt: options.prompt,
       project: workingDir,
       model: selectedModel
     });
 
-    return new Promise((resolve, reject) => {
+    return new Promise<AgentTask>((resolve, reject) => {
       try {
         const proc = spawn(cliPath, args, {
           cwd: workingDir,
@@ -73,56 +81,54 @@ class AgentRunner extends EventEmitter {
 
         this.currentProcess = proc;
 
-        const rlOut = readline.createInterface({ input: proc.stdout });
-        const rlErr = readline.createInterface({ input: proc.stderr });
+        if (proc.stdout) {
+          const rlOut = readline.createInterface({ input: proc.stdout });
+          rlOut.on('line', (line) => {
+            line = line.trim();
+            if (!line) return;
 
-        rlOut.on('line', (line) => {
-          line = line.trim();
-          if (!line) return;
+            try {
+              const data = JSON.parse(line);
+              this.handleStreamEvent(data);
+            } catch {
+              this.emit('agent_raw', { taskId, text: line });
+            }
+          });
+        }
 
-          try {
-            const data = JSON.parse(line);
-            this.handleStreamEvent(data);
-          } catch (e) {
-            // Raw text output fallback
-            this.emit('agent_raw', { taskId, text: line });
-          }
-        });
-
-        rlErr.on('line', (line) => {
-          line = line.trim();
-          if (line) {
-            this.emit('agent_stderr', { taskId, text: line });
-          }
-        });
+        if (proc.stderr) {
+          const rlErr = readline.createInterface({ input: proc.stderr });
+          rlErr.on('line', (line) => {
+            line = line.trim();
+            if (line) {
+              this.emit('agent_stderr', { taskId, text: line });
+            }
+          });
+        }
 
         proc.on('close', (code) => {
           this.currentProcess = null;
+          if (!this.activeTask) return;
+
           const duration = ((Date.now() - this.activeTask.startTime) / 1000).toFixed(1);
           this.activeTask.duration = `${duration}s`;
           this.activeTask.status = code === 0 ? 'completed' : 'failed';
           this.activeTask.exitCode = code;
 
-          this.history.unshift({ ...this.activeTask });
-          // keep last 50 history
+          const finishedTask = { ...this.activeTask };
+          this.history.unshift(finishedTask);
           if (this.history.length > 50) this.history.pop();
 
           this.emit('task_end', {
             taskId,
-            status: this.activeTask.status,
-            response: this.activeTask.response,
-            duration: this.activeTask.duration,
-            conversationId: this.activeTask.conversationId
+            status: finishedTask.status,
+            response: finishedTask.response,
+            duration: finishedTask.duration,
+            conversationId: finishedTask.conversationId
           });
 
-          const completedTask = { ...this.activeTask };
           this.activeTask = null;
-
-          if (code === 0) {
-            resolve(completedTask);
-          } else {
-            resolve(completedTask); // Still resolve with task data even if error exit
-          }
+          resolve(finishedTask);
         });
 
         proc.on('error', (err) => {
@@ -132,6 +138,7 @@ class AgentRunner extends EventEmitter {
             this.activeTask.error = err.message;
           }
           this.emit('task_error', { taskId, error: err.message });
+          const failedTask = this.activeTask;
           this.activeTask = null;
           reject(err);
         });
@@ -144,7 +151,7 @@ class AgentRunner extends EventEmitter {
     });
   }
 
-  handleStreamEvent(data) {
+  private handleStreamEvent(data: any): void {
     if (!this.activeTask) return;
     const taskId = this.activeTask.id;
 
@@ -162,7 +169,6 @@ class AgentRunner extends EventEmitter {
           this.activeTask.conversationId = step.conversation_id;
         }
 
-        // Collect text delta
         if (step.text_delta) {
           this.activeTask.response += step.text_delta;
           this.emit('agent_delta', {
@@ -172,7 +178,6 @@ class AgentRunner extends EventEmitter {
           });
         }
 
-        // Tool calls or state changes
         this.emit('agent_step', {
           taskId,
           stepIndex: step.step_index,
@@ -193,14 +198,13 @@ class AgentRunner extends EventEmitter {
     }
   }
 
-  cancel() {
-    if (this.currentProcess) {
+  public cancel(): boolean {
+    if (this.currentProcess && this.currentProcess.pid) {
       try {
-        // Windows kill process tree
-        spawn('taskkill', ['/pid', this.currentProcess.pid, '/f', '/t']);
+        spawn('taskkill', ['/pid', String(this.currentProcess.pid), '/f', '/t']);
         this.currentProcess = null;
       } catch (e) {
-        console.error('Failed to kill process:', e);
+        console.error('Failed to kill agent process:', e);
       }
       if (this.activeTask) {
         this.activeTask.status = 'cancelled';
@@ -212,5 +216,3 @@ class AgentRunner extends EventEmitter {
     return false;
   }
 }
-
-module.exports = AgentRunner;

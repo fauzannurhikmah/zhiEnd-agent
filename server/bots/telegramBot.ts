@@ -1,21 +1,40 @@
-const { Telegraf } = require('telegraf');
+import { Telegraf } from 'telegraf';
+import { AppConfig, TelegramStatus } from '../types';
+import { AgentRunner } from '../agentRunner';
+import { GitManager } from '../gitManager';
 
-class TelegramBotManager {
-  constructor({ config, agentRunner, gitManager, onProjectChange }) {
-    this.config = config;
-    this.agentRunner = agentRunner;
-    this.gitManager = gitManager;
-    this.onProjectChange = onProjectChange;
-    this.bot = null;
-    this.botInfo = null;
-    this.status = 'stopped'; // 'stopped' | 'running' | 'error'
-    this.errorMessage = null;
+export interface TelegramBotOptions {
+  config: AppConfig;
+  agentRunner: AgentRunner;
+  gitManager: GitManager;
+  onProjectChange?: (newPath: string) => Promise<{ success: boolean; activeProject?: string; error?: string }>;
+}
+
+export class TelegramBotManager {
+  private config: AppConfig;
+  private agentRunner: AgentRunner;
+  private gitManager: GitManager;
+  private onProjectChange?: (newPath: string) => Promise<{ success: boolean; activeProject?: string; error?: string }>;
+
+  private bot: Telegraf | null = null;
+  public botInfo: any = null;
+  public status: TelegramStatus['status'] = 'stopped';
+  public errorMessage: string | null = null;
+
+  constructor(options: TelegramBotOptions) {
+    this.config = options.config;
+    this.agentRunner = options.agentRunner;
+    this.gitManager = options.gitManager;
+    this.onProjectChange = options.onProjectChange;
   }
 
-  isAuthorized(ctx) {
+  public updateConfig(config: AppConfig): void {
+    this.config = config;
+  }
+
+  private isAuthorized(ctx: any): boolean {
     const allowed = this.config.telegram?.allowedUsers || [];
     if (!allowed || allowed.length === 0) {
-      // If none set, allow everyone or prompt them with their ID
       return true;
     }
     const userId = String(ctx.from?.id);
@@ -23,7 +42,7 @@ class TelegramBotManager {
     return allowed.some(a => String(a).toLowerCase() === userId || String(a).toLowerCase() === username);
   }
 
-  async start(token) {
+  public async start(token?: string): Promise<{ success: boolean; botInfo?: any; error?: string }> {
     const botToken = token || this.config.telegram?.botToken;
     if (!botToken || !botToken.trim()) {
       this.status = 'stopped';
@@ -38,19 +57,17 @@ class TelegramBotManager {
     try {
       this.bot = new Telegraf(botToken.trim());
 
-      // Authorization middleware
       this.bot.use(async (ctx, next) => {
         if (!this.isAuthorized(ctx)) {
           const userId = ctx.from?.id;
           return ctx.reply(
-            `⚠️ *Akses Ditolak*\nID Telegram Anda: \`${userId}\`\nSilakan tambahkan ID ini di Web UI zhiEnd Agent > Remote Hub agar dapat mengontrol bot.`,
+            `⚠️ *Akses Ditolak*\nID Telegram Anda: \`${userId}\`\nSilakan daftarkan ID ini di Web UI zhiEnd Agent > Settings agar dapat mengontrol bot.`,
             { parse_mode: 'Markdown' }
           );
         }
         return next();
       });
 
-      // /start & /help
       this.bot.command(['start', 'help'], async (ctx) => {
         const activeProj = this.config.activeProject || 'Belum dipilih';
         const helpText = 
@@ -71,12 +88,10 @@ class TelegramBotManager {
         return ctx.reply(helpText, { parse_mode: 'Markdown' });
       });
 
-      // /id
       this.bot.command('id', (ctx) => {
         return ctx.reply(`ID Telegram Anda: \`${ctx.from.id}\``, { parse_mode: 'Markdown' });
       });
 
-      // /status
       this.bot.command('status', async (ctx) => {
         const busy = this.agentRunner.isBusy();
         const activeProj = this.config.activeProject || 'None';
@@ -86,7 +101,6 @@ class TelegramBotManager {
         return ctx.reply(msg, { parse_mode: 'Markdown' });
       });
 
-      // /project
       this.bot.command('project', async (ctx) => {
         const text = ctx.message.text.replace('/project', '').trim();
         if (!text) {
@@ -103,7 +117,6 @@ class TelegramBotManager {
         }
       });
 
-      // /git
       this.bot.command('git', async (ctx) => {
         const projectPath = this.config.activeProject;
         const status = await this.gitManager.getStatus(projectPath);
@@ -132,7 +145,6 @@ class TelegramBotManager {
         return ctx.reply(reply, { parse_mode: 'Markdown' });
       });
 
-      // /diff
       this.bot.command('diff', async (ctx) => {
         const projectPath = this.config.activeProject;
         const diff = await this.gitManager.getDiff(projectPath);
@@ -143,7 +155,6 @@ class TelegramBotManager {
         return ctx.reply(`\`\`\`diff\n${snippet}\n\`\`\``, { parse_mode: 'Markdown' });
       });
 
-      // /commit
       this.bot.command('commit', async (ctx) => {
         const msg = ctx.message.text.replace('/commit', '').trim();
         if (!msg) {
@@ -162,7 +173,6 @@ class TelegramBotManager {
         }
       });
 
-      // /push
       this.bot.command('push', async (ctx) => {
         const projectPath = this.config.activeProject;
         await ctx.reply('🚀 Menjalankan `git push` ke GitHub...');
@@ -175,7 +185,6 @@ class TelegramBotManager {
         }
       });
 
-      // /cancel
       this.bot.command('cancel', (ctx) => {
         if (this.agentRunner.isBusy()) {
           this.agentRunner.cancel();
@@ -185,8 +194,7 @@ class TelegramBotManager {
         }
       });
 
-      // /code or any plain text message
-      const handleCodingPrompt = async (ctx, promptText) => {
+      const handleCodingPrompt = async (ctx: any, promptText: string) => {
         if (!promptText || !promptText.trim()) {
           return ctx.reply('⚠️ Masukkan instruksi coding.');
         }
@@ -196,7 +204,7 @@ class TelegramBotManager {
         }
 
         const activeProj = this.config.activeProject;
-        const statusMsg = await ctx.reply(
+        await ctx.reply(
           `🤖 *Antigravity Agent Berjalan...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${promptText.slice(0, 100)}..."\n_Mohon tunggu sebentar..._`,
           { parse_mode: 'Markdown' }
         );
@@ -209,7 +217,6 @@ class TelegramBotManager {
           });
 
           const resp = result.response || '(Tugas selesai tanpa output teks)';
-          // Split into chunks if too long for Telegram (limit 4096)
           const chunkSize = 3800;
           for (let i = 0; i < resp.length; i += chunkSize) {
             const chunk = resp.slice(i, i + chunkSize);
@@ -219,7 +226,7 @@ class TelegramBotManager {
           if (result.status === 'completed') {
             await ctx.reply(`✅ *Selesai* dalam ${result.duration || 'beberapa detik'}. Cek \`/git\` untuk melihat perubahan file.`);
           }
-        } catch (err) {
+        } catch (err: any) {
           await ctx.reply(`❌ *Error menjalankan agent:*\n${err.message}`);
         }
       };
@@ -231,11 +238,10 @@ class TelegramBotManager {
 
       this.bot.on('text', async (ctx) => {
         const text = ctx.message.text.trim();
-        if (text.startsWith('/')) return; // handled by commands
+        if (text.startsWith('/')) return;
         await handleCodingPrompt(ctx, text);
       });
 
-      // Launch bot in background
       this.bot.launch().catch(err => {
         console.error('Telegram bot launch error:', err);
         this.status = 'error';
@@ -246,14 +252,12 @@ class TelegramBotManager {
       this.status = 'running';
       this.errorMessage = null;
 
-      console.log(`Telegram Bot @${this.botInfo.username} connected and running.`);
-
       return {
         success: true,
         botInfo: this.botInfo
       };
 
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to start Telegram Bot:', err);
       this.status = 'error';
       this.errorMessage = err.message;
@@ -261,7 +265,7 @@ class TelegramBotManager {
     }
   }
 
-  async stop() {
+  public async stop(): Promise<{ success: boolean }> {
     if (this.bot) {
       try {
         await this.bot.stop();
@@ -275,7 +279,7 @@ class TelegramBotManager {
     return { success: true };
   }
 
-  getStatus() {
+  public getStatus(): TelegramStatus {
     return {
       status: this.status,
       botInfo: this.botInfo,
@@ -283,5 +287,3 @@ class TelegramBotManager {
     };
   }
 }
-
-module.exports = TelegramBotManager;

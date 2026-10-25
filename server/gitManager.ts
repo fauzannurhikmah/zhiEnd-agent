@@ -1,15 +1,23 @@
-const { exec } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+import { exec } from 'child_process';
+import fs from 'fs';
+import { GitStatus, GitFile, CommitInfo } from './types';
 
-function runGit(command, cwd) {
-  return new Promise((resolve, reject) => {
+export interface CommandOutput {
+  success: boolean;
+  stdout: string;
+  stderr: string;
+  error?: string;
+}
+
+function runGit(command: string, cwd: string): Promise<CommandOutput> {
+  return new Promise((resolve) => {
     exec(command, { cwd, maxBuffer: 10 * 1024 * 1024 }, (err, stdout, stderr) => {
       if (err) {
         resolve({
           success: false,
           error: stderr || err.message,
-          stdout: stdout || ''
+          stdout: stdout || '',
+          stderr: stderr || ''
         });
       } else {
         resolve({
@@ -22,14 +30,14 @@ function runGit(command, cwd) {
   });
 }
 
-class GitManager {
-  async isGitRepo(projectPath) {
+export class GitManager {
+  public async isGitRepo(projectPath: string): Promise<boolean> {
     if (!projectPath || !fs.existsSync(projectPath)) return false;
     const res = await runGit('git rev-parse --is-inside-work-tree', projectPath);
     return res.success && res.stdout.trim() === 'true';
   }
 
-  async getStatus(projectPath) {
+  public async getStatus(projectPath: string): Promise<GitStatus> {
     const isRepo = await this.isGitRepo(projectPath);
     if (!isRepo) {
       return {
@@ -38,7 +46,8 @@ class GitManager {
         remoteUrl: null,
         files: [],
         ahead: 0,
-        behind: 0
+        behind: 0,
+        clean: true
       };
     }
 
@@ -56,9 +65,10 @@ class GitManager {
 
     let ahead = 0;
     let behind = 0;
-    const files = [];
+    const files: GitFile[] = [];
 
-    for (let line of lines) {
+    for (const rawLine of lines) {
+      const line = rawLine.trimEnd();
       if (!line) continue;
       if (line.startsWith('##')) {
         const aheadMatch = line.match(/ahead (\d+)/);
@@ -70,7 +80,7 @@ class GitManager {
         const workTreeStatus = line[1];
         const filePath = line.substring(3).trim();
 
-        let statusText = 'modified';
+        let statusText: GitFile['status'] = 'modified';
         if (indexStatus === '?' && workTreeStatus === '?') statusText = 'untracked';
         else if (indexStatus === 'A' || workTreeStatus === 'A') statusText = 'added';
         else if (indexStatus === 'D' || workTreeStatus === 'D') statusText = 'deleted';
@@ -95,7 +105,7 @@ class GitManager {
     };
   }
 
-  async getDiff(projectPath, filePath = null, staged = false) {
+  public async getDiff(projectPath: string, filePath?: string | null, staged: boolean = false): Promise<string> {
     let cmd = staged ? 'git diff --staged' : 'git diff';
     if (filePath) {
       cmd += ` -- "${filePath}"`;
@@ -104,26 +114,25 @@ class GitManager {
     return res.stdout;
   }
 
-  async stage(projectPath, files = ['.']) {
-    const targets = Array.isArray(files) ? files.map(f => `"${f}"`).join(' ') : `"${files}"`;
+  public async stage(projectPath: string, files: string[] = ['.']): Promise<CommandOutput> {
+    const targets = files.map(f => `"${f}"`).join(' ');
     return await runGit(`git add ${targets}`, projectPath);
   }
 
-  async unstage(projectPath, files = ['.']) {
-    const targets = Array.isArray(files) ? files.map(f => `"${f}"`).join(' ') : `"${files}"`;
+  public async unstage(projectPath: string, files: string[] = ['.']): Promise<CommandOutput> {
+    const targets = files.map(f => `"${f}"`).join(' ');
     return await runGit(`git restore --staged ${targets}`, projectPath);
   }
 
-  async commit(projectPath, message) {
+  public async commit(projectPath: string, message: string): Promise<CommandOutput> {
     if (!message || !message.trim()) {
-      return { success: false, error: 'Commit message is required' };
+      return { success: false, stdout: '', stderr: 'Commit message is required', error: 'Commit message is required' };
     }
-    // Escape double quotes
     const safeMsg = message.replace(/"/g, '\\"');
     return await runGit(`git commit -m "${safeMsg}"`, projectPath);
   }
 
-  async push(projectPath, remote = 'origin', branch = null) {
+  public async push(projectPath: string, remote: string = 'origin', branch?: string | null): Promise<CommandOutput> {
     let cmd = `git push ${remote}`;
     if (branch) {
       cmd += ` ${branch}`;
@@ -131,7 +140,7 @@ class GitManager {
     return await runGit(cmd, projectPath);
   }
 
-  async pull(projectPath, remote = 'origin', branch = null) {
+  public async pull(projectPath: string, remote: string = 'origin', branch?: string | null): Promise<CommandOutput> {
     let cmd = `git pull ${remote}`;
     if (branch) {
       cmd += ` ${branch}`;
@@ -139,19 +148,19 @@ class GitManager {
     return await runGit(cmd, projectPath);
   }
 
-  async getRecentCommits(projectPath, limit = 10) {
+  public async getRecentCommits(projectPath: string, limit: number = 10): Promise<CommitInfo[]> {
     const res = await runGit(`git log -n ${limit} --pretty=format:"%h|%an|%ar|%s"`, projectPath);
     if (!res.success || !res.stdout.trim()) return [];
 
     return res.stdout.split('\n').filter(Boolean).map(line => {
       const [hash, author, date, message] = line.split('|');
-      return { hash, author, date, message };
+      return { hash, author, date, message: message || '' };
     });
   }
 
-  async initRepo(projectPath) {
+  public async initRepo(projectPath: string): Promise<CommandOutput> {
     return await runGit('git init', projectPath);
   }
 }
 
-module.exports = new GitManager();
+export const gitManager = new GitManager();

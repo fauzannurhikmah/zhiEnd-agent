@@ -1,11 +1,12 @@
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { AppConfig } from './types';
 
-const CONFIG_PATH = path.join(__dirname, '..', 'data', 'config.json');
+export const CONFIG_PATH = path.join(__dirname, '..', 'data', 'config.json');
 
-const DEFAULT_CONFIG = {
+export const DEFAULT_CONFIG: AppConfig = {
   port: 3888,
-  securityPin: '', // optional PIN to access UI from public URL
+  securityPin: '',
   activeProject: 'd:/Works/zhiEnd-agent',
   recentProjects: [
     'd:/Works/zhiEnd-agent'
@@ -24,27 +25,27 @@ const DEFAULT_CONFIG = {
   telegram: {
     enabled: false,
     botToken: '',
-    allowedUsers: [] // list of allowed Telegram user IDs or usernames
+    allowedUsers: []
   },
   whatsapp: {
     enabled: false,
-    allowedNumbers: [] // e.g. ['6281234567890@s.whatsapp.net']
+    allowedNumbers: []
   },
   tunnel: {
     enabled: false,
-    provider: 'localtunnel', // localtunnel or custom
+    provider: 'localtunnel',
     subdomain: '',
     publicUrl: ''
   }
 };
 
-function ensureDir(dirPath) {
+function ensureDir(dirPath: string): void {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
 }
 
-function loadConfig() {
+export function loadConfig(): AppConfig {
   try {
     ensureDir(path.dirname(CONFIG_PATH));
     if (fs.existsSync(CONFIG_PATH)) {
@@ -58,7 +59,7 @@ function loadConfig() {
   return DEFAULT_CONFIG;
 }
 
-function saveConfig(newConfig) {
+export function saveConfig(newConfig: AppConfig): void {
   try {
     ensureDir(path.dirname(CONFIG_PATH));
     fs.writeFileSync(CONFIG_PATH, JSON.stringify(newConfig, null, 2), 'utf-8');
@@ -66,9 +67,3 @@ function saveConfig(newConfig) {
     console.error('Error saving config:', err);
   }
 }
-
-module.exports = {
-  loadConfig,
-  saveConfig,
-  CONFIG_PATH
-};
