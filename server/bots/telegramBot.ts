@@ -2,6 +2,7 @@ import { Telegraf } from 'telegraf';
 import { AppConfig, TelegramStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
+import { getPersonas, getPersonaById, saveConfigToDb } from '../db/database';
 
 export interface TelegramBotOptions {
   config: AppConfig;
@@ -61,7 +62,7 @@ export class TelegramBotManager {
         if (!this.isAuthorized(ctx)) {
           const userId = ctx.from?.id;
           return ctx.reply(
-            `⚠️ *Akses Ditolak*\nID Telegram Anda: \`${userId}\`\nSilakan daftarkan ID ini di Web UI zhiEnd Agent > Settings agar dapat mengontrol bot.`,
+            `⚠️ *Akses Ditolak*\nID Telegram Anda: \`${userId}\`\nSilakan daftarkan ID ini di Web UI zhiEnd Agent > Remote Hub / Settings agar dapat mengontrol bot.`,
             { parse_mode: 'Markdown' }
           );
         }
@@ -70,14 +71,20 @@ export class TelegramBotManager {
 
       this.bot.command(['start', 'help'], async (ctx) => {
         const activeProj = this.config.activeProject || 'Belum dipilih';
+        const activePersonaId = this.config.telegram?.personaId || 'persona-default';
+        const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
+        const personaDisplay = activePersona ? `${activePersona.avatar} ${activePersona.name}` : '⚡ Standard';
+
         const helpText = 
-`🤖 *zhiEnd AI Coding Agent (Antigravity)*
+`🤖 *zhiEnd AI Coding Agent (Telegram Remote)*
 
 📁 *Project Aktif:* \`${activeProj}\`
-⚡ *Model:* \`${this.config.antigravity?.defaultModel || 'gemini-3.8-flash'}\`
+🎭 *Persona AI:* ${personaDisplay}
+⚡ *Model:* \`${activePersona?.preferred_model || this.config.antigravity?.defaultModel || 'gemini-3.8-flash'}\`
 
 *Perintah Remote:*
-• Kirim pesan langsung atau \`/code <perintah>\` untuk coding
+• Kirim pesan langsung atau \`/code <instruksi>\` untuk coding
+• \`/persona\` - Cek & ganti Persona AI bot
 • \`/git\` - Cek status git repo aktif
 • \`/diff\` - Cek git diff perubahan file
 • \`/commit <pesan>\` - Stage & commit perubahan
@@ -95,10 +102,64 @@ export class TelegramBotManager {
       this.bot.command('status', async (ctx) => {
         const busy = this.agentRunner.isBusy();
         const activeProj = this.config.activeProject || 'None';
+        const activePersonaId = this.config.telegram?.personaId || 'persona-default';
+        const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
+        const personaDisplay = activePersona ? `${activePersona.avatar} ${activePersona.name}` : '⚡ Standard';
+
         const msg = busy 
-          ? `⏳ *Agent Status:* Sedang menjalankan tugas di \`${activeProj}\`...` 
-          : `✅ *Agent Status:* Standby & Siap menerima instruksi.\n📁 Project: \`${activeProj}\``;
+          ? `⏳ *Agent Status:* Sedang menjalankan tugas di \`${activeProj}\`...\n🎭 Persona: ${personaDisplay}` 
+          : `✅ *Agent Status:* Standby & Siap menerima instruksi.\n📁 Project: \`${activeProj}\`\n🎭 Persona: ${personaDisplay}`;
         return ctx.reply(msg, { parse_mode: 'Markdown' });
+      });
+
+      // Persona Command
+      this.bot.command('persona', async (ctx) => {
+        const text = ctx.message.text.replace('/persona', '').trim().toLowerCase();
+        const activePersonaId = this.config.telegram?.personaId || 'persona-default';
+        const allPersonas = getPersonas();
+
+        if (!text || text === 'list') {
+          let personaMsg = `🎭 *Daftar Persona AI zhiEnd:*\n\n`;
+          allPersonas.forEach((p, idx) => {
+            const isCurrent = p.id === activePersonaId;
+            personaMsg += `${idx + 1}. ${p.avatar} *${p.name}* ${isCurrent ? '*(AKTIF)*' : ''}\n`;
+            personaMsg += `   • Model: \`${p.preferred_model || 'default'}\`\n`;
+            if (p.traits) personaMsg += `   • Sifat: _${p.traits}_\n`;
+            personaMsg += `\n`;
+          });
+          personaMsg += `*Untuk mengganti persona:*\nKetik \`/persona <nomor atau nama>\`\nContoh: \`/persona 2\` atau \`/persona Reviewer\``;
+          return ctx.reply(personaMsg, { parse_mode: 'Markdown' });
+        }
+
+        let matchedPersona = null;
+        const num = parseInt(text, 10);
+        if (!isNaN(num) && num >= 1 && num <= allPersonas.length) {
+          matchedPersona = allPersonas[num - 1];
+        } else {
+          matchedPersona = allPersonas.find(p => 
+            p.id.toLowerCase() === text || 
+            p.name.toLowerCase().includes(text)
+          );
+        }
+
+        if (matchedPersona) {
+          if (!this.config.telegram) {
+            this.config.telegram = { enabled: true, botToken: botToken, allowedUsers: [], personaId: matchedPersona.id };
+          } else {
+            this.config.telegram.personaId = matchedPersona.id;
+          }
+          saveConfigToDb(this.config);
+
+          return ctx.reply(
+            `✅ *Persona Telegram berhasil diubah!*\n\n${matchedPersona.avatar} *${matchedPersona.name}*\n⚡ Model: \`${matchedPersona.preferred_model}\`\n🎭 Karakter: _${matchedPersona.traits || 'Adaptif'}_`,
+            { parse_mode: 'Markdown' }
+          );
+        } else {
+          return ctx.reply(
+            `❌ Persona "${text}" tidak ditemukan.\nKetik \`/persona\` untuk melihat daftar nomor & nama persona.`,
+            { parse_mode: 'Markdown' }
+          );
+        }
       });
 
       this.bot.command('project', async (ctx) => {
@@ -204,8 +265,12 @@ export class TelegramBotManager {
         }
 
         const activeProj = this.config.activeProject;
+        const activePersonaId = this.config.telegram?.personaId || 'persona-default';
+        const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
+        const personaDisplay = activePersona ? `${activePersona.avatar} ${activePersona.name}` : '⚡ Standard';
+
         await ctx.reply(
-          `🤖 *Antigravity Agent Berjalan...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${promptText.slice(0, 100)}..."\n_Mohon tunggu sebentar..._`,
+          `🤖 *${personaDisplay} Berjalan...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${promptText.slice(0, 100)}..."\n_Mohon tunggu sebentar..._`,
           { parse_mode: 'Markdown' }
         );
 
@@ -213,7 +278,8 @@ export class TelegramBotManager {
           const result = await this.agentRunner.run({
             prompt: promptText,
             cwd: activeProj,
-            model: this.config.antigravity?.defaultModel
+            personaId: activePersonaId,
+            model: activePersona?.preferred_model || this.config.antigravity?.defaultModel
           });
 
           const resp = result.response || '(Tugas selesai tanpa output teks)';
@@ -252,13 +318,9 @@ export class TelegramBotManager {
       this.status = 'running';
       this.errorMessage = null;
 
-      return {
-        success: true,
-        botInfo: this.botInfo
-      };
-
+      return { success: true, botInfo: this.botInfo };
     } catch (err: any) {
-      console.error('Failed to start Telegram Bot:', err);
+      console.error('Error starting Telegram bot:', err);
       this.status = 'error';
       this.errorMessage = err.message;
       return { success: false, error: err.message };
@@ -268,9 +330,9 @@ export class TelegramBotManager {
   public async stop(): Promise<{ success: boolean }> {
     if (this.bot) {
       try {
-        await this.bot.stop();
+        this.bot.stop();
       } catch (e) {
-        console.error('Error stopping telegram bot:', e);
+        console.error('Error stopping Telegram bot:', e);
       }
       this.bot = null;
     }

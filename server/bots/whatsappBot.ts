@@ -12,6 +12,7 @@ import { EventEmitter } from 'events';
 import { AppConfig, WhatsAppStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
+import { getPersonas, getPersonaById, saveConfigToDb } from '../db/database';
 
 export interface WhatsAppBotOptions {
   config: AppConfig;
@@ -32,6 +33,8 @@ export class WhatsAppBotManager extends EventEmitter {
   public user: any = null;
   public errorMessage: string | null = null;
   private authPath: string;
+  private isStarting: boolean = false;
+  private reconnectTimeout: NodeJS.Timeout | null = null;
 
   constructor(options: WhatsAppBotOptions) {
     super();
@@ -63,17 +66,48 @@ export class WhatsAppBotManager extends EventEmitter {
       return { success: true, message: 'Already connected' };
     }
 
+    if (this.isStarting) {
+      return { success: true, message: 'Connection already in progress' };
+    }
+
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+
     try {
+      this.isStarting = true;
       this.status = 'connecting';
       this.errorMessage = null;
       this.emit('status_change', { status: this.status });
+
+      // Clean up previous socket if any
+      if (this.sock) {
+        try {
+          this.sock.ev.removeAllListeners('connection.update');
+          this.sock.ev.removeAllListeners('creds.update');
+          this.sock.ev.removeAllListeners('messages.upsert');
+          this.sock.end(undefined);
+        } catch {}
+        this.sock = null;
+      }
 
       if (!fs.existsSync(this.authPath)) {
         fs.mkdirSync(this.authPath, { recursive: true });
       }
 
       const { state, saveCreds } = await useMultiFileAuthState(this.authPath);
-      const { version } = await fetchLatestBaileysVersion();
+      
+      let version = [2, 3000, 1015901307] as any;
+      try {
+        const v = await fetchLatestBaileysVersion();
+        if (v && v.version) {
+          version = v.version;
+        }
+      } catch (err) {
+        console.warn('Fallback default Baileys version used due to fetch error:', err);
+      }
+
       const logger = pino({ level: 'silent' });
 
       this.sock = makeWASocket({
@@ -81,7 +115,9 @@ export class WhatsAppBotManager extends EventEmitter {
         logger,
         auth: state,
         printQRInTerminal: false,
-        browser: ['zhiEnd-Agent', 'Chrome', '1.0.0']
+        browser: ['zhiEnd-Agent', 'Chrome', '1.0.0'],
+        connectTimeoutMs: 60000,
+        defaultQueryTimeoutMs: 60000
       });
 
       this.sock.ev.on('creds.update', saveCreds);
@@ -108,7 +144,12 @@ export class WhatsAppBotManager extends EventEmitter {
           if (shouldReconnect) {
             this.status = 'connecting';
             this.emit('status_change', { status: this.status });
-            setTimeout(() => this.start(), 3000);
+            if (!this.reconnectTimeout) {
+              this.reconnectTimeout = setTimeout(() => {
+                this.reconnectTimeout = null;
+                this.start().catch(e => console.error('Auto reconnect WhatsApp failed:', e));
+              }, 4000);
+            }
           } else {
             this.status = 'stopped';
             this.user = null;
@@ -144,7 +185,7 @@ export class WhatsAppBotManager extends EventEmitter {
           if (!this.isAuthorized(sender)) {
             const senderClean = sender.replace(/[^0-9]/g, '');
             await this.sock?.sendMessage(sender, {
-              text: `⚠️ *Akses Ditolak*\nNomor Anda: ${senderClean}\nSilakan daftarkan nomor ini di Web UI zhiEnd Agent > Settings.`
+              text: `⚠️ *Akses Ditolak*\nNomor Anda: ${senderClean}\nSilakan daftarkan nomor ini di Web UI zhiEnd Agent > Remote Hub / Settings.`
             });
             continue;
           }
@@ -153,8 +194,10 @@ export class WhatsAppBotManager extends EventEmitter {
         }
       });
 
+      this.isStarting = false;
       return { success: true };
     } catch (err: any) {
+      this.isStarting = false;
       console.error('Error starting WhatsApp bot:', err);
       this.status = 'error';
       this.errorMessage = err.message;
@@ -167,22 +210,27 @@ export class WhatsAppBotManager extends EventEmitter {
     if (!this.sock) return;
     const activeProj = this.config.activeProject || 'Belum dipilih';
 
+    const activePersonaId = this.config.whatsapp?.personaId || 'persona-default';
+    const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
+    const personaDisplay = activePersona ? `${activePersona.avatar} ${activePersona.name}` : '⚡ Standard';
+
     if (text === '!help' || text === '!start') {
       const helpMsg = 
-`🤖 *zhiEnd AI Coding Agent (WhatsApp)*
+`🤖 *zhiEnd AI Coding Agent (WhatsApp Remote)*
 
-📁 *Project Aktif:*
-\`${activeProj}\`
-⚡ *Model:* \`${this.config.antigravity?.defaultModel || 'gemini-3.8-flash'}\`
+📁 *Project Aktif:* \`${activeProj}\`
+🎭 *Persona AI:* ${personaDisplay}
+⚡ *Model:* \`${activePersona?.preferred_model || this.config.antigravity?.defaultModel || 'gemini-3.8-flash'}\`
 
-*Perintah Remote:*
-• *!code <instruksi>* : Jalankan coding agent (atau ketik langsung instruksi)
-• *!git* : Cek status git repo
+*Daftar Perintah:*
+• *!code <instruksi>* : Jalankan coding agent (atau ketik langsung)
+• *!persona* : Cek & ganti Persona AI bot
+• *!git* : Cek status git repository
 • *!diff* : Cek diff perubahan kode
 • *!commit <pesan>* : Stage & commit perubahan
 • *!push* : Push ke GitHub
 • *!project <path>* : Ganti project aktif
-• *!cancel* : Batalkan agent yang sedang jalan
+• *!cancel* : Batalkan tugas agent yang sedang jalan
 • *!status* : Status sistem & agent`;
       await this.sock.sendMessage(sender, { text: helpMsg });
       return;
@@ -191,9 +239,66 @@ export class WhatsAppBotManager extends EventEmitter {
     if (text === '!status') {
       const busy = this.agentRunner.isBusy();
       const statusText = busy 
-        ? `⏳ *Agent Status:* Sedang menjalankan tugas di \`${activeProj}\`...` 
-        : `✅ *Agent Status:* Standby & Siap menerima instruksi.\n📁 Project: \`${activeProj}\``;
+        ? `⏳ *Agent Status:* Sedang menjalankan tugas di \`${activeProj}\`...\n🎭 Persona: ${personaDisplay}` 
+        : `✅ *Agent Status:* Standby & Siap menerima instruksi.\n📁 Project: \`${activeProj}\`\n🎭 Persona: ${personaDisplay}`;
       await this.sock.sendMessage(sender, { text: statusText });
+      return;
+    }
+
+    // Persona Management Command
+    if (text === '!persona' || text === '!persona list') {
+      const allPersonas = getPersonas();
+      let personaMsg = `🎭 *Daftar Persona AI zhiEnd:*\n\n`;
+      allPersonas.forEach((p, idx) => {
+        const isCurrent = p.id === activePersonaId;
+        personaMsg += `${idx + 1}. ${p.avatar} *${p.name}* ${isCurrent ? '*(AKTIF)*' : ''}\n`;
+        personaMsg += `   • Model: \`${p.preferred_model || 'default'}\`\n`;
+        if (p.traits) personaMsg += `   • Sifat: _${p.traits}_\n`;
+        personaMsg += `\n`;
+      });
+      personaMsg += `*Untuk mengganti persona:*\nKetik *!persona <nomor atau nama>*\nContoh: *!persona 2* atau *!persona Reviewer*`;
+      await this.sock.sendMessage(sender, { text: personaMsg });
+      return;
+    }
+
+    if (text.startsWith('!persona')) {
+      const query = text.replace('!persona', '').trim().toLowerCase();
+      if (!query) {
+        await this.sock.sendMessage(sender, { text: '⚠️ Masukkan nomor atau nama persona. Ketik *!persona* untuk melihat daftar.' });
+        return;
+      }
+
+      const allPersonas = getPersonas();
+      let matchedPersona = null;
+
+      // Check by index number (1-based)
+      const num = parseInt(query, 10);
+      if (!isNaN(num) && num >= 1 && num <= allPersonas.length) {
+        matchedPersona = allPersonas[num - 1];
+      } else {
+        // Check by ID or Name
+        matchedPersona = allPersonas.find(p => 
+          p.id.toLowerCase() === query || 
+          p.name.toLowerCase().includes(query)
+        );
+      }
+
+      if (matchedPersona) {
+        if (!this.config.whatsapp) {
+          this.config.whatsapp = { enabled: true, allowedNumbers: [], personaId: matchedPersona.id };
+        } else {
+          this.config.whatsapp.personaId = matchedPersona.id;
+        }
+        saveConfigToDb(this.config);
+
+        await this.sock.sendMessage(sender, {
+          text: `✅ *Persona WhatsApp berhasil diubah!*\n\n${matchedPersona.avatar} *${matchedPersona.name}*\n⚡ Model: \`${matchedPersona.preferred_model}\`\n🎭 Karakter: _${matchedPersona.traits || 'Adaptif'}_`
+        });
+      } else {
+        await this.sock.sendMessage(sender, {
+          text: `❌ Persona "${query}" tidak ditemukan.\nKetik *!persona* untuk melihat daftar nomor & nama persona.`
+        });
+      }
       return;
     }
 
@@ -306,14 +411,15 @@ export class WhatsAppBotManager extends EventEmitter {
     }
 
     await this.sock.sendMessage(sender, {
-      text: `🤖 *Antigravity Agent Memproses...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${codingPrompt.slice(0, 100)}..."\n_Mohon tunggu sebentar..._`
+      text: `🤖 *${personaDisplay} Memproses...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${codingPrompt.slice(0, 100)}..."\n_Mohon tunggu sebentar..._`
     });
 
     try {
       const result = await this.agentRunner.run({
         prompt: codingPrompt,
         cwd: activeProj,
-        model: this.config.antigravity?.defaultModel
+        personaId: activePersonaId,
+        model: activePersona?.preferred_model || this.config.antigravity?.defaultModel
       });
 
       const resp = result.response || '(Tugas selesai tanpa respon teks)';
@@ -331,13 +437,26 @@ export class WhatsAppBotManager extends EventEmitter {
   }
 
   public async logout(): Promise<{ success: boolean }> {
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
+      this.reconnectTimeout = null;
+    }
+
     if (this.sock) {
       try {
         await this.sock.logout();
       } catch (e) {
         console.error('Error logging out WhatsApp:', e);
       }
+      try {
+        this.sock.ev.removeAllListeners('connection.update');
+        this.sock.ev.removeAllListeners('creds.update');
+        this.sock.ev.removeAllListeners('messages.upsert');
+        this.sock.end(undefined);
+      } catch {}
+      this.sock = null;
     }
+
     this.status = 'stopped';
     this.qrCodeDataUrl = null;
     this.user = null;

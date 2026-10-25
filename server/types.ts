@@ -18,10 +18,12 @@ export interface AppConfig {
     botToken: string;
     allowedUsers: string[];
     botTokenSet?: boolean;
+    personaId?: string;
   };
   whatsapp: {
     enabled: boolean;
     allowedNumbers: string[];
+    personaId?: string;
   };
   tunnel: {
     enabled: boolean;

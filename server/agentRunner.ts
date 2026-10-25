@@ -28,6 +28,7 @@ export interface RunOptions {
   conversationId?: string;
   continueLast?: boolean;
   sessionId?: string;
+  personaId?: string;
 }
 
 export class AgentRunner extends EventEmitter {
@@ -56,7 +57,6 @@ export class AgentRunner extends EventEmitter {
 
     const workingDir = options.cwd || this.config.activeProject || process.cwd();
     const cliPath = this.config.antigravity?.cliPath || 'agy.exe';
-    const selectedModel = options.model || this.config.antigravity?.defaultModel || 'gemini-3.8-flash-high';
 
     const localIp = getLocalIP();
     const port = this.config.port || 3888;
@@ -78,19 +78,21 @@ ${wsCtx.custom_rules ? `- Aturan Khusus: ${wsCtx.custom_rules}` : ''}
     }
 
     let personaStr = '';
-    if (options.sessionId) {
-      const sess = getChatSessionById(options.sessionId);
-      if (sess && sess.persona_id) {
-        const persona = getPersonaById(sess.persona_id);
-        if (persona) {
-          const traitsLine = persona.traits ? `\n- Karakter & Sifat: ${persona.traits}` : '';
-          personaStr = `\n[Persona AI Aktif: ${persona.name}]:${traitsLine}
+    let personaModel = '';
+    const targetPersonaId = options.personaId || (options.sessionId ? getChatSessionById(options.sessionId)?.persona_id : null);
+    if (targetPersonaId) {
+      const persona = getPersonaById(targetPersonaId);
+      if (persona) {
+        personaModel = persona.preferred_model || '';
+        const traitsLine = persona.traits ? `\n- Karakter & Sifat: ${persona.traits}` : '';
+        personaStr = `\n[Persona AI Aktif: ${persona.name}]:${traitsLine}
 [Instruksi Peran & Gaya]:
 ${persona.system_prompt}
 (PENTING: Terapkan karakter/sifat dan instruksi peran persona di atas dalam seluruh respon, gaya komunikasi, dan eksekusi kode Anda)`;
-        }
       }
     }
+
+    const selectedModel = options.model || personaModel || this.config.antigravity?.defaultModel || 'gemini-3.8-flash-high';
 
     const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}
 [Panduan Operasional Sistem]:

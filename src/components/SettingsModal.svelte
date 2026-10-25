@@ -5,11 +5,13 @@
   let {
     config,
     isOpen,
+    personas = [],
     onClose,
     onSave
   }: {
     config: AppConfig | null;
     isOpen: boolean;
+    personas?: any[];
     onClose: () => void;
     onSave: (updates: Partial<AppConfig>) => Promise<boolean>;
   } = $props();
@@ -29,13 +31,23 @@
   let formTgEnabled = $state(false);
   let formTgToken = $state('');
   let formTgUsers = $state('');
+  let formTgPersonaId = $state('persona-default');
 
   let formWaEnabled = $state(false);
   let formWaNumbers = $state('');
+  let formWaPersonaId = $state('persona-default');
 
   let formTunnelSubdomain = $state('');
 
   let isSaving = $state(false);
+
+  function getSafeEmoji(avatar?: string | null): string {
+    if (!avatar) return '⚡';
+    if (avatar.startsWith('data:') || avatar.startsWith('http') || avatar.length > 8) {
+      return '🎭';
+    }
+    return avatar;
+  }
 
   $effect(() => {
     if (config && isOpen) {
@@ -50,9 +62,11 @@
       formTgEnabled = !!config.telegram?.enabled;
       formTgToken = config.telegram?.botToken || '';
       formTgUsers = (config.telegram?.allowedUsers || []).join(', ');
+      formTgPersonaId = config.telegram?.personaId || 'persona-default';
 
       formWaEnabled = !!config.whatsapp?.enabled;
       formWaNumbers = (config.whatsapp?.allowedNumbers || []).join(', ');
+      formWaPersonaId = config.whatsapp?.personaId || 'persona-default';
 
       formTunnelSubdomain = config.tunnel?.subdomain || '';
     }
@@ -86,11 +100,13 @@
         telegram: {
           enabled: formTgEnabled,
           botToken: formTgToken.trim(),
-          allowedUsers: formTgUsers.split(',').map(s => s.trim()).filter(Boolean)
+          allowedUsers: formTgUsers.split(',').map(s => s.trim()).filter(Boolean),
+          personaId: formTgPersonaId
         },
         whatsapp: {
           enabled: formWaEnabled,
-          allowedNumbers: formWaNumbers.split(',').map(s => s.trim()).filter(Boolean)
+          allowedNumbers: formWaNumbers.split(',').map(s => s.trim()).filter(Boolean),
+          personaId: formWaPersonaId
         },
         tunnel: {
           enabled: config?.tunnel?.enabled || false,
@@ -280,6 +296,19 @@
             </div>
 
             <div class="flex flex-col gap-1.5">
+              <label for="form-tg-persona" class="font-bold text-slate-300">Persona AI Default Telegram:</label>
+              <select
+                id="form-tg-persona"
+                bind:value={formTgPersonaId}
+                class="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-100 font-mono outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                {#each personas as p}
+                  <option value={p.id}>{getSafeEmoji(p.avatar)} {p.name} ({p.preferred_model || 'Flash'})</option>
+                {/each}
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
               <label for="form-tg-token" class="font-bold text-slate-300">Telegram Bot Token:</label>
               <input
                 id="form-tg-token"
@@ -310,6 +339,19 @@
             <div class="flex items-center gap-2">
               <input type="checkbox" id="form-wa-enabled" bind:checked={formWaEnabled} class="w-4 h-4 rounded cursor-pointer" />
               <label for="form-wa-enabled" class="font-bold text-slate-200 cursor-pointer">Aktifkan WhatsApp Bot Otomatis Saat Server Start</label>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="form-wa-persona" class="font-bold text-slate-300">Persona AI Default WhatsApp:</label>
+              <select
+                id="form-wa-persona"
+                bind:value={formWaPersonaId}
+                class="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-100 font-mono outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                {#each personas as p}
+                  <option value={p.id}>{getSafeEmoji(p.avatar)} {p.name} ({p.preferred_model || 'Flash'})</option>
+                {/each}
+              </select>
             </div>
 
             <div class="flex flex-col gap-1.5">

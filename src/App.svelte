@@ -16,7 +16,7 @@
   import ConfirmModal from './components/ConfirmModal.svelte';
   import PersonaModal from './components/PersonaModal.svelte';
 
-  import { UploadCloud, GitBranch, Play, Square, ExternalLink } from 'lucide-svelte';
+  import { UploadCloud, GitBranch, Play, Square, ExternalLink, MessageSquare, Send } from 'lucide-svelte';
 
   // Navigation tab
   let currentTab = $state<'chat' | 'git' | 'remote' | 'files'>('chat');
@@ -191,6 +191,25 @@
       }
     } catch (e) {
       console.error('Failed to update persona:', e);
+    }
+  }
+
+  async function handleUpdateBotPersona(platform: 'telegram' | 'whatsapp', personaId: string) {
+    try {
+      await api.setBotPersona(platform, personaId);
+      if (config) {
+        if (platform === 'whatsapp') {
+          if (!config.whatsapp) config.whatsapp = { enabled: false, allowedNumbers: [], personaId };
+          config.whatsapp.personaId = personaId;
+        } else {
+          if (!config.telegram) config.telegram = { enabled: false, botToken: '', allowedUsers: [], personaId };
+          config.telegram.personaId = personaId;
+        }
+      }
+      const p = personas.find(item => item.id === personaId);
+      addLog(`[Remote ${platform.toUpperCase()}] Persona diubah ke ${p?.avatar || '⚡'} ${p?.name || personaId}`);
+    } catch (e: any) {
+      alert('Gagal mengubah persona bot: ' + (e.message || 'Error'));
     }
   }
 
@@ -471,14 +490,15 @@
     });
 
     socket.on('whatsapp_qr', (data) => {
-      if (whatsappStatus) {
-        whatsappStatus.status = 'qr_ready';
-        whatsappStatus.qrCodeDataUrl = data.qrDataUrl;
-      }
+      whatsappStatus = {
+        ...(whatsappStatus || { status: 'qr_ready', user: null, error: null }),
+        status: 'qr_ready',
+        qrCodeDataUrl: data.qrDataUrl
+      };
     });
 
     socket.on('whatsapp_status', (data) => {
-      whatsappStatus = data;
+      whatsappStatus = { ...data };
     });
 
     socket.on('tunnel_status', (data) => {
@@ -630,6 +650,27 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <!-- Quick Remote Indicators -->
+        <button
+          onclick={() => currentTab = 'remote'}
+          class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer hover:scale-105 active:scale-95 {whatsappStatus?.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 animate-pulse' : 'bg-zinc-900/60 border-white/[0.06] text-zinc-400')}"
+          title="WhatsApp Remote: {whatsappStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
+        >
+          <MessageSquare class="w-3 h-3 text-emerald-400" />
+          <span>WA</span>
+          <span class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-400 shadow-[0_0_6px_#fbbf24]' : 'bg-zinc-600')}"></span>
+        </button>
+
+        <button
+          onclick={() => currentTab = 'remote'}
+          class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer hover:scale-105 active:scale-95 {telegramStatus?.status === 'running' ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' : 'bg-zinc-900/60 border-white/[0.06] text-zinc-400'}"
+          title="Telegram Remote: {telegramStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
+        >
+          <Send class="w-3 h-3 text-sky-400" />
+          <span>TG</span>
+          <span class="w-1.5 h-1.5 rounded-full {telegramStatus?.status === 'running' ? 'bg-sky-400 shadow-[0_0_6px_#38bdf8]' : 'bg-zinc-600'}"></span>
+        </button>
+
         <!-- Quick Dev Server Widget -->
         {#if devServer.isRunning}
           <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
@@ -735,6 +776,8 @@
           {telegramStatus}
           {tunnelStatus}
           {config}
+          {personas}
+          onUpdateBotPersona={handleUpdateBotPersona}
           onStartWhatsApp={async () => {
             await api.startWhatsApp();
             whatsappStatus = await api.getWhatsAppStatus();
@@ -750,6 +793,10 @@
                 whatsappStatus = await api.getWhatsAppStatus();
               }
             });
+          }}
+          onSaveWhatsAppNumbers={async (numbers) => {
+            await api.updateConfig({ whatsapp: { allowedNumbers: numbers } } as any);
+            alert('Nomor WhatsApp yang diizinkan berhasil disimpan.');
           }}
           onStartTelegram={async (token) => {
             const res = await api.startTelegram(token);
@@ -793,6 +840,7 @@
   <!-- Modals -->
   <SettingsModal
     {config}
+    {personas}
     isOpen={isSettingsOpen}
     onClose={() => isSettingsOpen = false}
     onSave={async (updates) => {

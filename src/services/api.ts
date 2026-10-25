@@ -280,6 +280,15 @@ export const api = {
     return res.json();
   },
 
+  async setBotPersona(platform: 'telegram' | 'whatsapp', personaId: string): Promise<{ success: boolean; personaId?: string; error?: string }> {
+    const res = await fetch(`/api/bots/${platform}/persona`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ personaId })
+    });
+    return res.json();
+  },
+
   // Database: Workspaces & Custom Root
   async getDbWorkspaces(): Promise<{ activeProject: string; rootWorkspace: string; workspaces: any[] }> {
     const res = await fetch('/api/workspaces', { headers: getHeaders() });

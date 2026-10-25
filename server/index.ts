@@ -159,6 +159,9 @@ app.post('/api/config', async (c) => {
     if (updates.telegram.enabled !== undefined) {
       config.telegram.enabled = updates.telegram.enabled;
     }
+    if (updates.telegram.personaId !== undefined) {
+      config.telegram.personaId = updates.telegram.personaId;
+    }
   }
 
   if (updates.whatsapp) {
@@ -167,6 +170,9 @@ app.post('/api/config', async (c) => {
     }
     if (updates.whatsapp.enabled !== undefined) {
       config.whatsapp.enabled = updates.whatsapp.enabled;
+    }
+    if (updates.whatsapp.personaId !== undefined) {
+      config.whatsapp.personaId = updates.whatsapp.personaId;
     }
   }
 
@@ -765,6 +771,39 @@ app.post('/api/bots/whatsapp/start', async (c) => {
 app.post('/api/bots/whatsapp/logout', async (c) => {
   const result = await whatsappBot.logout();
   return c.json(result);
+});
+
+app.post('/api/bots/:platform/persona', async (c) => {
+  const platform = c.req.param('platform');
+  let body: any = {};
+  try {
+    body = await c.req.json();
+  } catch {
+    try {
+      const raw = await c.req.text();
+      body = JSON.parse(raw);
+    } catch {}
+  }
+  const personaId = body?.personaId;
+  if (!personaId) {
+    return c.json({ success: false, error: 'Persona ID is required' }, 400);
+  }
+
+  if (platform === 'whatsapp') {
+    if (!config.whatsapp) config.whatsapp = { enabled: false, allowedNumbers: [], personaId };
+    config.whatsapp.personaId = personaId;
+  } else if (platform === 'telegram') {
+    if (!config.telegram) config.telegram = { enabled: false, botToken: '', allowedUsers: [], personaId };
+    config.telegram.personaId = personaId;
+  } else {
+    return c.json({ success: false, error: 'Platform tidak valid' }, 400);
+  }
+
+  saveConfig(config);
+  telegramBot.updateConfig(config);
+  whatsappBot.updateConfig(config);
+
+  return c.json({ success: true, platform, personaId });
 });
 
 function getFileMime(filePath: string): string {

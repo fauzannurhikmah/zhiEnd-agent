@@ -11,7 +11,8 @@
     onOpenProjectModal,
     onOpenSettingsModal,
     onQuickPush,
-    onModelChange
+    onModelChange,
+    onSelectTab
   }: {
     config: AppConfig | null;
     gitStatus: GitStatus | null;
@@ -22,6 +23,7 @@
     onOpenSettingsModal: () => void;
     onQuickPush: () => void;
     onModelChange: (model: string) => void;
+    onSelectTab?: (tab: 'chat' | 'git' | 'remote' | 'files') => void;
   } = $props();
 
   let activeModel = $state('gemini-3.8-flash-high');
@@ -105,34 +107,37 @@
   <!-- Right: Status Indicators & Settings -->
   <div class="flex items-center gap-2.5">
     <!-- Telegram Status -->
-    <div
-      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border {telegramStatus?.status === 'running' ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400'}"
-      title="Telegram Remote Bot: {telegramStatus?.status || 'stopped'}"
+    <button
+      onclick={() => onSelectTab && onSelectTab('remote')}
+      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border cursor-pointer hover:opacity-80 transition {telegramStatus?.status === 'running' ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400'}"
+      title="Telegram Remote Bot: {telegramStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
     >
       <Send class="w-3 h-3 text-sky-400" />
       <span>TG</span>
       <span class="w-1.5 h-1.5 rounded-full {telegramStatus?.status === 'running' ? 'bg-sky-400 shadow-[0_0_6px_#38bdf8]' : 'bg-slate-600'}"></span>
-    </div>
+    </button>
 
     <!-- WhatsApp Status -->
-    <div
-      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border {whatsappStatus?.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400'}"
-      title="WhatsApp Remote Bot: {whatsappStatus?.status || 'stopped'}"
+    <button
+      onclick={() => onSelectTab && onSelectTab('remote')}
+      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border cursor-pointer hover:opacity-80 transition {whatsappStatus?.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400')}"
+      title="WhatsApp Remote Bot: {whatsappStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
     >
       <MessageSquare class="w-3 h-3 text-emerald-400" />
       <span>WA</span>
-      <span class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'bg-slate-600'}"></span>
-    </div>
+      <span class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-400 shadow-[0_0_6px_#fbbf24] animate-pulse' : 'bg-slate-600')}"></span>
+    </button>
 
     <!-- Public Tunnel Status -->
-    <div
-      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border {tunnelStatus?.status === 'connected' ? 'bg-violet-500/10 border-violet-500/30 text-violet-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400'}"
-      title="Public Tunnel: {tunnelStatus?.publicUrl || 'Local only'}"
+    <button
+      onclick={() => onSelectTab && onSelectTab('remote')}
+      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border cursor-pointer hover:opacity-80 transition {tunnelStatus?.status === 'connected' ? 'bg-violet-500/10 border-violet-500/30 text-violet-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400'}"
+      title="Public Tunnel: {tunnelStatus?.publicUrl || 'Local only'} (Klik untuk buka Remote Hub)"
     >
       <Globe class="w-3 h-3 text-violet-400" />
       <span>Remote</span>
       <span class="w-1.5 h-1.5 rounded-full {tunnelStatus?.status === 'connected' ? 'bg-violet-400 shadow-[0_0_6px_#a78bfa]' : 'bg-slate-600'}"></span>
-    </div>
+    </button>
 
     <!-- Quick Push Button -->
     <button

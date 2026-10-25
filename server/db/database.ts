@@ -334,11 +334,13 @@ export function loadConfigFromDb(): AppConfig {
     telegram: {
       enabled: tgRow ? Boolean(tgRow.is_enabled) : false,
       botToken: tgRow ? tgRow.token_or_session || '' : '',
-      allowedUsers: tgAllowed
+      allowedUsers: tgAllowed,
+      personaId: tgRow?.default_persona_id || 'persona-default'
     },
     whatsapp: {
       enabled: waRow ? Boolean(waRow.is_enabled) : false,
-      allowedNumbers: waAllowed
+      allowedNumbers: waAllowed,
+      personaId: waRow?.default_persona_id || 'persona-default'
     },
     tunnel
   };
@@ -372,31 +374,44 @@ export function saveConfigToDb(newConfig: Partial<AppConfig>): void {
   }
 
   if (newConfig.telegram) {
+    const existing = db.prepare('SELECT * FROM bot_integrations WHERE platform = ?').get('telegram') as any;
+    const isEnabled = newConfig.telegram.enabled !== undefined ? (newConfig.telegram.enabled ? 1 : 0) : (existing?.is_enabled ?? 0);
+    const token = newConfig.telegram.botToken !== undefined ? newConfig.telegram.botToken : (existing?.token_or_session || '');
+    const allowed = newConfig.telegram.allowedUsers !== undefined ? JSON.stringify(newConfig.telegram.allowedUsers) : (existing?.allowed_identifiers || '[]');
+    const personaId = newConfig.telegram.personaId !== undefined ? newConfig.telegram.personaId : (existing?.default_persona_id || 'persona-default');
+
     db.prepare(`
-      UPDATE bot_integrations 
-      SET is_enabled = ?, token_or_session = ?, allowed_identifiers = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE platform = 'telegram'
-    `).run(
-      newConfig.telegram.enabled ? 1 : 0,
-      newConfig.telegram.botToken || '',
-      JSON.stringify(newConfig.telegram.allowedUsers || [])
-    );
+      INSERT OR REPLACE INTO bot_integrations 
+      (platform, is_enabled, token_or_session, allowed_identifiers, default_persona_id, updated_at)
+      VALUES ('telegram', ?, ?, ?, ?, CURRENT_TIMESTAMP)
+    `).run(isEnabled, token, allowed, personaId);
   }
 
   if (newConfig.whatsapp) {
+    const existing = db.prepare('SELECT * FROM bot_integrations WHERE platform = ?').get('whatsapp') as any;
+    const isEnabled = newConfig.whatsapp.enabled !== undefined ? (newConfig.whatsapp.enabled ? 1 : 0) : (existing?.is_enabled ?? 0);
+    const allowed = newConfig.whatsapp.allowedNumbers !== undefined ? JSON.stringify(newConfig.whatsapp.allowedNumbers) : (existing?.allowed_identifiers || '[]');
+    const personaId = newConfig.whatsapp.personaId !== undefined ? newConfig.whatsapp.personaId : (existing?.default_persona_id || 'persona-default');
+
     db.prepare(`
-      UPDATE bot_integrations 
-      SET is_enabled = ?, allowed_identifiers = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE platform = 'whatsapp'
-    `).run(
-      newConfig.whatsapp.enabled ? 1 : 0,
-      JSON.stringify(newConfig.whatsapp.allowedNumbers || [])
-    );
+      INSERT OR REPLACE INTO bot_integrations 
+      (platform, is_enabled, token_or_session, allowed_identifiers, default_persona_id, updated_at)
+      VALUES ('whatsapp', ?, '', ?, ?, CURRENT_TIMESTAMP)
+    `).run(isEnabled, allowed, personaId);
   }
 
   if (newConfig.tunnel) {
     setSetting.run('tunnel_config', JSON.stringify(newConfig.tunnel));
   }
+}
+
+export function setBotPersona(platform: 'telegram' | 'whatsapp', personaId: string): void {
+  const db = getDb();
+  db.prepare(`
+    UPDATE bot_integrations
+    SET default_persona_id = ?, updated_at = CURRENT_TIMESTAMP
+    WHERE platform = ?
+  `).run(personaId, platform);
 }
 
 // ==========================================
