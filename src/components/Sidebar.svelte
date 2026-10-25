@@ -8,10 +8,9 @@
     TowerControl, 
     Settings as SettingsIcon, 
     FolderGit, 
-    ExternalLink,
     ChevronDown,
     Sparkles,
-    Globe
+    Plus
   } from 'lucide-svelte';
 
   let {
@@ -55,22 +54,22 @@
   });
 </script>
 
-<aside class="w-64 bg-zinc-950 border-r border-zinc-800/60 flex flex-col justify-between shrink-0 select-none">
+<aside class="w-64 bg-zinc-950/80 backdrop-blur-xl border-r border-white/[0.08] flex flex-col justify-between shrink-0 select-none">
   <!-- Top: Logo & Workspace -->
   <div class="flex flex-col gap-3 p-3">
-    <!-- Brand -->
+    <!-- Brand with subtle gradient glow -->
     <div class="flex items-center justify-between px-2 pt-1">
-      <div class="flex items-center gap-2">
-        <div class="w-6 h-6 rounded-md bg-white text-zinc-950 font-black text-xs flex items-center justify-center">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-600 text-white font-black text-xs flex items-center justify-center shadow-lg shadow-indigo-500/25">
           z
         </div>
-        <span class="text-xs font-semibold tracking-tight text-zinc-100">
-          zhiEnd <span class="text-zinc-500 font-mono text-[10px]">agent</span>
+        <span class="text-xs font-bold tracking-tight text-white flex items-center gap-1.5">
+          zhiEnd <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400 font-mono text-[10px]">agent</span>
         </span>
       </div>
 
       {#if isAgentBusy}
-        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-[10px] text-amber-300 font-mono">
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-[10px] text-amber-300 font-mono">
           <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
           busy
         </span>
@@ -78,47 +77,57 @@
     </div>
 
     <!-- Active Workspace Dropdown Button -->
-    <button
-      onclick={onOpenProjectModal}
-      class="w-full flex items-center justify-between p-2 rounded-lg bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800/60 text-left transition cursor-pointer group"
-      title={config?.activeProject || 'Ganti Workspace'}
-    >
-      <div class="flex items-center gap-2 min-w-0">
-        <FolderGit class="w-4 h-4 text-zinc-400 group-hover:text-zinc-200 shrink-0" />
-        <div class="flex flex-col min-w-0">
-          <span class="text-xs font-medium text-zinc-200 truncate">{projectName()}</span>
-          {#if gitStatus?.isRepo}
-            <span class="text-[10px] text-zinc-500 font-mono flex items-center gap-1">
-              <GitBranch class="w-2.5 h-2.5 text-zinc-400" /> {gitStatus.branch || 'main'}
-            </span>
-          {/if}
+    <div class="flex items-center gap-1.5">
+      <button
+        onclick={onOpenProjectModal}
+        class="flex-1 flex items-center justify-between p-2 rounded-xl bg-zinc-900/60 hover:bg-zinc-900/90 border border-white/[0.06] hover:border-white/[0.14] text-left transition cursor-pointer group"
+        title={config?.activeProject || 'Ganti Workspace (D:\\Works)'}
+      >
+        <div class="flex items-center gap-2 min-w-0">
+          <FolderGit class="w-4 h-4 text-indigo-400 group-hover:scale-105 transition-transform shrink-0" />
+          <div class="flex flex-col min-w-0">
+            <span class="text-xs font-semibold text-zinc-100 truncate">{projectName()}</span>
+            {#if gitStatus?.isRepo}
+              <span class="text-[10px] text-zinc-400 font-mono flex items-center gap-1">
+                <GitBranch class="w-2.5 h-2.5 text-sky-400" /> {gitStatus.branch || 'main'}
+              </span>
+            {/if}
+          </div>
         </div>
-      </div>
-      <ChevronDown class="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-    </button>
+        <ChevronDown class="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+      </button>
 
-    <!-- Navigation -->
-    <nav class="flex flex-col gap-0.5 pt-2">
+      <button
+        onclick={onOpenProjectModal}
+        class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-900 border border-white/[0.06] hover:border-indigo-500/40 text-zinc-400 hover:text-indigo-300 transition cursor-pointer shrink-0"
+        title="Buka / Buat Project Baru di D:\Works"
+      >
+        <Plus class="w-3.5 h-3.5" />
+      </button>
+    </div>
+
+    <!-- Navigation with cinematic active gradient pill -->
+    <nav class="flex flex-col gap-1 pt-2">
       <button
         onclick={() => onSelectTab('chat')}
-        class="flex items-center justify-between px-2.5 py-2 rounded-md text-xs font-medium transition cursor-pointer {currentTab === 'chat' ? 'bg-zinc-800/80 text-white font-semibold' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40'}"
+        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab === 'chat' ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
       >
         <div class="flex items-center gap-2.5">
-          <Terminal class="w-4 h-4 {currentTab === 'chat' ? 'text-white' : 'text-zinc-400'}" />
-          <span>AI Agent</span>
+          <Terminal class="w-4 h-4 {currentTab === 'chat' ? 'text-indigo-400' : 'text-zinc-400'}" />
+          <span>AI Coding Agent</span>
         </div>
       </button>
 
       <button
         onclick={() => onSelectTab('git')}
-        class="flex items-center justify-between px-2.5 py-2 rounded-md text-xs font-medium transition cursor-pointer {currentTab === 'git' ? 'bg-zinc-800/80 text-white font-semibold' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40'}"
+        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab === 'git' ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
       >
         <div class="flex items-center gap-2.5">
-          <GitBranch class="w-4 h-4 {currentTab === 'git' ? 'text-white' : 'text-zinc-400'}" />
+          <GitBranch class="w-4 h-4 {currentTab === 'git' ? 'text-sky-400' : 'text-zinc-400'}" />
           <span>Source Control</span>
         </div>
         {#if gitStatus?.files?.length}
-          <span class="px-1.5 py-0.2 rounded-full bg-zinc-800 border border-zinc-700/60 text-zinc-300 font-mono text-[10px]">
+          <span class="px-2 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-mono text-[10px] font-bold">
             {gitStatus.files.length}
           </span>
         {/if}
@@ -126,28 +135,28 @@
 
       <button
         onclick={() => onSelectTab('remote')}
-        class="flex items-center justify-between px-2.5 py-2 rounded-md text-xs font-medium transition cursor-pointer {currentTab === 'remote' ? 'bg-zinc-800/80 text-white font-semibold' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40'}"
+        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab === 'remote' ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
       >
         <div class="flex items-center gap-2.5">
-          <TowerControl class="w-4 h-4 {currentTab === 'remote' ? 'text-white' : 'text-zinc-400'}" />
+          <TowerControl class="w-4 h-4 {currentTab === 'remote' ? 'text-violet-400' : 'text-zinc-400'}" />
           <span>Remote Hub</span>
         </div>
-        <div class="flex items-center gap-1">
+        <div class="flex items-center gap-1.5">
           {#if whatsappStatus?.status === 'connected'}
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400" title="WhatsApp Connected"></span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]" title="WhatsApp Connected"></span>
           {/if}
           {#if telegramStatus?.status === 'running'}
-            <span class="w-1.5 h-1.5 rounded-full bg-sky-400" title="Telegram Online"></span>
+            <span class="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_6px_#38bdf8]" title="Telegram Online"></span>
           {/if}
         </div>
       </button>
 
       <button
         onclick={() => onSelectTab('files')}
-        class="flex items-center justify-between px-2.5 py-2 rounded-md text-xs font-medium transition cursor-pointer {currentTab === 'files' ? 'bg-zinc-800/80 text-white font-semibold' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/40'}"
+        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab === 'files' ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
       >
         <div class="flex items-center gap-2.5">
-          <FolderTree class="w-4 h-4 {currentTab === 'files' ? 'text-white' : 'text-zinc-400'}" />
+          <FolderTree class="w-4 h-4 {currentTab === 'files' ? 'text-amber-400' : 'text-zinc-400'}" />
           <span>Files & Logs</span>
         </div>
       </button>
@@ -155,15 +164,15 @@
   </div>
 
   <!-- Bottom: Model, Remote indicator, Settings -->
-  <div class="p-3 border-t border-zinc-800/60 flex flex-col gap-2 bg-zinc-950/60">
-    <!-- Model Selector -->
-    <div class="flex items-center justify-between px-2 py-1.5 rounded-md bg-zinc-900/50 border border-zinc-800/60 text-xs">
-      <div class="flex items-center gap-1.5 min-w-0">
-        <Sparkles class="w-3 h-3 text-zinc-400 shrink-0" />
+  <div class="p-3 border-t border-white/[0.08] flex flex-col gap-2.5 bg-zinc-950/70">
+    <!-- Model Selector with gradient pill -->
+    <div class="flex items-center justify-between px-2.5 py-2 rounded-xl bg-zinc-900/70 border border-white/[0.08] text-xs">
+      <div class="flex items-center gap-2 min-w-0">
+        <Sparkles class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
         <select
           bind:value={activeModel}
           onchange={(e) => onModelChange((e.target as HTMLSelectElement).value)}
-          class="bg-transparent text-[11px] text-zinc-300 font-mono outline-none cursor-pointer truncate w-36"
+          class="bg-transparent text-xs text-zinc-200 font-mono outline-none cursor-pointer truncate w-36"
         >
           {#if config?.antigravity?.availableModels}
             {#each config.antigravity.availableModels as m}
@@ -179,18 +188,16 @@
 
     <!-- Tunnel / Settings footer -->
     <div class="flex items-center justify-between pt-1 px-1 text-xs">
-      <!-- Connection status -->
-      <div class="flex items-center gap-1.5 text-[11px] font-mono text-zinc-500">
-        <span class="w-1.5 h-1.5 rounded-full {tunnelStatus?.status === 'connected' ? 'bg-emerald-400' : 'bg-zinc-600'}"></span>
+      <div class="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
+        <span class="w-2 h-2 rounded-full {tunnelStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'bg-zinc-600'}"></span>
         <span class="truncate max-w-[120px]">
-          {tunnelStatus?.status === 'connected' ? 'Public' : 'Local :3888'}
+          {tunnelStatus?.status === 'connected' ? 'Public Live' : 'Local :3888'}
         </span>
       </div>
 
-      <!-- Settings button -->
       <button
         onclick={onOpenSettingsModal}
-        class="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition cursor-pointer"
+        class="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
         title="Pengaturan Sistem"
       >
         <SettingsIcon class="w-3.5 h-3.5" />

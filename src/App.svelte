@@ -275,10 +275,10 @@
       <div class="flex items-center gap-2">
         <button
           onclick={handleExecutePush}
-          class="flex items-center gap-1.5 px-3 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 text-xs font-medium transition cursor-pointer active:scale-95"
+          class="flex items-center gap-1.5 px-3.5 py-1 rounded-lg bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition cursor-pointer active:scale-95"
           title="Git Push to GitHub"
         >
-          <UploadCloud class="w-3 h-3 text-zinc-400" /> Push
+          <UploadCloud class="w-3.5 h-3.5" /> Push
         </button>
       </div>
     </header>
@@ -408,6 +408,7 @@
   <ProjectModal
     isOpen={isProjectModalOpen}
     recentProjects={config?.recentProjects || []}
+    activeProjectPath={config?.activeProject}
     onClose={() => isProjectModalOpen = false}
     onSelectProject={async (path) => {
       const res = await api.selectProject(path);

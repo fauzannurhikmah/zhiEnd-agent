@@ -167,6 +167,106 @@ app.get('/api/projects', (c) => {
   });
 });
 
+app.get('/api/projects/scan', (c) => {
+  const queryDir = c.req.query('dir') || 'D:\\Works';
+  const targetDir = path.resolve(queryDir);
+
+  if (!fs.existsSync(targetDir)) {
+    return c.json({ baseDir: targetDir, projects: [] });
+  }
+
+  const projects: Array<{
+    name: string;
+    path: string;
+    relativePath: string;
+    isGit: boolean;
+    hasPackageJson: boolean;
+    lastModified: number;
+  }> = [];
+
+  const ignored = new Set(['node_modules', '.git', '.gemini', 'dist', 'build', '.agents', '$RECYCLE.BIN', 'System Volume Information']);
+
+  function scanDir(currentDir: string, depth: number = 0) {
+    if (depth > 2) return;
+    try {
+      const items = fs.readdirSync(currentDir, { withFileTypes: true });
+      for (const item of items) {
+        if (!item.isDirectory() || ignored.has(item.name) || item.name.startsWith('.')) continue;
+
+        const fullPath = path.join(currentDir, item.name);
+        let isGit = false;
+        let hasPackageJson = false;
+        let mtime = 0;
+
+        try {
+          const stat = fs.statSync(fullPath);
+          mtime = stat.mtimeMs;
+          isGit = fs.existsSync(path.join(fullPath, '.git'));
+          hasPackageJson = fs.existsSync(path.join(fullPath, 'package.json'));
+        } catch {}
+
+        const rel = path.relative(targetDir, fullPath).replace(/\\/g, '/');
+
+        // Add folder as project
+        projects.push({
+          name: item.name,
+          path: fullPath.replace(/\\/g, '/'),
+          relativePath: rel,
+          isGit,
+          hasPackageJson,
+          lastModified: mtime
+        });
+
+        // If not a git repo or package.json at root, also scan 1 level deeper
+        if (!isGit && !hasPackageJson && depth < 2) {
+          scanDir(fullPath, depth + 1);
+        }
+      }
+    } catch {}
+  }
+
+  scanDir(targetDir, 0);
+
+  // Sort by most recently modified
+  projects.sort((a, b) => b.lastModified - a.lastModified);
+
+  return c.json({ baseDir: targetDir.replace(/\\/g, '/'), projects });
+});
+
+app.post('/api/projects/create', async (c) => {
+  const { name, parentDir, initGit = true } = await c.req.json<{
+    name: string;
+    parentDir?: string;
+    initGit?: boolean;
+  }>();
+
+  if (!name || !name.trim()) {
+    return c.json({ error: 'Nama project harus diisi' }, 400);
+  }
+
+  const cleanName = name.trim().replace(/[<>:"/\\|?*]/g, '-');
+  const baseParent = parentDir && parentDir.trim() ? path.resolve(parentDir.trim()) : 'D:\\Works';
+  const newProjPath = path.join(baseParent, cleanName);
+
+  try {
+    if (!fs.existsSync(newProjPath)) {
+      fs.mkdirSync(newProjPath, { recursive: true });
+    }
+
+    if (initGit) {
+      await gitManager.initRepo(newProjPath);
+    }
+
+    const switchResult = await onProjectChange(newProjPath);
+    return c.json({
+      success: true,
+      activeProject: switchResult.activeProject || newProjPath
+    });
+  } catch (err: any) {
+    return c.json({ error: 'Gagal membuat project: ' + err.message }, 500);
+  }
+});
+
 app.post('/api/projects/select', async (c) => {
   const { path: targetPath } = await c.req.json<{ path: string }>();
   const result = await onProjectChange(targetPath);

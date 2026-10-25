@@ -1,8 +1,9 @@
 {
   "port": 3888,
   "securityPin": "",
-  "activeProject": "d:/Works/zhiEnd-agent",
+  "activeProject": "d:\\Works\\zhiEnd-agent",
   "recentProjects": [
+    "d:\\Works\\zhiEnd-agent",
     "d:/Works/zhiEnd-agent"
   ],
   "antigravity": {

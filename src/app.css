@@ -2,11 +2,10 @@
 
 @layer base {
   :root {
-    --bg-app: #09090b;
-    --bg-surface: #111115;
-    --bg-surface-hover: #18181f;
+    --bg-app: #08090d;
+    --bg-surface: #0f1016;
     --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-focus: rgba(255, 255, 255, 0.2);
+    --border-glow: rgba(99, 102, 241, 0.35);
   }
 
   body {
@@ -14,6 +13,11 @@
     color: #f4f4f5;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     letter-spacing: -0.01em;
+    background-image: 
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.15) 0%, transparent 70%),
+      radial-gradient(circle 500px at 100% 100%, rgba(139, 92, 246, 0.06) 0%, transparent 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
   }
 
   code, pre, kbd {
@@ -34,16 +38,33 @@
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.22);
 }
 
-/* Linear-style subtle panels */
-.surface-panel {
-  background: #0f0f13;
-  border: 1px solid rgba(255, 255, 255, 0.07);
+/* Cinematic Utilities */
+.cinematic-glow {
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
 }
 
-.surface-hover:hover {
-  background: #17171d;
-  border-color: rgba(255, 255, 255, 0.12);
+.cinematic-card {
+  background: rgba(15, 16, 22, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cinematic-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.text-gradient {
+  background: linear-gradient(180deg, #ffffff 0%, #e4e4e7 60%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-brand {
+  background: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

@@ -47,6 +47,21 @@ export const api = {
     return res.json();
   },
 
+  async scanProjects(dir: string = 'D:\\Works'): Promise<{ baseDir: string; projects: import('../types').ScannedProject[] }> {
+    const q = new URLSearchParams({ dir });
+    const res = await fetch(`/api/projects/scan?${q.toString()}`, { headers: getHeaders() });
+    return res.json();
+  },
+
+  async createProject(name: string, parentDir: string = 'D:\\Works', initGit: boolean = true): Promise<{ success: boolean; activeProject?: string; error?: string }> {
+    const res = await fetch('/api/projects/create', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ name, parentDir, initGit })
+    });
+    return res.json();
+  },
+
   async selectProject(path: string): Promise<{ success: boolean; activeProject?: string; error?: string }> {
     const res = await fetch('/api/projects/select', {
       method: 'POST',

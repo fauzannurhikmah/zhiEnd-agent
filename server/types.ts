@@ -97,3 +97,13 @@ export interface FileItem {
   isDirectory: boolean;
   children?: FileItem[] | null;
 }
+
+export interface ScannedProject {
+  name: string;
+  path: string;
+  relativePath: string;
+  isGit: boolean;
+  hasPackageJson: boolean;
+  lastModified?: number;
+}
+
