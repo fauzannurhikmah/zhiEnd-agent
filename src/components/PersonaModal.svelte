@@ -68,6 +68,7 @@
   let formError = $state("");
   let avatarType = $state<"emoji" | "custom">("emoji");
   let fileInputRef = $state<HTMLInputElement | null>(null);
+  let isUploadingAvatar = $state(false);
 
   const emojiList = [
     "🤖",
@@ -143,6 +144,7 @@
     const str = newAvatar.trim().toLowerCase();
     if (
       str.startsWith("data:") ||
+      str.startsWith("/uploads/") ||
       str.startsWith("http://") ||
       str.startsWith("https://")
     ) {
@@ -180,30 +182,34 @@
     avatarType = "emoji";
   }
 
-  function handleFileSelect(e: Event) {
+  async function handleFileSelect(e: Event) {
     const target = e.target as HTMLInputElement;
     const file = target.files?.[0];
     if (!file) return;
 
-    // Batas ukuran file 10MB
-    if (file.size > 10 * 1024 * 1024) {
+    // Batas ukuran file 15MB
+    if (file.size > 15 * 1024 * 1024) {
       formError =
-        "Ukuran file avatar maksimal 10MB (gunakan video/gif durasi singkat).";
+        "Ukuran file avatar maksimal 15MB (gunakan video/gif durasi singkat).";
       return;
     }
 
     formError = "";
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        newAvatar = reader.result;
+    isUploadingAvatar = true;
+    try {
+      const res = await api.uploadAvatar(file);
+      if (res && res.success && res.url) {
+        newAvatar = res.url;
         avatarType = "custom";
+      } else {
+        formError = res?.error || "Gagal mengunggah file avatar ke server.";
       }
-    };
-    reader.onerror = () => {
-      formError = "Gagal membaca file avatar yang dipilih.";
-    };
-    reader.readAsDataURL(file);
+    } catch (err: any) {
+      formError = "Gagal mengunggah avatar: " + (err.message || "Network error");
+    } finally {
+      isUploadingAvatar = false;
+      if (fileInputRef) fileInputRef.value = "";
+    }
   }
 
   function resetAvatarToEmoji(emoji = "🤖") {
@@ -608,11 +614,17 @@
                     <!-- Upload Button -->
                     <button
                       type="button"
+                      disabled={isUploadingAvatar}
                       onclick={() => fileInputRef?.click()}
-                      class="px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                      class="px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
                     >
-                      <Upload class="w-3.5 h-3.5" />
-                      <span>Upload Avatar (Gambar/GIF/Video)</span>
+                      {#if isUploadingAvatar}
+                        <Loader2 class="w-3.5 h-3.5 animate-spin" />
+                        <span>Mengunggah Avatar...</span>
+                      {:else}
+                        <Upload class="w-3.5 h-3.5" />
+                        <span>Upload Avatar (Gambar/GIF/Video)</span>
+                      {/if}
                     </button>
 
                     {#if avatarType === "custom"}

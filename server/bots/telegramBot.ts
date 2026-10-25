@@ -4,6 +4,7 @@ import { AppConfig, TelegramStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
 import { getPersonas, getPersonaById, saveConfigToDb } from '../db/database';
+import { getSafePersonaEmoji } from './whatsappBot';
 
 export interface TelegramBotOptions {
   config: AppConfig;
@@ -61,6 +62,19 @@ export class TelegramBotManager extends EventEmitter {
       this.bot = new Telegraf(botToken.trim());
 
       this.bot.use(async (ctx, next) => {
+        const text = ctx.message && 'text' in ctx.message ? (ctx.message as any).text : '';
+        const userIdentifier = ctx.from?.username ? `@${ctx.from.username}` : String(ctx.from?.id);
+        if (text) {
+          console.log(`[Telegram Inbound] From: ${userIdentifier} (${ctx.from?.id}) | Text: "${text}"`);
+          this.emit('log', {
+            platform: 'telegram',
+            type: 'inbound',
+            sender: userIdentifier,
+            text,
+            timestamp: Date.now()
+          });
+        }
+
         if (!this.isAuthorized(ctx)) {
           const userId = ctx.from?.id;
           return ctx.reply(
@@ -71,29 +85,52 @@ export class TelegramBotManager extends EventEmitter {
         return next();
       });
 
-      this.bot.command(['start', 'help'], async (ctx) => {
+      this.bot.command(['start', 'help', 'menu'], async (ctx) => {
         const activeProj = this.config.activeProject || 'Belum dipilih';
         const activePersonaId = this.config.telegram?.personaId || 'persona-default';
         const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
-        const personaDisplay = activePersona ? `${activePersona.avatar} ${activePersona.name}` : '⚡ Standard';
+        const activeEmoji = getSafePersonaEmoji(activePersona?.avatar);
+        const personaDisplay = activePersona ? `${activeEmoji} ${activePersona.name}` : '⚡ Standard';
 
         const helpText = 
-`🤖 *zhiEnd AI Coding Agent (Telegram Remote)*
+`🤖 *zhiEnd AI Coding Agent — Shortcut Commands (Telegram)*
 
 📁 *Project Aktif:* \`${activeProj}\`
 🎭 *Persona AI:* ${personaDisplay}
 ⚡ *Model:* \`${activePersona?.preferred_model || this.config.antigravity?.defaultModel || 'gemini-3.8-flash'}\`
 
-*Perintah Remote:*
-• Kirim pesan langsung atau \`/code <instruksi>\` untuk coding
-• \`/persona\` - Cek & ganti Persona AI bot
-• \`/git\` - Cek status git repo aktif
-• \`/diff\` - Cek git diff perubahan file
-• \`/commit <pesan>\` - Stage & commit perubahan
-• \`/push\` - Push perubahan ke GitHub
-• \`/project <path>\` - Ganti project aktif
-• \`/cancel\` - Hentikan proses AI yang sedang jalan
-• \`/id\` - Tampilkan ID Telegram Anda`;
+━━━━━━━━━━━━━━━━━━━━━
+⌨️ *DAFTAR SHORTCUT PERINTAH:*
+━━━━━━━━━━━━━━━━━━━━━
+
+⚡ *Coding Agent:*
+• \`/code <instruksi>\` atau *ketik langsung* instruksi Anda.
+  _Contoh:_ \`/code buatkan login api\`
+
+🎭 *Persona AI:*
+• \`/persona\` : Cek daftar semua Persona AI
+• \`/persona <nomor/nama>\` : Ganti persona aktif
+  _Contoh:_ \`/persona 2\`
+
+📁 *Workspace Project:*
+• \`/project <path>\` : Ganti folder project aktif
+  _Contoh:_ \`/project D:/Works/crm-sehati\`
+
+🌿 *Git & Repository:*
+• \`/git\` : Cek status branch & file yang berubah
+• \`/diff\` : Cek ringkasan diff kode yang berubah
+• \`/commit <pesan>\` : Stage & commit perubahan lokal
+  _Contoh:_ \`/commit fix: styling button\`
+• \`/push\` : Push commit ke GitHub remote
+
+⚙️ *Sistem & Kontrol:*
+• \`/status\` : Cek status kesibukan agent
+• \`/cancel\` : Batalkan proses AI yang sedang jalan
+• \`/id\` : Cek ID Telegram Anda
+• \`/help\` atau \`/menu\` : Tampilkan panduan shortcut ini
+━━━━━━━━━━━━━━━━━━━━━
+💡 *Tips:* Anda bisa langsung mengirim instruksi coding biasa tanpa harus diawali \`/code\`.`;
+
         return ctx.reply(helpText, { parse_mode: 'Markdown' });
       });
 
@@ -106,7 +143,8 @@ export class TelegramBotManager extends EventEmitter {
         const activeProj = this.config.activeProject || 'None';
         const activePersonaId = this.config.telegram?.personaId || 'persona-default';
         const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
-        const personaDisplay = activePersona ? `${activePersona.avatar} ${activePersona.name}` : '⚡ Standard';
+        const activeEmoji = getSafePersonaEmoji(activePersona?.avatar);
+        const personaDisplay = activePersona ? `${activeEmoji} ${activePersona.name}` : '⚡ Standard';
 
         const msg = busy 
           ? `⏳ *Agent Status:* Sedang menjalankan tugas di \`${activeProj}\`...\n🎭 Persona: ${personaDisplay}` 
@@ -124,7 +162,8 @@ export class TelegramBotManager extends EventEmitter {
           let personaMsg = `🎭 *Daftar Persona AI zhiEnd:*\n\n`;
           allPersonas.forEach((p, idx) => {
             const isCurrent = p.id === activePersonaId;
-            personaMsg += `${idx + 1}. ${p.avatar} *${p.name}* ${isCurrent ? '*(AKTIF)*' : ''}\n`;
+            const pEmoji = getSafePersonaEmoji(p.avatar);
+            personaMsg += `${idx + 1}. ${pEmoji} *${p.name}* ${isCurrent ? '*(AKTIF)*' : ''}\n`;
             personaMsg += `   • Model: \`${p.preferred_model || 'default'}\`\n`;
             if (p.traits) personaMsg += `   • Sifat: _${p.traits}_\n`;
             personaMsg += `\n`;
@@ -152,8 +191,9 @@ export class TelegramBotManager extends EventEmitter {
           }
           saveConfigToDb(this.config);
 
+          const matchedEmoji = getSafePersonaEmoji(matchedPersona.avatar);
           return ctx.reply(
-            `✅ *Persona Telegram berhasil diubah!*\n\n${matchedPersona.avatar} *${matchedPersona.name}*\n⚡ Model: \`${matchedPersona.preferred_model}\`\n🎭 Karakter: _${matchedPersona.traits || 'Adaptif'}_`,
+            `✅ *Persona Telegram berhasil diubah!*\n\n${matchedEmoji} *${matchedPersona.name}*\n⚡ Model: \`${matchedPersona.preferred_model}\`\n🎭 Karakter: _${matchedPersona.traits || 'Adaptif'}_`,
             { parse_mode: 'Markdown' }
           );
         } else {
@@ -269,7 +309,8 @@ export class TelegramBotManager extends EventEmitter {
         const activeProj = this.config.activeProject;
         const activePersonaId = this.config.telegram?.personaId || 'persona-default';
         const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
-        const personaDisplay = activePersona ? `${activePersona.avatar} ${activePersona.name}` : '⚡ Standard';
+        const activeEmoji = getSafePersonaEmoji(activePersona?.avatar);
+        const personaDisplay = activePersona ? `${activeEmoji} ${activePersona.name}` : '⚡ Standard';
 
         await ctx.reply(
           `🤖 *${personaDisplay} Berjalan...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${promptText.slice(0, 100)}..."\n_Mohon tunggu sebentar..._`,

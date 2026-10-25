@@ -383,6 +383,20 @@ export const api = {
     return res.json();
   },
 
+  async uploadAvatar(file: File): Promise<{ success: boolean; url: string; filename?: string; error?: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const pin = localStorage.getItem(PIN_STORAGE_KEY) || '';
+    const res = await fetch('/api/upload/avatar', {
+      method: 'POST',
+      headers: {
+        'x-security-pin': pin
+      },
+      body: formData
+    });
+    return res.json();
+  },
+
   // Database: Chat Sessions & Messages (History)
   async getChatSessions(workspace?: string, isGlobal: boolean = false): Promise<{ sessions: any[] }> {
     const q = new URLSearchParams();

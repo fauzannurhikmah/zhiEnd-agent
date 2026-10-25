@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
+  import { io, Socket } from 'socket.io-client';
   import type { WhatsAppStatus, TelegramStatus, TunnelStatus, AppConfig, PersonaItem } from '../types';
   import { api } from '../services/api';
+  import { dialog } from '../services/dialog.svelte';
   import AvatarView from './AvatarView.svelte';
   import { 
     MessageSquare, 
@@ -21,7 +23,11 @@
     Settings,
     CheckCircle2,
     SlidersHorizontal,
-    QrCode
+    QrCode,
+    Terminal,
+    Trash2,
+    HelpCircle,
+    Clock
   } from 'lucide-svelte';
 
   let {
@@ -96,6 +102,10 @@
 
   let currentQr = $derived(whatsappStatus?.qrCodeDataUrl || (whatsappStatus as any)?.qrDataUrl || null);
 
+  // Live Bot Activity Logs
+  let botLogs = $state<Array<{ platform: string; type: string; sender?: string; text?: string; timestamp: number }>>([]);
+  let remoteSocket: Socket | null = null;
+
   onMount(async () => {
     try {
       const st = await api.getWhatsAppStatus();
@@ -103,6 +113,20 @@
         whatsappStatus = { ...st, qrCodeDataUrl: st.qrCodeDataUrl || (st as any).qrDataUrl };
       }
     } catch {}
+
+    try {
+      remoteSocket = io();
+      remoteSocket.on('bot_log', (data) => {
+        botLogs = [data, ...botLogs.slice(0, 39)];
+      });
+    } catch {}
+  });
+
+  onDestroy(() => {
+    if (remoteSocket) {
+      remoteSocket.disconnect();
+      remoteSocket = null;
+    }
   });
 
   $effect(() => {
@@ -689,6 +713,116 @@
         <Shield class="w-3.5 h-3.5 text-zinc-400 shrink-0 mt-0.5" />
         <span>Gunakan Security PIN di Settings agar Web UI aman saat diakses dari luar.</span>
       </div>
+    </div>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- SECTION: Live Activity Log & Shortcut Commands -->
+  <!-- ========================================== -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-6xl mx-auto mt-6 items-start">
+    
+    <!-- PANEL 1: Live Chat Activity Log (Inbound & Outbound) -->
+    <div class="bg-zinc-950/80 border border-white/[0.08] rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+      <div class="flex items-center justify-between border-b border-white/[0.06] pb-2.5">
+        <div class="flex items-center gap-2">
+          <Terminal class="w-4 h-4 text-emerald-400" />
+          <h2 class="text-xs font-bold text-white uppercase tracking-wider">Live Activity Log (Pesan Masuk & Keluar)</h2>
+        </div>
+        {#if botLogs.length > 0}
+          <button
+            onclick={() => botLogs = []}
+            class="text-[10px] text-zinc-500 hover:text-zinc-300 flex items-center gap-1 cursor-pointer transition"
+            title="Bersihkan log"
+          >
+            <Trash2 class="w-3 h-3" /> Bersihkan
+          </button>
+        {/if}
+      </div>
+
+      <div class="bg-zinc-900/90 rounded-xl p-3 border border-white/[0.04] max-h-64 overflow-y-auto font-mono text-[11px] flex flex-col gap-2 custom-scrollbar">
+        {#if botLogs.length === 0}
+          <div class="text-center py-6 text-zinc-500 text-xs flex flex-col items-center gap-2">
+            <Clock class="w-5 h-5 text-zinc-600 animate-pulse" />
+            <span>Belum ada log pesan. Coba kirim <span class="text-emerald-400 font-bold">!help</span> atau <span class="text-sky-400 font-bold">!status</span> dari WhatsApp Anda.</span>
+          </div>
+        {:else}
+          {#each botLogs as log}
+            <div class="flex flex-col gap-0.5 p-2 rounded-lg {log.type === 'inbound' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-300' : 'bg-zinc-950/80 border border-white/[0.06] text-zinc-300'}">
+              <div class="flex items-center justify-between text-[10px] opacity-80">
+                <span class="font-bold uppercase flex items-center gap-1">
+                  {#if log.type === 'inbound'}
+                    📩 [{log.platform}] Masuk dari: {log.sender?.split('@')[0] || 'Unknown'}
+                  {:else}
+                    📤 [{log.platform}] Balasan ke: {log.sender?.split('@')[0] || 'Unknown'}
+                  {/if}
+                </span>
+                <span class="text-zinc-500">{new Date(log.timestamp).toLocaleTimeString()}</span>
+              </div>
+              <div class="break-words whitespace-pre-wrap text-xs text-white font-sans mt-0.5">
+                {log.text}
+              </div>
+            </div>
+          {/each}
+        {/if}
+      </div>
+      <span class="text-[10px] text-zinc-500 font-mono">Real-time log menangkap semua pesan dari WhatsApp Baileys dan Telegram.</span>
+    </div>
+
+    <!-- PANEL 2: Shortcut Command Reference & Cheatsheet -->
+    <div class="bg-zinc-950/80 border border-white/[0.08] rounded-2xl p-4 shadow-xl flex flex-col gap-3">
+      <div class="flex items-center justify-between border-b border-white/[0.06] pb-2.5">
+        <div class="flex items-center gap-2">
+          <HelpCircle class="w-4 h-4 text-indigo-400" />
+          <h2 class="text-xs font-bold text-white uppercase tracking-wider">Panduan Shortcut Perintah Bot</h2>
+        </div>
+        <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 font-mono">WhatsApp & Telegram</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+        <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-white/[0.06] flex flex-col gap-1">
+          <div class="flex items-center gap-1.5 font-bold text-emerald-400 font-mono">
+            <span>!help</span> <span class="text-zinc-600 font-normal">/</span> <span>/help</span>
+          </div>
+          <p class="text-[11px] text-zinc-400 leading-tight">Menampilkan menu shortcut dan daftar perintah lengkap di chat.</p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-white/[0.06] flex flex-col gap-1">
+          <div class="flex items-center gap-1.5 font-bold text-indigo-400 font-mono">
+            <span>!code &lt;instruksi&gt;</span>
+          </div>
+          <p class="text-[11px] text-zinc-400 leading-tight">Menjalankan coding agent (atau bisa langsung ketik instruksi biasa).</p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-white/[0.06] flex flex-col gap-1">
+          <div class="flex items-center gap-1.5 font-bold text-amber-400 font-mono">
+            <span>!persona [nomor]</span>
+          </div>
+          <p class="text-[11px] text-zinc-400 leading-tight">Melihat daftar persona AI dan mengganti persona aktif dari HP.</p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-white/[0.06] flex flex-col gap-1">
+          <div class="flex items-center gap-1.5 font-bold text-violet-400 font-mono">
+            <span>!project &lt;path&gt;</span>
+          </div>
+          <p class="text-[11px] text-zinc-400 leading-tight">Berpindah ke workspace/folder project lain di laptop Anda.</p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-white/[0.06] flex flex-col gap-1">
+          <div class="flex items-center gap-1.5 font-bold text-sky-400 font-mono">
+            <span>!git</span> <span class="text-zinc-600 font-normal">&</span> <span>!diff</span>
+          </div>
+          <p class="text-[11px] text-zinc-400 leading-tight">Cek status git branch, file yang berubah, serta baris diff kode.</p>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-zinc-900/60 border border-white/[0.06] flex flex-col gap-1">
+          <div class="flex items-center gap-1.5 font-bold text-teal-400 font-mono">
+            <span>!commit</span> <span class="text-zinc-600 font-normal">&</span> <span>!push</span>
+          </div>
+          <p class="text-[11px] text-zinc-400 leading-tight">Stage & commit perubahan lokal lalu push ke GitHub remote.</p>
+        </div>
+      </div>
+      <span class="text-[10px] text-zinc-500 font-mono">💡 Ketik <b>!help</b> atau <b>!menu</b> di WhatsApp untuk menampilkan balasan panduan interaktif.</span>
     </div>
 
   </div>

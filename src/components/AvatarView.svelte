@@ -27,6 +27,7 @@
     return str.startsWith('data:image/') || 
            str.startsWith('http://') || 
            str.startsWith('https://') || 
+           str.startsWith('/uploads/') ||
            str.endsWith('.gif') || 
            str.endsWith('.png') || 
            str.endsWith('.jpg') || 

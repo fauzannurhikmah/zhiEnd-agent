@@ -15,6 +15,14 @@ export default defineConfig({
         target: 'http://localhost:3888',
         changeOrigin: true
       },
+      '/uploads': {
+        target: 'http://localhost:3888',
+        changeOrigin: true
+      },
+      '/preview': {
+        target: 'http://localhost:3888',
+        changeOrigin: true
+      },
       '/socket.io': {
         target: 'http://localhost:3888',
         ws: true

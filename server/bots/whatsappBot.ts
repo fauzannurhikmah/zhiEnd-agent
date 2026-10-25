@@ -35,6 +35,7 @@ export class WhatsAppBotManager extends EventEmitter {
   private authPath: string;
   private isStarting: boolean = false;
   private reconnectTimeout: NodeJS.Timeout | null = null;
+  private mySentMessageIds = new Set<string>();
 
   constructor(options: WhatsAppBotOptions) {
     super();
@@ -50,15 +51,54 @@ export class WhatsAppBotManager extends EventEmitter {
   }
 
   private isAuthorized(senderJid: string): boolean {
+    const senderClean = senderJid.split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
+    const botPhone = (this.user?.id || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
+    const botLid = ((this.user as any)?.lid || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
+
+    // Akun bot itu sendiri (chat ke diri sendiri / Message Yourself) SELALU authorized
+    if (
+      senderJid.endsWith('@lid') || 
+      (botPhone && senderClean === botPhone) || 
+      (botLid && senderClean === botLid)
+    ) {
+      return true;
+    }
+
     const allowed = this.config.whatsapp?.allowedNumbers || [];
     if (!allowed || allowed.length === 0) {
       return true;
     }
-    const cleanSender = senderJid.replace(/[^0-9]/g, '');
     return allowed.some(num => {
       const cleanAllowed = String(num).replace(/[^0-9]/g, '');
-      return cleanSender.includes(cleanAllowed) || cleanAllowed.includes(cleanSender);
+      return senderClean.includes(cleanAllowed) || cleanAllowed.includes(senderClean);
     });
+  }
+
+  private async sendReply(sender: string, content: any): Promise<any> {
+    if (!this.sock) return null;
+    try {
+      const sent = await this.sock.sendMessage(sender, content);
+      if (sent?.key?.id) {
+        this.mySentMessageIds.add(sent.key.id);
+        if (this.mySentMessageIds.size > 200) {
+          const first = this.mySentMessageIds.values().next().value;
+          if (first) this.mySentMessageIds.delete(first);
+        }
+      }
+      const preview = typeof content?.text === 'string' ? content.text.slice(0, 100) : 'Pesan Media';
+      console.log(`[WhatsApp Outbound] To: ${sender} | Preview: "${preview.replace(/\n/g, ' ')}"`);
+      this.emit('log', {
+        platform: 'whatsapp',
+        type: 'outbound',
+        sender,
+        text: preview,
+        timestamp: Date.now()
+      });
+      return sent;
+    } catch (e) {
+      console.error(`Failed to send WhatsApp message to ${sender}:`, e);
+      return null;
+    }
   }
 
   public async start(): Promise<{ success: boolean; message?: string; error?: string }> {
@@ -165,28 +205,77 @@ export class WhatsAppBotManager extends EventEmitter {
       });
 
       this.sock.ev.on('messages.upsert', async ({ messages, type }) => {
-        if (type !== 'notify') return;
-
         for (const msg of messages) {
-          if (!msg.message || msg.key.fromMe) continue;
+          if (!msg.message) continue;
+
+          // Abaikan jika pesan ini adalah balasan yang dikirim bot kita sendiri
+          if (msg.key.id && this.mySentMessageIds.has(msg.key.id)) {
+            continue;
+          }
 
           const sender = msg.key.remoteJid;
           if (!sender) continue;
 
+          // Abaikan status broadcast stories
+          if (sender.endsWith('@broadcast') || sender === 'status@broadcast') continue;
+
+          const m = (msg.message as any).ephemeralMessage?.message || 
+                    (msg.message as any).viewOnceMessage?.message || 
+                    (msg.message as any).viewOnceMessageV2?.message || 
+                    msg.message;
+
           const messageText = 
-            msg.message.conversation ||
-            msg.message.extendedTextMessage?.text ||
-            msg.message.imageMessage?.caption ||
+            m?.conversation ||
+            m?.extendedTextMessage?.text ||
+            m?.imageMessage?.caption ||
+            m?.videoMessage?.caption ||
             '';
 
           const text = messageText.trim();
           if (!text) continue;
 
+          const botPhone = (this.user?.id || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
+          const botLid = ((this.user as any)?.lid || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
+          const senderClean = sender.split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
+
+          // Cek apakah pesan dikirim di ruang obrolan diri sendiri ("Message Yourself")
+          const isSelfChat = 
+            sender.endsWith('@lid') || 
+            (botPhone && senderClean === botPhone) || 
+            (botLid && senderClean === botLid);
+
+          const isCommand = text.startsWith('!') || text.startsWith('/') || ['help', 'menu', 'status'].includes(text.toLowerCase());
+
+          // Jika fromMe === true (pesan dikirim dari akun WA yang sama):
+          // Hanya proses jika:
+          // 1. Dikirim di chat ke diri sendiri (Message Yourself), ATAU
+          // 2. Merupakan perintah bot (diawali ! atau /)
+          // Jika chat ke orang lain tanpa awalan perintah, abaikan agar tidak mengganggu obrolan pribadi
+          if (msg.key.fromMe && !isSelfChat && !isCommand) {
+            continue;
+          }
+
+          const isGroup = sender.endsWith('@g.us');
+          // Jika di dalam grup dan bukan perintah eksplisit, abaikan agar tidak mengganggu obrolan grup
+          if (isGroup && !isCommand) {
+            continue;
+          }
+
+          console.log(`[WhatsApp Inbound] From: ${sender} (self: ${isSelfChat}, fromMe: ${msg.key.fromMe}, group: ${isGroup}) | Text: "${text}"`);
+          this.emit('log', {
+            platform: 'whatsapp',
+            type: 'inbound',
+            sender,
+            text,
+            timestamp: Date.now()
+          });
+
           if (!this.isAuthorized(sender)) {
-            const senderClean = sender.replace(/[^0-9]/g, '');
-            await this.sock?.sendMessage(sender, {
-              text: `⚠️ *Akses Ditolak*\nNomor Anda: ${senderClean}\nSilakan daftarkan nomor ini di Web UI zhiEnd Agent > Remote Hub / Settings.`
-            });
+            if (!isGroup) {
+              await this.sendReply(sender, {
+                text: `⚠️ *Akses Ditolak*\nNomor Anda: ${senderClean}\nSilakan daftarkan nomor ini di Web UI zhiEnd Agent > Remote Hub / Settings.`
+              });
+            }
             continue;
           }
 
@@ -212,27 +301,55 @@ export class WhatsAppBotManager extends EventEmitter {
 
     const activePersonaId = this.config.whatsapp?.personaId || 'persona-default';
     const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
-    const personaDisplay = activePersona ? `${activePersona.avatar} ${activePersona.name}` : '⚡ Standard';
+    const activeEmoji = getSafePersonaEmoji(activePersona?.avatar);
+    const personaDisplay = activePersona ? `${activeEmoji} ${activePersona.name}` : '⚡ Standard';
 
-    if (text === '!help' || text === '!start') {
+    const cleanLower = text.toLowerCase().trim();
+    const isHelp = 
+      cleanLower === '!help' || cleanLower === '!menu' || cleanLower === '!start' || 
+      cleanLower === '/help' || cleanLower === '/menu' || cleanLower === '/start' || 
+      cleanLower === 'help' || cleanLower === 'menu';
+
+    if (isHelp) {
       const helpMsg = 
-`🤖 *zhiEnd AI Coding Agent (WhatsApp Remote)*
+`🤖 *zhiEnd AI Coding Agent — Shortcut Commands*
 
 📁 *Project Aktif:* \`${activeProj}\`
 🎭 *Persona AI:* ${personaDisplay}
 ⚡ *Model:* \`${activePersona?.preferred_model || this.config.antigravity?.defaultModel || 'gemini-3.8-flash'}\`
 
-*Daftar Perintah:*
-• *!code <instruksi>* : Jalankan coding agent (atau ketik langsung)
-• *!persona* : Cek & ganti Persona AI bot
-• *!git* : Cek status git repository
-• *!diff* : Cek diff perubahan kode
-• *!commit <pesan>* : Stage & commit perubahan
-• *!push* : Push ke GitHub
-• *!project <path>* : Ganti project aktif
-• *!cancel* : Batalkan tugas agent yang sedang jalan
-• *!status* : Status sistem & agent`;
-      await this.sock.sendMessage(sender, { text: helpMsg });
+━━━━━━━━━━━━━━━━━━━━━
+⌨️ *DAFTAR SHORTCUT PERINTAH:*
+━━━━━━━━━━━━━━━━━━━━━
+
+⚡ *Coding Agent:*
+• *!code <instruksi>* atau *ketik langsung* instruksi coding Anda
+  _Contoh:_ \`!code buatkan form login svelte\`
+
+🎭 *Persona AI:*
+• *!persona* : Cek daftar semua Persona AI
+• *!persona <nomor/nama>* : Ganti persona aktif
+  _Contoh:_ \`!persona 2\` atau \`!persona Reviewer\`
+
+📁 *Workspace Project:*
+• *!project <path>* : Ganti project/workspace aktif
+  _Contoh:_ \`!project D:/Works/crm-sehati\`
+
+🌿 *Git & Repository:*
+• *!git* : Cek status git branch & perubahan file
+• *!diff* : Cek diff baris kode yang berubah
+• *!commit <pesan>* : Stage semua file & commit lokal
+  _Contoh:_ \`!commit fix: perbaiki navbar\`
+• *!push* : Push commit langsung ke GitHub remote
+
+⚙️ *Sistem & Kontrol:*
+• *!status* : Cek status kesibukan agent & info runtime
+• *!cancel* : Hentikan proses AI yang sedang berjalan
+• *!help* atau *!menu* : Tampilkan daftar perintah ini
+━━━━━━━━━━━━━━━━━━━━━
+💡 *Tips Cepat:* Di chat ini Anda bisa langsung mengirim instruksi coding biasa tanpa harus mengetik *!code*.`;
+
+      await this.sendReply(sender, { text: helpMsg });
       return;
     }
 
@@ -241,7 +358,7 @@ export class WhatsAppBotManager extends EventEmitter {
       const statusText = busy 
         ? `⏳ *Agent Status:* Sedang menjalankan tugas di \`${activeProj}\`...\n🎭 Persona: ${personaDisplay}` 
         : `✅ *Agent Status:* Standby & Siap menerima instruksi.\n📁 Project: \`${activeProj}\`\n🎭 Persona: ${personaDisplay}`;
-      await this.sock.sendMessage(sender, { text: statusText });
+      await this.sendReply(sender, { text: statusText });
       return;
     }
 
@@ -251,20 +368,21 @@ export class WhatsAppBotManager extends EventEmitter {
       let personaMsg = `🎭 *Daftar Persona AI zhiEnd:*\n\n`;
       allPersonas.forEach((p, idx) => {
         const isCurrent = p.id === activePersonaId;
-        personaMsg += `${idx + 1}. ${p.avatar} *${p.name}* ${isCurrent ? '*(AKTIF)*' : ''}\n`;
+        const pEmoji = getSafePersonaEmoji(p.avatar);
+        personaMsg += `${idx + 1}. ${pEmoji} *${p.name}* ${isCurrent ? '*(AKTIF)*' : ''}\n`;
         personaMsg += `   • Model: \`${p.preferred_model || 'default'}\`\n`;
         if (p.traits) personaMsg += `   • Sifat: _${p.traits}_\n`;
         personaMsg += `\n`;
       });
       personaMsg += `*Untuk mengganti persona:*\nKetik *!persona <nomor atau nama>*\nContoh: *!persona 2* atau *!persona Reviewer*`;
-      await this.sock.sendMessage(sender, { text: personaMsg });
+      await this.sendReply(sender, { text: personaMsg });
       return;
     }
 
     if (text.startsWith('!persona')) {
       const query = text.replace('!persona', '').trim().toLowerCase();
       if (!query) {
-        await this.sock.sendMessage(sender, { text: '⚠️ Masukkan nomor atau nama persona. Ketik *!persona* untuk melihat daftar.' });
+        await this.sendReply(sender, { text: '⚠️ Masukkan nomor atau nama persona. Ketik *!persona* untuk melihat daftar.' });
         return;
       }
 
@@ -291,11 +409,12 @@ export class WhatsAppBotManager extends EventEmitter {
         }
         saveConfigToDb(this.config);
 
-        await this.sock.sendMessage(sender, {
-          text: `✅ *Persona WhatsApp berhasil diubah!*\n\n${matchedPersona.avatar} *${matchedPersona.name}*\n⚡ Model: \`${matchedPersona.preferred_model}\`\n🎭 Karakter: _${matchedPersona.traits || 'Adaptif'}_`
+        const matchedEmoji = getSafePersonaEmoji(matchedPersona.avatar);
+        await this.sendReply(sender, {
+          text: `✅ *Persona WhatsApp berhasil diubah!*\n\n${matchedEmoji} *${matchedPersona.name}*\n⚡ Model: \`${matchedPersona.preferred_model}\`\n🎭 Karakter: _${matchedPersona.traits || 'Adaptif'}_`
         });
       } else {
-        await this.sock.sendMessage(sender, {
+        await this.sendReply(sender, {
           text: `❌ Persona "${query}" tidak ditemukan.\nKetik *!persona* untuk melihat daftar nomor & nama persona.`
         });
       }
@@ -305,7 +424,7 @@ export class WhatsAppBotManager extends EventEmitter {
     if (text === '!git') {
       const status = await this.gitManager.getStatus(activeProj);
       if (!status.isRepo) {
-        await this.sock.sendMessage(sender, { text: `⚠️ Bukan git repository:\n${activeProj}` });
+        await this.sendReply(sender, { text: `⚠️ Bukan git repository:\n${activeProj}` });
         return;
       }
 
@@ -327,47 +446,47 @@ export class WhatsAppBotManager extends EventEmitter {
         reply += `\nKetik *!commit <pesan>* lalu *!push* untuk kirim ke GitHub.`;
       }
 
-      await this.sock.sendMessage(sender, { text: reply });
+      await this.sendReply(sender, { text: reply });
       return;
     }
 
     if (text === '!diff') {
       const diff = await this.gitManager.getDiff(activeProj);
       if (!diff || !diff.trim()) {
-        await this.sock.sendMessage(sender, { text: '✨ Tidak ada diff / perubahan aktif.' });
+        await this.sendReply(sender, { text: '✨ Tidak ada diff / perubahan aktif.' });
         return;
       }
       const snippet = diff.length > 3500 ? diff.slice(0, 3500) + '\n\n...(truncated)' : diff;
-      await this.sock.sendMessage(sender, { text: `*Git Diff:*\n\`\`\`\n${snippet}\n\`\`\`` });
+      await this.sendReply(sender, { text: `*Git Diff:*\n\`\`\`\n${snippet}\n\`\`\`` });
       return;
     }
 
     if (text.startsWith('!commit')) {
       const msg = text.replace('!commit', '').trim();
       if (!msg) {
-        await this.sock.sendMessage(sender, { text: '⚠️ Harap sertakan pesan commit. Contoh:\n!commit fix: styling navbar' });
+        await this.sendReply(sender, { text: '⚠️ Harap sertakan pesan commit. Contoh:\n!commit fix: styling navbar' });
         return;
       }
 
-      await this.sock.sendMessage(sender, { text: '🔄 Memproses commit...' });
+      await this.sendReply(sender, { text: '🔄 Memproses commit...' });
       await this.gitManager.stage(activeProj, ['.']);
       const res = await this.gitManager.commit(activeProj, msg);
 
       if (res.success) {
-        await this.sock.sendMessage(sender, { text: `✅ *Commit Berhasil!*\n📝 Pesan: "${msg}"\n\nKetik *!push* untuk push ke GitHub.` });
+        await this.sendReply(sender, { text: `✅ *Commit Berhasil!*\n📝 Pesan: "${msg}"\n\nKetik *!push* untuk push ke GitHub.` });
       } else {
-        await this.sock.sendMessage(sender, { text: `❌ Commit gagal: ${res.error || res.stdout}` });
+        await this.sendReply(sender, { text: `❌ Commit gagal: ${res.error || res.stdout}` });
       }
       return;
     }
 
     if (text === '!push') {
-      await this.sock.sendMessage(sender, { text: '🚀 Menjalankan git push ke GitHub...' });
+      await this.sendReply(sender, { text: '🚀 Menjalankan git push ke GitHub...' });
       const res = await this.gitManager.push(activeProj);
       if (res.success) {
-        await this.sock.sendMessage(sender, { text: `🎉 *Push Berhasil!*\n\`\`\`\n${res.stdout || res.stderr || 'Pushed successfully'}\n\`\`\`` });
+        await this.sendReply(sender, { text: `🎉 *Push Berhasil!*\n\`\`\`\n${res.stdout || res.stderr || 'Pushed successfully'}\n\`\`\`` });
       } else {
-        await this.sock.sendMessage(sender, { text: `❌ Push gagal:\n\`\`\`\n${res.error || res.stderr}\n\`\`\`` });
+        await this.sendReply(sender, { text: `❌ Push gagal:\n\`\`\`\n${res.error || res.stderr}\n\`\`\`` });
       }
       return;
     }
@@ -375,16 +494,16 @@ export class WhatsAppBotManager extends EventEmitter {
     if (text.startsWith('!project')) {
       const newPath = text.replace('!project', '').trim();
       if (!newPath) {
-        await this.sock.sendMessage(sender, { text: `📁 Project aktif saat ini:\n${activeProj}\n\nUntuk ganti: !project D:/Path/Ke/Project` });
+        await this.sendReply(sender, { text: `📁 Project aktif saat ini:\n${activeProj}\n\nUntuk ganti: !project D:/Path/Ke/Project` });
         return;
       }
 
       if (this.onProjectChange) {
         const res = await this.onProjectChange(newPath);
         if (res.success) {
-          await this.sock.sendMessage(sender, { text: `✅ *Project aktif diubah ke:*\n${newPath}` });
+          await this.sendReply(sender, { text: `✅ *Project aktif diubah ke:*\n${newPath}` });
         } else {
-          await this.sock.sendMessage(sender, { text: `❌ Gagal: ${res.error || 'Path tidak valid'}` });
+          await this.sendReply(sender, { text: `❌ Gagal: ${res.error || 'Path tidak valid'}` });
         }
       }
       return;
@@ -393,9 +512,9 @@ export class WhatsAppBotManager extends EventEmitter {
     if (text === '!cancel') {
       if (this.agentRunner.isBusy()) {
         this.agentRunner.cancel();
-        await this.sock.sendMessage(sender, { text: '🛑 Proses Antigravity agent telah dibatalkan.' });
+        await this.sendReply(sender, { text: '🛑 Proses Antigravity agent telah dibatalkan.' });
       } else {
-        await this.sock.sendMessage(sender, { text: 'ℹ️ Tidak ada tugas agent yang berjalan.' });
+        await this.sendReply(sender, { text: 'ℹ️ Tidak ada tugas agent yang berjalan.' });
       }
       return;
     }
@@ -406,11 +525,11 @@ export class WhatsAppBotManager extends EventEmitter {
     }
 
     if (this.agentRunner.isBusy()) {
-      await this.sock.sendMessage(sender, { text: '⏳ Agent sedang sibuk dengan tugas lain. Ketik *!cancel* untuk batalkan.' });
+      await this.sendReply(sender, { text: '⏳ Agent sedang sibuk dengan tugas lain. Ketik *!cancel* untuk batalkan.' });
       return;
     }
 
-    await this.sock.sendMessage(sender, {
+    await this.sendReply(sender, {
       text: `🤖 *${personaDisplay} Memproses...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${codingPrompt.slice(0, 100)}..."\n_Mohon tunggu sebentar..._`
     });
 
@@ -425,14 +544,14 @@ export class WhatsAppBotManager extends EventEmitter {
       const resp = result.response || '(Tugas selesai tanpa respon teks)';
       const chunkSize = 3500;
       for (let i = 0; i < resp.length; i += chunkSize) {
-        await this.sock.sendMessage(sender, { text: resp.slice(i, i + chunkSize) });
+        await this.sendReply(sender, { text: resp.slice(i, i + chunkSize) });
       }
 
       if (result.status === 'completed') {
-        await this.sock.sendMessage(sender, { text: `✅ *Selesai* dalam ${result.duration}. Ketik *!git* untuk cek file yang berubah.` });
+        await this.sendReply(sender, { text: `✅ *Selesai* dalam ${result.duration}. Ketik *!git* untuk cek file yang berubah.` });
       }
     } catch (err: any) {
-      await this.sock.sendMessage(sender, { text: `❌ Error: ${err.message}` });
+      await this.sendReply(sender, { text: `❌ Error: ${err.message}` });
     }
   }
 
@@ -482,3 +601,19 @@ export class WhatsAppBotManager extends EventEmitter {
     };
   }
 }
+
+export function getSafePersonaEmoji(avatar?: string | null): string {
+  if (!avatar) return '🎭';
+  const str = avatar.trim();
+  if (
+    str.startsWith('data:') ||
+    str.startsWith('/uploads/') ||
+    str.startsWith('http://') ||
+    str.startsWith('https://') ||
+    str.length > 20
+  ) {
+    return '🎭';
+  }
+  return str;
+}
+

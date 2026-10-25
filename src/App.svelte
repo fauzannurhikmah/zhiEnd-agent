@@ -511,6 +511,13 @@
       telegramStatus = data;
     });
 
+    socket.on('bot_log', (data: { platform: string; type: string; sender?: string; text?: string }) => {
+      const icon = data.type === 'inbound' ? '📩' : '📤';
+      const dir = data.type === 'inbound' ? 'Dari' : 'Kirim ke';
+      const senderPreview = data.sender ? String(data.sender).replace(/@.*$/, '') : '';
+      addLog(`[${data.platform?.toUpperCase() || 'BOT'} ${icon}] ${dir} ${senderPreview}: "${data.text?.slice(0, 120) || ''}"`);
+    });
+
     socket.on('tunnel_status', (data) => {
       if (tunnelStatus) {
         tunnelStatus.status = data.status;

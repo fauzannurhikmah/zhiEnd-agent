@@ -35,7 +35,8 @@ import {
   getSessionMessages,
   saveMessageToDb,
   clearSessionMessages,
-  getOrCreateDefaultSession
+  getOrCreateDefaultSession,
+  saveBase64Avatar
 } from './db/database';
 
 const app = new Hono();
@@ -421,6 +422,54 @@ ATURAN OUTPUT:
     return c.json({ error: err.message || 'Gagal men-generate instruksi sistem' }, 500);
   }
 });
+
+// Avatar Upload Endpoint (Gambar / GIF / Video)
+const UPLOADS_DIR = path.resolve(__dirname, '../data/uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+
+app.post('/api/upload/avatar', async (c) => {
+  try {
+    const avatarDir = path.join(UPLOADS_DIR, 'avatars');
+    if (!fs.existsSync(avatarDir)) {
+      fs.mkdirSync(avatarDir, { recursive: true });
+    }
+
+    const contentType = c.req.header('content-type') || '';
+    if (contentType.includes('multipart/form-data')) {
+      const body = await c.req.parseBody();
+      const file = body['file'];
+      if (!file || typeof file === 'string') {
+        return c.json({ error: 'No file uploaded' }, 400);
+      }
+
+      const fileObj = file as File;
+      const originalName = (fileObj as any).name || 'avatar.jpg';
+      const ext = path.extname(originalName) || '.jpg';
+      const cleanExt = ext.startsWith('.') ? ext : `.${ext}`;
+      const filename = `avatar-${Date.now()}-${Math.random().toString(36).substring(2, 8)}${cleanExt}`;
+      const filePath = path.join(avatarDir, filename);
+
+      const arrayBuffer = await fileObj.arrayBuffer();
+      fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
+      const url = `/uploads/avatars/${filename}`;
+      return c.json({ success: true, url, filename });
+    } else {
+      const json = await c.req.json<{ dataUrl?: string; base64?: string }>().catch(() => ({} as any));
+      const raw = json.dataUrl || json.base64;
+      if (!raw) return c.json({ error: 'No image data provided' }, 400);
+
+      const url = saveBase64Avatar(raw, `upload-${Date.now()}`);
+      if (!url) return c.json({ error: 'Invalid image data' }, 400);
+      return c.json({ success: true, url });
+    }
+  } catch (err: any) {
+    console.error('Avatar upload error:', err);
+    return c.json({ error: 'Upload failed: ' + err.message }, 500);
+  }
+});
+
 
 // ==========================================
 // DATABASE: Chat Sessions & Messages (History)
@@ -900,6 +949,22 @@ app.get('/preview/*', (c) => {
   `, 404);
 });
 
+// Static uploads serving (/uploads/avatars/...)
+app.get('/uploads/*', (c) => {
+  const relPath = c.req.path.replace(/^\/uploads\/?/, '');
+  const safePath = path.normalize(relPath).replace(/^(\.\.[\/\\])+/, '');
+  const filePath = path.join(UPLOADS_DIR, safePath);
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    return c.text('File not found', 404);
+  }
+  const mime = getFileMime(filePath);
+  const data = fs.readFileSync(filePath);
+  return c.body(data, 200, {
+    'Content-Type': mime,
+    'Cache-Control': 'public, max-age=86400'
+  });
+});
+
 // Static assets serving (dist from Svelte Vite build)
 const distDir = path.join(__dirname, '..', 'dist');
 
@@ -972,7 +1037,9 @@ try {
 
   whatsappBot.on('qr', (data) => io?.emit('whatsapp_qr', data));
   whatsappBot.on('status_change', (data) => io?.emit('whatsapp_status', data));
+  whatsappBot.on('log', (data) => io?.emit('bot_log', data));
   telegramBot.on('status_change', (data) => io?.emit('telegram_status', data));
+  telegramBot.on('log', (data) => io?.emit('bot_log', data));
   tunnelManager.on('status_change', (data) => io?.emit('tunnel_status', data));
 
 } catch (err) {

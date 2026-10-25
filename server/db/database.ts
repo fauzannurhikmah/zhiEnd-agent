@@ -28,6 +28,7 @@ export function getDb(): Database.Database {
     dbInstance.pragma('foreign_keys = ON');
     initTables(dbInstance);
     migrateFromLegacyConfig(dbInstance);
+    migrateBase64Avatars(dbInstance);
   }
   return dbInstance;
 }
@@ -129,6 +130,86 @@ function initTables(db: Database.Database): void {
     db.prepare("UPDATE personas SET traits = 'Kritis, Analitis, & Perfeksionis' WHERE id = 'persona-reviewer' AND (traits IS NULL OR traits = '')").run();
     db.prepare("UPDATE personas SET traits = 'Pragmatis, Efisien, & Cepat' WHERE id = 'persona-devops' AND (traits IS NULL OR traits = '')").run();
   } catch {}
+}
+
+export function saveBase64Avatar(base64Str: string, idPrefix: string = 'avatar'): string {
+  if (!base64Str || !base64Str.startsWith('data:')) return base64Str;
+  try {
+    const uploadsDir = path.join(__dirname, '..', '..', 'data', 'uploads', 'avatars');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+    const matches = base64Str.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+    if (!matches) return base64Str;
+    const mime = matches[1].toLowerCase();
+    const b64Data = matches[2];
+    const extMap: Record<string, string> = {
+      'image/jpeg': 'jpg',
+      'image/jpg': 'jpg',
+      'image/png': 'png',
+      'image/gif': 'gif',
+      'image/webp': 'webp',
+      'image/svg+xml': 'svg',
+      'video/mp4': 'mp4',
+      'video/webm': 'webm',
+      'video/ogg': 'ogg'
+    };
+    const ext = extMap[mime] || (mime.startsWith('video/') ? 'mp4' : 'png');
+    const filename = `avatar-${idPrefix}-${Date.now()}.${ext}`;
+    const filePath = path.join(uploadsDir, filename);
+    fs.writeFileSync(filePath, Buffer.from(b64Data, 'base64'));
+    return `/uploads/avatars/${filename}`;
+  } catch (e) {
+    console.error('Failed to convert base64 avatar to file:', e);
+    return base64Str;
+  }
+}
+
+export function migrateBase64Avatars(db: Database.Database): void {
+  try {
+    const rows = db.prepare("SELECT id, avatar FROM personas WHERE avatar LIKE 'data:%'").all() as Array<{ id: string; avatar: string }>;
+    if (!rows || rows.length === 0) return;
+
+    const uploadsDir = path.join(__dirname, '..', '..', 'data', 'uploads', 'avatars');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    const updateStmt = db.prepare("UPDATE personas SET avatar = ? WHERE id = ?");
+
+    for (const r of rows) {
+      if (!r.avatar || !r.avatar.startsWith('data:')) continue;
+      try {
+        const matches = r.avatar.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,(.+)$/);
+        if (!matches) continue;
+        const mime = matches[1].toLowerCase();
+        const b64Data = matches[2];
+        const extMap: Record<string, string> = {
+          'image/jpeg': 'jpg',
+          'image/jpg': 'jpg',
+          'image/png': 'png',
+          'image/gif': 'gif',
+          'image/webp': 'webp',
+          'image/svg+xml': 'svg',
+          'video/mp4': 'mp4',
+          'video/webm': 'webm',
+          'video/ogg': 'ogg'
+        };
+        const ext = extMap[mime] || (mime.startsWith('video/') ? 'mp4' : 'png');
+        const filename = `avatar-${r.id}.${ext}`;
+        const filePath = path.join(uploadsDir, filename);
+
+        fs.writeFileSync(filePath, Buffer.from(b64Data, 'base64'));
+        const publicUrl = `/uploads/avatars/${filename}`;
+        updateStmt.run(publicUrl, r.id);
+        console.log(`[Avatar Migration] Migrated base64 avatar for persona ${r.id} to ${publicUrl}`);
+      } catch (err) {
+        console.error(`[Avatar Migration] Failed to migrate avatar for ${r.id}:`, err);
+      }
+    }
+  } catch (e) {
+    console.error('Error checking base64 avatars for migration:', e);
+  }
 }
 
 function migrateFromLegacyConfig(db: Database.Database): void {
@@ -599,14 +680,19 @@ export function getPersonas(): PersonaItem[] {
 export function createPersona(data: { name: string; avatar?: string; traits?: string; system_prompt: string; preferred_model?: string }): PersonaItem {
   const db = getDb();
   const id = 'persona-' + Date.now();
+  let avatarUrl = data.avatar || '🤖';
+  if (avatarUrl.startsWith('data:')) {
+    avatarUrl = saveBase64Avatar(avatarUrl, id);
+  }
+
   db.prepare(`
     INSERT INTO personas (id, name, avatar, traits, system_prompt, preferred_model, is_default)
     VALUES (?, ?, ?, ?, ?, ?, 0)
-  `).run(id, data.name, data.avatar || '🤖', data.traits || null, data.system_prompt, data.preferred_model || 'gemini-3.8-flash-high');
+  `).run(id, data.name, avatarUrl, data.traits || null, data.system_prompt, data.preferred_model || 'gemini-3.8-flash-high');
   return {
     id,
     name: data.name,
-    avatar: data.avatar || '🤖',
+    avatar: avatarUrl,
     traits: data.traits || null,
     system_prompt: data.system_prompt,
     preferred_model: data.preferred_model,
@@ -619,13 +705,18 @@ export function updatePersona(id: string, data: Partial<PersonaItem>): boolean {
   const current = db.prepare('SELECT * FROM personas WHERE id = ?').get(id) as any;
   if (!current) return false;
 
+  let avatarUrl = data.avatar !== undefined ? data.avatar : current.avatar;
+  if (avatarUrl && avatarUrl.startsWith('data:')) {
+    avatarUrl = saveBase64Avatar(avatarUrl, id);
+  }
+
   db.prepare(`
     UPDATE personas 
     SET name = ?, avatar = ?, traits = ?, system_prompt = ?, preferred_model = ?
     WHERE id = ?
   `).run(
     data.name !== undefined ? data.name : current.name,
-    data.avatar !== undefined ? data.avatar : current.avatar,
+    avatarUrl,
     data.traits !== undefined ? data.traits : current.traits,
     data.system_prompt !== undefined ? data.system_prompt : current.system_prompt,
     data.preferred_model !== undefined ? data.preferred_model : current.preferred_model,
