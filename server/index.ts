@@ -925,6 +925,15 @@ try {
     cors: { origin: '*' }
   });
 
+  io.on('connection', (socket) => {
+    socket.emit('whatsapp_status', whatsappBot.getStatus());
+    if (whatsappBot.qrCodeDataUrl) {
+      socket.emit('whatsapp_qr', { qrDataUrl: whatsappBot.qrCodeDataUrl, qrCodeDataUrl: whatsappBot.qrCodeDataUrl });
+    }
+    socket.emit('telegram_status', telegramBot.getStatus());
+    socket.emit('tunnel_status', tunnelManager.getStatus());
+  });
+
   agentRunner.on('task_start', (data) => io?.emit('agent_task_start', data));
   agentRunner.on('agent_init', (data) => io?.emit('agent_init', data));
   agentRunner.on('agent_delta', (data) => io?.emit('agent_delta', data));
@@ -963,6 +972,7 @@ try {
 
   whatsappBot.on('qr', (data) => io?.emit('whatsapp_qr', data));
   whatsappBot.on('status_change', (data) => io?.emit('whatsapp_status', data));
+  telegramBot.on('status_change', (data) => io?.emit('telegram_status', data));
   tunnelManager.on('status_change', (data) => io?.emit('tunnel_status', data));
 
 } catch (err) {

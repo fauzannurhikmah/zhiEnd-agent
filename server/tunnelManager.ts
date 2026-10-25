@@ -125,6 +125,14 @@ export class TunnelManager extends EventEmitter {
     return { success: true };
   }
 
+  public getStatus(): { status: TunnelStatus['status']; url: string | null; error: string | null } {
+    return {
+      status: this.tunnelStatus,
+      url: this.publicUrl,
+      error: this.errorMessage
+    };
+  }
+
   public async getNetworkInfo(): Promise<TunnelStatus> {
     const localUrl = this.getLocalUrl();
     const localQr = await this.getQrCode(localUrl);

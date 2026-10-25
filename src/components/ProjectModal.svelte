@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import type { ScannedProject } from '../types';
   import { api } from '../services/api';
+  import { dialog } from '../services/dialog.svelte';
   import { 
     FolderGit, 
     X, 
@@ -170,7 +171,7 @@
 
   async function handleCreateProject() {
     if (!newProjectName.trim()) {
-      alert('Nama project harus diisi.');
+      dialog.showWarning('Nama project harus diisi.');
       return;
     }
     isCreating = true;
@@ -180,11 +181,12 @@
         newProjectName = '';
         await onSelectProject(res.activeProject);
         onClose();
+        dialog.showSuccess(`Project "${res.activeProject}" berhasil dibuat.`);
       } else {
-        alert('Gagal membuat project: ' + (res.error || 'Terjadi kesalahan'));
+        dialog.showError('Gagal membuat project: ' + (res.error || 'Terjadi kesalahan'));
       }
     } catch (e: any) {
-      alert('Error: ' + e.message);
+      dialog.showError('Error: ' + e.message);
     } finally {
       isCreating = false;
     }

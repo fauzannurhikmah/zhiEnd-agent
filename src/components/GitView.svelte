@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { GitStatus, CommitInfo } from '../types';
+  import { dialog } from '../services/dialog.svelte';
   import { 
     GitBranch, 
     UploadCloud, 
@@ -70,7 +71,7 @@
 
   async function handleCommit() {
     if (!commitMessage.trim()) {
-      alert('Pesan commit harus diisi.');
+      dialog.showWarning('Pesan commit harus diisi terlebih dahulu.');
       return;
     }
     isCommitting = true;

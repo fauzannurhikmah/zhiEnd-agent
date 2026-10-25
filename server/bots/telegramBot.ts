@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import { Telegraf } from 'telegraf';
 import { AppConfig, TelegramStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
@@ -11,7 +12,7 @@ export interface TelegramBotOptions {
   onProjectChange?: (newPath: string) => Promise<{ success: boolean; activeProject?: string; error?: string }>;
 }
 
-export class TelegramBotManager {
+export class TelegramBotManager extends EventEmitter {
   private config: AppConfig;
   private agentRunner: AgentRunner;
   private gitManager: GitManager;
@@ -23,6 +24,7 @@ export class TelegramBotManager {
   public errorMessage: string | null = null;
 
   constructor(options: TelegramBotOptions) {
+    super();
     this.config = options.config;
     this.agentRunner = options.agentRunner;
     this.gitManager = options.gitManager;
@@ -312,17 +314,20 @@ export class TelegramBotManager {
         console.error('Telegram bot launch error:', err);
         this.status = 'error';
         this.errorMessage = err.message;
+        this.emit('status_change', this.getStatus());
       });
 
       this.botInfo = await this.bot.telegram.getMe();
       this.status = 'running';
       this.errorMessage = null;
+      this.emit('status_change', this.getStatus());
 
       return { success: true, botInfo: this.botInfo };
     } catch (err: any) {
       console.error('Error starting Telegram bot:', err);
       this.status = 'error';
       this.errorMessage = err.message;
+      this.emit('status_change', this.getStatus());
       return { success: false, error: err.message };
     }
   }
@@ -338,6 +343,7 @@ export class TelegramBotManager {
     }
     this.status = 'stopped';
     this.botInfo = null;
+    this.emit('status_change', this.getStatus());
     return { success: true };
   }
 

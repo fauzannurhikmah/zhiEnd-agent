@@ -79,7 +79,7 @@ export class WhatsAppBotManager extends EventEmitter {
       this.isStarting = true;
       this.status = 'connecting';
       this.errorMessage = null;
-      this.emit('status_change', { status: this.status });
+      this.emit('status_change', this.getStatus());
 
       // Clean up previous socket if any
       if (this.sock) {
@@ -129,8 +129,8 @@ export class WhatsAppBotManager extends EventEmitter {
           try {
             this.qrCodeDataUrl = await QRCode.toDataURL(qr, { margin: 2, scale: 6 });
             this.status = 'qr_ready';
-            this.emit('qr', { qrDataUrl: this.qrCodeDataUrl });
-            this.emit('status_change', { status: this.status, qrDataUrl: this.qrCodeDataUrl });
+            this.emit('qr', { qrDataUrl: this.qrCodeDataUrl, qrCodeDataUrl: this.qrCodeDataUrl });
+            this.emit('status_change', this.getStatus());
           } catch (e) {
             console.error('Failed to generate WhatsApp QR code:', e);
           }
@@ -143,7 +143,7 @@ export class WhatsAppBotManager extends EventEmitter {
           this.qrCodeDataUrl = null;
           if (shouldReconnect) {
             this.status = 'connecting';
-            this.emit('status_change', { status: this.status });
+            this.emit('status_change', this.getStatus());
             if (!this.reconnectTimeout) {
               this.reconnectTimeout = setTimeout(() => {
                 this.reconnectTimeout = null;
@@ -153,14 +153,14 @@ export class WhatsAppBotManager extends EventEmitter {
           } else {
             this.status = 'stopped';
             this.user = null;
-            this.emit('status_change', { status: this.status });
+            this.emit('status_change', this.getStatus());
           }
         } else if (connection === 'open') {
           this.status = 'connected';
           this.qrCodeDataUrl = null;
           this.user = this.sock?.user;
           this.errorMessage = null;
-          this.emit('status_change', { status: this.status, user: this.user });
+          this.emit('status_change', this.getStatus());
         }
       });
 

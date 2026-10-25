@@ -81,3 +81,13 @@ To avoid dull, monochrome looks while preventing random or inconsistent colors, 
    - Folders and workspaces must be organized hierarchically with parents (`D:\Works\Parent`) and child subfolders (`├── child-a`, `└── child-b`), both individually selectable.
 5. **No Native OS Select Form Elements**:
    - Never use ugly native `<select>` / `<option>` elements. Use custom floating popover dropdowns with glassmorphism (`backdrop-blur-2xl`), badge pills, active indicators, and click-outside dismissal.
+6. **Strict Prohibition of Native Browser Dialogs (`alert`, `confirm`, `prompt`)**:
+   - **NEVER** use browser-native `alert()`, `confirm()`, or `prompt()` popups. They break the immersive Cinematic Minimalist aesthetic and degrade user experience (e.g. intrusive "localhost:5173 says" boxes).
+   - **Always Use Custom UI Modals via Universal Dialog Service (`src/services/dialog.svelte.ts`)**:
+     - **Action Confirmations**: Use `dialog.showConfirm({ title, message, confirmText, cancelText, variant: 'danger' | 'warning' | 'primary', action })` paired with `ConfirmModal.svelte`.
+     - **Success Information**: Use `dialog.showSuccess(message, title?)` with glowing Emerald accents (`CheckCircle2`, gradient emerald CTA).
+     - **Error / Failure Information**: Use `dialog.showError(message, title?)` with glowing Rose accents (`AlertCircle`, gradient rose CTA).
+     - **Warning Information**: Use `dialog.showWarning(message, title?)` with glowing Amber accents (`AlertTriangle`, gradient amber CTA).
+     - **General Notice / Info**: Use `dialog.showInfo(message, title?)` with glowing Indigo/Sky accents (`Info`, gradient indigo CTA).
+   - Every modal dialog must provide backdrop glassmorphism (`bg-black/80 backdrop-blur-md`), ambient obsidian card surface (`bg-zinc-900/95 border border-white/[0.08] shadow-2xl`), smooth zoom-in transitions, and keyboard accessibility (`Enter` to confirm/close, `Escape` to dismiss).
+

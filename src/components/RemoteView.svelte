@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type { WhatsAppStatus, TelegramStatus, TunnelStatus, AppConfig, PersonaItem } from '../types';
+  import { api } from '../services/api';
   import AvatarView from './AvatarView.svelte';
   import { 
     MessageSquare, 
@@ -93,6 +94,27 @@
   let tgActivePersonaId = $derived(config?.telegram?.personaId || 'persona-default');
   let tgPersona = $derived(personas.find(p => p.id === tgActivePersonaId) || personas.find(p => p.is_default) || personas[0]);
 
+  let currentQr = $derived(whatsappStatus?.qrCodeDataUrl || (whatsappStatus as any)?.qrDataUrl || null);
+
+  onMount(async () => {
+    try {
+      const st = await api.getWhatsAppStatus();
+      if (st) {
+        whatsappStatus = { ...st, qrCodeDataUrl: st.qrCodeDataUrl || (st as any).qrDataUrl };
+      }
+    } catch {}
+  });
+
+  $effect(() => {
+    if (whatsappStatus?.status === 'qr_ready' && !currentQr) {
+      api.getWhatsAppStatus().then(st => {
+        if (st && (st.qrCodeDataUrl || (st as any).qrDataUrl)) {
+          whatsappStatus = { ...st, qrCodeDataUrl: st.qrCodeDataUrl || (st as any).qrDataUrl };
+        }
+      }).catch(() => {});
+    }
+  });
+
   function copyText(val: string, type: 'local' | 'public') {
     navigator.clipboard.writeText(val);
     if (type === 'local') {
@@ -108,8 +130,25 @@
     isStartingWa = true;
     try {
       await onStartWhatsApp();
+      const st = await api.getWhatsAppStatus();
+      if (st) {
+        whatsappStatus = { ...st, qrCodeDataUrl: st.qrCodeDataUrl || (st as any).qrDataUrl };
+      }
     } finally {
-      setTimeout(() => { isStartingWa = false; }, 1500);
+      setTimeout(() => { isStartingWa = false; }, 1200);
+    }
+  }
+
+  async function handleRefreshWa() {
+    isStartingWa = true;
+    try {
+      await onStartWhatsApp();
+      const st = await api.getWhatsAppStatus();
+      if (st) {
+        whatsappStatus = { ...st, qrCodeDataUrl: st.qrCodeDataUrl || (st as any).qrDataUrl };
+      }
+    } finally {
+      setTimeout(() => { isStartingWa = false; }, 1200);
     }
   }
 
@@ -265,7 +304,7 @@
                 <QrCode class="w-3.5 h-3.5" /> Pindai Kode QR WhatsApp:
               </span>
               <button
-                onclick={handleStartWa}
+                onclick={handleRefreshWa}
                 disabled={isStartingWa}
                 class="flex items-center gap-1 text-[10px] text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 px-2 py-0.5 rounded cursor-pointer transition"
                 title="Muat ulang QR code"
@@ -274,14 +313,21 @@
               </button>
             </div>
 
-            {#if whatsappStatus.qrCodeDataUrl}
+            {#if currentQr}
               <div class="p-3 bg-white rounded-2xl shadow-xl border-2 border-amber-400/50">
-                <img src={whatsappStatus.qrCodeDataUrl} alt="WhatsApp QR Code" class="w-44 h-44 object-contain" />
+                <img src={currentQr} alt="WhatsApp QR Code" class="w-44 h-44 object-contain" />
               </div>
             {:else}
               <div class="w-44 h-44 bg-zinc-950 rounded-2xl flex flex-col items-center justify-center gap-2 text-zinc-400 border border-white/[0.08]">
                 <Loader2 class="w-6 h-6 animate-spin text-amber-400" />
                 <span class="text-[11px]">Memuat kode QR...</span>
+                <button
+                  type="button"
+                  onclick={handleRefreshWa}
+                  class="mt-1 text-[10px] text-amber-400 hover:text-amber-300 underline cursor-pointer"
+                >
+                  Muat Ulang
+                </button>
               </div>
             {/if}
 

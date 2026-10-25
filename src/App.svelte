@@ -14,7 +14,9 @@
   import PushModal from './components/PushModal.svelte';
   import PinModal from './components/PinModal.svelte';
   import ConfirmModal from './components/ConfirmModal.svelte';
+  import NoticeModal from './components/NoticeModal.svelte';
   import PersonaModal from './components/PersonaModal.svelte';
+  import { dialog } from './services/dialog.svelte';
 
   import { UploadCloud, GitBranch, Play, Square, ExternalLink, MessageSquare, Send } from 'lucide-svelte';
 
@@ -209,7 +211,7 @@
       const p = personas.find(item => item.id === personaId);
       addLog(`[Remote ${platform.toUpperCase()}] Persona diubah ke ${p?.avatar || '⚡'} ${p?.name || personaId}`);
     } catch (e: any) {
-      alert('Gagal mengubah persona bot: ' + (e.message || 'Error'));
+      dialog.showError('Gagal mengubah persona bot: ' + (e.message || 'Error'));
     }
   }
 
@@ -490,15 +492,23 @@
     });
 
     socket.on('whatsapp_qr', (data) => {
+      const url = data.qrCodeDataUrl || data.qrDataUrl;
       whatsappStatus = {
         ...(whatsappStatus || { status: 'qr_ready', user: null, error: null }),
         status: 'qr_ready',
-        qrCodeDataUrl: data.qrDataUrl
+        qrCodeDataUrl: url
       };
     });
 
     socket.on('whatsapp_status', (data) => {
-      whatsappStatus = { ...data };
+      whatsappStatus = {
+        ...data,
+        qrCodeDataUrl: data.qrCodeDataUrl || data.qrDataUrl || (data.status === 'qr_ready' ? whatsappStatus?.qrCodeDataUrl : null) || null
+      };
+    });
+
+    socket.on('telegram_status', (data) => {
+      telegramStatus = data;
     });
 
     socket.on('tunnel_status', (data) => {
@@ -749,16 +759,21 @@
             if (res.success) {
               gitStatus = await api.getGitStatus();
               commits = (await api.getRecentCommits()).commits || [];
+              dialog.showSuccess('Perubahan berhasil di-commit.');
               return true;
             } else {
-              alert('Commit gagal: ' + (res.error || 'Unknown error'));
+              dialog.showError('Commit gagal: ' + (res.error || 'Unknown error'));
               return false;
             }
           }}
           onPush={handleExecutePush}
           onPull={async () => {
             const res = await api.pull();
-            alert(res.success ? 'Git Pull Sukses:\n' + (res.stdout || 'Up to date') : 'Git Pull Gagal:\n' + (res.error || res.stderr));
+            if (res.success) {
+              dialog.showSuccess('Git Pull Sukses:\n' + (res.stdout || 'Up to date'));
+            } else {
+              dialog.showError('Git Pull Gagal:\n' + (res.error || res.stderr));
+            }
             gitStatus = await api.getGitStatus();
           }}
           onGenerateAiCommit={async () => {
@@ -796,11 +811,11 @@
           }}
           onSaveWhatsAppNumbers={async (numbers) => {
             await api.updateConfig({ whatsapp: { allowedNumbers: numbers } } as any);
-            alert('Nomor WhatsApp yang diizinkan berhasil disimpan.');
+            dialog.showSuccess('Nomor WhatsApp yang diizinkan berhasil disimpan.');
           }}
           onStartTelegram={async (token) => {
             const res = await api.startTelegram(token);
-            if (!res.success) alert('Gagal: ' + (res.error || 'Token tidak valid'));
+            if (!res.success) dialog.showError('Gagal menghubungkan Telegram: ' + (res.error || 'Token tidak valid'));
             telegramStatus = await api.getTelegramStatus();
           }}
           onStopTelegram={async () => {
@@ -809,11 +824,11 @@
           }}
           onSaveTelegramToken={async (token, allowedUsers) => {
             await api.updateConfig({ telegram: { token, allowedUsers } } as any);
-            alert('Pengaturan Telegram tersimpan.');
+            dialog.showSuccess('Pengaturan Telegram berhasil disimpan.');
           }}
           onStartTunnel={async (subdomain) => {
             const res = await api.startTunnel(subdomain);
-            if (!res.success) alert('Gagal memulai tunnel: ' + res.error);
+            if (!res.success) dialog.showError('Gagal memulai tunnel: ' + res.error);
             tunnelStatus = await api.getNetworkInfo();
           }}
           onStopTunnel={async () => {
@@ -823,7 +838,7 @@
           onSaveSecurityPin={async (pin) => {
             await api.updateConfig({ securityPin: pin });
             localStorage.setItem(PIN_STORAGE_KEY, pin);
-            alert('Security PIN disimpan.');
+            dialog.showSuccess('Security PIN berhasil disimpan.');
           }}
         />
       {:else if currentTab === 'files'}
@@ -865,7 +880,7 @@
         await refreshAll();
         return true;
       } else {
-        alert('Gagal membuka project: ' + (res.error || 'Path tidak valid'));
+        dialog.showError('Gagal membuka project: ' + (res.error || 'Path tidak valid'));
         return false;
       }
     }}
@@ -905,4 +920,6 @@
     onConfirm={handleConfirmDialog}
     onCancel={() => confirmDialog.isOpen = false}
   />
+
+  <NoticeModal />
 </div>
