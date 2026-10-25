@@ -1,8 +1,5 @@
-import fs from 'fs';
-import path from 'path';
 import { AppConfig } from './types';
-
-export const CONFIG_PATH = path.join(__dirname, '..', 'data', 'config.json');
+import { loadConfigFromDb, saveConfigToDb } from './db/database';
 
 export const DEFAULT_CONFIG: AppConfig = {
   port: 3888,
@@ -39,31 +36,19 @@ export const DEFAULT_CONFIG: AppConfig = {
   }
 };
 
-function ensureDir(dirPath: string): void {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-}
-
 export function loadConfig(): AppConfig {
   try {
-    ensureDir(path.dirname(CONFIG_PATH));
-    if (fs.existsSync(CONFIG_PATH)) {
-      const data = fs.readFileSync(CONFIG_PATH, 'utf-8');
-      return { ...DEFAULT_CONFIG, ...JSON.parse(data) };
-    }
+    return loadConfigFromDb();
   } catch (err) {
-    console.error('Error loading config, using default:', err);
+    console.error('Error loading config from SQLite db, fallback:', err);
+    return DEFAULT_CONFIG;
   }
-  saveConfig(DEFAULT_CONFIG);
-  return DEFAULT_CONFIG;
 }
 
-export function saveConfig(newConfig: AppConfig): void {
+export function saveConfig(newConfig: Partial<AppConfig>): void {
   try {
-    ensureDir(path.dirname(CONFIG_PATH));
-    fs.writeFileSync(CONFIG_PATH, JSON.stringify(newConfig, null, 2), 'utf-8');
+    saveConfigToDb(newConfig);
   } catch (err) {
-    console.error('Error saving config:', err);
+    console.error('Error saving config to SQLite db:', err);
   }
 }

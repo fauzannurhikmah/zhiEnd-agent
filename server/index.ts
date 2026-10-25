@@ -12,16 +12,41 @@ import { gitManager } from './gitManager';
 import { TunnelManager } from './tunnelManager';
 import { TelegramBotManager } from './bots/telegramBot';
 import { WhatsAppBotManager } from './bots/whatsappBot';
-import { AppConfig, FileItem } from './types';
+import { AppConfig, FileItem, AgentTask } from './types';
+import {
+  getWorkspaces,
+  setActiveWorkspace,
+  removeWorkspace,
+  getCustomRootWorkspace,
+  setCustomRootWorkspace,
+  getWorkspaceContext,
+  saveWorkspaceContext,
+  autoIndexWorkspaceContext,
+  getPersonas,
+  createPersona,
+  updatePersona,
+  deletePersona,
+  getChatSessions,
+  getChatSessionById,
+  createChatSession,
+  deleteChatSession,
+  getSessionMessages,
+  saveMessageToDb,
+  clearSessionMessages,
+  getOrCreateDefaultSession
+} from './db/database';
 
 const app = new Hono();
 
-// Load Config
+// Load Config from SQLite
 let config: AppConfig = loadConfig();
 
 // Initialize Services
 const agentRunner = new AgentRunner(config);
 const tunnelManager = new TunnelManager(config.port || 3888);
+
+// Auto-index active project context on start
+autoIndexWorkspaceContext(config.activeProject);
 
 const onProjectChange = async (newPath: string) => {
   if (!fs.existsSync(newPath)) {
@@ -32,16 +57,13 @@ const onProjectChange = async (newPath: string) => {
     return { success: false, error: 'Path is not a directory' };
   }
 
-  config.activeProject = path.resolve(newPath);
-  if (!config.recentProjects.includes(config.activeProject)) {
-    config.recentProjects.unshift(config.activeProject);
-    config.recentProjects = config.recentProjects.slice(0, 10);
-  }
-  saveConfig(config);
+  setActiveWorkspace(newPath);
+  config = loadConfig();
   agentRunner.updateConfig(config);
   telegramBot.updateConfig(config);
   whatsappBot.updateConfig(config);
   io?.emit('project_changed', { activeProject: config.activeProject });
+  autoIndexWorkspaceContext(config.activeProject);
   return { success: true, activeProject: config.activeProject };
 };
 
@@ -277,8 +299,122 @@ app.post('/api/projects/select', async (c) => {
 });
 
 app.post('/api/projects/reset', async (c) => {
-  const result = await onProjectChange('D:\\Works');
+  const root = getCustomRootWorkspace();
+  const result = await onProjectChange(root);
   return c.json(result);
+});
+
+// ==========================================
+// DATABASE: Workspaces, Contexts & Root
+// ==========================================
+app.get('/api/workspaces', (c) => {
+  const list = getWorkspaces();
+  const root = getCustomRootWorkspace();
+  return c.json({
+    activeProject: config.activeProject,
+    rootWorkspace: root,
+    workspaces: list
+  });
+});
+
+app.post('/api/workspaces/set-active', async (c) => {
+  const { path: targetPath } = await c.req.json<{ path: string }>().catch(() => ({} as any));
+  if (!targetPath) return c.json({ error: 'Path is required' }, 400);
+  const result = await onProjectChange(targetPath);
+  return c.json(result);
+});
+
+app.post('/api/workspaces/remove', async (c) => {
+  const { path: targetPath } = await c.req.json<{ path: string }>().catch(() => ({} as any));
+  if (!targetPath) return c.json({ error: 'Path is required' }, 400);
+  const result = removeWorkspace(targetPath);
+  return c.json(result);
+});
+
+app.get('/api/workspaces/root', (c) => {
+  return c.json({ root: getCustomRootWorkspace() });
+});
+
+app.post('/api/workspaces/root', async (c) => {
+  const { root } = await c.req.json<{ root: string }>().catch(() => ({} as any));
+  if (!root || !root.trim()) return c.json({ error: 'Root path cannot be empty' }, 400);
+  const result = setCustomRootWorkspace(root);
+  return c.json(result);
+});
+
+app.get('/api/workspaces/context', (c) => {
+  const target = c.req.query('path') || config.activeProject;
+  const context = getWorkspaceContext(target);
+  return c.json({ context });
+});
+
+app.post('/api/workspaces/context', async (c) => {
+  const { workspaceId, context } = await c.req.json<{ workspaceId: string; context: any }>().catch(() => ({} as any));
+  if (!workspaceId) return c.json({ error: 'workspaceId is required' }, 400);
+  saveWorkspaceContext(workspaceId, context);
+  return c.json({ success: true });
+});
+
+// ==========================================
+// DATABASE: Personas AI
+// ==========================================
+app.get('/api/personas', (c) => {
+  return c.json({ personas: getPersonas() });
+});
+
+app.post('/api/personas', async (c) => {
+  const body = await c.req.json<{ name: string; avatar?: string; system_prompt: string; preferred_model?: string }>().catch(() => ({} as any));
+  if (!body.name || !body.system_prompt) return c.json({ error: 'Name and system_prompt required' }, 400);
+  const persona = createPersona(body);
+  return c.json({ persona });
+});
+
+app.put('/api/personas/:id', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json().catch(() => ({} as any));
+  const success = updatePersona(id, body);
+  return c.json({ success });
+});
+
+app.delete('/api/personas/:id', (c) => {
+  const id = c.req.param('id');
+  const success = deletePersona(id);
+  return c.json({ success });
+});
+
+// ==========================================
+// DATABASE: Chat Sessions & Messages (History)
+// ==========================================
+app.get('/api/chat/sessions', (c) => {
+  const ws = c.req.query('workspace');
+  const isGlobal = c.req.query('isGlobal') === '1';
+  const sessions = getChatSessions(isGlobal ? null : ws);
+  return c.json({ sessions });
+});
+
+app.post('/api/chat/sessions', async (c) => {
+  const body = await c.req.json<{ title: string; workspace_id?: string | null; persona_id?: string | null }>().catch(() => ({} as any));
+  if (!body.title) return c.json({ error: 'Title required' }, 400);
+  const session = createChatSession(body);
+  return c.json({ session });
+});
+
+app.delete('/api/chat/sessions/:id', (c) => {
+  const id = c.req.param('id');
+  const success = deleteChatSession(id);
+  return c.json({ success });
+});
+
+app.get('/api/chat/messages/:sessionId', (c) => {
+  const sessionId = c.req.param('sessionId');
+  const messages = getSessionMessages(sessionId);
+  return c.json({ messages });
+});
+
+app.post('/api/chat/messages/clear/:sessionId', (c) => {
+  const sessionId = c.req.param('sessionId');
+  const success = clearSessionMessages(sessionId);
+  return c.json({ success });
 });
 
 app.get('/api/projects/files', (c) => {
@@ -410,6 +546,10 @@ app.post('/api/agent/chat', async (c) => {
   }
 
   const workingDir = config.activeProject || 'D:\\Works';
+  const targetSession = body.sessionId 
+    ? (getChatSessionById(body.sessionId) || getOrCreateDefaultSession(workingDir)) 
+    : getOrCreateDefaultSession(workingDir);
+  const targetSessionId = targetSession.id;
 
   // Run in background
   agentRunner.run({
@@ -417,7 +557,8 @@ app.post('/api/agent/chat', async (c) => {
     cwd: workingDir,
     model: body.model || config.antigravity?.defaultModel,
     conversationId: body.conversationId,
-    continueLast: body.continueLast
+    continueLast: body.continueLast,
+    sessionId: targetSessionId
   }).catch(err => {
     console.error('Agent execution error:', err);
   });
@@ -425,7 +566,8 @@ app.post('/api/agent/chat', async (c) => {
   return c.json({
     success: true,
     message: 'Task started',
-    project: workingDir
+    project: workingDir,
+    sessionId: targetSessionId
   });
 });
 
@@ -704,7 +846,32 @@ try {
   agentRunner.on('agent_result', (data) => io?.emit('agent_result', data));
   agentRunner.on('agent_raw', (data) => io?.emit('agent_raw', data));
   agentRunner.on('agent_stderr', (data) => io?.emit('agent_stderr', data));
-  agentRunner.on('task_end', (data) => io?.emit('agent_task_end', data));
+  agentRunner.on('task_end', (data: AgentTask) => {
+    io?.emit('agent_task_end', data);
+    try {
+      const targetSessionId = data.sessionId || (getOrCreateDefaultSession(data.project)).id;
+      const taskId = data.id || (data as any).taskId || String(Date.now());
+      if (data.prompt) {
+        saveMessageToDb({
+          id: 'usr-' + taskId,
+          session_id: targetSessionId,
+          sender: 'user',
+          text: data.prompt
+        });
+      }
+      saveMessageToDb({
+        id: 'agent-' + taskId,
+        session_id: targetSessionId,
+        sender: 'agent',
+        text: data.response,
+        thought: data.thought,
+        steps: data.steps,
+        model_used: data.model
+      });
+    } catch (e) {
+      console.error('Failed to auto-save chat message to SQLite:', e);
+    }
+  });
   agentRunner.on('task_cancelled', (data) => io?.emit('agent_task_cancelled', data));
   agentRunner.on('task_error', (data) => io?.emit('agent_task_error', data));
 

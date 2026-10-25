@@ -179,13 +179,29 @@ export const api = {
   },
 
   // Agent
-  async sendChat(prompt: string, model?: string, conversationId?: string): Promise<{ success: boolean; error?: string }> {
-    const res = await fetch('/api/agent/chat', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ prompt, model, conversationId })
-    });
-    return res.json();
+  async sendChat(prompt: string, model?: string, conversationId?: string, sessionId?: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const res = await fetch('/api/agent/chat', {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ prompt, model, conversationId, sessionId })
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        let errMsg = `Server error (${res.status})`;
+        try {
+          const parsed = JSON.parse(text);
+          if (parsed.error) errMsg = parsed.error;
+        } catch {}
+        throw new Error(errMsg);
+      }
+      return await res.json();
+    } catch (e: any) {
+      if (e.message?.includes('Unexpected end of JSON') || e.message?.includes('Failed to fetch')) {
+        throw new Error('Gagal terhubung ke backend server (port 3888). Pastikan server backend sedang aktif.');
+      }
+      throw e;
+    }
   },
 
   async cancelTask(): Promise<{ success: boolean }> {
@@ -258,6 +274,130 @@ export const api = {
 
   async logoutWhatsApp(): Promise<{ success: boolean }> {
     const res = await fetch('/api/bots/whatsapp/logout', {
+      method: 'POST',
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
+  // Database: Workspaces & Custom Root
+  async getDbWorkspaces(): Promise<{ activeProject: string; rootWorkspace: string; workspaces: any[] }> {
+    const res = await fetch('/api/workspaces', { headers: getHeaders() });
+    return res.json();
+  },
+
+  async setDbActiveWorkspace(path: string): Promise<any> {
+    const res = await fetch('/api/workspaces/set-active', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ path })
+    });
+    return res.json();
+  },
+
+  async removeDbWorkspace(path: string): Promise<any> {
+    const res = await fetch('/api/workspaces/remove', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ path })
+    });
+    return res.json();
+  },
+
+  async getRootWorkspace(): Promise<{ root: string }> {
+    const res = await fetch('/api/workspaces/root', { headers: getHeaders() });
+    return res.json();
+  },
+
+  async setRootWorkspace(root: string): Promise<{ success: boolean; root: string }> {
+    const res = await fetch('/api/workspaces/root', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ root })
+    });
+    return res.json();
+  },
+
+  async getWorkspaceContext(path?: string): Promise<{ context: any }> {
+    const q = path ? `?path=${encodeURIComponent(path)}` : '';
+    const res = await fetch(`/api/workspaces/context${q}`, { headers: getHeaders() });
+    return res.json();
+  },
+
+  async saveWorkspaceContext(workspaceId: string, context: any): Promise<any> {
+    const res = await fetch('/api/workspaces/context', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ workspaceId, context })
+    });
+    return res.json();
+  },
+
+  // Database: Personas AI
+  async getPersonas(): Promise<{ personas: any[] }> {
+    const res = await fetch('/api/personas', { headers: getHeaders() });
+    return res.json();
+  },
+
+  async createPersona(data: { name: string; avatar?: string; system_prompt: string; preferred_model?: string }): Promise<any> {
+    const res = await fetch('/api/personas', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async updatePersona(id: string, data: any): Promise<any> {
+    const res = await fetch(`/api/personas/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async deletePersona(id: string): Promise<any> {
+    const res = await fetch(`/api/personas/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
+  // Database: Chat Sessions & Messages (History)
+  async getChatSessions(workspace?: string, isGlobal: boolean = false): Promise<{ sessions: any[] }> {
+    const q = new URLSearchParams();
+    if (isGlobal) q.append('isGlobal', '1');
+    else if (workspace) q.append('workspace', workspace);
+    const res = await fetch(`/api/chat/sessions?${q.toString()}`, { headers: getHeaders() });
+    return res.json();
+  },
+
+  async createChatSession(data: { title: string; workspace_id?: string | null; persona_id?: string | null }): Promise<any> {
+    const res = await fetch('/api/chat/sessions', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
+  },
+
+  async deleteChatSession(id: string): Promise<any> {
+    const res = await fetch(`/api/chat/sessions/${id}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
+  async getChatMessages(sessionId: string): Promise<{ messages: any[] }> {
+    const res = await fetch(`/api/chat/messages/${sessionId}`, { headers: getHeaders() });
+    return res.json();
+  },
+
+  async clearChatMessages(sessionId: string): Promise<{ success: boolean }> {
+    const res = await fetch(`/api/chat/messages/clear/${sessionId}`, {
       method: 'POST',
       headers: getHeaders()
     });

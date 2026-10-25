@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { AppConfig, GitStatus, TelegramStatus, WhatsAppStatus, TunnelStatus } from '../types';
+  import type { AppConfig, GitStatus, TelegramStatus, WhatsAppStatus, TunnelStatus, ChatSessionItem } from '../types';
   import { 
     MessageSquare, 
     GitBranch, 
@@ -12,7 +12,8 @@
     Sparkles,
     Plus,
     Check,
-    X
+    X,
+    Trash2
   } from 'lucide-svelte';
 
   let {
@@ -23,11 +24,18 @@
     whatsappStatus,
     tunnelStatus,
     isAgentBusy,
+    chatSessions = [],
+    activeSessionId = null,
+    historyScope = 'workspace',
     onSelectTab,
     onOpenProjectModal,
     onOpenSettingsModal,
     onModelChange,
-    onResetToRoot
+    onResetToRoot,
+    onSelectSession,
+    onCreateNewSession,
+    onDeleteSession,
+    onToggleScope
   }: {
     currentTab: 'chat' | 'git' | 'remote' | 'files';
     config: AppConfig | null;
@@ -36,11 +44,18 @@
     whatsappStatus: WhatsAppStatus | null;
     tunnelStatus: TunnelStatus | null;
     isAgentBusy: boolean;
+    chatSessions?: ChatSessionItem[];
+    activeSessionId?: string | null;
+    historyScope?: 'workspace' | 'global';
     onSelectTab: (tab: 'chat' | 'git' | 'remote' | 'files') => void;
     onOpenProjectModal: () => void;
     onOpenSettingsModal: () => void;
     onModelChange: (model: string) => void;
     onResetToRoot: () => void;
+    onSelectSession?: (session: ChatSessionItem) => void;
+    onCreateNewSession?: () => void;
+    onDeleteSession?: (id: string) => void;
+    onToggleScope?: (scope: 'workspace' | 'global') => void;
   } = $props();
 
   let activeModel = $state('gemini-3.8-flash-high');
@@ -253,6 +268,99 @@
         </div>
       </button>
     </nav>
+
+    <!-- Riwayat Chat Section -->
+    <div class="flex flex-col gap-1.5 pt-2.5 border-t border-white/[0.06]">
+      <div class="flex items-center justify-between px-1">
+        <div class="flex items-center gap-1.5">
+          <MessageSquare class="w-3 h-3 text-indigo-400" />
+          <span class="text-[11px] font-semibold text-zinc-300">Riwayat Chat</span>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <!-- Scope switcher: Project vs Global -->
+          <div class="flex items-center bg-zinc-900 rounded-lg p-0.5 border border-white/5 text-[9px] font-mono">
+            <button
+              type="button"
+              onclick={() => onToggleScope?.('workspace')}
+              class="px-1.5 py-0.5 rounded transition cursor-pointer {historyScope === 'workspace' ? 'bg-indigo-600 text-white font-bold' : 'text-zinc-500 hover:text-zinc-300'}"
+              title="Chat khusus project ini"
+            >
+              Project
+            </button>
+            <button
+              type="button"
+              onclick={() => onToggleScope?.('global')}
+              class="px-1.5 py-0.5 rounded transition cursor-pointer {historyScope === 'global' ? 'bg-indigo-600 text-white font-bold' : 'text-zinc-500 hover:text-zinc-300'}"
+              title="Chat global"
+            >
+              Global
+            </button>
+          </div>
+
+          <!-- New Chat Button -->
+          <button
+            type="button"
+            onclick={() => onCreateNewSession?.()}
+            class="p-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-white/5 hover:border-indigo-500/30 text-zinc-400 hover:text-indigo-300 transition cursor-pointer"
+            title="Mulai Chat Baru"
+          >
+            <Plus class="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollable list of sessions -->
+      <div class="flex flex-col gap-1 max-h-48 overflow-y-auto pr-0.5 mt-0.5">
+        {#if chatSessions && chatSessions.length > 0}
+          {#each chatSessions as sess (sess.id)}
+            {@const isActive = activeSessionId === sess.id}
+            <div class="group/item flex items-center justify-between px-2 py-1.5 rounded-xl transition cursor-pointer {isActive ? 'bg-indigo-600/20 border border-indigo-500/40 text-white font-medium shadow-sm' : 'hover:bg-zinc-900/60 border border-transparent text-zinc-400 hover:text-zinc-200'}">
+              <button
+                type="button"
+                onclick={() => {
+                  onSelectTab('chat');
+                  onSelectSession?.(sess);
+                }}
+                class="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
+                title={sess.title}
+              >
+                <MessageSquare class="w-3 h-3 {isActive ? 'text-indigo-400' : 'text-zinc-500 group-hover/item:text-zinc-400'} shrink-0" />
+                <span class="text-xs truncate flex-1">{sess.title}</span>
+                {#if sess.message_count && sess.message_count > 0}
+                  <span class="text-[9px] px-1.5 py-0.2 rounded-full font-mono {isActive ? 'bg-indigo-500/30 text-indigo-200' : 'bg-zinc-800 text-zinc-500'} shrink-0">
+                    {sess.message_count}
+                  </span>
+                {/if}
+              </button>
+
+              <button
+                type="button"
+                onclick={(e) => {
+                  e.stopPropagation();
+                  onDeleteSession?.(sess.id);
+                }}
+                class="opacity-0 group-hover/item:opacity-100 p-1 rounded hover:bg-rose-500/20 text-zinc-500 hover:text-rose-400 transition cursor-pointer shrink-0 ml-1"
+                title="Hapus sesi chat"
+              >
+                <Trash2 class="w-2.5 h-2.5" />
+              </button>
+            </div>
+          {/each}
+        {:else}
+          <div class="p-3 text-center rounded-xl bg-zinc-900/30 border border-dashed border-white/5 flex flex-col items-center gap-1.5">
+            <span class="text-[11px] text-zinc-500">Belum ada riwayat chat</span>
+            <button
+              type="button"
+              onclick={() => onCreateNewSession?.()}
+              class="text-[10px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 cursor-pointer"
+            >
+              <Plus class="w-2.5 h-2.5" /> Mulai Chat Baru
+            </button>
+          </div>
+        {/if}
+      </div>
+    </div>
   </div>
 
   <!-- Bottom: Model, Remote indicator, Settings -->

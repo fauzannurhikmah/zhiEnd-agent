@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { io, Socket } from 'socket.io-client';
-  import type { AppConfig, GitStatus, CommitInfo, TunnelStatus, TelegramStatus, WhatsAppStatus, ChatMessage, FileItem } from './types';
+  import type { AppConfig, GitStatus, CommitInfo, TunnelStatus, TelegramStatus, WhatsAppStatus, ChatMessage, FileItem, ChatSessionItem } from './types';
   import { api, PIN_STORAGE_KEY } from './services/api';
 
   import Sidebar from './components/Sidebar.svelte';
@@ -33,9 +33,16 @@
   let devServer = $state<{ isRunning: boolean; activePorts: { port: number; url: string }[] }>({ isRunning: false, activePorts: [] });
   let isStartingDev = $state(false);
 
-  // Chat States
+  // Chat States & Database Sessions
   let messages = $state<ChatMessage[]>([]);
   let isAgentBusy = $state(false);
+  let chatSessions = $state<ChatSessionItem[]>([]);
+  let activeSessionId = $state<string | null>(null);
+  let historyScope = $state<'workspace' | 'global'>('workspace');
+
+  let activeSession = $derived(() => {
+    return chatSessions.find(s => s.id === activeSessionId) || null;
+  });
 
   // Modals
   let isSettingsOpen = $state(false);
@@ -79,9 +86,117 @@
       whatsappStatus = await api.getWhatsAppStatus();
       projectFiles = (await api.getProjectFiles()).files || [];
       await checkDevServer();
+      await loadSessions(false);
     } catch (e) {
       console.error('Error refreshing state:', e);
     }
+  }
+
+  async function loadSessions(selectFirst = false) {
+    try {
+      const isGlobal = historyScope === 'global';
+      const wsParam = isGlobal ? undefined : config?.activeProject;
+      const res = await api.getChatSessions(wsParam, isGlobal);
+      chatSessions = res.sessions || [];
+
+      if (!activeSessionId) {
+        if (chatSessions.length > 0) {
+          await handleSelectSession(chatSessions[0]);
+        } else {
+          await handleCreateNewSession(false);
+        }
+      } else if (selectFirst) {
+        if (chatSessions.length > 0) {
+          await handleSelectSession(chatSessions[0]);
+        } else {
+          await handleCreateNewSession(false);
+        }
+      } else {
+        await loadSessionMessages(activeSessionId);
+      }
+    } catch (e) {
+      console.error('Failed to load chat sessions:', e);
+    }
+  }
+
+  async function handleSelectSession(session: ChatSessionItem) {
+    activeSessionId = session.id;
+    await loadSessionMessages(session.id, true);
+  }
+
+  async function loadSessionMessages(sessionId: string, forceReset = false) {
+    try {
+      const res = await api.getChatMessages(sessionId);
+      if (res.messages && res.messages.length > 0) {
+        messages = res.messages.map((m: any) => ({
+          id: m.id,
+          sender: m.sender,
+          text: m.text,
+          timestamp: new Date(m.created_at).getTime(),
+          tools: [],
+          steps: m.steps || [],
+          thought: m.thought || '',
+          isStreaming: false
+        }));
+      } else if (forceReset) {
+        messages = [];
+      }
+    } catch (e) {
+      console.error('Failed to load session messages:', e);
+    }
+  }
+
+  async function handleCreateNewSession(switchTab = true) {
+    try {
+      const isGlobal = historyScope === 'global';
+      const projName = config?.activeProject ? (config.activeProject.split(/[\\/]/).pop() || 'Project') : 'Diskusi Baru';
+      const title = isGlobal ? 'Diskusi Global' : `Sesi ${projName}`;
+      const res = await api.createChatSession({
+        title,
+        workspace_id: isGlobal ? null : config?.activeProject
+      });
+      if (res.session) {
+        chatSessions = [res.session, ...chatSessions];
+        activeSessionId = res.session.id;
+        messages = [];
+        if (switchTab) currentTab = 'chat';
+      }
+    } catch (e) {
+      console.error('Failed to create new session:', e);
+    }
+  }
+
+  async function handleDeleteSession(id: string) {
+    try {
+      await api.deleteChatSession(id);
+      chatSessions = chatSessions.filter(s => s.id !== id);
+      if (activeSessionId === id) {
+        if (chatSessions.length > 0) {
+          await handleSelectSession(chatSessions[0]);
+        } else {
+          await handleCreateNewSession(false);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to delete chat session:', e);
+    }
+  }
+
+  async function handleClearCurrentSessionMessages() {
+    if (!activeSessionId) return;
+    if (!confirm('Yakin ingin membersihkan semua pesan di sesi ini?')) return;
+    try {
+      await api.clearChatMessages(activeSessionId);
+      messages = [];
+      await loadSessions(false);
+    } catch (e) {
+      console.error('Failed to clear session messages:', e);
+    }
+  }
+
+  async function handleToggleScope(scope: 'workspace' | 'global') {
+    historyScope = scope;
+    await loadSessions(true);
   }
 
   async function checkDevServer() {
@@ -187,12 +302,19 @@
           if (data.toolsExecuted && data.toolsExecuted.length > 0) {
             last.tools = data.toolsExecuted;
           }
+          if (data.steps && data.steps.length > 0) {
+            last.steps = data.steps;
+          }
+          if (data.thought) {
+            last.thought = data.thought;
+          }
           last.isStreaming = false;
           messages = [...messages];
         }
       }
       addLog(`[Task Completed] Status: ${data.status} in ${data.duration}`);
       api.getGitStatus().then(st => gitStatus = st);
+      setTimeout(() => loadSessions(false), 500);
     });
 
     socket.on('agent_task_cancelled', () => {
@@ -231,10 +353,17 @@
       addLog(`[Project Switched] ${data.activeProject}`);
       gitStatus = await api.getGitStatus();
       projectFiles = (await api.getProjectFiles()).files || [];
+      await loadSessions(true);
     });
   }
 
   async function handleSendMessage(text: string) {
+    if (!text.trim() || isAgentBusy) return;
+
+    if (!activeSessionId) {
+      await handleCreateNewSession(false);
+    }
+
     messages = [...messages, {
       id: 'usr_' + Date.now(),
       sender: 'user',
@@ -244,7 +373,7 @@
 
     isAgentBusy = true;
     try {
-      await api.sendChat(text, config?.antigravity?.defaultModel);
+      await api.sendChat(text, config?.antigravity?.defaultModel, undefined, activeSessionId || undefined);
     } catch (e: any) {
       isAgentBusy = false;
       messages = [...messages, {
@@ -317,10 +446,17 @@
     {whatsappStatus}
     {tunnelStatus}
     {isAgentBusy}
+    chatSessions={chatSessions}
+    activeSessionId={activeSessionId}
+    historyScope={historyScope}
     onSelectTab={(tab) => currentTab = tab}
     onOpenProjectModal={() => isProjectModalOpen = true}
     onOpenSettingsModal={() => isSettingsOpen = true}
     onResetToRoot={handleResetToRoot}
+    onSelectSession={handleSelectSession}
+    onCreateNewSession={() => handleCreateNewSession(true)}
+    onDeleteSession={handleDeleteSession}
+    onToggleScope={handleToggleScope}
     onModelChange={async (newModel) => {
       if (config) config.antigravity.defaultModel = newModel;
       await api.updateConfig({ defaultModel: newModel } as any);
@@ -409,11 +545,13 @@
           {messages}
           isBusy={isAgentBusy}
           {config}
+          activeSession={activeSession()}
           onSendMessage={handleSendMessage}
           onCancelTask={async () => {
             await api.cancelTask();
           }}
-          onClearMessages={() => messages = []}
+          onClearMessages={handleClearCurrentSessionMessages}
+          onCreateNewSession={() => handleCreateNewSession(true)}
         />
       {:else if currentTab === 'git'}
         <GitView

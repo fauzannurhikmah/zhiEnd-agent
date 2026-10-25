@@ -4,6 +4,7 @@ import path from 'path';
 import os from 'os';
 import { EventEmitter } from 'events';
 import { AppConfig, AgentTask } from './types';
+import { getWorkspaceContext, getCustomRootWorkspace } from './db/database';
 
 function getLocalIP(): string {
   const interfaces = os.networkInterfaces();
@@ -26,6 +27,7 @@ export interface RunOptions {
   model?: string;
   conversationId?: string;
   continueLast?: boolean;
+  sessionId?: string;
 }
 
 export class AgentRunner extends EventEmitter {
@@ -59,10 +61,25 @@ export class AgentRunner extends EventEmitter {
     const localIp = getLocalIP();
     const port = this.config.port || 3888;
     const publicTunnelUrl = this.config.tunnel?.publicUrl || '';
+    const rootDir = getCustomRootWorkspace();
 
-    const promptWithContext = `[Konteks Workspace: "${workingDir}"]
+    const wsCtx = getWorkspaceContext(workingDir);
+    let cachedContextStr = '';
+    if (wsCtx) {
+      cachedContextStr = `\n[Memory Cache Workspace - Hemat Token & Akselerasi]:
+- Tech Stack: ${wsCtx.tech_stack || 'N/A'}
+- Package Manager: ${wsCtx.package_manager || 'N/A'}
+- Dev Command: ${wsCtx.dev_command || 'N/A'}
+- Dev Port: ${wsCtx.dev_port || 3000}
+${wsCtx.key_files && wsCtx.key_files.length > 0 ? `- Key Files: ${wsCtx.key_files.join(', ')}` : ''}
+${wsCtx.architecture_summary ? `- Arsitektur: ${wsCtx.architecture_summary}` : ''}
+${wsCtx.custom_rules ? `- Aturan Khusus: ${wsCtx.custom_rules}` : ''}
+(Gunakan informasi di atas langsung tanpa perlu membaca ulang file manifest/config)`;
+    }
+
+    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}
 [Panduan Operasional Sistem]:
-1. Root direktori default untuk semua project adalah D:\\Works. Jika diminta membuat project baru atau menyimpan file baru tanpa path absolut, SELALU buat dan simpan langsung di dalam D:\\Works (contoh: D:\\Works\\<nama-project>).
+1. Root direktori default untuk semua project adalah ${rootDir}. Jika diminta membuat project baru atau menyimpan file baru tanpa path absolut, SELALU buat dan simpan langsung di dalam ${rootDir} (contoh: ${rootDir}\\<nama-project>).
 2. PENTING - Menjalankan Project & URL Akses (Local maupun External/LAN):
    - Jika project adalah Pure Web Statis (HTML/CSS/JS tanpa package.json):
      Projek OTOMATIS langsung dapat diakses melalui Gateway zhiEnd Agent tanpa perlu instalasi server tambahan:
@@ -109,14 +126,16 @@ ${options.prompt}`;
       status: 'running',
       response: '',
       conversationId: options.conversationId || null,
-      toolsExecuted: []
+      toolsExecuted: [],
+      sessionId: options.sessionId
     };
 
     this.emit('task_start', {
       taskId,
       prompt: options.prompt,
       project: workingDir,
-      model: selectedModel
+      model: selectedModel,
+      sessionId: options.sessionId
     });
 
     return new Promise<AgentTask>((resolve, reject) => {
@@ -188,12 +207,19 @@ ${options.prompt}`;
           if (this.history.length > 50) this.history.pop();
 
           this.emit('task_end', {
-            taskId,
+            id: finishedTask.id,
+            taskId: finishedTask.id,
+            prompt: finishedTask.prompt,
+            project: finishedTask.project,
+            model: finishedTask.model,
             status: finishedTask.status,
             response: finishedTask.response,
             duration: finishedTask.duration,
             conversationId: finishedTask.conversationId,
-            toolsExecuted: finishedTask.toolsExecuted
+            toolsExecuted: finishedTask.toolsExecuted,
+            steps: finishedTask.steps || [],
+            thought: finishedTask.thought || '',
+            sessionId: finishedTask.sessionId
           });
 
           this.activeTask = null;

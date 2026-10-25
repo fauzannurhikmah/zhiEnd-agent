@@ -117,3 +117,47 @@ export interface ScannedProject {
   lastModified?: number;
 }
 
+export interface WorkspaceItem {
+  id: string;
+  name: string;
+  path: string;
+  is_active: boolean;
+  is_root: boolean;
+  created_at?: string;
+  last_opened_at?: string;
+}
+
+export interface WorkspaceContext {
+  workspace_id: string;
+  tech_stack?: string | null;
+  package_manager?: string | null;
+  dev_command?: string | null;
+  dev_port?: number | null;
+  architecture_summary?: string | null;
+  key_files?: string[];
+  custom_rules?: string | null;
+  last_indexed_at?: string;
+}
+
+export interface PersonaItem {
+  id: string;
+  name: string;
+  avatar: string;
+  system_prompt: string;
+  preferred_model?: string | null;
+  is_default: boolean;
+  created_at?: string;
+}
+
+export interface ChatSessionItem {
+  id: string;
+  workspace_id: string | null;
+  persona_id: string | null;
+  title: string;
+  is_pinned: boolean;
+  created_at: string;
+  updated_at: string;
+  message_count?: number;
+}
+
+

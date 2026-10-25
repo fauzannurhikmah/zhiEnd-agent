@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { ChatMessage, AppConfig } from '../types';
+  import type { ChatMessage, AppConfig, ChatSessionItem } from '../types';
   import { renderMarkdown } from '../services/markdown';
   import { 
     Send, 
@@ -19,32 +19,40 @@
     FileCode,
     Terminal,
     FileEdit,
-    FileText
+    FileText,
+    MessageSquare,
+    Plus
   } from 'lucide-svelte';
 
   let {
     messages,
     isBusy,
     config,
+    activeSession = null,
     onSendMessage,
     onCancelTask,
-    onClearMessages
+    onClearMessages,
+    onCreateNewSession
   }: {
     messages: ChatMessage[];
     isBusy: boolean;
     config: AppConfig | null;
+    activeSession?: ChatSessionItem | null;
     onSendMessage: (text: string) => void;
     onCancelTask: () => void;
     onClearMessages: () => void;
+    onCreateNewSession?: () => void;
   } = $props();
 
   let promptInput = $state('');
   let messagesContainer: HTMLDivElement;
   let copiedMessageId = $state<string | null>(null);
   let expandedProcesses = $state<Record<string, boolean>>({});
+  let prevStreamingStatus = $state<Record<string, boolean>>({});
 
   function toggleProcess(id: string) {
-    expandedProcesses[id] = !isProcessExpanded(id);
+    const current = isProcessExpanded(id);
+    expandedProcesses[id] = !current;
     expandedProcesses = { ...expandedProcesses };
   }
 
@@ -55,6 +63,24 @@
     // Default expanded while streaming, collapsible once finished
     return Boolean(isStreaming);
   }
+
+  // Auto-collapse (susutkan) process accordion when AI finishes responding
+  $effect(() => {
+    for (const msg of messages) {
+      if (msg.sender !== 'user') {
+        const wasStreaming = prevStreamingStatus[msg.id];
+        const isNowStreaming = Boolean(msg.isStreaming);
+
+        if (wasStreaming && !isNowStreaming) {
+          // Execution completed: collapse the process panel so user sees answer
+          expandedProcesses[msg.id] = false;
+          expandedProcesses = { ...expandedProcesses };
+        }
+
+        prevStreamingStatus[msg.id] = isNowStreaming;
+      }
+    }
+  });
 
   async function handleCopy(id: string, text: string) {
     if (!text) return;
@@ -127,6 +153,43 @@
 </script>
 
 <div class="h-full flex flex-col justify-between overflow-hidden relative">
+  <!-- Top Session Bar -->
+  <div class="flex items-center justify-between px-4 py-2 border-b border-white/[0.06] bg-zinc-950/40 backdrop-blur-md z-10 shrink-0 select-none">
+    <div class="flex items-center gap-2 min-w-0">
+      <MessageSquare class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+      <span class="text-xs font-semibold text-zinc-200 truncate max-w-xs">
+        {activeSession?.title || 'Diskusi Aktif'}
+      </span>
+      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-900 border border-white/5 text-zinc-400">
+        {activeSession?.workspace_id ? 'Workspace' : 'Global'}
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button
+        type="button"
+        onclick={onCreateNewSession}
+        class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-300 hover:text-indigo-300 transition cursor-pointer"
+        title="Mulai sesi baru"
+      >
+        <Plus class="w-3 h-3 text-indigo-400" />
+        <span>Chat Baru</span>
+      </button>
+
+      {#if messages.length > 0}
+        <button
+          type="button"
+          onclick={onClearMessages}
+          class="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-rose-500/20 text-zinc-500 hover:text-rose-400 text-[11px] transition cursor-pointer"
+          title="Bersihkan pesan di sesi ini"
+        >
+          <Trash2 class="w-3 h-3" />
+          <span>Bersihkan</span>
+        </button>
+      {/if}
+    </div>
+  </div>
+
   <!-- Content Viewport -->
   <div bind:this={messagesContainer} class="flex-1 overflow-y-auto px-4 py-6">
     {#if messages.length === 0}
@@ -201,12 +264,12 @@
               <!-- Professional Execution & Reasoning Accordion (For Agent Responses) -->
               {#if msg.sender !== 'user' && ((msg.steps && msg.steps.length > 0) || (msg.tools && msg.tools.length > 0) || msg.thought || msg.isStreaming)}
                 {@const isExp = isProcessExpanded(msg.id, msg.isStreaming)}
-                <div class="mb-3 rounded-xl border border-white/[0.08] bg-zinc-950/70 overflow-hidden shadow-sm">
+                <div class="mb-3 rounded-xl border transition-all duration-200 overflow-hidden {isExp ? 'border-indigo-500/25 bg-zinc-950/70 shadow-lg shadow-indigo-950/20' : 'border-white/[0.06] bg-zinc-900/40 hover:border-white/[0.12]'}">
                   <!-- Accordion Header Button -->
                   <button
                     type="button"
                     onclick={() => toggleProcess(msg.id)}
-                    class="w-full flex items-center justify-between px-3 py-2 bg-zinc-900/60 hover:bg-zinc-900 transition cursor-pointer text-left select-none"
+                    class="w-full flex items-center justify-between px-3 {isExp ? 'py-2 bg-zinc-900/70' : 'py-1.5 bg-zinc-900/35'} hover:bg-zinc-900/90 transition-all cursor-pointer text-left select-none"
                   >
                     <div class="flex items-center gap-2 min-w-0">
                       {#if msg.isStreaming}
@@ -216,7 +279,7 @@
                         </span>
                       {:else}
                         <CheckCircle2 class="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                        <span class="text-xs font-semibold text-zinc-300">
+                        <span class="text-xs font-medium text-zinc-300">
                           Proses & Eksekusi Selesai
                         </span>
                       {/if}
@@ -287,6 +350,17 @@
                               </div>
                             </div>
                           {/each}
+
+                          <!-- Active in-progress indicator while streaming -->
+                          {#if msg.isStreaming}
+                            <div class="flex items-center gap-2.5 text-indigo-300/80 text-xs py-1 pl-2">
+                              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping shrink-0"></span>
+                              <div class="flex items-center gap-2 flex-1">
+                                <span class="text-[11px] font-mono text-zinc-400">Menjalankan instruksi berikutnya...</span>
+                                <div class="h-2 w-24 rounded skeleton-shimmer"></div>
+                              </div>
+                            </div>
+                          {/if}
                         </div>
                       {:else if msg.tools && msg.tools.length > 0}
                         <div class="flex flex-wrap gap-1.5">
@@ -295,6 +369,20 @@
                               <Wrench class="w-2.5 h-2.5 text-indigo-400" /> {tool}
                             </span>
                           {/each}
+                        </div>
+                      {:else if msg.isStreaming}
+                        <!-- Skeleton Loader when process just started and no steps/tools/thought yet -->
+                        <div class="flex flex-col gap-2.5 py-1">
+                          <div class="flex items-center gap-2 text-indigo-300 text-[11px] font-mono">
+                            <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
+                            <span>Menganalisis kode & merencanakan tugas...</span>
+                          </div>
+
+                          <div class="space-y-2 pl-3 border-l-2 border-indigo-500/20">
+                            <div class="h-2.5 w-4/5 rounded skeleton-shimmer"></div>
+                            <div class="h-2.5 w-3/5 rounded skeleton-shimmer"></div>
+                            <div class="h-2 w-2/5 rounded skeleton-shimmer"></div>
+                          </div>
                         </div>
                       {/if}
                     </div>
