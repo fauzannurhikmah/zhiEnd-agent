@@ -50,27 +50,36 @@ export class WhatsAppBotManager extends EventEmitter {
     this.config = config;
   }
 
-  private isAuthorized(senderJid: string): boolean {
+  private isAuthorized(senderJid: string, participantJid?: string): boolean {
     const senderClean = senderJid.split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
+    const participantClean = (participantJid || '').split('@')[0].split(':')[0].replace(/[^0-9]/g, '');
     const botPhone = (this.user?.id || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
     const botLid = ((this.user as any)?.lid || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
 
-    // Akun bot itu sendiri (chat ke diri sendiri / Message Yourself) SELALU authorized
+    // 1. Akun bot itu sendiri (chat ke diri sendiri / Message Yourself) SELALU authorized
     if (
       senderJid.endsWith('@lid') || 
-      (botPhone && senderClean === botPhone) || 
-      (botLid && senderClean === botLid)
+      (botPhone && (senderClean === botPhone || participantClean === botPhone)) || 
+      (botLid && (senderClean === botLid || participantClean === botLid))
     ) {
       return true;
     }
 
+    // 2. Cek nomor yang didaftarkan di allowedNumbers
     const allowed = this.config.whatsapp?.allowedNumbers || [];
     if (!allowed || allowed.length === 0) {
-      return true;
+      // Jika allowedNumbers kosong, HANYA chat ke diri sendiri yang diizinkan!
+      // Nomor lain/orang luar TIDAK diizinkan.
+      return false;
     }
+
     return allowed.some(num => {
       const cleanAllowed = String(num).replace(/[^0-9]/g, '');
-      return senderClean.includes(cleanAllowed) || cleanAllowed.includes(senderClean);
+      if (!cleanAllowed) return false;
+      return (
+        (senderClean && (senderClean.includes(cleanAllowed) || cleanAllowed.includes(senderClean))) ||
+        (participantClean && (participantClean.includes(cleanAllowed) || cleanAllowed.includes(participantClean)))
+      );
     });
   }
 
@@ -244,20 +253,26 @@ export class WhatsAppBotManager extends EventEmitter {
             (botPhone && senderClean === botPhone) || 
             (botLid && senderClean === botLid);
 
+          const isGroup = sender.endsWith('@g.us');
+          const participant = msg.key.participant || (msg as any).participant;
           const isCommand = text.startsWith('!') || text.startsWith('/') || ['help', 'menu', 'status'].includes(text.toLowerCase());
 
-          // Jika fromMe === true (pesan dikirim dari akun WA yang sama):
-          // Hanya proses jika:
-          // 1. Dikirim di chat ke diri sendiri (Message Yourself), ATAU
-          // 2. Merupakan perintah bot (diawali ! atau /)
-          // Jika chat ke orang lain tanpa awalan perintah, abaikan agar tidak mengganggu obrolan pribadi
-          if (msg.key.fromMe && !isSelfChat && !isCommand) {
-            continue;
+          // PROTEKSI TOTAL UNTUK INCOMING CHAT:
+          // Jika pesan BUKAN dari ruang obrolan diri sendiri ("Message Yourself"):
+          if (!isSelfChat) {
+            const isWhiteListed = this.isAuthorized(sender, participant);
+            // 1. Jika nomor pengirim/participant TIDAK terdaftar di allowedNumbers:
+            //    DIAM TOTAL! Jangan pernah balas apapun ke nomor/grup tersebut!
+            // 2. Jika pengirim terdaftar di allowedNumbers tapi pesannya BUKAN perintah diawali ! atau /:
+            //    DIAM TOTAL! Jangan ganggu percakapan biasa!
+            if (!isWhiteListed || !isCommand) {
+              continue;
+            }
           }
 
-          const isGroup = sender.endsWith('@g.us');
-          // Jika di dalam grup dan bukan perintah eksplisit, abaikan agar tidak mengganggu obrolan grup
-          if (isGroup && !isCommand) {
+          // Jika fromMe === true (pesan dikirim dari akun WA yang sama ke orang/grup lain):
+          // Jangan proses jika bukan di Message Yourself dan bukan command eksplisit
+          if (msg.key.fromMe && !isSelfChat && !isCommand) {
             continue;
           }
 
@@ -270,16 +285,12 @@ export class WhatsAppBotManager extends EventEmitter {
             timestamp: Date.now()
           });
 
-          if (!this.isAuthorized(sender)) {
-            if (!isGroup) {
-              await this.sendReply(sender, {
-                text: `⚠️ *Akses Ditolak*\nNomor Anda: ${senderClean}\nSilakan daftarkan nomor ini di Web UI zhiEnd Agent > Remote Hub / Settings.`
-              });
-            }
+          // PENTING: Jangan pernah kirim pesan "Akses Ditolak" ke siapapun!
+          if (!this.isAuthorized(sender, participant)) {
             continue;
           }
 
-          await this.handleCommand(sender, text);
+          await this.handleCommand(sender, text, isSelfChat);
         }
       });
 
@@ -295,7 +306,7 @@ export class WhatsAppBotManager extends EventEmitter {
     }
   }
 
-  private async handleCommand(sender: string, text: string): Promise<void> {
+  private async handleCommand(sender: string, text: string, isSelfChat: boolean = false): Promise<void> {
     if (!this.sock) return;
     const activeProj = this.config.activeProject || 'Belum dipilih';
 
@@ -516,6 +527,11 @@ export class WhatsAppBotManager extends EventEmitter {
       } else {
         await this.sendReply(sender, { text: 'ℹ️ Tidak ada tugas agent yang berjalan.' });
       }
+      return;
+    }
+
+    // Safeguard: Jika bukan dari diri sendiri dan bukan command yang diawali ! atau /, abaikan
+    if (!isSelfChat && !text.startsWith('!') && !text.startsWith('/')) {
       return;
     }
 
