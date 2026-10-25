@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { ChatMessage, AppConfig } from '../types';
+  import { renderMarkdown } from '../services/markdown';
   import { 
     Send, 
     StopCircle, 
@@ -169,9 +170,15 @@
                 </div>
               {/if}
 
-              <div class="whitespace-pre-wrap font-sans text-[13px] leading-relaxed">
-                {msg.text}
-              </div>
+              {#if msg.sender === 'user'}
+                <div class="whitespace-pre-wrap font-sans text-[13px] leading-relaxed">
+                  {msg.text}
+                </div>
+              {:else}
+                <div class="prose-chat font-sans text-[13px] leading-relaxed space-y-2">
+                  {@html renderMarkdown(msg.text)}
+                </div>
+              {/if}
 
               {#if msg.isStreaming}
                 <div class="flex items-center gap-2 mt-3 pt-2 border-t border-white/[0.06] text-xs text-indigo-400 font-mono">

@@ -40,8 +40,23 @@ export class AgentRunner extends EventEmitter {
     const cliPath = this.config.antigravity?.cliPath || 'agy.exe';
     const selectedModel = options.model || this.config.antigravity?.defaultModel || 'gemini-3.8-flash-high';
 
+    const promptWithContext = `[Konteks Workspace: "${workingDir}"]
+[Panduan Operasional Sistem]:
+1. Root direktori default untuk semua project adalah D:\\Works. Jika diminta membuat project baru atau menyimpan file baru tanpa path absolut, SELALU buat dan simpan langsung di dalam D:\\Works (contoh: D:\\Works\\<nama-project>).
+2. PENTING - Menjalankan Project / Dev Server (seperti 'pnpm dev', 'npm run dev', 'yarn dev', 'next dev', 'vite', python dsb):
+   Jalankan server secara detached di Windows HANYA DENGAN 1 PERINTAH CEPAT:
+   Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '${workingDir}'; pnpm dev" -WindowStyle Minimized
+   (sesuaikan package manager yang ada: pnpm dev / npm run dev).
+   ATURAN MUTLAK:
+   - JANGAN melakukan looping pengecekan, sleep berulang, atau mencoba command alternatif berkali-kali!
+   - Server seperti Next.js membutuhkan waktu booting/compile di background.
+   - Segera setelah menjalankan perintah Start-Process tersebut, SELESAIKAN tugas dan langsung beri tahu pengguna bahwa server sedang berjalan di background dengan tautan URL: [http://localhost:3000](http://localhost:3000).
+
+Permintaan Pengguna:
+${options.prompt}`;
+
     const args: string[] = [
-      '-p', options.prompt,
+      '-p', promptWithContext,
       '--output-format', 'stream-json',
       '--dangerously-skip-permissions',
       '--model', selectedModel

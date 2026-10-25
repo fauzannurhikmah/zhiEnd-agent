@@ -7,9 +7,9 @@ export const CONFIG_PATH = path.join(__dirname, '..', 'data', 'config.json');
 export const DEFAULT_CONFIG: AppConfig = {
   port: 3888,
   securityPin: '',
-  activeProject: 'd:/Works/zhiEnd-agent',
+  activeProject: 'D:\\Works',
   recentProjects: [
-    'd:/Works/zhiEnd-agent'
+    'D:\\Works'
   ],
   antigravity: {
     cliPath: 'C:\\Users\\zhien\\AppData\\Local\\agy\\bin\\agy.exe',

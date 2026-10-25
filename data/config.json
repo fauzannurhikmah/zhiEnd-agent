@@ -1,8 +1,11 @@
 {
   "port": 3888,
   "securityPin": "",
-  "activeProject": "D:\\Works\\Sehati\\erp-pos",
+  "activeProject": "D:\\Works\\Sehati\\erp-purchasing",
   "recentProjects": [
+    "D:\\Works\\Sehati\\erp-purchasing",
+    "D:\\Works\\sanika",
+    "D:\\Works\\Sehati\\CRM",
     "D:\\Works\\Sehati\\erp-pos",
     "D:\\Works\\project stock market\\stock-intel-ingestion",
     "D:\\Works\\Sehati",

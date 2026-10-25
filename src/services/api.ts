@@ -76,6 +76,28 @@ export const api = {
     return res.json();
   },
 
+  // Dev Server Controls
+  async getDevServerStatus(): Promise<{ project: string; activePorts: { port: number; url: string }[]; isRunning: boolean }> {
+    const res = await fetch('/api/project/dev-server/status', { headers: getHeaders() });
+    return res.json();
+  },
+
+  async startDevServer(): Promise<{ success: boolean; message?: string; command?: string; error?: string }> {
+    const res = await fetch('/api/project/dev-server/start', {
+      method: 'POST',
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
+  async stopDevServer(): Promise<{ success: boolean; message?: string }> {
+    const res = await fetch('/api/project/dev-server/stop', {
+      method: 'POST',
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
   // Git
   async getGitStatus(): Promise<GitStatus> {
     const res = await fetch('/api/git/status', { headers: getHeaders() });

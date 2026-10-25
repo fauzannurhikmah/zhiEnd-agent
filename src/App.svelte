@@ -14,7 +14,7 @@
   import PushModal from './components/PushModal.svelte';
   import PinModal from './components/PinModal.svelte';
 
-  import { UploadCloud, GitBranch } from 'lucide-svelte';
+  import { UploadCloud, GitBranch, Play, Square, ExternalLink } from 'lucide-svelte';
 
   // Navigation tab
   let currentTab = $state<'chat' | 'git' | 'remote' | 'files'>('chat');
@@ -28,6 +28,10 @@
   let whatsappStatus = $state<WhatsAppStatus | null>(null);
   let projectFiles = $state<FileItem[]>([]);
   let systemLogs = $state<string[]>(['[System] zhiEnd Agent ready.']);
+
+  // Dev Server Quick State
+  let devServer = $state<{ isRunning: boolean; activePorts: { port: number; url: string }[] }>({ isRunning: false, activePorts: [] });
+  let isStartingDev = $state(false);
 
   // Chat States
   let messages = $state<ChatMessage[]>([]);
@@ -74,8 +78,31 @@
       telegramStatus = await api.getTelegramStatus();
       whatsappStatus = await api.getWhatsAppStatus();
       projectFiles = (await api.getProjectFiles()).files || [];
+      await checkDevServer();
     } catch (e) {
       console.error('Error refreshing state:', e);
+    }
+  }
+
+  async function checkDevServer() {
+    try {
+      devServer = await api.getDevServerStatus();
+    } catch {}
+  }
+
+  async function handleToggleDevServer() {
+    if (devServer.isRunning) {
+      await api.stopDevServer();
+      addLog('[Dev Server] Dihentikan.');
+      setTimeout(checkDevServer, 1000);
+    } else {
+      isStartingDev = true;
+      const res = await api.startDevServer();
+      addLog(`[Dev Server] ${res.message || 'Memulai dev server...'}`);
+      setTimeout(() => {
+        checkDevServer();
+        isStartingDev = false;
+      }, 3500);
     }
   }
 
@@ -301,6 +328,39 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <!-- Quick Dev Server Widget -->
+        {#if devServer.isRunning}
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <a
+              href={devServer.activePorts[0]?.url || 'http://localhost:3000'}
+              target="_blank"
+              class="text-xs font-mono text-emerald-300 hover:text-emerald-200 flex items-center gap-1 font-semibold"
+              title="Buka Aplikasi di Browser"
+            >
+              <span>Port {devServer.activePorts[0]?.port || 3000}</span>
+              <ExternalLink class="w-3 h-3 text-emerald-400" />
+            </a>
+            <button
+              onclick={handleToggleDevServer}
+              class="p-1 ml-1 rounded hover:bg-rose-500/20 text-rose-400/80 hover:text-rose-300 transition cursor-pointer"
+              title="Hentikan Dev Server"
+            >
+              <Square class="w-3 h-3 fill-rose-400" />
+            </button>
+          </div>
+        {:else}
+          <button
+            onclick={handleToggleDevServer}
+            disabled={isStartingDev}
+            class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 hover:border-emerald-500/40 text-zinc-300 hover:text-emerald-300 text-xs font-medium transition cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
+            title="Jalankan Dev Server Project Aktif"
+          >
+            <Play class="w-3 h-3 text-emerald-400 fill-emerald-400" />
+            <span>{isStartingDev ? 'Memulai...' : 'Jalankan Dev'}</span>
+          </button>
+        {/if}
+
         <button
           onclick={handleExecutePush}
           class="flex items-center gap-1.5 px-3.5 py-1 rounded-lg bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition cursor-pointer active:scale-95"

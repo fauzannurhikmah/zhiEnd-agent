@@ -389,14 +389,14 @@ app.get('/api/agent/status', (c) => {
 });
 
 app.post('/api/agent/chat', async (c) => {
-  const body = await c.req.json<{
-    prompt: string;
-    model?: string;
-    conversationId?: string;
-    continueLast?: boolean;
-  }>();
+  let body: any;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'Payload JSON tidak valid' }, 400);
+  }
 
-  if (!body.prompt || !body.prompt.trim()) {
+  if (!body?.prompt || !body.prompt.trim()) {
     return c.json({ error: 'Prompt is required' }, 400);
   }
 
@@ -404,7 +404,7 @@ app.post('/api/agent/chat', async (c) => {
     return c.json({ error: 'Agent is already running a task.' }, 409);
   }
 
-  const workingDir = config.activeProject;
+  const workingDir = config.activeProject || 'D:\\Works';
 
   // Run in background
   agentRunner.run({
@@ -427,6 +427,69 @@ app.post('/api/agent/chat', async (c) => {
 app.post('/api/agent/cancel', (c) => {
   const cancelled = agentRunner.cancel();
   return c.json({ success: cancelled });
+});
+
+// Dev Server Manager
+app.get('/api/project/dev-server/status', async (c) => {
+  // Check common dev ports: 3000, 3001, 5173, 8080, 8000
+  const ports = [3000, 3001, 5173, 8080, 8000];
+  const activePorts: { port: number; url: string }[] = [];
+
+  for (const port of ports) {
+    try {
+      const net = await import('net');
+      await new Promise<void>((resolve, reject) => {
+        const tester = net.createConnection({ port, host: '127.0.0.1' }, () => {
+          activePorts.push({ port, url: `http://localhost:${port}` });
+          tester.destroy();
+          resolve();
+        });
+        tester.on('error', () => resolve());
+        tester.setTimeout(300, () => {
+          tester.destroy();
+          resolve();
+        });
+      });
+    } catch {}
+  }
+
+  return c.json({
+    project: config.activeProject,
+    activePorts,
+    isRunning: activePorts.length > 0
+  });
+});
+
+app.post('/api/project/dev-server/start', async (c) => {
+  const targetDir = config.activeProject;
+  if (!fs.existsSync(targetDir)) {
+    return c.json({ error: 'Direktori project tidak ditemukan' }, 404);
+  }
+
+  // Detect package manager
+  let cmd = 'npm run dev';
+  if (fs.existsSync(path.join(targetDir, 'pnpm-lock.yaml'))) {
+    cmd = 'pnpm dev';
+  } else if (fs.existsSync(path.join(targetDir, 'yarn.lock'))) {
+    cmd = 'yarn dev';
+  }
+
+  try {
+    const { exec } = await import('child_process');
+    const psCmd = `powershell -Command "Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd ''${targetDir}''; ${cmd}' -WindowStyle Minimized"`;
+    exec(psCmd);
+    return c.json({ success: true, message: `Menjalankan ${cmd} di background...`, command: cmd });
+  } catch (err: any) {
+    return c.json({ error: 'Gagal menjalankan dev server: ' + err.message }, 500);
+  }
+});
+
+app.post('/api/project/dev-server/stop', async (c) => {
+  const { exec } = await import('child_process');
+  // Kill processes on ports 3000, 3001, 5173
+  const psCmd = `powershell -Command "Get-NetTCPConnection -LocalPort 3000, 3001, 5173 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"`;
+  exec(psCmd);
+  return c.json({ success: true, message: 'Dev server dihentikan.' });
 });
 
 // Network & Tunnel
