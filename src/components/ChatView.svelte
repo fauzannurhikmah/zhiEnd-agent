@@ -195,12 +195,13 @@
               <span>{msg.sender === 'user' ? 'Anda' : 'Antigravity'}</span>
             </div>
 
-            <div class="max-w-[88%] text-xs leading-relaxed {msg.sender === 'user' ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-3 rounded-2xl rounded-tr-none shadow-md shadow-indigo-600/20' : 'bg-zinc-900/50 border border-white/[0.07] px-4 py-3.5 rounded-2xl text-zinc-200 w-full'}">
+            <!-- Bubble Content -->
+            <div class="{msg.sender === 'user' ? 'max-w-[85%] bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-none shadow-md shadow-indigo-600/20' : 'w-full max-w-[88%] bg-zinc-900/50 border border-white/[0.07] px-4 py-3 rounded-2xl text-zinc-200'} text-xs leading-relaxed">
               
               <!-- Professional Execution & Reasoning Accordion (For Agent Responses) -->
               {#if msg.sender !== 'user' && ((msg.steps && msg.steps.length > 0) || (msg.tools && msg.tools.length > 0) || msg.thought || msg.isStreaming)}
                 {@const isExp = isProcessExpanded(msg.id, msg.isStreaming)}
-                <div class="mb-3.5 rounded-xl border border-white/[0.08] bg-zinc-950/70 overflow-hidden shadow-sm">
+                <div class="mb-3 rounded-xl border border-white/[0.08] bg-zinc-950/70 overflow-hidden shadow-sm">
                   <!-- Accordion Header Button -->
                   <button
                     type="button"
@@ -307,14 +308,14 @@
                   {msg.text}
                 </div>
               {:else}
-                <div class="prose-chat font-sans text-[13px] leading-relaxed space-y-2">
+                <div class="prose-chat font-sans text-[13px] leading-relaxed">
                   {@html renderMarkdown(msg.text)}
                 </div>
               {/if}
 
               <!-- Live Streaming Activity Indicator -->
               {#if msg.isStreaming}
-                <div class="flex items-center gap-2 mt-3 pt-2 border-t border-white/[0.06] text-xs text-indigo-400 font-mono">
+                <div class="flex items-center gap-2 mt-2.5 pt-2 border-t border-white/[0.06] text-xs text-indigo-400 font-mono">
                   <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
                   {#if msg.steps && msg.steps.length > 0}
                     <span>Eksekusi aktif: <span class="text-zinc-200 font-semibold">{msg.steps[msg.steps.length - 1].title}</span></span>
@@ -326,25 +327,27 @@
                 </div>
               {/if}
 
-              <!-- Bottom Copy Button (Only Appears on Hover) -->
-              <div class="flex items-center justify-end pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            </div>
+
+            <!-- Action Toolbar OUTSIDE & UNDER the bubble - Only Appears on Hover -->
+            {#if msg.text && !msg.isStreaming}
+              <div class="flex items-center gap-1 px-1 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 {msg.sender === 'user' ? 'justify-end' : 'justify-start'}">
                 <button
                   type="button"
                   onclick={() => handleCopy(msg.id, msg.text)}
-                  class="flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-indigo-300 transition cursor-pointer px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/[0.06] hover:border-indigo-500/30 shadow-sm"
-                  title="Salin isi pesan"
+                  class="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-zinc-800/60 transition cursor-pointer"
+                  title="Salin teks"
                 >
                   {#if copiedMessageId === msg.id}
-                    <Check class="w-3.5 h-3.5 text-emerald-400" />
-                    <span class="text-emerald-400 font-medium text-[11px]">Tersalin!</span>
+                    <Check class="w-3 h-3 text-emerald-400" />
+                    <span class="text-emerald-400 text-[10px] font-medium">Tersalin!</span>
                   {:else}
-                    <Copy class="w-3.5 h-3.5" />
-                    <span class="font-medium text-[11px]">Salin</span>
+                    <Copy class="w-3 h-3 text-zinc-400 hover:text-zinc-200" />
+                    <span class="text-[10px]">Salin</span>
                   {/if}
                 </button>
               </div>
-
-            </div>
+            {/if}
           </div>
         {/each}
       </div>
