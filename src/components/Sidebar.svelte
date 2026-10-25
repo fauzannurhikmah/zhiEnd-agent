@@ -9,9 +9,7 @@
     Settings as SettingsIcon, 
     FolderGit, 
     ChevronDown,
-    Sparkles,
     Plus,
-    Check,
     X,
     Trash2
   } from 'lucide-svelte';
@@ -30,7 +28,6 @@
     onSelectTab,
     onOpenProjectModal,
     onOpenSettingsModal,
-    onModelChange,
     onResetToRoot,
     onSelectSession,
     onCreateNewSession,
@@ -50,55 +47,12 @@
     onSelectTab: (tab: 'chat' | 'git' | 'remote' | 'files') => void;
     onOpenProjectModal: () => void;
     onOpenSettingsModal: () => void;
-    onModelChange: (model: string) => void;
     onResetToRoot: () => void;
     onSelectSession?: (session: ChatSessionItem) => void;
     onCreateNewSession?: () => void;
     onDeleteSession?: (id: string) => void;
     onToggleScope?: (scope: 'workspace' | 'global') => void;
   } = $props();
-
-  let activeModel = $state('gemini-3.8-flash-high');
-  let isModelDropdownOpen = $state(false);
-  let dropdownRef = $state<HTMLDivElement | null>(null);
-
-  $effect(() => {
-    if (!isModelDropdownOpen) return;
-
-    function onPointerDown(e: PointerEvent) {
-      if (dropdownRef && !dropdownRef.contains(e.target as Node)) {
-        isModelDropdownOpen = false;
-      }
-    }
-
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        isModelDropdownOpen = false;
-      }
-    }
-
-    window.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('keydown', onKeyDown);
-
-    return () => {
-      window.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('keydown', onKeyDown);
-    };
-  });
-
-  const defaultModels = [
-    { id: 'gemini-3.8-flash-high', name: 'Gemini 3.8 Flash (High Reasoning)' },
-    { id: 'gemini-3.8-flash-medium', name: 'Gemini 3.8 Flash (Medium Reasoning)' },
-    { id: 'gemini-3.8-flash-low', name: 'Gemini 3.8 Flash (Fast / Low Reasoning)' },
-    { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6 (Thinking)' },
-    { id: 'claude-opus-4-6-thinking', name: 'Claude Opus 4.6 (Thinking)' }
-  ];
-
-  $effect(() => {
-    if (config?.antigravity?.defaultModel) {
-      activeModel = config.antigravity.defaultModel;
-    }
-  });
 
   const isRootWorkspace = $derived(() => {
     if (!config?.activeProject) return true;
@@ -114,30 +68,6 @@
     }
     const parts = config.activeProject.replace(/\\/g, '/').split('/').filter(Boolean);
     return parts[parts.length - 1] || config.activeProject;
-  });
-
-  function modelBaseName(name: string): string {
-    return name.replace(/\(.*\)/, '').trim();
-  }
-
-  function modelSubtitle(name: string, id: string): string {
-    const match = name.match(/\((.*)\)/);
-    return match ? match[1] : id;
-  }
-
-  function modelBadge(name: string): string {
-    const sub = modelSubtitle(name, '').toLowerCase();
-    if (sub.includes('high')) return 'High';
-    if (sub.includes('medium')) return 'Medium';
-    if (sub.includes('fast') || sub.includes('low')) return 'Fast';
-    if (sub.includes('thinking')) return 'Thinking';
-    return '';
-  }
-
-  const currentModelName = $derived(() => {
-    const models = config?.antigravity?.availableModels || defaultModels;
-    const found = models.find(m => m.id === activeModel);
-    return found ? found.name : activeModel;
   });
 </script>
 
@@ -363,102 +293,21 @@
     </div>
   </div>
 
-  <!-- Bottom: Model, Remote indicator, Settings -->
-  <div class="p-3 border-t border-white/[0.08] flex flex-col gap-2.5 bg-zinc-950/70">
-    <!-- Custom Floating Model Selector -->
-    <div class="relative" bind:this={dropdownRef}>
-      <button
-        type="button"
-        onclick={() => isModelDropdownOpen = !isModelDropdownOpen}
-        class="w-full flex items-center justify-between px-2.5 py-2 rounded-xl bg-zinc-900/80 hover:bg-zinc-800/80 border border-white/[0.08] hover:border-indigo-500/40 text-xs transition cursor-pointer group shadow-sm"
-        title="Pilih Model AI"
-      >
-        <div class="flex items-center gap-2 min-w-0">
-          <Sparkles class="w-3.5 h-3.5 text-indigo-400 shrink-0 group-hover:scale-110 transition-transform" />
-          <div class="flex items-center gap-1.5 truncate">
-            <span class="font-semibold text-zinc-200 text-xs truncate">
-              {modelBaseName(currentModelName())}
-            </span>
-            {#if modelBadge(currentModelName())}
-              <span class="text-[9px] px-1.5 py-0.2 rounded-md font-mono {activeModel.startsWith('claude') ? 'bg-amber-500/15 text-amber-300 border border-amber-500/25' : 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/25'}">
-                {modelBadge(currentModelName())}
-              </span>
-            {/if}
-          </div>
-        </div>
-        <ChevronDown class="w-3.5 h-3.5 text-zinc-400 shrink-0 transition-transform duration-200 {isModelDropdownOpen ? 'rotate-180 text-indigo-400' : ''}" />
-      </button>
-
-      <!-- Floating Dropdown Popover -->
-      {#if isModelDropdownOpen}
-        <div class="absolute bottom-full mb-2 left-0 w-72 bg-zinc-950/95 backdrop-blur-2xl border border-white/[0.12] rounded-2xl p-2 shadow-2xl shadow-indigo-950/60 z-50 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150">
-          <div class="px-2.5 py-1.5 border-b border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-zinc-400">
-            <span class="font-bold uppercase tracking-wider text-zinc-300">Pilih Model AI</span>
-            <span class="text-indigo-400">Antigravity Core</span>
-          </div>
-
-          <div class="flex flex-col gap-1 max-h-60 overflow-y-auto pt-1 font-sans">
-            {#each (config?.antigravity?.availableModels || defaultModels) as m}
-              {@const isSelected = activeModel === m.id}
-              {@const isClaude = m.id.startsWith('claude')}
-              <button
-                type="button"
-                onclick={() => {
-                  activeModel = m.id;
-                  onModelChange(m.id);
-                  isModelDropdownOpen = false;
-                }}
-                class="w-full flex items-center justify-between p-2 rounded-xl text-left transition cursor-pointer {isSelected ? 'bg-indigo-600/20 border border-indigo-500/40 text-white' : 'hover:bg-zinc-900/80 border border-transparent text-zinc-300'}"
-              >
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <div class="w-6 h-6 rounded-lg {isClaude ? 'bg-amber-500/15 text-amber-400' : 'bg-indigo-500/15 text-indigo-400'} flex items-center justify-center shrink-0">
-                    <Sparkles class="w-3 h-3" />
-                  </div>
-                  <div class="flex flex-col min-w-0">
-                    <div class="flex items-center gap-1.5">
-                      <span class="text-xs font-semibold truncate {isSelected ? 'text-white' : 'text-zinc-200'}">
-                        {modelBaseName(m.name)}
-                      </span>
-                      {#if modelBadge(m.name)}
-                        <span class="text-[9px] px-1.5 py-0.2 rounded font-mono {isClaude ? 'bg-amber-500/20 text-amber-300' : 'bg-indigo-500/20 text-indigo-300'}">
-                          {modelBadge(m.name)}
-                        </span>
-                      {/if}
-                    </div>
-                    <span class="text-[10px] text-zinc-500 font-mono truncate">
-                      {modelSubtitle(m.name, m.id)}
-                    </span>
-                  </div>
-                </div>
-
-                {#if isSelected}
-                  <div class="w-4 h-4 rounded-full bg-indigo-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-indigo-500">
-                    <Check class="w-2.5 h-2.5 stroke-[3]" />
-                  </div>
-                {/if}
-              </button>
-            {/each}
-          </div>
-        </div>
-      {/if}
+  <!-- Bottom: Tunnel status & Settings -->
+  <div class="p-3 border-t border-white/[0.08] flex items-center justify-between bg-zinc-950/70 text-xs">
+    <div class="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
+      <span class="w-2 h-2 rounded-full {tunnelStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'bg-zinc-600'}"></span>
+      <span class="truncate max-w-[120px]">
+        {tunnelStatus?.status === 'connected' ? 'Public Live' : 'Local :3888'}
+      </span>
     </div>
 
-    <!-- Tunnel / Settings footer -->
-    <div class="flex items-center justify-between pt-1 px-1 text-xs">
-      <div class="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
-        <span class="w-2 h-2 rounded-full {tunnelStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'bg-zinc-600'}"></span>
-        <span class="truncate max-w-[120px]">
-          {tunnelStatus?.status === 'connected' ? 'Public Live' : 'Local :3888'}
-        </span>
-      </div>
-
-      <button
-        onclick={onOpenSettingsModal}
-        class="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
-        title="Pengaturan Sistem"
-      >
-        <SettingsIcon class="w-3.5 h-3.5" />
-      </button>
-    </div>
+    <button
+      onclick={onOpenSettingsModal}
+      class="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+      title="Pengaturan Sistem"
+    >
+      <SettingsIcon class="w-3.5 h-3.5" />
+    </button>
   </div>
 </aside>

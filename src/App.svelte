@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { io, Socket } from 'socket.io-client';
-  import type { AppConfig, GitStatus, CommitInfo, TunnelStatus, TelegramStatus, WhatsAppStatus, ChatMessage, FileItem, ChatSessionItem } from './types';
+  import type { AppConfig, GitStatus, CommitInfo, TunnelStatus, TelegramStatus, WhatsAppStatus, ChatMessage, FileItem, ChatSessionItem, PersonaItem } from './types';
   import { api, PIN_STORAGE_KEY } from './services/api';
 
   import Sidebar from './components/Sidebar.svelte';
@@ -13,6 +13,8 @@
   import ProjectModal from './components/ProjectModal.svelte';
   import PushModal from './components/PushModal.svelte';
   import PinModal from './components/PinModal.svelte';
+  import ConfirmModal from './components/ConfirmModal.svelte';
+  import PersonaModal from './components/PersonaModal.svelte';
 
   import { UploadCloud, GitBranch, Play, Square, ExternalLink } from 'lucide-svelte';
 
@@ -40,8 +42,20 @@
   let activeSessionId = $state<string | null>(null);
   let historyScope = $state<'workspace' | 'global'>('workspace');
 
+  // Personas
+  let personas = $state<PersonaItem[]>([]);
+  let isPersonaModalOpen = $state(false);
+
   let activeSession = $derived(() => {
     return chatSessions.find(s => s.id === activeSessionId) || null;
+  });
+
+  let activePersona = $derived(() => {
+    const curr = chatSessions.find(s => s.id === activeSessionId);
+    if (curr?.persona_id) {
+      return personas.find(p => p.id === curr.persona_id) || null;
+    }
+    return personas.find(p => p.is_default) || personas[0] || null;
   });
 
   // Modals
@@ -51,6 +65,49 @@
   let isPushModalOpen = $state(false);
   let pushStatus = $state<'idle' | 'running' | 'success' | 'error'>('idle');
   let pushLogs = $state('');
+
+  // Reusable Confirmation Modal State
+  let confirmDialog = $state<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'warning' | 'primary';
+    action: () => void | Promise<void>;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Lanjutkan',
+    cancelText: 'Batal',
+    variant: 'danger',
+    action: () => {}
+  });
+
+  function showConfirm(options: {
+    title: string;
+    message: string;
+    confirmText?: string;
+    cancelText?: string;
+    variant?: 'danger' | 'warning' | 'primary';
+    action: () => void | Promise<void>;
+  }) {
+    confirmDialog = {
+      isOpen: true,
+      title: options.title,
+      message: options.message,
+      confirmText: options.confirmText || 'Lanjutkan',
+      cancelText: options.cancelText || 'Batal',
+      variant: options.variant || 'danger',
+      action: options.action
+    };
+  }
+
+  async function handleConfirmDialog() {
+    confirmDialog.isOpen = false;
+    await confirmDialog.action();
+  }
 
   let socket: Socket | null = null;
 
@@ -86,10 +143,56 @@
       whatsappStatus = await api.getWhatsAppStatus();
       projectFiles = (await api.getProjectFiles()).files || [];
       await checkDevServer();
+      const pRes = await api.getPersonas();
+      personas = pRes.personas || [];
       await loadSessions(false);
     } catch (e) {
       console.error('Error refreshing state:', e);
     }
+  }
+
+  async function handleSelectPersona(persona: PersonaItem) {
+    if (!activeSessionId) return;
+    try {
+      await api.updateChatSessionPersona(activeSessionId, persona.id);
+      chatSessions = chatSessions.map(s => s.id === activeSessionId ? { ...s, persona_id: persona.id } : s);
+      addLog(`[Persona Aktif] ${persona.avatar} ${persona.name} diterapkan.`);
+    } catch (e) {
+      console.error('Failed to update session persona:', e);
+    }
+  }
+
+  async function handleCreatePersona(data: { name: string; avatar: string; traits?: string; system_prompt: string; preferred_model?: string }) {
+    const res = await api.createPersona(data);
+    if (res.persona) {
+      personas = [...personas, res.persona];
+      if (activeSessionId) {
+        await handleSelectPersona(res.persona);
+      }
+      addLog(`[Persona Dibuat] ${res.persona.name}`);
+    }
+  }
+
+  async function handleDeletePersona(id: string) {
+    showConfirm({
+      title: 'Hapus Persona Ini?',
+      message: 'Persona custom ini akan dihapus permanen dari sistem.',
+      confirmText: 'Hapus',
+      variant: 'danger',
+      action: async () => {
+        try {
+          await api.deletePersona(id);
+          personas = personas.filter(p => p.id !== id);
+          if (activeSession()?.persona_id === id) {
+            const def = personas.find(p => p.is_default) || personas[0];
+            if (def && activeSessionId) await handleSelectPersona(def);
+          }
+          addLog('[Persona Dihapus]');
+        } catch (e) {
+          console.error('Failed to delete persona:', e);
+        }
+      }
+    });
   }
 
   async function loadSessions(selectFirst = false) {
@@ -166,32 +269,48 @@
     }
   }
 
-  async function handleDeleteSession(id: string) {
-    try {
-      await api.deleteChatSession(id);
-      chatSessions = chatSessions.filter(s => s.id !== id);
-      if (activeSessionId === id) {
-        if (chatSessions.length > 0) {
-          await handleSelectSession(chatSessions[0]);
-        } else {
-          await handleCreateNewSession(false);
+  function handleDeleteSession(id: string) {
+    showConfirm({
+      title: 'Hapus Sesi Diskusi?',
+      message: 'Sesi ini dan semua pesannya akan dihapus secara permanen dari database.',
+      confirmText: 'Hapus Sesi',
+      variant: 'danger',
+      action: async () => {
+        try {
+          await api.deleteChatSession(id);
+          chatSessions = chatSessions.filter(s => s.id !== id);
+          if (activeSessionId === id) {
+            if (chatSessions.length > 0) {
+              await handleSelectSession(chatSessions[0]);
+            } else {
+              await handleCreateNewSession(false);
+            }
+          }
+        } catch (e) {
+          console.error('Failed to delete chat session:', e);
         }
       }
-    } catch (e) {
-      console.error('Failed to delete chat session:', e);
-    }
+    });
   }
 
-  async function handleClearCurrentSessionMessages() {
+  function handleClearCurrentSessionMessages() {
     if (!activeSessionId) return;
-    if (!confirm('Yakin ingin membersihkan semua pesan di sesi ini?')) return;
-    try {
-      await api.clearChatMessages(activeSessionId);
-      messages = [];
-      await loadSessions(false);
-    } catch (e) {
-      console.error('Failed to clear session messages:', e);
-    }
+    showConfirm({
+      title: 'Bersihkan Percakapan?',
+      message: 'Semua pesan dan riwayat aktivitas dalam sesi ini akan dibersihkan. Tindakan ini tidak dapat dibatalkan.',
+      confirmText: 'Ya, Bersihkan',
+      variant: 'danger',
+      action: async () => {
+        try {
+          await api.clearChatMessages(activeSessionId);
+          messages = [];
+          await loadSessions(false);
+          addLog('[Chat Cleared] Pesan dalam sesi dibersihkan.');
+        } catch (e) {
+          console.error('Failed to clear session messages:', e);
+        }
+      }
+    });
   }
 
   async function handleToggleScope(scope: 'workspace' | 'global') {
@@ -457,11 +576,6 @@
     onCreateNewSession={() => handleCreateNewSession(true)}
     onDeleteSession={handleDeleteSession}
     onToggleScope={handleToggleScope}
-    onModelChange={async (newModel) => {
-      if (config) config.antigravity.defaultModel = newModel;
-      await api.updateConfig({ defaultModel: newModel } as any);
-      addLog(`Model aktif: ${newModel}`);
-    }}
   />
 
   <!-- Main Content Workspace Area -->
@@ -546,12 +660,14 @@
           isBusy={isAgentBusy}
           {config}
           activeSession={activeSession()}
+          activePersona={activePersona()}
           onSendMessage={handleSendMessage}
           onCancelTask={async () => {
             await api.cancelTask();
           }}
           onClearMessages={handleClearCurrentSessionMessages}
           onCreateNewSession={() => handleCreateNewSession(true)}
+          onOpenPersonaModal={() => isPersonaModalOpen = true}
         />
       {:else if currentTab === 'git'}
         <GitView
@@ -602,10 +718,17 @@
             await api.startWhatsApp();
             whatsappStatus = await api.getWhatsAppStatus();
           }}
-          onLogoutWhatsApp={async () => {
-            if (!confirm('Putuskan koneksi WhatsApp?')) return;
-            await api.logoutWhatsApp();
-            whatsappStatus = await api.getWhatsAppStatus();
+          onLogoutWhatsApp={() => {
+            showConfirm({
+              title: 'Putuskan WhatsApp?',
+              message: 'Sesi bot WhatsApp akan diputuskan. Anda perlu scan ulang kode QR untuk menghubungkan kembali.',
+              confirmText: 'Putuskan',
+              variant: 'danger',
+              action: async () => {
+                await api.logoutWhatsApp();
+                whatsappStatus = await api.getWhatsAppStatus();
+              }
+            });
           }}
           onStartTelegram={async (token) => {
             const res = await api.startTelegram(token);
@@ -690,5 +813,26 @@
   <PinModal
     isOpen={isPinModalOpen}
     onSubmit={handlePinSubmit}
+  />
+
+  <PersonaModal
+    isOpen={isPersonaModalOpen}
+    {personas}
+    activePersonaId={activeSession()?.persona_id}
+    onSelectPersona={handleSelectPersona}
+    onCreatePersona={handleCreatePersona}
+    onDeletePersona={handleDeletePersona}
+    onClose={() => isPersonaModalOpen = false}
+  />
+
+  <ConfirmModal
+    isOpen={confirmDialog.isOpen}
+    title={confirmDialog.title}
+    message={confirmDialog.message}
+    confirmText={confirmDialog.confirmText}
+    cancelText={confirmDialog.cancelText}
+    variant={confirmDialog.variant}
+    onConfirm={handleConfirmDialog}
+    onCancel={() => confirmDialog.isOpen = false}
   />
 </div>

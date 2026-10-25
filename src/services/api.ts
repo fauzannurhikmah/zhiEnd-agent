@@ -339,7 +339,7 @@ export const api = {
     return res.json();
   },
 
-  async createPersona(data: { name: string; avatar?: string; system_prompt: string; preferred_model?: string }): Promise<any> {
+  async createPersona(data: { name: string; avatar?: string; traits?: string; system_prompt: string; preferred_model?: string }): Promise<any> {
     const res = await fetch('/api/personas', {
       method: 'POST',
       headers: getHeaders(),
@@ -361,6 +361,15 @@ export const api = {
     const res = await fetch(`/api/personas/${id}`, {
       method: 'DELETE',
       headers: getHeaders()
+    });
+    return res.json();
+  },
+
+  async generatePersonaPrompt(data: { name?: string; traits?: string; preferred_model?: string }): Promise<{ prompt?: string; error?: string }> {
+    const res = await fetch('/api/personas/generate-prompt', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
     });
     return res.json();
   },
@@ -387,6 +396,15 @@ export const api = {
     const res = await fetch(`/api/chat/sessions/${id}`, {
       method: 'DELETE',
       headers: getHeaders()
+    });
+    return res.json();
+  },
+
+  async updateChatSessionPersona(sessionId: string, personaId: string | null): Promise<any> {
+    const res = await fetch(`/api/chat/sessions/${sessionId}/persona`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({ persona_id: personaId })
     });
     return res.json();
   },

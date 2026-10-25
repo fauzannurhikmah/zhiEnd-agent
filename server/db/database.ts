@@ -71,6 +71,7 @@ function initTables(db: Database.Database): void {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       avatar TEXT,
+      traits TEXT,
       system_prompt TEXT NOT NULL,
       preferred_model TEXT,
       is_default INTEGER DEFAULT 0,
@@ -117,6 +118,17 @@ function initTables(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_sessions_workspace ON chat_sessions(workspace_id);
     CREATE INDEX IF NOT EXISTS idx_workspaces_active ON workspaces(is_active);
   `);
+
+  try {
+    db.prepare('ALTER TABLE personas ADD COLUMN traits TEXT').run();
+  } catch {}
+
+  // Update default persona traits if missing
+  try {
+    db.prepare("UPDATE personas SET traits = 'Solutif, Teliti, & Adaptif' WHERE id = 'persona-default' AND (traits IS NULL OR traits = '')").run();
+    db.prepare("UPDATE personas SET traits = 'Kritis, Analitis, & Perfeksionis' WHERE id = 'persona-reviewer' AND (traits IS NULL OR traits = '')").run();
+    db.prepare("UPDATE personas SET traits = 'Pragmatis, Efisien, & Cepat' WHERE id = 'persona-devops' AND (traits IS NULL OR traits = '')").run();
+  } catch {}
 }
 
 function migrateFromLegacyConfig(db: Database.Database): void {
@@ -140,14 +152,15 @@ function migrateFromLegacyConfig(db: Database.Database): void {
 
   // 1. Seed Personas AI Bawaan
   const insertPersona = db.prepare(`
-    INSERT OR IGNORE INTO personas (id, name, avatar, system_prompt, preferred_model, is_default)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT OR IGNORE INTO personas (id, name, avatar, traits, system_prompt, preferred_model, is_default)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
   insertPersona.run(
     'persona-default',
     'zhiEnd Fullstack Engineer',
     '⚡',
+    'Solutif, Teliti, & Adaptif',
     'Anda adalah zhiEnd Assistant, AI software engineer tingkat lanjut yang mahir dalam merancang, menulis, dan merefaktor kode berkualitas produksi secara clean, modular, dan efisien.',
     'gemini-3.8-flash-high',
     1
@@ -157,6 +170,7 @@ function migrateFromLegacyConfig(db: Database.Database): void {
     'persona-reviewer',
     'Senior Code Reviewer & Architect',
     '🔍',
+    'Kritis, Analitis, & Perfeksionis',
     'Anda adalah Senior Code Reviewer dan Software Architect. Analisis kode dengan sangat teliti, temukan potensi bug, memory leak, security risk, serta berikan rekomendasi perbaikan berbasis best practice.',
     'claude-sonnet-4-6',
     0
@@ -166,6 +180,7 @@ function migrateFromLegacyConfig(db: Database.Database): void {
     'persona-devops',
     'DevOps & System Specialist',
     '🚀',
+    'Pragmatis, Efisien, & Cepat',
     'Anda adalah DevOps dan System Engineer. Ahli dalam CI/CD, script PowerShell/Bash, automasi task, port management, networking tunnel, dan optimasi performa backend.',
     'gemini-3.8-flash-medium',
     0
@@ -558,6 +573,7 @@ export function getPersonas(): PersonaItem[] {
     id: r.id,
     name: r.name,
     avatar: r.avatar || '⚡',
+    traits: r.traits || null,
     system_prompt: r.system_prompt,
     preferred_model: r.preferred_model,
     is_default: Boolean(r.is_default),
@@ -565,17 +581,18 @@ export function getPersonas(): PersonaItem[] {
   }));
 }
 
-export function createPersona(data: { name: string; avatar?: string; system_prompt: string; preferred_model?: string }): PersonaItem {
+export function createPersona(data: { name: string; avatar?: string; traits?: string; system_prompt: string; preferred_model?: string }): PersonaItem {
   const db = getDb();
   const id = 'persona-' + Date.now();
   db.prepare(`
-    INSERT INTO personas (id, name, avatar, system_prompt, preferred_model, is_default)
-    VALUES (?, ?, ?, ?, ?, 0)
-  `).run(id, data.name, data.avatar || '🤖', data.system_prompt, data.preferred_model || 'gemini-3.8-flash-high');
+    INSERT INTO personas (id, name, avatar, traits, system_prompt, preferred_model, is_default)
+    VALUES (?, ?, ?, ?, ?, ?, 0)
+  `).run(id, data.name, data.avatar || '🤖', data.traits || null, data.system_prompt, data.preferred_model || 'gemini-3.8-flash-high');
   return {
     id,
     name: data.name,
     avatar: data.avatar || '🤖',
+    traits: data.traits || null,
     system_prompt: data.system_prompt,
     preferred_model: data.preferred_model,
     is_default: false
@@ -589,11 +606,12 @@ export function updatePersona(id: string, data: Partial<PersonaItem>): boolean {
 
   db.prepare(`
     UPDATE personas 
-    SET name = ?, avatar = ?, system_prompt = ?, preferred_model = ?
+    SET name = ?, avatar = ?, traits = ?, system_prompt = ?, preferred_model = ?
     WHERE id = ?
   `).run(
     data.name ?? current.name,
     data.avatar ?? current.avatar,
+    data.traits ?? current.traits,
     data.system_prompt ?? current.system_prompt,
     data.preferred_model ?? current.preferred_model,
     id
@@ -606,6 +624,28 @@ export function deletePersona(id: string): boolean {
   const row = db.prepare('SELECT is_default FROM personas WHERE id = ?').get(id) as any;
   if (row && row.is_default) return false; // Jangan hapus persona default
   db.prepare('DELETE FROM personas WHERE id = ?').run(id);
+  return true;
+}
+
+export function getPersonaById(id: string): PersonaItem | null {
+  const db = getDb();
+  const r = db.prepare('SELECT * FROM personas WHERE id = ?').get(id) as any;
+  if (!r) return null;
+  return {
+    id: r.id,
+    name: r.name,
+    avatar: r.avatar || '⚡',
+    traits: r.traits || null,
+    system_prompt: r.system_prompt,
+    preferred_model: r.preferred_model,
+    is_default: Boolean(r.is_default),
+    created_at: r.created_at
+  };
+}
+
+export function updateChatSessionPersona(sessionId: string, personaId: string | null): boolean {
+  const db = getDb();
+  db.prepare('UPDATE chat_sessions SET persona_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(personaId, sessionId);
   return true;
 }
 

@@ -143,6 +143,7 @@ export interface PersonaItem {
   id: string;
   name: string;
   avatar: string;
+  traits?: string | null;
   system_prompt: string;
   preferred_model?: string | null;
   is_default: boolean;

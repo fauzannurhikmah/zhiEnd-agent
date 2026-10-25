@@ -30,6 +30,7 @@ import {
   getChatSessionById,
   createChatSession,
   deleteChatSession,
+  updateChatSessionPersona,
   getSessionMessages,
   saveMessageToDb,
   clearSessionMessages,
@@ -363,7 +364,7 @@ app.get('/api/personas', (c) => {
 });
 
 app.post('/api/personas', async (c) => {
-  const body = await c.req.json<{ name: string; avatar?: string; system_prompt: string; preferred_model?: string }>().catch(() => ({} as any));
+  const body = await c.req.json<{ name: string; avatar?: string; traits?: string; system_prompt: string; preferred_model?: string }>().catch(() => ({} as any));
   if (!body.name || !body.system_prompt) return c.json({ error: 'Name and system_prompt required' }, 400);
   const persona = createPersona(body);
   return c.json({ persona });
@@ -380,6 +381,37 @@ app.delete('/api/personas/:id', (c) => {
   const id = c.req.param('id');
   const success = deletePersona(id);
   return c.json({ success });
+});
+
+app.post('/api/personas/generate-prompt', async (c) => {
+  const body = await c.req.json<{ name?: string; traits?: string; preferred_model?: string }>().catch(() => ({} as any));
+  const traits = body.traits?.trim() || 'Solutif, Teliti, & Adaptif';
+  const name = body.name?.trim() || 'Software Engineer Assistant';
+
+  const prompt = `Anda adalah seorang System Prompt Architect kelas dunia.
+Tugas Anda adalah merumuskan instruksi sistem (system prompt) yang kuat, komprehensif, dan elegan untuk seorang Persona AI bernama: "${name}" yang memiliki Sifat & Karakteristik: "${traits}".
+
+Instruksi harus mencakup:
+1. Definisi peran & identitas persona.
+2. Pendekatan berpikir (mindset) dan tata krama komunikasi yang mencerminkan sifat "${traits}".
+3. Standar teknis, kualitas penulisan kode, dan cara menangani masalah/debugging.
+4. Gaya respons (bahasa Indonesia yang natural, lugas, profesional).
+
+ATURAN OUTPUT:
+- Tuliskan HANYA isi teks instruksi sistem (system prompt) tersebut secara langsung, tanpa kata pengantar, tanpa markdown backtick penutup/pembuka (\`\`\`), tanpa "Berikut adalah system prompt...". Langsung teks instruksinya saja.`;
+
+  try {
+    const result = await agentRunner.run({
+      prompt,
+      cwd: config.activeProject || 'D:\\Works',
+      model: body.preferred_model || 'gemini-3.8-flash-low'
+    });
+    const text = result.response?.trim() || '';
+    const cleanText = text.replace(/^```[a-z]*\n?|```$/gi, '').trim();
+    return c.json({ prompt: cleanText });
+  } catch (err: any) {
+    return c.json({ error: err.message || 'Gagal men-generate instruksi sistem' }, 500);
+  }
 });
 
 // ==========================================
@@ -402,6 +434,13 @@ app.post('/api/chat/sessions', async (c) => {
 app.delete('/api/chat/sessions/:id', (c) => {
   const id = c.req.param('id');
   const success = deleteChatSession(id);
+  return c.json({ success });
+});
+
+app.put('/api/chat/sessions/:id/persona', async (c) => {
+  const id = c.req.param('id');
+  const body = await c.req.json<{ persona_id?: string | null }>().catch(() => ({} as any));
+  const success = updateChatSessionPersona(id, body.persona_id ?? null);
   return c.json({ success });
 });
 
@@ -551,11 +590,17 @@ app.post('/api/agent/chat', async (c) => {
     : getOrCreateDefaultSession(workingDir);
   const targetSessionId = targetSession.id;
 
+  let sessionPersonaModel: string | undefined;
+  if (targetSession?.persona_id) {
+    const p = getPersonaById(targetSession.persona_id);
+    if (p?.preferred_model) sessionPersonaModel = p.preferred_model;
+  }
+
   // Run in background
   agentRunner.run({
     prompt: body.prompt,
     cwd: workingDir,
-    model: body.model || config.antigravity?.defaultModel,
+    model: body.model || sessionPersonaModel || config.antigravity?.defaultModel,
     conversationId: body.conversationId,
     continueLast: body.continueLast,
     sessionId: targetSessionId

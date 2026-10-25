@@ -4,7 +4,7 @@ import path from 'path';
 import os from 'os';
 import { EventEmitter } from 'events';
 import { AppConfig, AgentTask } from './types';
-import { getWorkspaceContext, getCustomRootWorkspace } from './db/database';
+import { getWorkspaceContext, getCustomRootWorkspace, getChatSessionById, getPersonaById } from './db/database';
 
 function getLocalIP(): string {
   const interfaces = os.networkInterfaces();
@@ -77,7 +77,22 @@ ${wsCtx.custom_rules ? `- Aturan Khusus: ${wsCtx.custom_rules}` : ''}
 (Gunakan informasi di atas langsung tanpa perlu membaca ulang file manifest/config)`;
     }
 
-    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}
+    let personaStr = '';
+    if (options.sessionId) {
+      const sess = getChatSessionById(options.sessionId);
+      if (sess && sess.persona_id) {
+        const persona = getPersonaById(sess.persona_id);
+        if (persona) {
+          const traitsLine = persona.traits ? `\n- Karakter & Sifat: ${persona.traits}` : '';
+          personaStr = `\n[Persona AI Aktif: ${persona.name}]:${traitsLine}
+[Instruksi Peran & Gaya]:
+${persona.system_prompt}
+(PENTING: Terapkan karakter/sifat dan instruksi peran persona di atas dalam seluruh respon, gaya komunikasi, dan eksekusi kode Anda)`;
+        }
+      }
+    }
+
+    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}
 [Panduan Operasional Sistem]:
 1. Root direktori default untuk semua project adalah ${rootDir}. Jika diminta membuat project baru atau menyimpan file baru tanpa path absolut, SELALU buat dan simpan langsung di dalam ${rootDir} (contoh: ${rootDir}\\<nama-project>).
 2. PENTING - Menjalankan Project & URL Akses (Local maupun External/LAN):
