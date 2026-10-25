@@ -42,6 +42,31 @@
 
   let activeModel = $state('gemini-3.8-flash-high');
   let isModelDropdownOpen = $state(false);
+  let dropdownRef = $state<HTMLDivElement | null>(null);
+
+  $effect(() => {
+    if (!isModelDropdownOpen) return;
+
+    function onPointerDown(e: PointerEvent) {
+      if (dropdownRef && !dropdownRef.contains(e.target as Node)) {
+        isModelDropdownOpen = false;
+      }
+    }
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        isModelDropdownOpen = false;
+      }
+    }
+
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  });
 
   const defaultModels = [
     { id: 'gemini-3.8-flash-high', name: 'Gemini 3.8 Flash (High Reasoning)' },
@@ -200,7 +225,7 @@
   <!-- Bottom: Model, Remote indicator, Settings -->
   <div class="p-3 border-t border-white/[0.08] flex flex-col gap-2.5 bg-zinc-950/70">
     <!-- Custom Floating Model Selector -->
-    <div class="relative">
+    <div class="relative" bind:this={dropdownRef}>
       <button
         type="button"
         onclick={() => isModelDropdownOpen = !isModelDropdownOpen}
@@ -225,14 +250,6 @@
 
       <!-- Floating Dropdown Popover -->
       {#if isModelDropdownOpen}
-        <!-- Backdrop to close on outside click -->
-        <button
-          type="button"
-          class="fixed inset-0 z-40 cursor-default bg-transparent"
-          onclick={() => isModelDropdownOpen = false}
-          aria-label="Close model dropdown"
-        ></button>
-
         <div class="absolute bottom-full mb-2 left-0 w-72 bg-zinc-950/95 backdrop-blur-2xl border border-white/[0.12] rounded-2xl p-2 shadow-2xl shadow-indigo-950/60 z-50 flex flex-col gap-1 animate-in fade-in zoom-in-95 duration-150">
           <div class="px-2.5 py-1.5 border-b border-white/[0.06] flex items-center justify-between text-[10px] font-mono text-zinc-400">
             <span class="font-bold uppercase tracking-wider text-zinc-300">Pilih Model AI</span>

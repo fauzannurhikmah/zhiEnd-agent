@@ -413,39 +413,39 @@
 
       <!-- Tab 2: Create New Project (Default: D:\Works) -->
       {#if activeTab === 'create'}
-        <div class="p-5 flex flex-col gap-4 text-xs">
-          <div class="flex flex-col gap-1.5">
-            <label for="new-proj-name" class="font-bold text-zinc-200">Nama Project Baru:</label>
+        <div class="p-6 flex flex-col gap-5 text-xs flex-1 overflow-y-auto min-h-0">
+          <div class="flex flex-col gap-2">
+            <label for="new-proj-name" class="font-bold text-zinc-200 text-xs">Nama Project Baru:</label>
             <input
               id="new-proj-name"
               type="text"
               bind:value={newProjectName}
               placeholder="Contoh: my-awesome-app"
-              class="bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl p-2.5 text-zinc-100 font-mono outline-none"
+              class="bg-zinc-900/80 border border-white/[0.08] focus:border-indigo-500 rounded-xl p-3 text-zinc-100 font-mono text-xs outline-none transition"
             />
           </div>
 
-          <div class="flex flex-col gap-1.5">
-            <label for="new-proj-parent" class="font-bold text-zinc-200">Direktori Induk (Parent Folder):</label>
+          <div class="flex flex-col gap-2">
+            <label for="new-proj-parent" class="font-bold text-zinc-200 text-xs">Direktori Induk (Parent Folder):</label>
             <input
               id="new-proj-parent"
               type="text"
               bind:value={newProjectParent}
-              class="bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl p-2.5 text-zinc-100 font-mono outline-none"
+              class="bg-zinc-900/80 border border-white/[0.08] focus:border-indigo-500 rounded-xl p-3 text-zinc-100 font-mono text-xs outline-none transition"
             />
-            <span class="text-[11px] text-zinc-500">
-              Project akan dibuat di: <code class="text-indigo-400 font-mono">{newProjectParent}\{newProjectName || '&lt;nama-project&gt;'}</code>
+            <span class="text-[11px] text-zinc-500 font-mono">
+              Lokasi tujuan: <code class="text-indigo-400">{newProjectParent}\{newProjectName || '&lt;nama-project&gt;'}</code>
             </span>
           </div>
 
-          <div class="flex items-center gap-2 pt-1">
+          <div class="flex items-center gap-2.5 pt-1">
             <input
               type="checkbox"
               id="init-git-cb"
               bind:checked={initGit}
               class="w-4 h-4 rounded cursor-pointer accent-indigo-600"
             />
-            <label for="init-git-cb" class="text-zinc-300 font-medium cursor-pointer">
+            <label for="init-git-cb" class="text-zinc-300 font-medium cursor-pointer select-none">
               Inisialisasi Git Repository (`git init`) otomatis
             </label>
           </div>
@@ -453,7 +453,7 @@
           <button
             onclick={handleCreateProject}
             disabled={isCreating || !newProjectName.trim()}
-            class="mt-2 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition cursor-pointer"
+            class="mt-2 py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/25 transition cursor-pointer active:scale-95"
           >
             <Sparkles class="w-4 h-4" />
             {isCreating ? 'Membuat Project...' : 'Buat & Buka Project di zhiEnd Agent'}
@@ -463,38 +463,62 @@
 
       <!-- Tab 3: Manual Path Input (Outside D:) -->
       {#if activeTab === 'manual'}
-        <div class="p-5 flex flex-col gap-4 text-xs">
-          <div class="flex flex-col gap-1.5">
-            <label for="manual-path-input" class="font-bold text-zinc-200">Masukkan Path Direktori Lengkap:</label>
+        <div class="p-6 flex flex-col gap-6 text-xs flex-1 overflow-y-auto min-h-0">
+          <div class="flex flex-col gap-2">
+            <label for="manual-path-input" class="font-bold text-zinc-200 text-xs">Masukkan Path Direktori Lengkap:</label>
             <div class="flex gap-2">
               <input
                 id="manual-path-input"
                 type="text"
                 bind:value={manualPathInput}
                 placeholder="Contoh: C:\Users\zhien\my-project atau E:\Repos\backend"
-                class="flex-1 bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl p-2.5 text-zinc-100 font-mono outline-none"
+                class="flex-1 bg-zinc-900/80 border border-white/[0.08] focus:border-indigo-500 rounded-xl p-3 text-zinc-100 font-mono text-xs outline-none transition"
               />
               <button
                 onclick={() => handleSelect(manualPathInput)}
                 disabled={isSelecting || !manualPathInput.trim()}
-                class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-bold flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/20"
+                class="px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold flex items-center gap-2 cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95 transition"
               >
-                Buka <ArrowRight class="w-3.5 h-3.5" />
+                <span>Buka</span>
+                <ArrowRight class="w-3.5 h-3.5" />
               </button>
             </div>
-            <span class="text-[11px] text-zinc-500">Gunakan opsi ini jika project Anda berada di drive C:, E:, atau lokasi jaringan lainnya.</span>
+            <span class="text-[11px] text-zinc-500">Gunakan opsi ini jika project Anda berada di drive C:, E:, atau lokasi jaringan lainnya di luar D:\Works.</span>
           </div>
 
           {#if recentProjects && recentProjects.length > 0}
-            <div class="flex flex-col gap-1.5 pt-3 border-t border-zinc-800">
-              <span class="text-[11px] text-zinc-400 font-semibold">Riwayat Terakhir:</span>
-              <div class="flex flex-col gap-1 max-h-36 overflow-y-auto">
+            <div class="flex flex-col gap-3 pt-4 border-t border-white/[0.08] flex-1 min-h-0">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-zinc-300 font-bold">Riwayat Workspace Terakhir ({recentProjects.length})</span>
+                <span class="text-[10px] text-zinc-500 font-mono">Klik baris untuk langsung membuka</span>
+              </div>
+              
+              <div class="flex flex-col gap-2 flex-1 overflow-y-auto pr-1">
                 {#each recentProjects as r}
+                  {@const isCurrentProj = isCurrent(r)}
                   <button
+                    type="button"
                     onclick={() => handleSelect(r)}
-                    class="p-2 rounded-lg bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-800 text-left font-mono text-[11px] text-zinc-300 truncate cursor-pointer"
+                    class="p-3 min-h-[46px] shrink-0 rounded-xl {isCurrentProj ? 'bg-indigo-600/15 border-indigo-500/40 text-white shadow-sm' : 'bg-zinc-900/60 hover:bg-zinc-800/80 border-white/[0.06] hover:border-indigo-500/30 text-zinc-300 hover:text-white'} border flex items-center justify-between gap-3 text-left font-mono text-xs cursor-pointer transition group"
+                    title={`Buka: ${r}`}
                   >
-                    {r}
+                    <div class="flex items-center gap-2.5 min-w-0">
+                      <div class="w-7 h-7 rounded-lg {isCurrentProj ? 'bg-indigo-600 text-white' : 'bg-zinc-800 text-zinc-400 group-hover:text-indigo-300 group-hover:bg-zinc-750'} flex items-center justify-center shrink-0 transition">
+                        <FolderGit class="w-3.5 h-3.5" />
+                      </div>
+                      <span class="truncate">{r}</span>
+                    </div>
+
+                    <div class="flex items-center gap-2 shrink-0 pr-1">
+                      {#if isCurrentProj}
+                        <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/25 border border-indigo-500/40 text-indigo-300 text-[10px] font-mono font-bold">
+                          <Check class="w-3 h-3 text-indigo-400" />
+                          <span>Active</span>
+                        </div>
+                      {:else}
+                        <ArrowRight class="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400" />
+                      {/if}
+                    </div>
                   </button>
                 {/each}
               </div>
