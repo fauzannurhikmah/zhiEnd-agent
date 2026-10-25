@@ -26,6 +26,7 @@ import {
   createPersona,
   updatePersona,
   deletePersona,
+  getPersonaById,
   getChatSessions,
   getChatSessionById,
   createChatSession,
@@ -374,7 +375,8 @@ app.put('/api/personas/:id', async (c) => {
   const id = c.req.param('id');
   const body = await c.req.json().catch(() => ({} as any));
   const success = updatePersona(id, body);
-  return c.json({ success });
+  const persona = getPersonaById(id);
+  return c.json({ success, persona });
 });
 
 app.delete('/api/personas/:id', (c) => {

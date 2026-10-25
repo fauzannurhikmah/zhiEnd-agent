@@ -46,11 +46,11 @@
   let personas = $state<PersonaItem[]>([]);
   let isPersonaModalOpen = $state(false);
 
-  let activeSession = $derived(() => {
+  let activeSession = $derived.by(() => {
     return chatSessions.find(s => s.id === activeSessionId) || null;
   });
 
-  let activePersona = $derived(() => {
+  let activePersona = $derived.by(() => {
     const curr = chatSessions.find(s => s.id === activeSessionId);
     if (curr?.persona_id) {
       return personas.find(p => p.id === curr.persona_id) || null;
@@ -173,6 +173,27 @@
     }
   }
 
+  async function handleUpdatePersona(id: string, data: Partial<PersonaItem>) {
+    try {
+      const res = await api.updatePersona(id, data);
+      if (res?.success) {
+        if (res.persona) {
+          personas = personas.map(p => p.id === id ? res.persona : p);
+        } else {
+          const pRes = await api.getPersonas();
+          if (pRes?.personas) {
+            personas = pRes.personas;
+          } else {
+            personas = personas.map(p => p.id === id ? { ...p, ...data } : p);
+          }
+        }
+        addLog(`[Persona Diperbarui] ${data.name || 'Persona'}`);
+      }
+    } catch (e) {
+      console.error('Failed to update persona:', e);
+    }
+  }
+
   async function handleDeletePersona(id: string) {
     showConfirm({
       title: 'Hapus Persona Ini?',
@@ -183,7 +204,7 @@
         try {
           await api.deletePersona(id);
           personas = personas.filter(p => p.id !== id);
-          if (activeSession()?.persona_id === id) {
+          if (activeSession?.persona_id === id) {
             const def = personas.find(p => p.is_default) || personas[0];
             if (def && activeSessionId) await handleSelectPersona(def);
           }
@@ -659,8 +680,8 @@
           {messages}
           isBusy={isAgentBusy}
           {config}
-          activeSession={activeSession()}
-          activePersona={activePersona()}
+          activeSession={activeSession}
+          activePersona={activePersona}
           onSendMessage={handleSendMessage}
           onCancelTask={async () => {
             await api.cancelTask();
@@ -818,9 +839,10 @@
   <PersonaModal
     isOpen={isPersonaModalOpen}
     {personas}
-    activePersonaId={activeSession()?.persona_id}
+    activePersonaId={activeSession?.persona_id}
     onSelectPersona={handleSelectPersona}
     onCreatePersona={handleCreatePersona}
+    onUpdatePersona={handleUpdatePersona}
     onDeletePersona={handleDeletePersona}
     onClose={() => isPersonaModalOpen = false}
   />

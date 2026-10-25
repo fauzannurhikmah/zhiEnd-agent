@@ -176,17 +176,20 @@
       <button
         type="button"
         onclick={onOpenPersonaModal}
-        class="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-200 hover:text-indigo-300 transition cursor-pointer group shadow-sm"
-        title="Pilih atau buat persona AI untuk sesi ini"
+        class="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-200 hover:text-indigo-300 transition cursor-pointer group shadow-sm max-w-[280px]"
+        title={`Persona: ${activePersona?.name || 'Default'}${activePersona?.traits ? ` • Sifat: ${activePersona.traits}` : ''}`}
       >
-        <AvatarView avatar={activePersona?.avatar} name={activePersona?.name} size="xs" className="rounded-md" />
-        <span class="font-medium truncate max-w-[120px]">{activePersona?.name || 'Default Persona'}</span>
+        <AvatarView avatar={activePersona?.avatar} name={activePersona?.name} size="xs" className="rounded-md shrink-0" />
+        <span class="font-medium truncate max-w-[110px]">{activePersona?.name || 'Default Persona'}</span>
         {#if activePersona?.traits}
-          <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-300 font-mono hidden md:inline">
+          <span 
+            class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-300 font-mono hidden md:inline truncate max-w-[120px]" 
+            title={activePersona.traits}
+          >
             {activePersona.traits}
           </span>
         {/if}
-        <ChevronDown class="w-3 h-3 text-zinc-500 group-hover:text-indigo-400 transition-transform" />
+        <ChevronDown class="w-3 h-3 text-zinc-500 group-hover:text-indigo-400 transition-transform shrink-0" />
       </button>
 
       <button
@@ -322,15 +325,20 @@
 
               <div class="flex-1 flex flex-col gap-1.5 min-w-0 max-w-[92%]">
                 <!-- Header Username, Traits & Model -->
-                <div class="flex items-center gap-2 text-[10px] font-mono text-zinc-400 px-1 flex-wrap">
-                  <span class="font-bold text-zinc-200">{activePersona?.name || 'zhiEnd Assistant'}</span>
+                <div class="flex items-center gap-2 text-[10px] font-mono text-zinc-400 px-1 min-w-0">
+                  <span class="font-bold text-zinc-200 truncate shrink-0 max-w-[150px] sm:max-w-[200px]" title={activePersona?.name || 'zhiEnd Assistant'}>
+                    {activePersona?.name || 'zhiEnd Assistant'}
+                  </span>
                   {#if activePersona?.traits}
-                    <span class="text-[9px] px-1.5 py-0.2 rounded-md bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 font-sans">
+                    <span 
+                      class="text-[9px] px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 font-sans truncate max-w-[180px] sm:max-w-[280px] md:max-w-[360px]"
+                      title={`Sifat & Karakteristik: ${activePersona.traits}`}
+                    >
                       {activePersona.traits}
                     </span>
                   {/if}
                   {#if activePersona?.preferred_model}
-                    <span class="text-[9px] text-zinc-500 font-mono hidden sm:inline">
+                    <span class="text-[9px] text-zinc-500 font-mono hidden md:inline shrink-0">
                       {activePersona.preferred_model}
                     </span>
                   {/if}

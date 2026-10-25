@@ -15,6 +15,8 @@
     Smile,
     RefreshCw,
     Loader2,
+    Pencil,
+    Save,
   } from "lucide-svelte";
 
   let {
@@ -23,6 +25,7 @@
     activePersonaId = null,
     onSelectPersona,
     onCreatePersona,
+    onUpdatePersona,
     onDeletePersona,
     onClose,
   }: {
@@ -37,11 +40,22 @@
       system_prompt: string;
       preferred_model?: string;
     }) => Promise<void>;
+    onUpdatePersona?: (
+      id: string,
+      data: {
+        name: string;
+        avatar: string;
+        traits?: string;
+        system_prompt: string;
+        preferred_model?: string;
+      }
+    ) => Promise<void>;
     onDeletePersona: (id: string) => Promise<void>;
     onClose: () => void;
   } = $props();
 
   let activeTab = $state<"list" | "create">("list");
+  let editingPersonaId = $state<string | null>(null);
 
   // Form states
   let newName = $state("");
@@ -117,6 +131,45 @@
         "Anda adalah debugging specialist yang tajam. Saat memeriksa error, telusuri root cause hingga ke akarnya, perbaiki file yang bermasalah secara teliti tanpa merusak fitur lain, dan jelaskan penyebab serta solusinya dengan lugas.",
     },
   ];
+
+  function startEditPersona(p: PersonaItem) {
+    editingPersonaId = p.id;
+    newName = p.name;
+    newAvatar = p.avatar || "🤖";
+    newTraits = p.traits || "";
+    newSystemPrompt = p.system_prompt;
+    newPreferredModel = p.preferred_model || "gemini-3.8-flash-high";
+
+    const str = newAvatar.trim().toLowerCase();
+    if (
+      str.startsWith("data:") ||
+      str.startsWith("http://") ||
+      str.startsWith("https://")
+    ) {
+      avatarType = "custom";
+    } else {
+      avatarType = "emoji";
+    }
+    formError = "";
+    activeTab = "create";
+  }
+
+  function resetForm() {
+    editingPersonaId = null;
+    newName = "";
+    newAvatar = "🤖";
+    newTraits = "";
+    newSystemPrompt = "";
+    newPreferredModel = "gemini-3.8-flash-high";
+    avatarType = "emoji";
+    formError = "";
+    if (fileInputRef) fileInputRef.value = "";
+  }
+
+  function cancelForm() {
+    resetForm();
+    activeTab = "list";
+  }
 
   function applyTemplate(tpl: (typeof templates)[0]) {
     newName = tpl.title;
@@ -195,7 +248,7 @@
     }
   }
 
-  async function handleCreate() {
+  async function handleSubmit() {
     if (!newName.trim()) {
       formError = "Nama persona wajib diisi.";
       return;
@@ -208,23 +261,30 @@
     formError = "";
     isSubmitting = true;
     try {
-      await onCreatePersona({
-        name: newName.trim(),
-        avatar: newAvatar || "🤖",
-        traits: newTraits.trim() || undefined,
-        system_prompt: newSystemPrompt.trim(),
-        preferred_model: newPreferredModel,
-      });
+      if (editingPersonaId) {
+        if (onUpdatePersona) {
+          await onUpdatePersona(editingPersonaId, {
+            name: newName.trim(),
+            avatar: newAvatar || "🤖",
+            traits: newTraits.trim() || undefined,
+            system_prompt: newSystemPrompt.trim(),
+            preferred_model: newPreferredModel,
+          });
+        }
+      } else {
+        await onCreatePersona({
+          name: newName.trim(),
+          avatar: newAvatar || "🤖",
+          traits: newTraits.trim() || undefined,
+          system_prompt: newSystemPrompt.trim(),
+          preferred_model: newPreferredModel,
+        });
+      }
 
-      // Reset form
-      newName = "";
-      newAvatar = "🤖";
-      newTraits = "";
-      newSystemPrompt = "";
-      avatarType = "emoji";
+      resetForm();
       activeTab = "list";
     } catch (e: any) {
-      formError = e.message || "Gagal membuat persona.";
+      formError = e.message || "Gagal menyimpan persona.";
     } finally {
       isSubmitting = false;
     }
@@ -275,7 +335,7 @@
               </span>
             </h2>
             <p class="text-[11px] text-zinc-400">
-              Pilih model yang terikat, sifat, dan custom avatar (foto, GIF,
+              Pilih model terikat, sifat, dan custom avatar (foto, GIF,
               atau video singkat)
             </p>
           </div>
@@ -296,7 +356,9 @@
       >
         <button
           type="button"
-          onclick={() => (activeTab = "list")}
+          onclick={() => {
+            activeTab = "list";
+          }}
           class="pb-2.5 px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
           'list'
             ? 'border-indigo-500 text-indigo-300 font-bold'
@@ -308,14 +370,24 @@
 
         <button
           type="button"
-          onclick={() => (activeTab = "create")}
+          onclick={() => {
+            if (activeTab === "create" && editingPersonaId) {
+              resetForm();
+            }
+            activeTab = "create";
+          }}
           class="pb-2.5 px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
           'create'
             ? 'border-indigo-500 text-indigo-300 font-bold'
             : 'border-transparent text-zinc-400 hover:text-zinc-200'}"
         >
-          <Plus class="w-3.5 h-3.5" />
-          <span>Buat Persona Baru</span>
+          {#if editingPersonaId}
+            <Pencil class="w-3.5 h-3.5 text-indigo-400" />
+            <span>Edit Persona</span>
+          {:else}
+            <Plus class="w-3.5 h-3.5" />
+            <span>Buat Persona Baru</span>
+          {/if}
         </button>
       </div>
 
@@ -365,23 +437,36 @@
                       </div>
                     </div>
 
-                    {#if !p.is_default}
+                    <!-- Action buttons: Edit & Delete -->
+                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                       <button
                         type="button"
-                        onclick={() => onDeletePersona(p.id)}
-                        class="p-1 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer opacity-0 group-hover:opacity-100 shrink-0"
-                        title="Hapus persona custom ini"
+                        onclick={() => startEditPersona(p)}
+                        class="p-1 rounded-lg text-zinc-400 hover:text-indigo-300 hover:bg-indigo-500/10 transition cursor-pointer"
+                        title="Edit persona ini"
                       >
-                        <Trash2 class="w-3.5 h-3.5" />
+                        <Pencil class="w-3.5 h-3.5" />
                       </button>
-                    {/if}
+
+                      {#if !p.is_default}
+                        <button
+                          type="button"
+                          onclick={() => onDeletePersona(p.id)}
+                          class="p-1 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+                          title="Hapus persona custom ini"
+                        >
+                          <Trash2 class="w-3.5 h-3.5" />
+                        </button>
+                      {/if}
+                    </div>
                   </div>
 
                   <!-- Traits Badge if present -->
                   {#if p.traits}
-                    <div class="flex items-center gap-1 flex-wrap">
+                    <div class="flex items-center gap-1 min-w-0">
                       <span
-                        class="text-[10px] font-medium px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/25 text-indigo-300"
+                        class="text-[10px] font-medium px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 truncate max-w-full block"
+                        title={p.traits}
                       >
                         {p.traits}
                       </span>
@@ -421,36 +506,56 @@
             {/each}
           </div>
         {:else}
-          <!-- Create Persona Form -->
+          <!-- Create / Edit Persona Form -->
           <div class="flex flex-col gap-4 animate-in fade-in duration-200">
-            <!-- Quick Template Inspiration -->
-            <div class="space-y-1.5">
-              <span
-                class="text-xs font-semibold text-zinc-300 flex items-center gap-1.5"
-              >
-                <Sparkles class="w-3.5 h-3.5 text-indigo-400" /> Pilih dari Template
-                Cepat (Opsional):
-              </span>
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {#each templates as tpl}
-                  <button
-                    type="button"
-                    onclick={() => applyTemplate(tpl)}
-                    class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 border border-white/[0.06] hover:border-indigo-500/30 text-left transition cursor-pointer group"
-                  >
-                    <span class="text-lg">{tpl.avatar}</span>
-                    <div
-                      class="text-[11px] font-semibold text-zinc-200 mt-1 truncate group-hover:text-indigo-300"
-                    >
-                      {tpl.title}
-                    </div>
-                    <div class="text-[9px] text-zinc-500 font-mono truncate">
-                      {tpl.traits}
-                    </div>
-                  </button>
-                {/each}
+            <!-- Edit Mode Header Alert -->
+            {#if editingPersonaId}
+              <div class="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-between text-xs animate-in fade-in duration-150">
+                <div class="flex items-center gap-2 min-w-0">
+                  <Pencil class="w-4 h-4 text-indigo-400 shrink-0" />
+                  <div class="truncate">
+                    <span class="font-bold text-zinc-100">Sedang Mengedit:</span>
+                    <span class="text-indigo-300 ml-1 font-semibold truncate">{newName || 'Persona'}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onclick={resetForm}
+                  class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[11px] font-medium transition cursor-pointer shrink-0"
+                >
+                  Batal Edit & Buat Baru
+                </button>
               </div>
-            </div>
+            {:else}
+              <!-- Quick Template Inspiration (Only in Create Mode) -->
+              <div class="space-y-1.5">
+                <span
+                  class="text-xs font-semibold text-zinc-300 flex items-center gap-1.5"
+                >
+                  <Sparkles class="w-3.5 h-3.5 text-indigo-400" /> Pilih dari Template
+                  Cepat (Opsional):
+                </span>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {#each templates as tpl}
+                    <button
+                      type="button"
+                      onclick={() => applyTemplate(tpl)}
+                      class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 border border-white/[0.06] hover:border-indigo-500/30 text-left transition cursor-pointer group"
+                    >
+                      <span class="text-lg">{tpl.avatar}</span>
+                      <div
+                        class="text-[11px] font-semibold text-zinc-200 mt-1 truncate group-hover:text-indigo-300"
+                      >
+                        {tpl.title}
+                      </div>
+                      <div class="text-[9px] text-zinc-500 font-mono truncate">
+                        {tpl.traits}
+                      </div>
+                    </button>
+                  {/each}
+                </div>
+              </div>
+            {/if}
 
             <!-- Custom Avatar Picker & Upload Section -->
             <div
@@ -676,7 +781,7 @@
             >
               <button
                 type="button"
-                onclick={() => (activeTab = "list")}
+                onclick={cancelForm}
                 class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition cursor-pointer"
               >
                 Batal
@@ -684,14 +789,19 @@
 
               <button
                 type="button"
-                onclick={handleCreate}
+                onclick={handleSubmit}
                 disabled={isSubmitting ||
                   !newName.trim() ||
                   !newSystemPrompt.trim()}
                 class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 transition cursor-pointer active:scale-95 flex items-center gap-1.5"
               >
-                <Plus class="w-3.5 h-3.5" />
-                <span>Simpan Persona</span>
+                {#if editingPersonaId}
+                  <Save class="w-3.5 h-3.5" />
+                  <span>Simpan Perubahan</span>
+                {:else}
+                  <Plus class="w-3.5 h-3.5" />
+                  <span>Simpan Persona</span>
+                {/if}
               </button>
             </div>
           </div>

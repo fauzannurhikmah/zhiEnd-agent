@@ -609,11 +609,11 @@ export function updatePersona(id: string, data: Partial<PersonaItem>): boolean {
     SET name = ?, avatar = ?, traits = ?, system_prompt = ?, preferred_model = ?
     WHERE id = ?
   `).run(
-    data.name ?? current.name,
-    data.avatar ?? current.avatar,
-    data.traits ?? current.traits,
-    data.system_prompt ?? current.system_prompt,
-    data.preferred_model ?? current.preferred_model,
+    data.name !== undefined ? data.name : current.name,
+    data.avatar !== undefined ? data.avatar : current.avatar,
+    data.traits !== undefined ? data.traits : current.traits,
+    data.system_prompt !== undefined ? data.system_prompt : current.system_prompt,
+    data.preferred_model !== undefined ? data.preferred_model : current.preferred_model,
     id
   );
   return true;
