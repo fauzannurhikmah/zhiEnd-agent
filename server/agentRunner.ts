@@ -1,5 +1,6 @@
 import { spawn, ChildProcess } from 'child_process';
 import readline from 'readline';
+import path from 'path';
 import { EventEmitter } from 'events';
 import { AppConfig, AgentTask } from './types';
 
@@ -80,7 +81,8 @@ export class AgentRunner extends EventEmitter {
         const proc = spawn(cliPath, args, {
           cwd: workingDir,
           env: { ...process.env },
-          shell: true
+          shell: false,
+          windowsHide: true
         });
 
         this.currentProcess = proc;
