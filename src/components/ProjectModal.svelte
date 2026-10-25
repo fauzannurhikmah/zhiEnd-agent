@@ -277,41 +277,53 @@
                 {@const hasChildren = node.children.length > 0}
                 {@const isExpanded = isNodeExpanded(node.name)}
 
-                <div class="rounded-xl border {isNodeCurrent ? 'border-indigo-500/50 bg-indigo-950/20 shadow-indigo-950/20' : 'border-white/[0.08] bg-zinc-900/40'} shrink-0 overflow-hidden shadow-sm transition">
-                  <!-- PARENT FOLDER ROW -->
-                  <div class="min-h-[50px] flex items-center justify-between p-3 bg-zinc-900/70 hover:bg-zinc-800/60 transition gap-2">
+                <div class="rounded-xl border {isNodeCurrent ? 'border-indigo-500/50 bg-indigo-950/20 shadow-indigo-950/20' : 'border-white/[0.08] bg-zinc-900/40 hover:border-white/[0.16]'} shrink-0 overflow-hidden shadow-sm transition">
+                  <!-- PARENT FOLDER ROW (CLICKABLE AREA) -->
+                  <div
+                    role="button"
+                    tabindex="0"
+                    onclick={() => handleSelect(node.path)}
+                    onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(node.path); }}
+                    class="min-h-[52px] flex items-center justify-between p-3 bg-zinc-900/70 hover:bg-zinc-800/70 transition gap-2 cursor-pointer group"
+                    title={`Klik untuk buka: ${node.name}`}
+                  >
                     <div class="flex items-center gap-2.5 min-w-0 flex-1">
                       {#if hasChildren}
                         <button
                           type="button"
-                          onclick={() => toggleExpand(node.name)}
-                          class="p-1 rounded hover:bg-zinc-700/60 text-zinc-400 hover:text-white transition cursor-pointer shrink-0"
+                          onclick={(e) => {
+                            e.stopPropagation();
+                            toggleExpand(node.name);
+                          }}
+                          class="p-1 rounded-md hover:bg-zinc-700/80 text-zinc-400 hover:text-white transition cursor-pointer shrink-0"
                           title={isExpanded ? 'Tutup turunan folder' : 'Buka turunan folder'}
                         >
                           {#if isExpanded}
                             <ChevronDown class="w-4 h-4 text-indigo-400" />
                           {:else}
-                            <ChevronRight class="w-4 h-4 text-zinc-400" />
+                            <ChevronRight class="w-4 h-4 text-zinc-400 group-hover:text-zinc-200" />
                           {/if}
                         </button>
                       {:else}
                         <div class="w-6 shrink-0"></div>
                       {/if}
 
-                      <div class="w-8 h-8 rounded-lg {isNodeCurrent ? 'bg-indigo-600 text-white' : 'bg-zinc-800 text-zinc-300'} flex items-center justify-center shrink-0 shadow-sm">
+                      <div class="w-8 h-8 rounded-lg {isNodeCurrent ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25' : 'bg-zinc-800 text-zinc-400 group-hover:text-zinc-200 group-hover:bg-zinc-750'} flex items-center justify-center shrink-0 transition">
                         <FolderGit class="w-4 h-4" />
                       </div>
 
                       <div class="flex flex-col min-w-0 flex-1">
                         <div class="flex items-center gap-2 flex-wrap">
-                          <span class="text-xs font-bold text-zinc-100 truncate">{node.name}</span>
-                          {#if isNodeCurrent}
-                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/30 text-indigo-200 font-mono font-bold">ACTIVE</span>
-                          {/if}
+                          <span class="text-xs font-bold text-zinc-100 group-hover:text-white truncate transition-colors">
+                            {node.name}
+                          </span>
                           {#if hasChildren}
                             <button
                               type="button"
-                              onclick={() => toggleExpand(node.name)}
+                              onclick={(e) => {
+                                e.stopPropagation();
+                                toggleExpand(node.name);
+                              }}
                               class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 border border-indigo-500/25 font-mono cursor-pointer transition"
                             >
                               {node.children.length} sub-folder {isExpanded ? '▲' : '▼'}
@@ -327,26 +339,15 @@
                       </div>
                     </div>
 
-                    <!-- ACTION BUTTON -->
-                    <div class="flex items-center gap-2 shrink-0">
-                      {#if hasChildren}
-                        <button
-                          type="button"
-                          onclick={() => handleSelect(node.path)}
-                          class="px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer {isNodeCurrent ? 'bg-indigo-600 text-white' : 'bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-white/[0.08]'}"
-                          title={`Buka direktori induk: ${node.name}`}
-                        >
-                          {isNodeCurrent ? 'Aktif' : 'Pilih Parent'}
-                        </button>
+                    <!-- RIGHT: CLEAN ACTIVE / HOVER INDICATOR (NO BULKY BUTTON) -->
+                    <div class="flex items-center gap-2 shrink-0 pr-1">
+                      {#if isNodeCurrent}
+                        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[11px] font-mono font-bold shadow-sm shadow-indigo-500/20">
+                          <Check class="w-3 h-3 text-indigo-400" />
+                          <span>Active</span>
+                        </div>
                       {:else}
-                        <button
-                          type="button"
-                          onclick={() => handleSelect(node.path)}
-                          class="px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer {isNodeCurrent ? 'bg-indigo-600 text-white' : 'bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white shadow-sm shadow-indigo-500/20'}"
-                          title={`Buka project: ${node.name}`}
-                        >
-                          {isNodeCurrent ? 'Aktif' : 'Pilih'}
-                        </button>
+                        <ArrowRight class="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400" />
                       {/if}
                     </div>
                   </div>
@@ -358,38 +359,45 @@
                         {#each node.children as child, idx}
                           {@const isChildCurrent = isCurrent(child.path)}
                           {@const isLastChild = idx === node.children.length - 1}
-                          <div class="min-h-[40px] px-3 py-2 rounded-xl bg-zinc-900/50 hover:bg-zinc-800/70 border border-white/[0.04] hover:border-white/[0.1] flex items-center justify-between shrink-0 transition gap-2">
+                          <div
+                            role="button"
+                            tabindex="0"
+                            onclick={() => handleSelect(child.path)}
+                            onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(child.path); }}
+                            class="min-h-[40px] px-3 py-2 rounded-xl {isChildCurrent ? 'bg-indigo-600/15 border-indigo-500/40 text-white' : 'bg-zinc-900/50 hover:bg-zinc-800/80 border-white/[0.04] hover:border-white/[0.1] text-zinc-300'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group"
+                            title={`Klik untuk buka: ${child.name}`}
+                          >
                             <div class="flex items-center gap-2.5 min-w-0 flex-1">
                               <span class="text-zinc-600 font-mono text-xs select-none shrink-0">
                                 {isLastChild ? '└──' : '├──'}
                               </span>
-                              <div class="w-6 h-6 rounded-md {isChildCurrent ? 'bg-indigo-600 text-white' : 'bg-zinc-800 text-zinc-400'} flex items-center justify-center shrink-0">
+                              <div class="w-6 h-6 rounded-md {isChildCurrent ? 'bg-indigo-600 text-white shadow-sm' : 'bg-zinc-800 text-zinc-400 group-hover:text-zinc-200'} flex items-center justify-center shrink-0 transition">
                                 <Package class="w-3.5 h-3.5" />
                               </div>
                               <div class="flex flex-col min-w-0 flex-1">
                                 <div class="flex items-center gap-1.5">
-                                  <span class="text-xs font-semibold text-zinc-200 truncate">{child.name}</span>
-                                  {#if isChildCurrent}
-                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/30 text-indigo-200 font-mono font-bold">ACTIVE</span>
+                                  <span class="text-xs font-semibold {isChildCurrent ? 'text-white' : 'text-zinc-200 group-hover:text-white'} truncate transition-colors">
+                                    {child.name}
+                                  </span>
+                                  {#if child.isGit}
+                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-zinc-800/80 text-zinc-400 font-mono flex items-center gap-1">
+                                      <GitBranch class="w-2.5 h-2.5 text-zinc-400" /> git
+                                    </span>
                                   {/if}
                                 </div>
                                 <span class="text-[10px] text-zinc-500 font-mono truncate">{child.relativePath}</span>
                               </div>
                             </div>
 
-                            <div class="flex items-center gap-2 shrink-0">
-                              {#if child.isGit}
-                                <span class="text-[10px] font-mono text-zinc-500 hidden sm:flex items-center gap-1">
-                                  <GitBranch class="w-2.5 h-2.5" /> git
-                                </span>
+                            <div class="flex items-center gap-2 shrink-0 pr-1">
+                              {#if isChildCurrent}
+                                <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/25 border border-indigo-500/40 text-indigo-300 text-[10px] font-mono font-bold">
+                                  <Check class="w-3 h-3 text-indigo-400" />
+                                  <span>Active</span>
+                                </div>
+                              {:else}
+                                <ArrowRight class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400" />
                               {/if}
-                              <button
-                                type="button"
-                                onclick={() => handleSelect(child.path)}
-                                class="px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer {isChildCurrent ? 'bg-indigo-600 text-white' : 'bg-zinc-800/90 hover:bg-indigo-600 text-zinc-200 hover:text-white'}"
-                              >
-                                {isChildCurrent ? 'Aktif' : 'Pilih'}
-                              </button>
                             </div>
                           </div>
                         {/each}
