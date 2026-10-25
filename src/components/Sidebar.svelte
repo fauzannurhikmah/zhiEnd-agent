@@ -11,7 +11,8 @@
     ChevronDown,
     Sparkles,
     Plus,
-    Check
+    Check,
+    X
   } from 'lucide-svelte';
 
   let {
@@ -25,7 +26,8 @@
     onSelectTab,
     onOpenProjectModal,
     onOpenSettingsModal,
-    onModelChange
+    onModelChange,
+    onResetToRoot
   }: {
     currentTab: 'chat' | 'git' | 'remote' | 'files';
     config: AppConfig | null;
@@ -38,6 +40,7 @@
     onOpenProjectModal: () => void;
     onOpenSettingsModal: () => void;
     onModelChange: (model: string) => void;
+    onResetToRoot: () => void;
   } = $props();
 
   let activeModel = $state('gemini-3.8-flash-high');
@@ -82,8 +85,18 @@
     }
   });
 
+  const isRootWorkspace = $derived(() => {
+    if (!config?.activeProject) return true;
+    const norm = config.activeProject.replace(/\\/g, '/').toLowerCase().replace(/\/+$/, '');
+    return norm === 'd:/works' || norm === 'd:';
+  });
+
   const projectName = $derived(() => {
-    if (!config?.activeProject) return 'Workspace';
+    if (!config?.activeProject) return 'Root D:\\Works';
+    const norm = config.activeProject.replace(/\\/g, '/').toLowerCase().replace(/\/+$/, '');
+    if (norm === 'd:/works' || norm === 'd:') {
+      return 'Root D:\\Works';
+    }
     const parts = config.activeProject.replace(/\\/g, '/').split('/').filter(Boolean);
     return parts[parts.length - 1] || config.activeProject;
   });
@@ -135,7 +148,7 @@
       {/if}
     </div>
 
-    <!-- Active Workspace Dropdown Button -->
+    <!-- Active Workspace Dropdown Button & Clear Workspace -->
     <div class="flex items-center gap-1.5">
       <button
         onclick={onOpenProjectModal}
@@ -143,10 +156,12 @@
         title={config?.activeProject || 'Ganti Workspace (D:\\Works)'}
       >
         <div class="flex items-center gap-2 min-w-0">
-          <FolderGit class="w-4 h-4 text-indigo-400 group-hover:scale-105 transition-transform shrink-0" />
+          <FolderGit class="w-4 h-4 {isRootWorkspace() ? 'text-indigo-400' : 'text-emerald-400'} group-hover:scale-105 transition-transform shrink-0" />
           <div class="flex flex-col min-w-0">
             <span class="text-xs font-semibold text-zinc-100 truncate">{projectName()}</span>
-            {#if gitStatus?.isRepo}
+            {#if isRootWorkspace()}
+              <span class="text-[10px] text-indigo-400/80 font-mono">default root</span>
+            {:else if gitStatus?.isRepo}
               <span class="text-[10px] text-zinc-400 font-mono flex items-center gap-1">
                 <GitBranch class="w-2.5 h-2.5 text-sky-400" /> {gitStatus.branch || 'main'}
               </span>
@@ -155,6 +170,16 @@
         </div>
         <ChevronDown class="w-3.5 h-3.5 text-zinc-500 shrink-0" />
       </button>
+
+      {#if !isRootWorkspace()}
+        <button
+          onclick={onResetToRoot}
+          class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-rose-500/20 border border-white/[0.06] hover:border-rose-500/40 text-zinc-400 hover:text-rose-300 transition cursor-pointer shrink-0"
+          title="Clear Workspace (Reset ke Root D:\Works)"
+        >
+          <X class="w-3.5 h-3.5" />
+        </button>
+      {/if}
 
       <button
         onclick={onOpenProjectModal}

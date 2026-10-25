@@ -71,6 +71,14 @@ export const api = {
     return res.json();
   },
 
+  async resetToRoot(): Promise<{ success: boolean; activeProject?: string }> {
+    const res = await fetch('/api/projects/reset', {
+      method: 'POST',
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
   async getProjectFiles(): Promise<{ projectPath: string; files: FileItem[] }> {
     const res = await fetch('/api/projects/files', { headers: getHeaders() });
     return res.json();

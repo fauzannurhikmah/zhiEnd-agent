@@ -267,6 +267,12 @@
     }
   }
 
+  async function handleResetToRoot() {
+    await api.resetToRoot();
+    await refreshAll();
+    addLog('[Workspace Reset] Kembali ke Root D:\\Works.');
+  }
+
   async function handlePinSubmit(pin: string): Promise<boolean> {
     const res = await api.verifyPin(pin);
     if (res.authorized) {
@@ -304,6 +310,7 @@
     onSelectTab={(tab) => currentTab = tab}
     onOpenProjectModal={() => isProjectModalOpen = true}
     onOpenSettingsModal={() => isSettingsOpen = true}
+    onResetToRoot={handleResetToRoot}
     onModelChange={async (newModel) => {
       if (config) config.antigravity.defaultModel = newModel;
       await api.updateConfig({ defaultModel: newModel } as any);
@@ -318,7 +325,21 @@
       <div class="flex items-center gap-2 text-xs font-mono text-zinc-400">
         <span class="text-zinc-500">zhiEnd</span>
         <span class="text-zinc-600">/</span>
-        <span class="text-zinc-200 truncate max-w-sm">{config?.activeProject?.split(/\\|\//).pop() || 'workspace'}</span>
+        {#if !config?.activeProject || config.activeProject.replace(/\\/g, '/').toLowerCase() === 'd:/works'}
+          <span class="text-indigo-400 font-semibold flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+            D:\Works (Root)
+          </span>
+        {:else}
+          <span class="text-zinc-200 truncate max-w-sm">{config?.activeProject?.split(/\\|\//).pop()}</span>
+          <button
+            onclick={handleResetToRoot}
+            class="px-2 py-0.5 rounded-md bg-zinc-800/80 hover:bg-rose-500/20 text-[10px] text-zinc-400 hover:text-rose-300 border border-white/10 hover:border-rose-500/30 transition cursor-pointer flex items-center gap-1"
+            title="Clear Workspace (Reset ke Root D:\Works)"
+          >
+            Clear
+          </button>
+        {/if}
         {#if gitStatus?.isRepo}
           <span class="text-zinc-600">/</span>
           <span class="flex items-center gap-1 text-zinc-400">

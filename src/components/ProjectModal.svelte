@@ -92,6 +92,12 @@
     return activeProjectPath.replace(/\\/g, '/').toLowerCase() === pathToCheck.replace(/\\/g, '/').toLowerCase();
   }
 
+  function isAtRoot(): boolean {
+    if (!activeProjectPath) return true;
+    const norm = activeProjectPath.replace(/\\/g, '/').toLowerCase().replace(/\/+$/, '');
+    return norm === 'd:/works' || norm === 'd:';
+  }
+
   const projectTree = $derived(() => {
     const q = searchQuery.toLowerCase().trim();
     const map = new Map<string, ProjectTreeNode>();
@@ -258,6 +264,49 @@
               placeholder="Cari project di D:\Works (contoh: sehati, affiliate, image, pacar)..."
               class="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-zinc-100 placeholder-zinc-500 outline-none focus:border-indigo-500/60 transition"
             />
+          </div>
+
+          <!-- Root Folder (D:\Works) & Clear Workspace Hero Card -->
+          <div class="rounded-xl border {isAtRoot() ? 'border-indigo-500/60 bg-gradient-to-r from-indigo-950/40 via-purple-950/20 to-zinc-900/60 shadow-md shadow-indigo-950/20' : 'border-white/[0.08] bg-zinc-900/50 hover:border-indigo-500/30'} p-3 flex items-center justify-between gap-3 shrink-0 transition">
+            <div
+              role="button"
+              tabindex="0"
+              onclick={() => handleSelect('D:\\Works')}
+              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect('D:\\Works'); }}
+              class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer group"
+            >
+              <div class="w-8 h-8 rounded-lg bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-105 transition-transform shrink-0">
+                <Folder class="w-4 h-4 text-indigo-300" />
+              </div>
+              <div class="flex flex-col min-w-0">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-white tracking-tight group-hover:text-indigo-200 transition">D:\Works (Root Folder)</span>
+                  <span class="px-2 py-0.2 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 text-[10px] font-mono">
+                    Default Workspace
+                  </span>
+                </div>
+                <p class="text-[11px] text-zinc-400 truncate">
+                  Tanpa spesifik project. Simpan / buat project baru langsung di root folder ini.
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              {#if isAtRoot()}
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-xs font-semibold flex items-center gap-1 font-mono">
+                  <Check class="w-3.5 h-3.5 text-indigo-400" /> Sedang Aktif
+                </span>
+              {:else}
+                <button
+                  type="button"
+                  onclick={() => handleSelect('D:\\Works')}
+                  class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-indigo-600 hover:text-white border border-white/10 text-zinc-200 text-xs font-medium transition cursor-pointer flex items-center gap-1.5 shadow-sm active:scale-95"
+                >
+                  <RotateCw class="w-3 h-3 text-indigo-400" />
+                  <span>Set Root / Clear Workspace</span>
+                </button>
+              {/if}
+            </div>
           </div>
 
           <!-- Structured Tree View -->

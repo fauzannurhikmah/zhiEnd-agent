@@ -276,6 +276,11 @@ app.post('/api/projects/select', async (c) => {
   return c.json(result);
 });
 
+app.post('/api/projects/reset', async (c) => {
+  const result = await onProjectChange('D:\\Works');
+  return c.json(result);
+});
+
 app.get('/api/projects/files', (c) => {
   const activeProj = config.activeProject;
   if (!fs.existsSync(activeProj)) {

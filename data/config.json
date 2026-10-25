@@ -1,17 +1,18 @@
 {
   "port": 3888,
   "securityPin": "",
-  "activeProject": "D:\\Works\\Sehati\\erp-purchasing",
+  "activeProject": "D:\\Works",
   "recentProjects": [
+    "D:\\Works",
+    "D:\\Works\\Sehati\\erp-warehouse",
+    "D:\\Works\\porfolio\\fauzan-portfolio",
+    "D:\\Works\\Database Backup",
     "D:\\Works\\Sehati\\erp-purchasing",
     "D:\\Works\\sanika",
     "D:\\Works\\Sehati\\CRM",
     "D:\\Works\\Sehati\\erp-pos",
     "D:\\Works\\project stock market\\stock-intel-ingestion",
-    "D:\\Works\\Sehati",
-    "D:\\Works\\nextgen-portfolio",
-    "d:\\Works\\zhiEnd-agent",
-    "d:/Works/zhiEnd-agent"
+    "D:\\Works\\Sehati"
   ],
   "antigravity": {
     "cliPath": "C:\\Users\\zhien\\AppData\\Local\\agy\\bin\\agy.exe",
