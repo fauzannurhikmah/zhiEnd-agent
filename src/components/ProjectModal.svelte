@@ -235,38 +235,38 @@
 </script>
 
 {#if isOpen}
-  <div class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-    <div class="w-full max-w-3xl h-[85vh] bg-zinc-950/95 border border-white/[0.12] rounded-2xl flex flex-col shadow-2xl shadow-indigo-950/40 overflow-hidden">
+  <div class="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
+    <div class="w-full max-w-3xl h-[92vh] sm:h-[85vh] bg-zinc-950/95 border border-white/[0.12] rounded-2xl flex flex-col shadow-2xl shadow-indigo-950/40 overflow-hidden">
       
       <!-- Modal Header with Cinematic Accent -->
-      <div class="px-5 py-4 border-b border-zinc-800/80 flex items-center justify-between bg-gradient-to-r from-zinc-900/60 via-zinc-900/30 to-zinc-900/60">
-        <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-500/20">
+      <div class="px-3.5 sm:px-5 py-3 sm:py-4 border-b border-zinc-800/80 flex items-center justify-between bg-gradient-to-r from-zinc-900/60 via-zinc-900/30 to-zinc-900/60">
+        <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-500/20 shrink-0">
             <FolderGit class="w-4 h-4" />
           </div>
-          <div>
-            <h3 class="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+          <div class="min-w-0">
+            <h3 class="text-xs sm:text-sm font-bold text-white tracking-tight flex items-center gap-1.5 sm:gap-2 truncate">
               Workspace & Project Manager
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                Default: D:\Works
+              <span class="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 hidden xs:inline">
+                D:\Works
               </span>
             </h3>
-            <p class="text-[11px] text-zinc-400">Pilih dari folder D:\Works, buat baru, atau masukkan path manual</p>
+            <p class="text-[10px] sm:text-[11px] text-zinc-400 truncate">Pilih dari folder D:\Works, buat baru, atau masukkan path manual</p>
           </div>
         </div>
-        <button onclick={onClose} class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition cursor-pointer">
+        <button onclick={onClose} class="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-zinc-800 transition cursor-pointer shrink-0">
           <X class="w-4 h-4" />
         </button>
       </div>
 
       <!-- Navigation Tabs -->
-      <div class="flex items-center justify-between px-5 border-b border-zinc-800/60 bg-zinc-900/40 text-xs font-semibold">
-        <div class="flex gap-4">
+      <div class="flex items-center justify-between px-3 sm:px-5 border-b border-zinc-800/60 bg-zinc-900/40 text-xs font-semibold overflow-x-auto gap-2 scrollbar-none">
+        <div class="flex gap-2 sm:gap-4 shrink-0">
           <button
             onclick={() => activeTab = 'scan'}
-            class="py-2.5 border-b-2 flex items-center gap-1.5 cursor-pointer {activeTab === 'scan' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-zinc-400 hover:text-zinc-200'}"
+            class="py-2 sm:py-2.5 border-b-2 flex items-center gap-1.5 cursor-pointer text-xs whitespace-nowrap {activeTab === 'scan' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-zinc-400 hover:text-zinc-200'}"
           >
-            <FolderGit class="w-3.5 h-3.5" /> Project D:\Works ({scannedProjects.length})
+            <FolderGit class="w-3.5 h-3.5" /> D:\Works ({scannedProjects.length})
           </button>
           <button
             onclick={() => activeTab = 'create'}

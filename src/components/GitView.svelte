@@ -84,17 +84,17 @@
   }
 </script>
 
-<div class="h-full flex flex-col gap-3 overflow-hidden p-1">
+<div class="h-full flex flex-col gap-3 overflow-y-auto lg:overflow-hidden p-2 md:p-1 pb-20 md:pb-1">
   <!-- Top Bar with Cinematic Header -->
-  <div class="flex items-center justify-between border-b border-white/[0.08] pb-3">
-    <div class="flex items-center gap-4 text-xs font-mono">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+    <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-mono">
       <div class="flex items-center gap-1.5 text-zinc-100 font-bold px-2.5 py-1 rounded-lg bg-zinc-900 border border-white/[0.06]">
         <GitBranch class="w-3.5 h-3.5 text-sky-400" />
         <span>{gitStatus?.branch || 'HEAD'}</span>
       </div>
 
       {#if gitStatus?.remoteUrl}
-        <a href={gitStatus.remoteUrl} target="_blank" class="text-zinc-400 hover:text-white flex items-center gap-1 truncate max-w-sm">
+        <a href={gitStatus.remoteUrl} target="_blank" class="text-zinc-400 hover:text-white flex items-center gap-1 truncate max-w-[180px] sm:max-w-sm">
           {gitStatus.remoteUrl} <ExternalLink class="w-2.5 h-2.5" />
         </a>
       {/if}
@@ -110,7 +110,7 @@
     </div>
 
     <!-- Actions -->
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 self-start sm:self-auto">
       <button
         onclick={onPull}
         class="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/[0.08] text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition cursor-pointer"

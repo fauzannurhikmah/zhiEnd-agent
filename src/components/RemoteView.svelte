@@ -207,7 +207,7 @@
   }
 </script>
 
-<div class="h-full overflow-y-auto p-4 md:p-6 custom-scrollbar select-none">
+<div class="h-full overflow-y-auto p-3.5 sm:p-4 md:p-6 pb-24 md:pb-6 custom-scrollbar select-none">
   <!-- Header Title -->
   <div class="max-w-6xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
     <div>

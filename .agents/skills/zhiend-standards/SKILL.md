@@ -1,6 +1,6 @@
 ---
 name: zhiend-standards
-description: Coding guidelines, architecture conventions, TypeScript safety rules, Svelte 5 component patterns, Hono backend patterns, Tailwind CSS v4 styling system, and Cinematic Minimalist UI hierarchy for zhiEnd Agent.
+description: Coding guidelines, architecture conventions, TypeScript safety rules, Svelte 5 component patterns, Hono backend patterns, Tailwind CSS v4 styling system, Cinematic Minimalist UI hierarchy, and Mobile-First Responsive UI standards for zhiEnd Agent.
 ---
 
 # zhiEnd Agent Architecture & Coding Standards
@@ -90,4 +90,47 @@ To avoid dull, monochrome looks while preventing random or inconsistent colors, 
      - **Warning Information**: Use `dialog.showWarning(message, title?)` with glowing Amber accents (`AlertTriangle`, gradient amber CTA).
      - **General Notice / Info**: Use `dialog.showInfo(message, title?)` with glowing Indigo/Sky accents (`Info`, gradient indigo CTA).
    - Every modal dialog must provide backdrop glassmorphism (`bg-black/80 backdrop-blur-md`), ambient obsidian card surface (`bg-zinc-900/95 border border-white/[0.08] shadow-2xl`), smooth zoom-in transitions, and keyboard accessibility (`Enter` to confirm/close, `Escape` to dismiss).
+
+---
+
+## 5. Mobile-First & Fully Responsive UI Standards (Mandatory)
+
+Semua halaman dan komponen web UI di zhiEnd Agent **WAJIB** ramah pengguna mobile (smartphone/tablet) dan responsif penuh di berbagai ukuran layar (dari 320px hingga 4K desktop). DILARANG KERAS membuat UI yang hanya optimal di layar lebar laptop/desktop dan hancur di HP.
+
+### A. Core Mobile Responsiveness Rules
+
+1. **Zero Horizontal Viewport Overflow (`overflow-x-hidden`)**:
+   - Tidak boleh ada elemen, tabel, kartu, atau teks kode yang meluber keluar layar (`body` atau container horizontal tidak boleh goyang/bisa di-scroll ke samping).
+   - Selalu gunakan `w-full max-w-full overflow-hidden` pada container utama dan `overflow-x-auto` khusus untuk kontainer tabel atau blok kode (`pre/code`) dengan touch inertia scrolling (`-webkit-overflow-scrolling: touch`).
+
+2. **Adaptive App Shell & Navigation Layout**:
+   - **Desktop (`md:` / `lg:`)**: Sidebar samping persisten atau semi-collapsible, breadcrumb horizontal lengkap, tombol aksi sejajar (inline).
+   - **Mobile (`< md:`)**:
+     - Sidebar harus berubah menjadi **Off-Canvas Drawer** (slide-over dari kiri/kanan dengan tombol hamburger dan backdrop blur gelap) atau **Bottom Sheet Navigation**.
+     - Tombol-tombol navigasi penting harus mudah dijangkau dengan ibu jari (thumb-zone friendly).
+     - Grid layout wajib responsif: gunakan `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3` (jangan memaksakan `grid-cols-3` atau `grid-cols-4` di layar kecil).
+
+3. **Touch Targets & Interactive Sizing**:
+   - Semua tombol aksi, ikon interaktif, pill tag, toggle, dan opsi dropdown di layar HP **WAJIB** memiliki target sentuh minimal **44x44px** (atau padding minimal `p-2.5` / `p-3`, `min-h-[44px]`).
+   - Hindari tombol-tombol mini yang berdempetan rapat sehingga rawan salah pencet di layar sentuh. Berikan jarak `gap-2` atau `gap-3`.
+
+4. **Mobile Chat & Sticky Input Bar**:
+   - Area input chat harus menempel rapi di bagian bawah viewport (`sticky bottom-0 pb-safe z-30`).
+   - Perhitungkan virtual keyboard di mobile: input bar tidak boleh tertutup keyboard atau terlempar keluar layar.
+   - Textarea input pesan di mobile harus otomatis menyesuaikan tinggi (`max-h-32 overflow-y-auto`) dengan tombol kirim yang jelas dan mudah diakses.
+
+5. **Adaptive Modals & Popovers**:
+   - Pada layar desktop, modal muncul di tengah dengan efek zoom.
+   - Pada layar mobile (`< sm:`), modal harus otomatis beradaptasi menjadi **Bottom Sheet** (`fixed inset-x-0 bottom-0 rounded-t-2xl max-h-[90vh]`) atau **Full Screen Modal** dengan tombol tutup (X) yang jelas di pojok atas dan konten yang bisa di-scroll (`overflow-y-auto`).
+
+6. **Typography & Spacing Fluidity**:
+   - Gunakan ukuran teks responsif:
+     - Judul: `text-xl sm:text-2xl lg:text-3xl font-bold`
+     - Subtitle / Label: `text-xs sm:text-sm`
+     - Body Text: `text-sm sm:text-base leading-relaxed`
+   - Gunakan padding & margin adaptif: `p-3 sm:p-5 lg:p-6`, `gap-3 sm:gap-4 lg:gap-6`.
+
+7. **Kewajiban Pengujian (Self-Audit)**:
+   - Setiap kali membuat atau memodifikasi halaman / komponen UI, **WAJIB** membayangkan dan menguji tampilan pada resolusi layar mobile (375px / 390px / 414px) sebelum menyatakan tugas selesai.
+
 

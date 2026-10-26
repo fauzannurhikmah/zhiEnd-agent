@@ -32,7 +32,9 @@
     onSelectSession,
     onCreateNewSession,
     onDeleteSession,
-    onToggleScope
+    onToggleScope,
+    isMobileOpen = false,
+    onCloseMobile
   }: {
     currentTab: 'chat' | 'git' | 'remote' | 'files';
     config: AppConfig | null;
@@ -44,6 +46,8 @@
     chatSessions?: ChatSessionItem[];
     activeSessionId?: string | null;
     historyScope?: 'workspace' | 'global';
+    isMobileOpen?: boolean;
+    onCloseMobile?: () => void;
     onSelectTab: (tab: 'chat' | 'git' | 'remote' | 'files') => void;
     onOpenProjectModal: () => void;
     onOpenSettingsModal: () => void;
@@ -53,6 +57,26 @@
     onDeleteSession?: (id: string) => void;
     onToggleScope?: (scope: 'workspace' | 'global') => void;
   } = $props();
+
+  function handleTabClick(tab: 'chat' | 'git' | 'remote' | 'files') {
+    onSelectTab(tab);
+    if (onCloseMobile) onCloseMobile();
+  }
+
+  function handleSessionClick(session: ChatSessionItem) {
+    if (onSelectSession) onSelectSession(session);
+    if (onCloseMobile) onCloseMobile();
+  }
+
+  function handleProjectModalClick() {
+    onOpenProjectModal();
+    if (onCloseMobile) onCloseMobile();
+  }
+
+  function handleSettingsModalClick() {
+    onOpenSettingsModal();
+    if (onCloseMobile) onCloseMobile();
+  }
 
   const isRootWorkspace = $derived(() => {
     if (!config?.activeProject) return true;
@@ -71,7 +95,18 @@
   });
 </script>
 
-<aside class="relative z-10 w-64 bg-zinc-950/80 backdrop-blur-xl border-r border-white/[0.08] flex flex-col justify-between shrink-0 select-none">
+{#if isMobileOpen}
+  <!-- Backdrop for Mobile Off-Canvas Drawer -->
+  <div 
+    class="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200" 
+    onclick={onCloseMobile}
+    role="button"
+    tabindex="0"
+    onkeydown={(e) => { if (e.key === 'Escape' && onCloseMobile) onCloseMobile(); }}
+  ></div>
+{/if}
+
+<aside class="fixed md:static inset-y-0 left-0 z-50 md:z-10 w-72 md:w-64 max-w-[85vw] bg-zinc-950/95 md:bg-zinc-950/80 backdrop-blur-2xl border-r border-white/[0.08] flex flex-col justify-between shrink-0 select-none shadow-2xl md:shadow-none transition-transform duration-300 ease-in-out {isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}">
   <!-- Top: Logo & Workspace -->
   <div class="flex flex-col gap-3 p-3">
     <!-- Brand with subtle gradient glow -->
@@ -85,12 +120,24 @@
         </span>
       </div>
 
-      {#if isAgentBusy}
-        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-[10px] text-amber-300 font-mono">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-          busy
-        </span>
-      {/if}
+      <div class="flex items-center gap-2">
+        {#if isAgentBusy}
+          <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/25 text-[10px] text-amber-300 font-mono">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+            busy
+          </span>
+        {/if}
+        {#if onCloseMobile}
+          <button
+            type="button"
+            onclick={onCloseMobile}
+            class="md:hidden p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+            title="Tutup Menu"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        {/if}
+      </div>
     </div>
 
     <!-- Active Workspace Card & Create Button (Proportional & Clean) -->
@@ -146,7 +193,7 @@
     <!-- Navigation with cinematic active gradient pill -->
     <nav class="flex flex-col gap-1 pt-2">
       <button
-        onclick={() => onSelectTab('chat')}
+        onclick={() => handleTabClick('chat')}
         class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab === 'chat' ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
       >
         <div class="flex items-center gap-2.5">
@@ -156,7 +203,7 @@
       </button>
 
       <button
-        onclick={() => onSelectTab('git')}
+        onclick={() => handleTabClick('git')}
         class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab === 'git' ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
       >
         <div class="flex items-center gap-2.5">
@@ -171,7 +218,7 @@
       </button>
 
       <button
-        onclick={() => onSelectTab('remote')}
+        onclick={() => handleTabClick('remote')}
         class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab === 'remote' ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
       >
         <div class="flex items-center gap-2.5">
@@ -189,7 +236,7 @@
       </button>
 
       <button
-        onclick={() => onSelectTab('files')}
+        onclick={() => handleTabClick('files')}
         class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab === 'files' ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
       >
         <div class="flex items-center gap-2.5">
@@ -249,8 +296,8 @@
               <button
                 type="button"
                 onclick={() => {
-                  onSelectTab('chat');
-                  onSelectSession?.(sess);
+                  handleTabClick('chat');
+                  handleSessionClick(sess);
                 }}
                 class="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
                 title={sess.title}

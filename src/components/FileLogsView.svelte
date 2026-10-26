@@ -22,9 +22,9 @@
   }
 </script>
 
-<div class="h-full grid grid-cols-1 md:grid-cols-[320px_1fr] gap-3 overflow-hidden">
+<div class="h-full grid grid-cols-1 md:grid-cols-[320px_1fr] gap-3 overflow-y-auto md:overflow-hidden pb-20 md:pb-0 p-1">
   <!-- Left: File Tree Explorer -->
-  <div class="glass-panel p-3.5 rounded-xl flex flex-col gap-2.5 overflow-hidden border border-slate-800/80 shadow-md">
+  <div class="glass-panel p-3.5 rounded-xl flex flex-col gap-2.5 h-64 md:h-auto overflow-hidden border border-slate-800/80 shadow-md">
     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
       <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
         <FolderTree class="w-4 h-4 text-amber-400" />
@@ -74,7 +74,7 @@
   </div>
 
   <!-- Right: Terminal & Stream Logs -->
-  <div class="glass-panel p-3.5 rounded-xl flex flex-col gap-2.5 overflow-hidden border border-slate-800/80 shadow-md">
+  <div class="glass-panel p-3.5 rounded-xl flex flex-col gap-2.5 min-h-[320px] md:min-h-0 overflow-hidden border border-slate-800/80 shadow-md">
     <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
       <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">
         <Terminal class="w-4 h-4 text-violet-400" />
@@ -90,7 +90,7 @@
         <div class="text-slate-600 italic">[System] Menunggu aktivitas task...</div>
       {:else}
         {#each logs as log}
-          <div class="whitespace-pre-wrap">{log}</div>
+          <div class="whitespace-pre-wrap break-all">{log}</div>
         {/each}
       {/if}
     </div>
