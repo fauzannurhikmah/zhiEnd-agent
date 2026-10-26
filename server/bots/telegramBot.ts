@@ -3,7 +3,8 @@ import { Telegraf } from 'telegraf';
 import { AppConfig, TelegramStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
-import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, getOrCreateDefaultSession, saveMessageToDb } from '../db/database';
+import path from 'path';
+import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, getOrCreateDefaultSession, saveMessageToDb, getAllProjectsList } from '../db/database';
 import { getSafePersonaEmoji, formatForWhatsApp } from './whatsappBot';
 
 export interface TelegramBotOptions {
@@ -113,8 +114,9 @@ export class TelegramBotManager extends EventEmitter {
   _Contoh:_ \`/persona 2\`
 
 📁 *Workspace Project:*
-• \`/project <path>\` : Ganti folder project aktif
-  _Contoh:_ \`/project D:/Works/crm-sehati\`
+• \`/project\` : Tampilkan seluruh daftar project & workspace
+• \`/project <nomor/nama/path>\` : Ganti folder project aktif
+  _Contoh:_ \`/project\` atau \`/project 2\` atau \`/project erp-pos\`
 
 🌿 *Git & Repository:*
 • \`/git\` : Cek status branch & file yang berubah
@@ -204,16 +206,54 @@ export class TelegramBotManager extends EventEmitter {
         }
       });
 
-      this.bot.command('project', async (ctx) => {
-        const text = ctx.message.text.replace('/project', '').trim();
-        if (!text) {
-          return ctx.reply(`📁 *Project aktif saat ini:*\n\`${this.config.activeProject}\`\n\nUntuk mengganti: \`/project D:/Path/Ke/Project\``, { parse_mode: 'Markdown' });
+      this.bot.command(['project', 'projects'], async (ctx) => {
+        const text = ctx.message.text.replace(/^[/!](projects|project)/i, '').trim();
+        const activeProj = this.config.activeProject || 'Belum dipilih';
+        const allProjects = getAllProjectsList();
+
+        if (!text || text.toLowerCase() === 'list') {
+          let msg = `📁 *Daftar Project / Workspace:*\n`;
+          msg += `Project Aktif: \`${activeProj}\`\n\n`;
+
+          if (allProjects.length === 0) {
+            msg += `_(Belum ada project terdeteksi)_\n`;
+          } else {
+            allProjects.forEach((p, idx) => {
+              const isCurrent = p.isActive || path.resolve(p.path).toLowerCase() === path.resolve(activeProj).toLowerCase();
+              msg += `${idx + 1}. 📁 *${p.name}* ${isCurrent ? '*(AKTIF)*' : ''}\n`;
+              msg += `   • Path: \`${p.path}\`\n\n`;
+            });
+          }
+
+          msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+          msg += `💡 *Untuk mengganti project:*\n`;
+          msg += `Ketik: \`/project <nomor atau nama>\`\n`;
+          msg += `_Contoh:_ \`/project 2\` atau \`/project ${allProjects[1]?.name || 'nama-project'}\`\n`;
+          msg += `Atau masukkan path lengkap: \`/project D:/Works/...\``;
+
+          return ctx.reply(msg, { parse_mode: 'Markdown' });
+        }
+
+        let targetPath = text;
+        const numIdx = parseInt(text, 10);
+        if (!isNaN(numIdx) && numIdx >= 1 && numIdx <= allProjects.length) {
+          targetPath = allProjects[numIdx - 1].path;
+        } else {
+          const cleanQ = text.toLowerCase();
+          const matched = allProjects.find(p => 
+            p.name.toLowerCase() === cleanQ || 
+            p.name.toLowerCase().includes(cleanQ) ||
+            path.basename(p.path).toLowerCase() === cleanQ
+          );
+          if (matched) {
+            targetPath = matched.path;
+          }
         }
 
         if (this.onProjectChange) {
-          const res = await this.onProjectChange(text);
+          const res = await this.onProjectChange(targetPath);
           if (res.success) {
-            return ctx.reply(`✅ *Project aktif berhasil diubah ke:*\n\`${text}\``, { parse_mode: 'Markdown' });
+            return ctx.reply(`✅ *Project aktif berhasil diubah ke:*\n📁 \`${res.activeProject || targetPath}\``, { parse_mode: 'Markdown' });
           } else {
             return ctx.reply(`❌ Gagal: ${res.error || 'Direktori tidak ditemukan'}`);
           }

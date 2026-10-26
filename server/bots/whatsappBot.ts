@@ -13,7 +13,7 @@ import { EventEmitter } from 'events';
 import { AppConfig, WhatsAppStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
-import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, saveMessageToDb, getOrCreateDefaultSession } from '../db/database';
+import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, saveMessageToDb, getOrCreateDefaultSession, getAllProjectsList } from '../db/database';
 
 export interface WhatsAppBotOptions {
   config: AppConfig;
@@ -391,7 +391,8 @@ export class WhatsAppBotManager extends EventEmitter {
   _Contoh:_ \`!persona 2\` atau \`!persona Reviewer\`
 
 📁 *Workspace Project:*
-• *!project <path>* : Ganti project/workspace aktif
+• *!project* : Tampilkan seluruh daftar project & workspace
+• *!project <nomor/nama/path>* : Ganti project/workspace aktif
   _Contoh:_ \`!project D:/Works/crm-sehati\`
 
 🌿 *Git & Repository:*
@@ -550,19 +551,63 @@ export class WhatsAppBotManager extends EventEmitter {
       return;
     }
 
-    if (text.startsWith('!project')) {
-      const newPath = text.replace('!project', '').trim();
-      if (!newPath) {
-        await this.sendReply(sender, { text: `📁 Project aktif saat ini:\n${activeProj}\n\nUntuk ganti: !project D:/Path/Ke/Project` });
+    const isProjectCmd = 
+      cleanLower === '!project' || cleanLower === '/project' ||
+      cleanLower === '!projects' || cleanLower === '/projects' ||
+      cleanLower.startsWith('!project ') || cleanLower.startsWith('/project ') ||
+      cleanLower.startsWith('!projects ') || cleanLower.startsWith('/projects ');
+
+    if (isProjectCmd) {
+      const query = text.replace(/^[/!](projects|project)/i, '').trim();
+      const allProjects = getAllProjectsList();
+
+      if (!query || query.toLowerCase() === 'list') {
+        let msg = `📁 *Daftar Project / Workspace:*\n`;
+        msg += `Project Aktif: \`${activeProj}\`\n\n`;
+
+        if (allProjects.length === 0) {
+          msg += `_(Belum ada project terdeteksi di folder kerja)_\n`;
+        } else {
+          allProjects.forEach((p, idx) => {
+            const isCurrent = p.isActive || path.resolve(p.path).toLowerCase() === path.resolve(activeProj).toLowerCase();
+            msg += `${idx + 1}. 📁 *${p.name}* ${isCurrent ? '*(AKTIF)*' : ''}\n`;
+            msg += `   • Path: \`${p.path}\`\n\n`;
+          });
+        }
+
+        msg += `━━━━━━━━━━━━━━━━━━━━━\n`;
+        msg += `💡 *Untuk mengganti project:*\n`;
+        msg += `Ketik: *!project <nomor atau nama>*\n`;
+        msg += `_Contoh:_ *!project 2* atau *!project ${allProjects[1]?.name || 'nama-project'}*\n`;
+        msg += `Atau masukkan path lengkap: *!project D:/Works/...*`;
+
+        await this.sendReply(sender, { text: msg });
         return;
       }
 
+      // Resolve target project by number, name match, or path
+      let targetPath = query;
+      const numIdx = parseInt(query, 10);
+      if (!isNaN(numIdx) && numIdx >= 1 && numIdx <= allProjects.length) {
+        targetPath = allProjects[numIdx - 1].path;
+      } else {
+        const cleanQ = query.toLowerCase();
+        const matched = allProjects.find(p => 
+          p.name.toLowerCase() === cleanQ || 
+          p.name.toLowerCase().includes(cleanQ) ||
+          path.basename(p.path).toLowerCase() === cleanQ
+        );
+        if (matched) {
+          targetPath = matched.path;
+        }
+      }
+
       if (this.onProjectChange) {
-        const res = await this.onProjectChange(newPath);
+        const res = await this.onProjectChange(targetPath);
         if (res.success) {
-          await this.sendReply(sender, { text: `✅ *Project aktif diubah ke:*\n${newPath}` });
+          await this.sendReply(sender, { text: `✅ *Project aktif berhasil diubah ke:*\n📁 \`${res.activeProject || targetPath}\`` });
         } else {
-          await this.sendReply(sender, { text: `❌ Gagal: ${res.error || 'Path tidak valid'}` });
+          await this.sendReply(sender, { text: `❌ Gagal: ${res.error || 'Direktori tidak ditemukan'}` });
         }
       }
       return;

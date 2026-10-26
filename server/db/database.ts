@@ -571,6 +571,104 @@ export function setCustomRootWorkspace(rootPath: string): { success: boolean; ro
   return { success: true, root: norm };
 }
 
+export interface ProjectListItem {
+  name: string;
+  path: string;
+  isActive: boolean;
+}
+
+export function getAllProjectsList(): ProjectListItem[] {
+  const list: ProjectListItem[] = [];
+  const seenPaths = new Set<string>();
+
+  // Determine active project
+  let activeProj = '';
+  try {
+    const activeRow = getDb().prepare('SELECT path FROM workspaces WHERE is_active = 1 LIMIT 1').get() as { path: string } | undefined;
+    if (activeRow?.path) {
+      activeProj = activeRow.path;
+    } else {
+      activeProj = getCustomRootWorkspace();
+    }
+  } catch {
+    activeProj = 'D:\\Works';
+  }
+  const normActive = path.resolve(activeProj).toLowerCase();
+
+  // 1. Add workspaces recorded in SQLite
+  try {
+    const workspaces = getWorkspaces();
+    for (const ws of workspaces) {
+      if (!ws.path) continue;
+      const norm = path.resolve(ws.path);
+      const normKey = norm.toLowerCase();
+      if (!seenPaths.has(normKey) && fs.existsSync(norm)) {
+        seenPaths.add(normKey);
+        list.push({
+          name: ws.name || path.basename(norm),
+          path: norm,
+          isActive: normKey === normActive
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching workspaces for project list:', err);
+  }
+
+  // 2. Scan root directory (depth up to 2)
+  const rootDir = getCustomRootWorkspace() || 'D:\\Works';
+  if (fs.existsSync(rootDir)) {
+    const ignored = new Set(['node_modules', '.git', '.gemini', 'dist', 'build', '.agents', '$RECYCLE.BIN', 'System Volume Information', 'AppData']);
+    const scan = (dir: string, depth: number) => {
+      if (depth > 2) return;
+      try {
+        const items = fs.readdirSync(dir, { withFileTypes: true });
+        for (const it of items) {
+          if (!it.isDirectory() || ignored.has(it.name) || it.name.startsWith('.')) continue;
+          const full = path.join(dir, it.name);
+          const norm = path.resolve(full);
+          const normKey = norm.toLowerCase();
+
+          let isProject = false;
+          try {
+            isProject = fs.existsSync(path.join(full, 'package.json')) || fs.existsSync(path.join(full, '.git'));
+          } catch {}
+
+          if (!seenPaths.has(normKey)) {
+            seenPaths.add(normKey);
+            list.push({
+              name: it.name,
+              path: norm,
+              isActive: normKey === normActive
+            });
+          }
+
+          if (!isProject && depth < 2) {
+            scan(full, depth + 1);
+          }
+        }
+      } catch {}
+    };
+    scan(rootDir, 0);
+  }
+
+  // Double check active project status
+  for (const item of list) {
+    if (path.resolve(item.path).toLowerCase() === normActive) {
+      item.isActive = true;
+    }
+  }
+
+  // Sort so active project is first, then alphabetical by name
+  list.sort((a, b) => {
+    if (a.isActive && !b.isActive) return -1;
+    if (!a.isActive && b.isActive) return 1;
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+  });
+
+  return list;
+}
+
 // Workspace Context (AI Caching)
 export function getWorkspaceContext(workspaceIdOrPath: string): WorkspaceContext | null {
   const db = getDb();
