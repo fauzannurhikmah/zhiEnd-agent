@@ -66,6 +66,7 @@ const onProjectChange = async (newPath: string) => {
   telegramBot.updateConfig(config);
   whatsappBot.updateConfig(config);
   io?.emit('project_changed', { activeProject: config.activeProject });
+  broadcastDevServerStatus(true);
   autoIndexWorkspaceContext(config.activeProject);
   return { success: true, activeProject: config.activeProject };
 };
@@ -687,34 +688,60 @@ app.post('/api/agent/cancel', (c) => {
 // Dev Server Manager
 const SAFE_DEV_PORTS = [3000, 3001, 3002, 5174, 5175, 5176, 8000, 8080, 4173, 4200, 8888];
 let activeDevServerPid: number | null = null;
+let lastDevServerStatusJson = '';
 
-app.get('/api/project/dev-server/status', async (c) => {
-  // Check common dev ports for target projects (Strictly NEVER include 5173 or 3888!)
+async function getDevServerStatus(): Promise<{
+  project: string;
+  activePorts: { port: number; url: string }[];
+  isRunning: boolean;
+}> {
   const activePorts: { port: number; url: string }[] = [];
-
-  for (const port of SAFE_DEV_PORTS) {
-    try {
-      const net = await import('net');
-      await new Promise<void>((resolve) => {
-        const tester = net.createConnection({ port, host: '127.0.0.1' }, () => {
-          activePorts.push({ port, url: `http://localhost:${port}` });
-          tester.destroy();
-          resolve();
+  try {
+    const net = await import('net');
+    await Promise.all(
+      SAFE_DEV_PORTS.map((port) => {
+        return new Promise<void>((resolve) => {
+          const tester = net.createConnection({ port, host: '127.0.0.1' }, () => {
+            activePorts.push({ port, url: `http://localhost:${port}` });
+            tester.destroy();
+            resolve();
+          });
+          tester.on('error', () => resolve());
+          tester.setTimeout(250, () => {
+            tester.destroy();
+            resolve();
+          });
         });
-        tester.on('error', () => resolve());
-        tester.setTimeout(250, () => {
-          tester.destroy();
-          resolve();
-        });
-      });
-    } catch {}
-  }
+      })
+    );
+  } catch {}
 
-  return c.json({
+  activePorts.sort((a, b) => a.port - b.port);
+
+  return {
     project: config.activeProject,
     activePorts,
     isRunning: activePorts.length > 0
-  });
+  };
+}
+
+async function broadcastDevServerStatus(force = false) {
+  try {
+    const status = await getDevServerStatus();
+    const json = JSON.stringify(status);
+    if (force || json !== lastDevServerStatusJson) {
+      lastDevServerStatusJson = json;
+      io?.emit('dev_server_status', status);
+    }
+    return status;
+  } catch {
+    return null;
+  }
+}
+
+app.get('/api/project/dev-server/status', async (c) => {
+  const status = await getDevServerStatus();
+  return c.json(status);
 });
 
 async function startActiveProjectDevServer(): Promise<{ success: boolean; message: string; command?: string }> {
@@ -752,6 +779,12 @@ async function startActiveProjectDevServer(): Promise<{ success: boolean; messag
         }
       }
     });
+
+    // Broadcast multiple times as port turns on
+    [800, 1800, 3200, 5000].forEach((delay) => {
+      setTimeout(() => broadcastDevServerStatus(), delay);
+    });
+
     return { success: true, message: `Menjalankan ${cmd} di background...`, command: cmd };
   } catch (err: any) {
     return { success: false, message: 'Gagal menjalankan dev server: ' + err.message };
@@ -780,7 +813,16 @@ app.post('/api/project/dev-server/stop', async (c) => {
   // 2. Kill processes ONLY on SAFE_DEV_PORTS (Strictly NEVER touch 5173 or 3888!)
   const portsList = SAFE_DEV_PORTS.join(', ');
   const psCmd = `powershell -Command "$agentPids = @(${process.pid}); Get-NetTCPConnection -LocalPort ${portsList} -ErrorAction SilentlyContinue | Where-Object { $agentPids -notcontains $_.OwningProcess } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"`;
-  exec(psCmd);
+  exec(psCmd, () => {
+    [300, 1000, 2000].forEach((delay) => {
+      setTimeout(() => broadcastDevServerStatus(), delay);
+    });
+  });
+
+  [300, 1000, 2000].forEach((delay) => {
+    setTimeout(() => broadcastDevServerStatus(), delay);
+  });
+
   return c.json({ success: true, message: 'Dev server dihentikan.' });
 });
 
@@ -1019,13 +1061,17 @@ try {
     cors: { origin: '*' }
   });
 
-  io.on('connection', (socket) => {
+  io.on('connection', async (socket) => {
     socket.emit('whatsapp_status', whatsappBot.getStatus());
     if (whatsappBot.qrCodeDataUrl) {
       socket.emit('whatsapp_qr', { qrDataUrl: whatsappBot.qrCodeDataUrl, qrCodeDataUrl: whatsappBot.qrCodeDataUrl });
     }
     socket.emit('telegram_status', telegramBot.getStatus());
     socket.emit('tunnel_status', tunnelManager.getStatus());
+    try {
+      const devStatus = await getDevServerStatus();
+      socket.emit('dev_server_status', devStatus);
+    } catch {}
   });
 
   agentRunner.on('task_start', (data) => io?.emit('agent_task_start', data));
@@ -1037,6 +1083,8 @@ try {
   agentRunner.on('agent_stderr', (data) => io?.emit('agent_stderr', data));
   agentRunner.on('task_end', (data: AgentTask) => {
     io?.emit('agent_task_end', data);
+    broadcastDevServerStatus();
+    setTimeout(() => broadcastDevServerStatus(), 2000);
     try {
       const targetSessionId = data.sessionId || (getOrCreateDefaultSession(data.project)).id;
       const taskId = data.id || (data as any).taskId || String(Date.now());
@@ -1070,6 +1118,11 @@ try {
   telegramBot.on('status_change', (data) => io?.emit('telegram_status', data));
   telegramBot.on('log', (data) => io?.emit('bot_log', data));
   tunnelManager.on('status_change', (data) => io?.emit('tunnel_status', data));
+
+  // Realtime Dev Server Checker (Every 2.5s)
+  setInterval(() => {
+    broadcastDevServerStatus();
+  }, 2500);
 
 } catch (err) {
   console.error('Socket.io initialization error:', err);

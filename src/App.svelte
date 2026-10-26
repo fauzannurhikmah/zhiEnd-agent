@@ -133,6 +133,16 @@
 
     // 3. Connect Socket.io
     initSocket();
+
+    // 4. Background dev server poll fallback
+    const devInterval = setInterval(() => {
+      checkDevServer();
+    }, 4000);
+
+    return () => {
+      clearInterval(devInterval);
+      if (socket) socket.disconnect();
+    };
   });
 
   async function refreshAll() {
@@ -522,6 +532,12 @@
       if (tunnelStatus) {
         tunnelStatus.status = data.status;
         if (data.url) tunnelStatus.publicUrl = data.url;
+      }
+    });
+
+    socket.on('dev_server_status', (data) => {
+      if (data && typeof data.isRunning === 'boolean') {
+        devServer = data;
       }
     });
 
