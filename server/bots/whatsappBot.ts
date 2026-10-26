@@ -20,6 +20,9 @@ export interface WhatsAppBotOptions {
   agentRunner: AgentRunner;
   gitManager: GitManager;
   onProjectChange?: (newPath: string) => Promise<{ success: boolean; activeProject?: string; error?: string }>;
+  onStartDevServer?: () => Promise<{ success: boolean; message: string; command?: string }>;
+  onStopDevServer?: () => Promise<{ success: boolean; message: string }>;
+  getTunnelUrl?: () => string | null;
 }
 
 export class WhatsAppBotManager extends EventEmitter {
@@ -27,6 +30,9 @@ export class WhatsAppBotManager extends EventEmitter {
   private agentRunner: AgentRunner;
   private gitManager: GitManager;
   private onProjectChange?: (newPath: string) => Promise<{ success: boolean; activeProject?: string; error?: string }>;
+  private onStartDevServer?: () => Promise<{ success: boolean; message: string; command?: string }>;
+  private onStopDevServer?: () => Promise<{ success: boolean; message: string }>;
+  private getTunnelUrl?: () => string | null;
 
   private sock: WASocket | null = null;
   public status: WhatsAppStatus['status'] = 'stopped';
@@ -44,6 +50,9 @@ export class WhatsAppBotManager extends EventEmitter {
     this.agentRunner = options.agentRunner;
     this.gitManager = options.gitManager;
     this.onProjectChange = options.onProjectChange;
+    this.onStartDevServer = options.onStartDevServer;
+    this.onStopDevServer = options.onStopDevServer;
+    this.getTunnelUrl = options.getTunnelUrl;
     this.authPath = path.join(__dirname, '..', '..', 'data', 'baileys_auth');
   }
 
@@ -623,6 +632,36 @@ export class WhatsAppBotManager extends EventEmitter {
       return;
     }
 
+    if (text === '!run' || text === '!start' || text === '!dev') {
+      if (this.onStartDevServer) {
+        await this.sendReply(sender, { text: `🚀 Memulai Dev Server untuk project \`${activeProj}\`...` });
+        const res = await this.onStartDevServer();
+        if (res.success) {
+          const tunnelUrl = this.getTunnelUrl ? this.getTunnelUrl() : null;
+          let msg = `✅ *Dev Server Berhasil Berjalan!*\n📁 Project: \`${activeProj}\`\n\n`;
+          msg += `🌐 *Tautan Akses untuk HP / Laptop:*\n`;
+          msg += `• *Akses HP (Satu Wi-Fi):* http://192.168.0.100:3000\n`;
+          msg += `• *Akses Gateway HP:* http://192.168.0.100:3888/preview/\n`;
+          msg += `• *Dedicated Local Port:* http://localhost:3000\n`;
+          if (tunnelUrl) {
+            msg += `• *Akses Publik Internet:* ${tunnelUrl}/preview/\n`;
+          }
+          await this.sendReply(sender, { text: msg });
+        } else {
+          await this.sendReply(sender, { text: `❌ Gagal memulai dev server: ${res.message}` });
+        }
+      }
+      return;
+    }
+
+    if (text === '!stop') {
+      if (this.onStopDevServer) {
+        await this.onStopDevServer();
+        await this.sendReply(sender, { text: `🛑 Dev server untuk project \`${activeProj}\` telah dihentikan.` });
+      }
+      return;
+    }
+
     // Safeguard: Jika bukan dari diri sendiri dan bukan command yang diawali ! atau /, abaikan KECUALI ada gambar terlampir
     if (!isSelfChat && !text.startsWith('!') && !text.startsWith('/') && (!images || images.length === 0)) {
       return;
@@ -639,6 +678,18 @@ export class WhatsAppBotManager extends EventEmitter {
     if (this.agentRunner.isBusy()) {
       await this.sendReply(sender, { text: '⏳ Agent sedang sibuk dengan tugas lain. Ketik *!cancel* untuk batalkan.' });
       return;
+    }
+
+    // Otomatis nyalakan dev server jika pesan meminta menjalankan projek
+    const isRunReq = /jalankan|running|run dev|start dev|hidupkan|nyalakan.*proje?k|buka.*proje?k/i.test(codingPrompt);
+    if (isRunReq && this.onStartDevServer) {
+      try {
+        console.log(`[WhatsApp] Auto-starting dev server for ${activeProj}...`);
+        await this.onStartDevServer();
+        await new Promise((r) => setTimeout(r, 1500));
+      } catch (e: any) {
+        console.error('[WhatsApp] Failed auto-start dev server:', e);
+      }
     }
 
     const imageNote = images && images.length > 0 ? `\n🖼️ Terlampir ${images.length} gambar` : '';

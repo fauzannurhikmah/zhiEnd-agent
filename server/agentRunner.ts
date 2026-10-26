@@ -122,14 +122,20 @@ ${formattedPaths.map(p => `• File Gambar: "${p}"`).join('\n')}
 3. PENTING - Menjalankan Project & Dev Server:
    - Jika pengguna meminta menjalankan projek ('jalankan projek ini', 'running dev', dll.):
      Sistem backend zhiEnd Agent OTOMATIS SUDAH MEMULAI Dev Server di latar belakang untuk workspace ini. Anda TIDAK PERLU lagi mengeksekusi 'npm run dev', 'pnpm dev', 'Start-Process', atau berulang-ulang mengecek port dengan 'Get-NetTCPConnection' / 'Start-Sleep'.
-   - SEMUA project OTOMATIS BISA DIAKSES via Gateway zhiEnd Agent:
-     • Local Preview: http://localhost:5173/preview/ atau http://localhost:${port}/preview/
-     • Network Wi-Fi / LAN (HP & Laptop satu WiFi): http://${localIp}:${port}/preview/
-     ${publicTunnelUrl ? `• 🌐 Akses Publik Internet: ${publicTunnelUrl}/preview/` : '• 🌐 Akses Publik Internet: Buka tab Remote Hub > Akses Jaringan untuk mengaktifkan Public Tunnel'}
-     • Dedicated Port 3000: http://localhost:3000
-     • Dedicated LAN Port 3000: http://${localIp}:3000
+   - PANDUAN TAUTAN AKSES PROJEK (Tampilkan dengan rapi, jelas, dan pisahkan untuk HP vs Laptop):
+     📱 AKSES DARI HP (SMARTPHONE):
+     • Jika HP & Laptop terhubung ke Wi-Fi yang SAMA (Sangat Disarankan, Paling Cepat):
+       - Direct: http://${localIp}:${wsCtx?.dev_port || 3000} (Buka langsung di browser HP)
+       - Gateway: http://${localIp}:${port}/preview/
+     ${publicTunnelUrl ? `• Jika HP di luar / pakai Kuota Data Seluler (Akses Publik):
+       - Public Tunnel: ${publicTunnelUrl}/preview/
+       (Jika muncul verifikasi IP dari Localtunnel, masukkan Tunnel Password/IP Publik laptop Anda)` : ''}
+
+     💻 AKSES DARI LAPTOP / PC:
+     - Localhost: http://localhost:${wsCtx?.dev_port || 3000}
+     - Gateway: http://localhost:5173/preview/ (atau http://localhost:${port}/preview/)
    ATURAN FORMAT RESPON:
-   - Sajikan tautan Live Preview Gateway & Dedicated Port menggunakan format Markdown yang rapi dan jelas.
+   - Sajikan tautan di atas secara terstruktur menggunakan Markdown link atau list yang rapi.
    - DILARANG KERAS mematikan atau menghentikan port 5173 (zhiEnd Agent frontend) dan port ${port} (zhiEnd Agent backend)!
 
 Permintaan Pengguna:

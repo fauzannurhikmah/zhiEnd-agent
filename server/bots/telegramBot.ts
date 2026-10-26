@@ -12,6 +12,9 @@ export interface TelegramBotOptions {
   agentRunner: AgentRunner;
   gitManager: GitManager;
   onProjectChange?: (newPath: string) => Promise<{ success: boolean; activeProject?: string; error?: string }>;
+  onStartDevServer?: () => Promise<{ success: boolean; message: string; command?: string }>;
+  onStopDevServer?: () => Promise<{ success: boolean; message: string }>;
+  getTunnelUrl?: () => string | null;
 }
 
 export class TelegramBotManager extends EventEmitter {
@@ -19,6 +22,9 @@ export class TelegramBotManager extends EventEmitter {
   private agentRunner: AgentRunner;
   private gitManager: GitManager;
   private onProjectChange?: (newPath: string) => Promise<{ success: boolean; activeProject?: string; error?: string }>;
+  private onStartDevServer?: () => Promise<{ success: boolean; message: string; command?: string }>;
+  private onStopDevServer?: () => Promise<{ success: boolean; message: string }>;
+  private getTunnelUrl?: () => string | null;
 
   private bot: Telegraf | null = null;
   public botInfo: any = null;
@@ -31,6 +37,9 @@ export class TelegramBotManager extends EventEmitter {
     this.agentRunner = options.agentRunner;
     this.gitManager = options.gitManager;
     this.onProjectChange = options.onProjectChange;
+    this.onStartDevServer = options.onStartDevServer;
+    this.onStopDevServer = options.onStopDevServer;
+    this.getTunnelUrl = options.getTunnelUrl;
   }
 
   public updateConfig(config: AppConfig): void {
@@ -328,6 +337,36 @@ export class TelegramBotManager extends EventEmitter {
         }
       });
 
+      this.bot.command(['run', 'start_dev', 'dev'], async (ctx) => {
+        const activeProj = this.config.activeProject || 'D:\\Works';
+        if (this.onStartDevServer) {
+          await ctx.reply(`🚀 Memulai Dev Server untuk project \`${activeProj}\`...`, { parse_mode: 'Markdown' });
+          const res = await this.onStartDevServer();
+          if (res.success) {
+            const tunnelUrl = this.getTunnelUrl ? this.getTunnelUrl() : null;
+            let msg = `✅ *Dev Server Berhasil Berjalan!*\n📁 Project: \`${activeProj}\`\n\n`;
+            msg += `🌐 *Tautan Akses:*\n`;
+            msg += `• *Akses HP (Satu Wi-Fi):* \`http://192.168.0.100:3000\`\n`;
+            msg += `• *Akses Gateway HP:* \`http://192.168.0.100:3888/preview/\`\n`;
+            msg += `• *Local Port:* \`http://localhost:3000\`\n`;
+            if (tunnelUrl) {
+              msg += `• *Akses Publik Internet:* ${tunnelUrl}/preview/\n`;
+            }
+            return ctx.reply(msg, { parse_mode: 'Markdown' });
+          } else {
+            return ctx.reply(`❌ Gagal memulai server: ${res.message}`);
+          }
+        }
+      });
+
+      this.bot.command('stop', async (ctx) => {
+        const activeProj = this.config.activeProject || 'D:\\Works';
+        if (this.onStopDevServer) {
+          await this.onStopDevServer();
+          return ctx.reply(`🛑 Dev server untuk project \`${activeProj}\` telah dihentikan.`, { parse_mode: 'Markdown' });
+        }
+      });
+
       this.bot.command('cancel', (ctx) => {
         if (this.agentRunner.isBusy()) {
           this.agentRunner.cancel();
@@ -351,6 +390,18 @@ export class TelegramBotManager extends EventEmitter {
         const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
         const activeEmoji = getSafePersonaEmoji(activePersona?.avatar);
         const personaDisplay = activePersona ? `${activeEmoji} ${activePersona.name}` : '⚡ Standard';
+
+        // Otomatis nyalakan dev server jika pesan meminta menjalankan projek
+        const isRunReq = /jalankan|running|run dev|start dev|hidupkan|nyalakan.*proje?k|buka.*proje?k/i.test(promptText);
+        if (isRunReq && this.onStartDevServer) {
+          try {
+            console.log(`[Telegram] Auto-starting dev server for ${activeProj}...`);
+            await this.onStartDevServer();
+            await new Promise((r) => setTimeout(r, 1500));
+          } catch (e: any) {
+            console.error('[Telegram] Failed auto-start dev server:', e);
+          }
+        }
 
         const imageNote = images && images.length > 0 ? `\n🖼️ Terlampir ${images.length} gambar` : '';
         await ctx.reply(

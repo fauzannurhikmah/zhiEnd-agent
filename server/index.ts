@@ -76,14 +76,20 @@ const telegramBot = new TelegramBotManager({
   config,
   agentRunner,
   gitManager,
-  onProjectChange
+  onProjectChange,
+  onStartDevServer: startActiveProjectDevServer,
+  onStopDevServer: stopActiveProjectDevServer,
+  getTunnelUrl: () => tunnelManager.publicUrl
 });
 
 const whatsappBot = new WhatsAppBotManager({
   config,
   agentRunner,
   gitManager,
-  onProjectChange
+  onProjectChange,
+  onStartDevServer: startActiveProjectDevServer,
+  onStopDevServer: stopActiveProjectDevServer,
+  getTunnelUrl: () => tunnelManager.publicUrl
 });
 
 // Global Middleware
@@ -889,7 +895,7 @@ async function killProcessesOnDevPorts(): Promise<void> {
 
 // Stop Dev Server Completely: Kills process tree, powershell windows, ports, and orphaned node.exe
 async function stopActiveProjectDevServer(): Promise<{ success: boolean; message: string }> {
-  const { execSync, execFile } = await import('child_process');
+  const { execSync } = await import('child_process');
 
   // 1. Matikan process tree berdasarkan PID yang tercatat
   if (activeDevServerPid) {
@@ -899,37 +905,22 @@ async function stopActiveProjectDevServer(): Promise<{ success: boolean; message
     activeDevServerPid = null;
   }
 
-  // 2. Tutup semua jendela PowerShell / CMD berlabel zhiEnd-DevServer
+  // 2. Tutup semua jendela PowerShell / CMD berlabel zhiEnd-DevServer secara sinkron
   try {
-    execFile('powershell.exe', [
-      '-NoProfile',
-      '-NonInteractive',
-      '-Command',
-      "Get-Process powershell,cmd -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like 'zhiEnd-DevServer*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
-    ], () => {});
+    execSync(
+      'powershell.exe -NoProfile -NonInteractive -Command "Get-Process powershell,cmd -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like \'zhiEnd-DevServer*\' } | Stop-Process -Force -ErrorAction SilentlyContinue"',
+      { stdio: 'ignore', timeout: 3000 }
+    );
   } catch {}
 
   // 3. Matikan semua process yang menempati SAFE_DEV_PORTS (port 3000, 5174, dll.)
   await killProcessesOnDevPorts();
 
-  // 4. Bersihkan proses node/cmd liar yang berjalan di direktori project aktif saat ini
-  if (config.activeProject && config.activeProject.length > 5) {
-    try {
-      const cleanProjPath = config.activeProject.replace(/\\/g, '\\\\');
-      execFile('powershell.exe', [
-        '-NoProfile',
-        '-NonInteractive',
-        '-Command',
-        `Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { ($_.Name -match 'node|cmd|powershell') -and ($_.CommandLine -like '*${cleanProjPath}*') -and ($_.ProcessId -ne ${process.pid}) } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`
-      ], () => {});
-    } catch {}
-  }
-
   [200, 600, 1200, 2000].forEach((delay) => {
     setTimeout(() => broadcastDevServerStatus(), delay);
   });
 
-  return { success: true, message: 'Dev server dan jendela background berhasil dihentikan sepenuhnya.' };
+  return { success: true, message: 'Dev server berhasil dihentikan sepenuhnya.' };
 }
 
 async function startActiveProjectDevServer(): Promise<{ success: boolean; message: string; command?: string }> {
@@ -938,12 +929,9 @@ async function startActiveProjectDevServer(): Promise<{ success: boolean; messag
     return { success: false, message: 'Pilih project yang valid terlebih dahulu' };
   }
 
-  // PENTING: Bersihkan dulu proses sebelumnya & port yang mungkin masih nyangkut
-  // Hal ini mencegah error EADDRINUSE saat project dijalankan kembali setelah stop manual
+  // Bersihkan dulu proses sebelumnya & port yang mungkin masih nyangkut
   await stopActiveProjectDevServer();
-
-  // Tunggu sejenak agar socket port OS benar-benar lepas
-  await new Promise((r) => setTimeout(r, 400));
+  await new Promise((r) => setTimeout(r, 600));
 
   // Detect project type
   let cmd = 'npm run dev';
@@ -967,25 +955,29 @@ async function startActiveProjectDevServer(): Promise<{ success: boolean; messag
     const cleanProjName = path.basename(targetDir);
     const windowTitle = `zhiEnd-DevServer-[${cleanProjName}]`;
 
-    // Jalankan powershell dengan window title khusus agar dapat dilacak dan ditutup total saat stop
-    const psChild = spawn('powershell.exe', [
-      '-NoProfile',
-      '-Command',
-      `$host.ui.RawUI.WindowTitle = '${windowTitle}'; Set-Location '${targetDir}'; ${cmd}`
-    ], {
+    // Pastikan direktori log tersedia
+    const logDir = path.join(__dirname, '..', 'data', 'logs');
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    const logFile = path.join(logDir, 'dev-server.log');
+    const logFd = fs.openSync(logFile, 'a');
+
+    // Di Windows, jalankan via cmd.exe /c dengan log file terhubung agar process tidak crash akibat invalid stdout
+    const child = spawn('cmd.exe', ['/c', `title ${windowTitle} && ${cmd}`], {
       cwd: targetDir,
       detached: true,
-      stdio: 'ignore',
+      stdio: ['ignore', logFd, logFd],
       windowsHide: false
     });
 
-    if (psChild.pid) {
-      activeDevServerPid = psChild.pid;
-      psChild.unref();
+    if (child.pid) {
+      activeDevServerPid = child.pid;
+      child.unref();
     }
 
-    // Broadcast multiple times saat port mulai aktif
-    [800, 1800, 3200, 5000].forEach((delay) => {
+    // Broadcast status secara berkala hingga framework selesai booting (hingga 14s)
+    [1000, 2000, 3500, 5000, 7500, 10000, 13000].forEach((delay) => {
       setTimeout(() => broadcastDevServerStatus(), delay);
     });
 
@@ -1133,10 +1125,46 @@ function getFileMime(filePath: string): string {
 }
 
 // Live Preview Gateway for Active Project or Sub-projects (Local, LAN, External)
-app.get('/preview', (c) => c.redirect('/preview/'));
-app.get('/preview/*', (c) => {
-  let targetDir = config.activeProject || 'D:\\Works';
+app.all('/preview', (c) => c.redirect('/preview/'));
+app.all('/preview/*', async (c) => {
   let relPath = c.req.path.replace(/^\/preview\/?/, '');
+
+  // 1. Cek apakah ada Dev Server yang aktif berjalan (misal port 3000, 5174, dll.)
+  try {
+    const status = await getDevServerStatus();
+    const primaryPortItem = status.activePorts.find(p => p.port !== (config.port || 3888) && p.port !== 5173);
+    if (primaryPortItem) {
+      const devPort = primaryPortItem.port;
+      const urlQuery = c.req.raw.url.includes('?') ? '?' + c.req.raw.url.split('?')[1] : '';
+      const targetUrl = `http://127.0.0.1:${devPort}/${relPath}${urlQuery}`;
+      const method = c.req.method;
+
+      const reqHeaders = new Headers(c.req.raw.headers);
+      reqHeaders.set('host', `127.0.0.1:${devPort}`);
+      reqHeaders.delete('content-length');
+
+      const bodyData = ['GET', 'HEAD'].includes(method) ? undefined : await c.req.raw.arrayBuffer();
+      const proxyResp = await fetch(targetUrl, {
+        method,
+        headers: reqHeaders,
+        body: bodyData,
+        redirect: 'manual'
+      });
+
+      const respHeaders = new Headers(proxyResp.headers);
+      respHeaders.set('Access-Control-Allow-Origin', '*');
+
+      return new Response(proxyResp.body, {
+        status: proxyResp.status,
+        headers: respHeaders
+      });
+    }
+  } catch (err: any) {
+    console.warn('[Preview Gateway] Proxy attempt notice:', err.message);
+  }
+
+  // 2. Fallback: Sajikan file statis dari workspace jika dev server tidak running di port
+  let targetDir = config.activeProject || 'D:\\Works';
 
   let targetFile = path.join(targetDir, relPath || 'index.html');
   if (fs.existsSync(targetDir) && fs.statSync(targetDir).isDirectory()) {

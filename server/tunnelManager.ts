@@ -75,8 +75,10 @@ export class TunnelManager extends EventEmitter {
       this.tunnel = await localtunnel(options);
       this.publicUrl = this.tunnel.url;
       this.tunnelStatus = 'connected';
+      this.startHeartbeat();
 
       this.tunnel.on('close', () => {
+        this.stopHeartbeat();
         this.tunnel = null;
         this.publicUrl = null;
         this.tunnelStatus = 'stopped';
@@ -84,6 +86,7 @@ export class TunnelManager extends EventEmitter {
       });
 
       this.tunnel.on('error', (err: any) => {
+        this.stopHeartbeat();
         this.errorMessage = err.message;
         this.tunnelStatus = 'error';
         this.emit('status_change', { status: this.tunnelStatus, error: err.message });
@@ -96,9 +99,10 @@ export class TunnelManager extends EventEmitter {
 
       return {
         success: true,
-        url: this.publicUrl
+        url: this.publicUrl || undefined
       };
     } catch (err: any) {
+      this.stopHeartbeat();
       this.tunnelStatus = 'error';
       this.errorMessage = err.message;
       this.emit('status_change', { status: this.tunnelStatus, error: err.message });
@@ -109,7 +113,47 @@ export class TunnelManager extends EventEmitter {
     }
   }
 
+  private pingInterval: NodeJS.Timeout | null = null;
+  public publicIp: string | null = null;
+
+  public async getPublicIp(): Promise<string> {
+    if (this.publicIp) return this.publicIp;
+    try {
+      const res = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(3000) });
+      const data: any = await res.json();
+      if (data?.ip) {
+        this.publicIp = data.ip;
+        return data.ip;
+      }
+    } catch {}
+    return '';
+  }
+
+  private startHeartbeat(): void {
+    this.stopHeartbeat();
+    this.pingInterval = setInterval(async () => {
+      if (!this.publicUrl || this.tunnelStatus !== 'connected') return;
+      try {
+        await fetch(`${this.publicUrl}/api/auth/status`, {
+          headers: { 'Bypass-Tunnel-Reminder': 'true' },
+          signal: AbortSignal.timeout(8000)
+        });
+      } catch (e: any) {
+        console.warn('[Tunnel Heartbeat] Stale connection detected, reconnecting tunnel...');
+        this.startTunnel().catch(() => {});
+      }
+    }, 45000);
+  }
+
+  private stopHeartbeat(): void {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
+    }
+  }
+
   public async stopTunnel(): Promise<{ success: boolean }> {
+    this.stopHeartbeat();
     if (this.tunnel) {
       try {
         await this.tunnel.close();

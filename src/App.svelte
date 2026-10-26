@@ -386,10 +386,15 @@
       isStartingDev = true;
       const res = await api.startDevServer();
       addLog(`[Dev Server] ${res.message || 'Memulai dev server...'}`);
-      setTimeout(() => {
-        checkDevServer();
-        isStartingDev = false;
-      }, 3500);
+      let attempts = 0;
+      const pollTimer = setInterval(async () => {
+        attempts++;
+        await checkDevServer();
+        if (devServer.isRunning || attempts >= 10) {
+          clearInterval(pollTimer);
+          isStartingDev = false;
+        }
+      }, 1500);
     }
   }
 
