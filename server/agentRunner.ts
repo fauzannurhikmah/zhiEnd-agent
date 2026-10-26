@@ -33,13 +33,15 @@ export interface RunOptions {
 
 export class AgentRunner extends EventEmitter {
   private config: AppConfig;
+  private getTunnelUrl?: () => string | null;
   public currentProcess: ChildProcess | null = null;
   public activeTask: AgentTask | null = null;
   public history: AgentTask[] = [];
 
-  constructor(config: AppConfig) {
+  constructor(config: AppConfig, getTunnelUrl?: () => string | null) {
     super();
     this.config = config;
+    this.getTunnelUrl = getTunnelUrl;
   }
 
   public updateConfig(config: AppConfig): void {
@@ -60,7 +62,7 @@ export class AgentRunner extends EventEmitter {
 
     const localIp = getLocalIP();
     const port = this.config.port || 3888;
-    const publicTunnelUrl = this.config.tunnel?.publicUrl || '';
+    const publicTunnelUrl = (this.getTunnelUrl ? this.getTunnelUrl() : null) || this.config.tunnel?.publicUrl || '';
     const rootDir = getCustomRootWorkspace();
 
     const wsCtx = getWorkspaceContext(workingDir);
@@ -97,25 +99,19 @@ ${persona.system_prompt}
     const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}
 [Panduan Operasional Sistem]:
 1. Root direktori default untuk semua project adalah ${rootDir}. Jika diminta membuat project baru atau menyimpan file baru tanpa path absolut, SELALU buat dan simpan langsung di dalam ${rootDir} (contoh: ${rootDir}\\<nama-project>).
-2. PENTING - Menjalankan Project & URL Akses (Local maupun External/LAN):
-   - Jika project adalah Pure Web Statis (HTML/CSS/JS tanpa package.json):
-     Projek OTOMATIS langsung dapat diakses melalui Gateway zhiEnd Agent tanpa perlu instalasi server tambahan:
-     • Local URL: [http://localhost:${port}/preview/](http://localhost:${port}/preview/)
-     • Network LAN (bisa dibuka dari HP/perangkat lain di WiFi): [http://${localIp}:${port}/preview/](http://${localIp}:${port}/preview/)
-     ${publicTunnelUrl ? `• External Public (Internet): [${publicTunnelUrl}/preview/](${publicTunnelUrl}/preview/)` : ''}
-     (Jika pengguna ingin dedicated server di port 3000, jalankan perintah detached:
-     Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '${workingDir}'; npx -y serve -p 3000" -WindowStyle Minimized).
-   - Jika project adalah Node.js / Framework (Next.js, Vite, dsb yang memiliki package.json):
-     Jalankan detached 1 kali cepat:
-     Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '${workingDir}'; pnpm dev" -WindowStyle Minimized (atau npm run dev).
-     Tautan URL:
-     • Local: [http://localhost:3000](http://localhost:3000)
-     • Network LAN: [http://${localIp}:3000](http://${localIp}:3000)
-     ${publicTunnelUrl ? `• External Public: [${publicTunnelUrl}](${publicTunnelUrl})` : ''}
+2. PENTING - Menjalankan Project & URL Akses (Local, LAN, dan Public Internet):
+   - SEMUA project (baik statis HTML maupun framework) OTOMATIS BISA DIAKSES langsung via Gateway zhiEnd Agent:
+     • Local Preview: [http://localhost:5173/preview/](http://localhost:5173/preview/) atau [http://localhost:${port}/preview/](http://localhost:${port}/preview/)
+     • Network Wi-Fi / LAN (HP & Laptop satu WiFi): [http://${localIp}:${port}/preview/](http://${localIp}:${port}/preview/)
+     ${publicTunnelUrl ? `• 🌐 Akses Publik Internet (HP / Luar Jaringan): [${publicTunnelUrl}/preview/](${publicTunnelUrl}/preview/)` : '• 🌐 Akses Publik Internet: Buka tab Remote Hub > Akses Jaringan untuk mengaktifkan Public Tunnel'}
+   - Jika pengguna meminta menjalankan dev server dedicated (port 3000):
+     EKSEKUSI PERINTAH SECARA NYATA via PowerShell/terminal (misal: Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '${workingDir}'; npm run dev" -WindowStyle Minimized). JANGAN PERNAH hanya mengklaim di teks bahwa server sudah jalan tanpa menjalankannya!
+     • Dedicated Local Port 3000: [http://localhost:3000](http://localhost:3000)
+     • Dedicated LAN Port 3000: [http://${localIp}:3000](http://${localIp}:3000)
    ATURAN MUTLAK:
-   - DILARANG KERAS mematikan atau menghentikan port 5173 (zhiEnd Agent frontend) dan port ${port} (zhiEnd Agent backend)! Keduanya adalah sistem utama zhiEnd Agent yang TIDAK BOLEH dimatikan.
-   - JANGAN melakukan looping pengecekan, sleep berulang, atau mencoba command alternatif berkali-kali!
-   - Berikan selalu URL yang jelas (Local dan Network LAN/External) agar pengguna bisa langsung mengkliknya di browser!
+   - SELALU cantumkan tautan Live Preview Gateway di atas karena tautan tersebut DIJAMIN 100% PASTI AKTIF dan bisa dibuka pengguna seketika!
+   - DILARANG KERAS mematikan atau menghentikan port 5173 (zhiEnd Agent frontend) dan port ${port} (zhiEnd Agent backend)!
+   - Berikan selalu URL yang rapi dan clickable (Markdown link) agar pengguna bisa langsung mengkliknya di browser HP maupun laptop!
 
 Permintaan Pengguna:
 ${options.prompt}`;
@@ -217,6 +213,28 @@ ${options.prompt}`;
             } else {
               this.activeTask.response = `Proses selesai (exit code: ${code}).`;
             }
+          }
+
+          // Otomatis lampirkan link live preview & public tunnel jika permintaan adalah menjalankan projek
+          const isRunReq = /jalankan|running|run|start.*proje?k/i.test(options.prompt);
+          if (isRunReq && !this.activeTask.response.includes('/preview/')) {
+            const previewLocal = `http://localhost:5173/preview/`;
+            const previewLan = `http://${localIp}:${port}/preview/`;
+            const previewPublic = publicTunnelUrl ? `${publicTunnelUrl}/preview/` : null;
+
+            let linksBlock = `\n\n━━━━━━━━━━━━━━━━━━━━━\n🌐 **Tautan Akses Projek (Aktif):**\n• 💻 **Local Preview:** [${previewLocal}](${previewLocal})\n• 📱 **Wi-Fi LAN (HP/Perangkat):** [${previewLan}](${previewLan})\n`;
+            if (previewPublic) {
+              linksBlock += `• 🌍 **Akses Publik Internet:** [${previewPublic}](${previewPublic})\n`;
+            } else {
+              linksBlock += `• 🌍 **Akses Publik Internet:** _(Buka tab Remote Hub > Akses Jaringan untuk mengaktifkan Public Tunnel)_\n`;
+            }
+            linksBlock += `━━━━━━━━━━━━━━━━━━━━━`;
+            this.activeTask.response += linksBlock;
+            this.emit('agent_delta', {
+              taskId,
+              delta: linksBlock,
+              accumulated: this.activeTask.response
+            });
           }
 
           const finishedTask = { ...this.activeTask };

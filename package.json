@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"SERVER,CLIENT\" -c \"cyan.bold,green.bold\" \"tsx watch server/index.ts\" \"vite\"",
+    "dev:client": "vite",
+    "dev:server": "tsx watch server/index.ts",
     "build": "vite build",
     "start": "tsx server/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -40,5 +42,8 @@
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
   }
 }

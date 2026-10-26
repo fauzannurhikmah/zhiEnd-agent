@@ -37,7 +37,6 @@
   let scannedProjects = $state<ScannedProject[]>([]);
   let isScanning = $state(false);
   let searchQuery = $state('');
-  let collapsedNodes = $state<Record<string, boolean>>({});
 
   // Create project form
   let newProjectName = $state('');
@@ -50,12 +49,15 @@
   let isSelecting = $state(false);
 
   export interface ProjectTreeNode {
-    name: string;             // Parent folder name e.g. "Sehati"
-    path: string;             // Absolute path e.g. "D:\Works\Sehati"
+    id: string;               // Unique id like "Sehati" or "Sehati/CRM"
+    name: string;             // Folder name e.g. "Sehati" or "CRM"
+    path: string;             // Absolute path e.g. "D:\Works\Sehati\CRM"
+    relativePath: string;     // Relative path e.g. "Sehati/CRM"
+    depth: number;
     isGit: boolean;
     hasPackageJson: boolean;
-    isProject: boolean;       // Is root folder itself a project
-    children: ScannedProject[]; // Child sub-projects
+    isProject: boolean;
+    children: ProjectTreeNode[];
   }
 
   $effect(() => {
@@ -76,16 +78,16 @@
     }
   }
 
-  let expandedNodes = $state<Record<string, boolean>>({});
+  let collapsedNodes = $state<Record<string, boolean>>({});
 
-  function toggleExpand(nodeName: string) {
-    expandedNodes[nodeName] = !expandedNodes[nodeName];
-    expandedNodes = { ...expandedNodes };
+  function toggleExpand(id: string) {
+    collapsedNodes[id] = !collapsedNodes[id];
+    collapsedNodes = { ...collapsedNodes };
   }
 
-  function isNodeExpanded(nodeName: string): boolean {
+  function isNodeExpanded(id: string): boolean {
     if (searchQuery.trim().length > 0) return true;
-    return Boolean(expandedNodes[nodeName]);
+    return !collapsedNodes[id];
   }
 
   function isCurrent(pathToCheck?: string): boolean {
@@ -99,60 +101,99 @@
     return norm === 'd:/works' || norm === 'd:';
   }
 
-  const projectTree = $derived(() => {
+  const projectTree = $derived.by(() => {
     const q = searchQuery.toLowerCase().trim();
-    const map = new Map<string, ProjectTreeNode>();
+    const rootMap = new Map<string, any>();
 
     for (const p of scannedProjects) {
-      const norm = p.relativePath.replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
-      const parts = norm.split('/').filter(Boolean);
-      const rootName = parts[0] || p.name;
+      const normRel = p.relativePath.replace(/\\/g, '/').replace(/^\/+|\/+$/g, '');
+      const parts = normRel.split('/').filter(Boolean);
+      if (parts.length === 0) continue;
 
-      if (!map.has(rootName)) {
-        const rootPath = p.path.replace(/\\/g, '/').split('/').slice(0, p.path.replace(/\\/g, '/').indexOf(rootName) + 1).join('/') || `D:\\Works\\${rootName}`;
-        map.set(rootName, {
-          name: rootName,
-          path: rootPath,
-          isGit: false,
-          hasPackageJson: false,
-          isProject: false,
-          children: []
-        });
-      }
+      let currentLevel = rootMap;
+      let accumulatedRel = '';
 
-      const node = map.get(rootName)!;
-      if (parts.length <= 1) {
-        node.isProject = true;
-        node.isGit = p.isGit;
-        node.hasPackageJson = p.hasPackageJson;
-        node.path = p.path;
-      } else {
-        node.children.push(p);
-      }
-    }
+      for (let i = 0; i < parts.length; i++) {
+        const part = parts[i];
+        accumulatedRel = accumulatedRel ? `${accumulatedRel}/${part}` : part;
+        const isLeaf = i === parts.length - 1;
 
-    let tree = Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
-
-    for (const node of tree) {
-      node.children.sort((a, b) => a.name.localeCompare(b.name));
-    }
-
-    if (q) {
-      tree = tree.filter(node => {
-        const parentMatch = node.name.toLowerCase().includes(q) || node.path.toLowerCase().includes(q);
-        const matchedChildren = node.children.filter(c => 
-          c.name.toLowerCase().includes(q) || c.relativePath.toLowerCase().includes(q)
-        );
-        if (parentMatch) return true;
-        if (matchedChildren.length > 0) {
-          node.children = matchedChildren;
-          return true;
+        let node = currentLevel.get(part);
+        if (!node) {
+          const absPath = isLeaf ? p.path : `D:/Works/${accumulatedRel}`;
+          node = {
+            id: accumulatedRel,
+            name: part,
+            path: absPath,
+            relativePath: accumulatedRel,
+            depth: i,
+            isGit: false,
+            hasPackageJson: false,
+            isProject: false,
+            children: []
+          };
+          currentLevel.set(part, node);
         }
-        return false;
-      });
+
+        if (isLeaf) {
+          node.name = p.name;
+          node.path = p.path;
+          node.relativePath = p.relativePath;
+          node.isGit = p.isGit;
+          node.hasPackageJson = p.hasPackageJson;
+          node.isProject = true;
+        }
+
+        if (!node.childMap) node.childMap = new Map<string, any>();
+        currentLevel = node.childMap;
+      }
     }
 
-    return tree;
+    function convertToArray(map: Map<string, any>): ProjectTreeNode[] {
+      const arr: ProjectTreeNode[] = [];
+      for (const node of map.values()) {
+        if (node.childMap && node.childMap.size > 0) {
+          node.children = convertToArray(node.childMap);
+          node.children.sort((a: ProjectTreeNode, b: ProjectTreeNode) => {
+            const aHas = a.children.length > 0 ? 0 : 1;
+            const bHas = b.children.length > 0 ? 0 : 1;
+            if (aHas !== bHas) return aHas - bHas;
+            return a.name.localeCompare(b.name);
+          });
+        } else {
+          node.children = [];
+        }
+        delete node.childMap;
+        arr.push(node);
+      }
+      arr.sort((a, b) => {
+        const aHas = a.children.length > 0 ? 0 : 1;
+        const bHas = b.children.length > 0 ? 0 : 1;
+        if (aHas !== bHas) return aHas - bHas;
+        return a.name.localeCompare(b.name);
+      });
+      return arr;
+    }
+
+    const fullTree = convertToArray(rootMap);
+    if (!q) return fullTree;
+
+    function filterTree(nodes: ProjectTreeNode[]): ProjectTreeNode[] {
+      const res: ProjectTreeNode[] = [];
+      for (const node of nodes) {
+        const match = node.name.toLowerCase().includes(q) || node.relativePath.toLowerCase().includes(q);
+        const filteredChildren = filterTree(node.children);
+        if (match || filteredChildren.length > 0) {
+          res.push({
+            ...node,
+            children: filteredChildren
+          });
+        }
+      }
+      return res;
+    }
+
+    return filterTree(fullTree);
   });
 
   async function handleSelect(path: string) {
@@ -318,25 +359,36 @@
                 <RotateCw class="w-5 h-5 animate-spin text-indigo-400" />
                 <span>Membaca seluruh folder di D:\Works beserta turunannya...</span>
               </div>
-            {:else if projectTree().length === 0}
+            {:else if projectTree.length === 0}
               <div class="py-12 text-center text-zinc-500 text-xs shrink-0">
                 Tidak ada project yang cocok dengan pencarian "{searchQuery}".
               </div>
             {:else}
-              {#each projectTree() as node}
+              {#each projectTree as node}
                 {@const isNodeCurrent = isCurrent(node.path)}
                 {@const hasChildren = node.children.length > 0}
-                {@const isExpanded = isNodeExpanded(node.name)}
+                {@const isExpanded = isNodeExpanded(node.id)}
 
                 <div class="rounded-xl border {isNodeCurrent ? 'border-indigo-500/50 bg-indigo-950/20 shadow-indigo-950/20' : 'border-white/[0.08] bg-zinc-900/40 hover:border-white/[0.16]'} shrink-0 overflow-hidden shadow-sm transition">
                   <!-- PARENT FOLDER ROW (CLICKABLE AREA) -->
                   <div
                     role="button"
                     tabindex="0"
-                    onclick={() => handleSelect(node.path)}
-                    onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(node.path); }}
+                    onclick={() => {
+                      if (hasChildren) {
+                        toggleExpand(node.id);
+                      } else {
+                        handleSelect(node.path);
+                      }
+                    }}
+                    onkeydown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        if (hasChildren) toggleExpand(node.id);
+                        else handleSelect(node.path);
+                      }
+                    }}
                     class="min-h-[52px] flex items-center justify-between p-3 bg-zinc-900/70 hover:bg-zinc-800/70 transition gap-2 cursor-pointer group"
-                    title={`Klik untuk buka: ${node.name}`}
+                    title={hasChildren ? (isExpanded ? `Tutup folder ${node.name}` : `Buka folder ${node.name}`) : `Buka workspace: ${node.name}`}
                   >
                     <div class="flex items-center gap-2.5 min-w-0 flex-1">
                       {#if hasChildren}
@@ -344,7 +396,7 @@
                           type="button"
                           onclick={(e) => {
                             e.stopPropagation();
-                            toggleExpand(node.name);
+                            toggleExpand(node.id);
                           }}
                           class="p-1 rounded-md hover:bg-zinc-700/80 text-zinc-400 hover:text-white transition cursor-pointer shrink-0"
                           title={isExpanded ? 'Tutup turunan folder' : 'Buka turunan folder'}
@@ -369,16 +421,9 @@
                             {node.name}
                           </span>
                           {#if hasChildren}
-                            <button
-                              type="button"
-                              onclick={(e) => {
-                                e.stopPropagation();
-                                toggleExpand(node.name);
-                              }}
-                              class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 border border-indigo-500/25 font-mono cursor-pointer transition"
-                            >
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 font-mono select-none">
                               {node.children.length} sub-folder {isExpanded ? '▲' : '▼'}
-                            </button>
+                            </span>
                           {/if}
                           {#if node.isGit}
                             <span class="text-[9px] px-1.5 py-0.2 rounded bg-zinc-800/80 text-zinc-400 font-mono flex items-center gap-1">
@@ -390,67 +435,223 @@
                       </div>
                     </div>
 
-                    <!-- RIGHT: CLEAN ACTIVE / HOVER INDICATOR (NO BULKY BUTTON) -->
+                    <!-- RIGHT: CLEAN ACTIVE / HOVER INDICATOR -->
                     <div class="flex items-center gap-2 shrink-0 pr-1">
                       {#if isNodeCurrent}
                         <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[11px] font-mono font-bold shadow-sm shadow-indigo-500/20">
                           <Check class="w-3 h-3 text-indigo-400" />
                           <span>Active</span>
                         </div>
+                      {:else if hasChildren}
+                        <button
+                          type="button"
+                          onclick={(e) => {
+                            e.stopPropagation();
+                            handleSelect(node.path);
+                          }}
+                          class="px-2.5 py-1 text-[11px] rounded-lg bg-zinc-800/80 hover:bg-indigo-600 hover:text-white border border-white/10 text-zinc-300 font-medium transition cursor-pointer flex items-center gap-1 shadow-sm active:scale-95"
+                          title={`Jadikan seluruh folder ${node.name} sebagai active workspace`}
+                        >
+                          <span>Set Active</span>
+                        </button>
                       {:else}
                         <ArrowRight class="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400" />
                       {/if}
                     </div>
                   </div>
 
-                  <!-- CHILD FOLDERS (EXPANDED TREE LIST) -->
+                  <!-- LEVEL 2 CHILDREN (EXPANDED TREE LIST) -->
                   {#if hasChildren && isExpanded}
                     <div class="border-t border-white/[0.06] bg-zinc-950/80 p-2 pl-4 flex flex-col gap-1.5">
                       <div class="border-l-2 border-indigo-500/30 ml-3 pl-3 flex flex-col gap-1.5">
                         {#each node.children as child, idx}
                           {@const isChildCurrent = isCurrent(child.path)}
+                          {@const hasSubChildren = child.children.length > 0}
+                          {@const isChildExpanded = isNodeExpanded(child.id)}
                           {@const isLastChild = idx === node.children.length - 1}
-                          <div
-                            role="button"
-                            tabindex="0"
-                            onclick={() => handleSelect(child.path)}
-                            onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(child.path); }}
-                            class="min-h-[40px] px-3 py-2 rounded-xl {isChildCurrent ? 'bg-indigo-600/15 border-indigo-500/40 text-white' : 'bg-zinc-900/50 hover:bg-zinc-800/80 border-white/[0.04] hover:border-white/[0.1] text-zinc-300'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group"
-                            title={`Klik untuk buka: ${child.name}`}
-                          >
-                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                              <span class="text-zinc-600 font-mono text-xs select-none shrink-0">
-                                {isLastChild ? '└──' : '├──'}
-                              </span>
-                              <div class="w-6 h-6 rounded-md {isChildCurrent ? 'bg-indigo-600 text-white shadow-sm' : 'bg-zinc-800 text-zinc-400 group-hover:text-zinc-200'} flex items-center justify-center shrink-0 transition">
-                                <Package class="w-3.5 h-3.5" />
-                              </div>
-                              <div class="flex flex-col min-w-0 flex-1">
-                                <div class="flex items-center gap-1.5">
-                                  <span class="text-xs font-semibold {isChildCurrent ? 'text-white' : 'text-zinc-200 group-hover:text-white'} truncate transition-colors">
-                                    {child.name}
-                                  </span>
-                                  {#if child.isGit}
-                                    <span class="text-[9px] px-1.5 py-0.2 rounded bg-zinc-800/80 text-zinc-400 font-mono flex items-center gap-1">
-                                      <GitBranch class="w-2.5 h-2.5 text-zinc-400" /> git
-                                    </span>
+
+                          {#if hasSubChildren}
+                            <!-- SUB-FOLDER CONTAINER (e.g. CRM, Assets Management) -->
+                            <div class="rounded-xl border {isChildCurrent ? 'border-indigo-500/50 bg-indigo-950/30' : 'border-white/[0.08] bg-zinc-900/60 hover:border-white/[0.14]'} overflow-hidden my-0.5 transition">
+                              <div
+                                role="button"
+                                tabindex="0"
+                                onclick={() => {
+                                  if (hasSubChildren) {
+                                    toggleExpand(child.id);
+                                  } else {
+                                    handleSelect(child.path);
+                                  }
+                                }}
+                                onkeydown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    if (hasSubChildren) toggleExpand(child.id);
+                                    else handleSelect(child.path);
+                                  }
+                                }}
+                                class="min-h-[44px] px-3 py-2 flex items-center justify-between hover:bg-zinc-800/70 transition gap-2 cursor-pointer group"
+                                title={hasSubChildren ? (isChildExpanded ? `Tutup sub-folder ${child.name}` : `Buka sub-folder ${child.name}`) : `Buka workspace: ${child.name}`}
+                              >
+                                <div class="flex items-center gap-2 min-w-0 flex-1">
+                                  <button
+                                    type="button"
+                                    onclick={(e) => {
+                                      e.stopPropagation();
+                                      toggleExpand(child.id);
+                                    }}
+                                    class="p-1 rounded hover:bg-zinc-700/80 text-zinc-400 hover:text-white transition cursor-pointer shrink-0"
+                                    title={isChildExpanded ? 'Tutup sub-folder' : 'Buka sub-folder'}
+                                  >
+                                    {#if isChildExpanded}
+                                      <ChevronDown class="w-3.5 h-3.5 text-indigo-400" />
+                                    {:else}
+                                      <ChevronRight class="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-200" />
+                                    {/if}
+                                  </button>
+
+                                  <div class="w-7 h-7 rounded-lg {isChildCurrent ? 'bg-indigo-600 text-white shadow-sm' : 'bg-zinc-800 text-zinc-400 group-hover:text-zinc-200'} flex items-center justify-center shrink-0 transition">
+                                    <FolderGit class="w-3.5 h-3.5" />
+                                  </div>
+
+                                  <div class="flex flex-col min-w-0 flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                      <span class="text-xs font-bold {isChildCurrent ? 'text-white' : 'text-zinc-200 group-hover:text-white'} truncate transition-colors">
+                                        {child.name}
+                                      </span>
+                                      <span class="text-[9px] px-2 py-0.2 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 font-mono select-none">
+                                        {child.children.length} sub-project {isChildExpanded ? '▲' : '▼'}
+                                      </span>
+                                      {#if child.isGit}
+                                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-zinc-800/80 text-zinc-400 font-mono flex items-center gap-1">
+                                          <GitBranch class="w-2.5 h-2.5 text-zinc-400" /> git
+                                        </span>
+                                      {/if}
+                                    </div>
+                                    <span class="text-[10px] text-zinc-500 font-mono truncate">{child.relativePath}</span>
+                                  </div>
+                                </div>
+
+                                <div class="flex items-center gap-2 shrink-0 pr-1">
+                                  {#if isChildCurrent}
+                                    <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/25 border border-indigo-500/40 text-indigo-300 text-[10px] font-mono font-bold">
+                                      <Check class="w-3 h-3 text-indigo-400" />
+                                      <span>Active</span>
+                                    </div>
+                                  {:else if hasSubChildren}
+                                    <button
+                                      type="button"
+                                      onclick={(e) => {
+                                        e.stopPropagation();
+                                        handleSelect(child.path);
+                                      }}
+                                      class="px-2 py-0.5 text-[10px] rounded-md bg-zinc-800/80 hover:bg-indigo-600 hover:text-white border border-white/10 text-zinc-300 font-medium transition cursor-pointer flex items-center gap-1 shadow-sm active:scale-95"
+                                      title={`Jadikan folder ${child.name} sebagai active workspace`}
+                                    >
+                                      <span>Set Active</span>
+                                    </button>
+                                  {:else}
+                                    <ArrowRight class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400" />
                                   {/if}
                                 </div>
-                                <span class="text-[10px] text-zinc-500 font-mono truncate">{child.relativePath}</span>
                               </div>
-                            </div>
 
-                            <div class="flex items-center gap-2 shrink-0 pr-1">
-                              {#if isChildCurrent}
-                                <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/25 border border-indigo-500/40 text-indigo-300 text-[10px] font-mono font-bold">
-                                  <Check class="w-3 h-3 text-indigo-400" />
-                                  <span>Active</span>
+                              <!-- LEVEL 3 SUB-CHILDREN (e.g. crm-backend, crm-frontend, docker-socket, docker-waha) -->
+                              {#if isChildExpanded}
+                                <div class="border-t border-white/[0.04] bg-zinc-950/70 p-2 pl-4 flex flex-col gap-1.5">
+                                  <div class="border-l-2 border-indigo-500/30 ml-3 pl-3 flex flex-col gap-1.5">
+                                    {#each child.children as subChild, sIdx}
+                                      {@const isSubCurrent = isCurrent(subChild.path)}
+                                      {@const isLastSub = sIdx === child.children.length - 1}
+                                      <div
+                                        role="button"
+                                        tabindex="0"
+                                        onclick={() => handleSelect(subChild.path)}
+                                        onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(subChild.path); }}
+                                        class="min-h-[38px] px-3 py-1.5 rounded-lg {isSubCurrent ? 'bg-indigo-600/25 border-indigo-500/50 text-white' : 'bg-zinc-900/40 hover:bg-zinc-800/80 border-white/[0.04] hover:border-white/[0.1] text-zinc-300'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group"
+                                        title={`Klik untuk buka workspace: ${subChild.name}`}
+                                      >
+                                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                          <span class="text-zinc-600 font-mono text-xs select-none shrink-0">
+                                            {isLastSub ? '└──' : '├──'}
+                                          </span>
+                                          <div class="w-5 h-5 rounded {isSubCurrent ? 'bg-indigo-600 text-white shadow-sm' : 'bg-zinc-800 text-zinc-400 group-hover:text-zinc-200'} flex items-center justify-center shrink-0 transition">
+                                            <Package class="w-3 h-3" />
+                                          </div>
+                                          <div class="flex flex-col min-w-0 flex-1">
+                                            <div class="flex items-center gap-1.5">
+                                              <span class="text-xs font-semibold {isSubCurrent ? 'text-white font-bold' : 'text-zinc-200 group-hover:text-white'} truncate transition-colors">
+                                                {subChild.name}
+                                              </span>
+                                              {#if subChild.isGit}
+                                                <span class="text-[9px] px-1.5 py-0.2 rounded bg-zinc-800/80 text-zinc-400 font-mono flex items-center gap-1">
+                                                  <GitBranch class="w-2.5 h-2.5 text-zinc-400" /> git
+                                                </span>
+                                              {/if}
+                                            </div>
+                                            <span class="text-[9px] text-zinc-500 font-mono truncate">{subChild.relativePath}</span>
+                                          </div>
+                                        </div>
+
+                                        <div class="flex items-center gap-2 shrink-0 pr-1">
+                                          {#if isSubCurrent}
+                                            <div class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[10px] font-mono font-bold">
+                                              <Check class="w-3 h-3 text-emerald-400" />
+                                              <span>Active</span>
+                                            </div>
+                                          {:else}
+                                            <ArrowRight class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400" />
+                                          {/if}
+                                        </div>
+                                      </div>
+                                    {/each}
+                                  </div>
                                 </div>
-                              {:else}
-                                <ArrowRight class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400" />
                               {/if}
                             </div>
-                          </div>
+                          {:else}
+                            <!-- DIRECT LEAF PROJECT UNDER LEVEL 1 (e.g. ecommerce-sehati, erp-finance) -->
+                            <div
+                              role="button"
+                              tabindex="0"
+                              onclick={() => handleSelect(child.path)}
+                              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(child.path); }}
+                              class="min-h-[40px] px-3 py-2 rounded-xl {isChildCurrent ? 'bg-indigo-600/15 border-indigo-500/40 text-white' : 'bg-zinc-900/50 hover:bg-zinc-800/80 border-white/[0.04] hover:border-white/[0.1] text-zinc-300'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group"
+                              title={`Klik untuk buka: ${child.name}`}
+                            >
+                              <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                <span class="text-zinc-600 font-mono text-xs select-none shrink-0">
+                                  {isLastChild ? '└──' : '├──'}
+                                </span>
+                                <div class="w-6 h-6 rounded-md {isChildCurrent ? 'bg-indigo-600 text-white shadow-sm' : 'bg-zinc-800 text-zinc-400 group-hover:text-zinc-200'} flex items-center justify-center shrink-0 transition">
+                                  <Package class="w-3.5 h-3.5" />
+                                </div>
+                                <div class="flex flex-col min-w-0 flex-1">
+                                  <div class="flex items-center gap-1.5">
+                                    <span class="text-xs font-semibold {isChildCurrent ? 'text-white' : 'text-zinc-200 group-hover:text-white'} truncate transition-colors">
+                                      {child.name}
+                                    </span>
+                                    {#if child.isGit}
+                                      <span class="text-[9px] px-1.5 py-0.2 rounded bg-zinc-800/80 text-zinc-400 font-mono flex items-center gap-1">
+                                        <GitBranch class="w-2.5 h-2.5 text-zinc-400" /> git
+                                      </span>
+                                    {/if}
+                                  </div>
+                                  <span class="text-[10px] text-zinc-500 font-mono truncate">{child.relativePath}</span>
+                                </div>
+                              </div>
+
+                              <div class="flex items-center gap-2 shrink-0 pr-1">
+                                {#if isChildCurrent}
+                                  <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/25 border border-indigo-500/40 text-indigo-300 text-[10px] font-mono font-bold">
+                                    <Check class="w-3 h-3 text-indigo-400" />
+                                    <span>Active</span>
+                                  </div>
+                                {:else}
+                                  <ArrowRight class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-indigo-400" />
+                                {/if}
+                              </div>
+                            </div>
+                          {/if}
                         {/each}
                       </div>
                     </div>

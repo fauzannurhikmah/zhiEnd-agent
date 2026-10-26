@@ -202,6 +202,12 @@ export class WhatsAppBotManager extends EventEmitter {
           } else {
             this.status = 'stopped';
             this.user = null;
+            if (this.config.whatsapp) {
+              this.config.whatsapp.enabled = false;
+            }
+            try {
+              saveConfigToDb({ whatsapp: { enabled: false } });
+            } catch {}
             this.emit('status_change', this.getStatus());
           }
         } else if (connection === 'open') {
@@ -209,6 +215,12 @@ export class WhatsAppBotManager extends EventEmitter {
           this.qrCodeDataUrl = null;
           this.user = this.sock?.user;
           this.errorMessage = null;
+          if (this.config.whatsapp) {
+            this.config.whatsapp.enabled = true;
+          }
+          try {
+            saveConfigToDb({ whatsapp: { enabled: true } });
+          } catch {}
           this.emit('status_change', this.getStatus());
         }
       });

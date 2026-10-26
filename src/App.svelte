@@ -830,7 +830,7 @@
             telegramStatus = await api.getTelegramStatus();
           }}
           onSaveTelegramToken={async (token, allowedUsers) => {
-            await api.updateConfig({ telegram: { token, allowedUsers } } as any);
+            await api.updateConfig({ telegram: { botToken: token, allowedUsers } } as any);
             dialog.showSuccess('Pengaturan Telegram berhasil disimpan.');
           }}
           onStartTunnel={async (subdomain) => {

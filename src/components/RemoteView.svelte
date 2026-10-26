@@ -71,6 +71,8 @@
   let isCopiedLocal = $state(false);
   let isCopiedPublic = $state(false);
   let isStartingWa = $state(false);
+  let securityPinInput = $state('');
+  let isSavingPin = $state(false);
 
   // Accordion toggles for advanced settings
   let showWaSettings = $state(false);
@@ -90,6 +92,9 @@
     }
     if (config?.whatsapp?.allowedNumbers && !waAllowedInput) {
       waAllowedInput = config.whatsapp.allowedNumbers.join(', ');
+    }
+    if (config?.securityPin && !securityPinInput) {
+      securityPinInput = config.securityPin;
     }
   });
 
@@ -185,6 +190,16 @@
   async function handleSaveTgConfig() {
     const list = tgAllowedInput.split(',').map(s => s.trim()).filter(Boolean);
     await onSaveTelegramToken(tgTokenInput, list);
+  }
+
+  async function handleSavePin() {
+    if (!onSaveSecurityPin) return;
+    isSavingPin = true;
+    try {
+      await onSaveSecurityPin(securityPinInput.trim());
+    } finally {
+      isSavingPin = false;
+    }
   }
 
   function selectPersona(platform: 'telegram' | 'whatsapp', personaId: string) {
@@ -709,9 +724,34 @@
         {/if}
       </div>
 
-      <div class="border-t border-white/[0.06] pt-3 text-[10px] text-zinc-500 font-mono flex items-start gap-1.5">
-        <Shield class="w-3.5 h-3.5 text-zinc-400 shrink-0 mt-0.5" />
-        <span>Gunakan Security PIN di Settings agar Web UI aman saat diakses dari luar.</span>
+      <!-- 3. Security PIN Input -->
+      <div class="flex flex-col gap-1.5 pt-2 border-t border-white/[0.06]">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] text-zinc-300 font-semibold flex items-center gap-1.5">
+            <Shield class="w-3.5 h-3.5 text-amber-400" /> Security PIN Akses Web:
+          </span>
+          {#if config?.securityPin}
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono">PIN Aktif</span>
+          {:else}
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 border border-white/[0.08] text-zinc-400 font-mono">Belum Ada PIN</span>
+          {/if}
+        </div>
+        <div class="flex gap-2">
+          <input
+            type="password"
+            bind:value={securityPinInput}
+            placeholder="Ketik PIN (misal: 1234)"
+            class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 font-mono outline-none focus:border-amber-500"
+          />
+          <button
+            onclick={handleSavePin}
+            disabled={isSavingPin}
+            class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold cursor-pointer active:scale-95 transition"
+          >
+            {isSavingPin ? 'Menyimpan...' : 'Simpan PIN'}
+          </button>
+        </div>
+        <span class="text-[10px] text-zinc-500 font-mono">Siapapun yang membuka link publik wajib memasukkan PIN ini.</span>
       </div>
     </div>
 

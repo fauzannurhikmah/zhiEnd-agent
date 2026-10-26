@@ -45,8 +45,8 @@ const app = new Hono();
 let config: AppConfig = loadConfig();
 
 // Initialize Services
-const agentRunner = new AgentRunner(config);
 const tunnelManager = new TunnelManager(config.port || 3888);
+const agentRunner = new AgentRunner(config, () => tunnelManager.publicUrl);
 
 // Auto-index active project context on start
 autoIndexWorkspaceContext(config.activeProject);
@@ -218,7 +218,7 @@ app.get('/api/projects/scan', (c) => {
   const ignored = new Set(['node_modules', '.git', '.gemini', 'dist', 'build', '.agents', '$RECYCLE.BIN', 'System Volume Information']);
 
   function scanDir(currentDir: string, depth: number = 0) {
-    if (depth > 2) return;
+    if (depth > 3) return;
     try {
       const items = fs.readdirSync(currentDir, { withFileTypes: true });
       for (const item of items) {
@@ -249,7 +249,7 @@ app.get('/api/projects/scan', (c) => {
         });
 
         // If not a git repo or package.json at root, also scan 1 level deeper
-        if (!isGit && !hasPackageJson && depth < 2) {
+        if (!isGit && !hasPackageJson && depth < 3) {
           scanDir(fullPath, depth + 1);
         }
       }
@@ -653,6 +653,12 @@ app.post('/api/agent/chat', async (c) => {
     if (p?.preferred_model) sessionPersonaModel = p.preferred_model;
   }
 
+  // Otomatis jalankan dev server jika pengguna meminta menjalankan projek
+  const isRunRequest = /jalankan|running|run dev|start dev|hidupkan|nyalakan.*proje?k/i.test(body.prompt);
+  if (isRunRequest) {
+    startActiveProjectDevServer().catch(() => {});
+  }
+
   // Run in background
   agentRunner.run({
     prompt: body.prompt,
@@ -711,10 +717,10 @@ app.get('/api/project/dev-server/status', async (c) => {
   });
 });
 
-app.post('/api/project/dev-server/start', async (c) => {
+async function startActiveProjectDevServer(): Promise<{ success: boolean; message: string; command?: string }> {
   const targetDir = config.activeProject;
   if (!targetDir || targetDir === 'D:\\Works' || targetDir === 'D:/Works' || !fs.existsSync(targetDir)) {
-    return c.json({ error: 'Pilih project yang valid terlebih dahulu' }, 400);
+    return { success: false, message: 'Pilih project yang valid terlebih dahulu' };
   }
 
   // Detect project type
@@ -746,10 +752,18 @@ app.post('/api/project/dev-server/start', async (c) => {
         }
       }
     });
-    return c.json({ success: true, message: `Menjalankan ${cmd} di background...`, command: cmd });
+    return { success: true, message: `Menjalankan ${cmd} di background...`, command: cmd };
   } catch (err: any) {
-    return c.json({ error: 'Gagal menjalankan dev server: ' + err.message }, 500);
+    return { success: false, message: 'Gagal menjalankan dev server: ' + err.message };
   }
+}
+
+app.post('/api/project/dev-server/start', async (c) => {
+  const result = await startActiveProjectDevServer();
+  if (!result.success) {
+    return c.json({ error: result.message }, 400);
+  }
+  return c.json(result);
 });
 
 app.post('/api/project/dev-server/stop', async (c) => {
@@ -796,14 +810,21 @@ app.post('/api/bots/telegram/start', async (c) => {
   const { token } = await c.req.json<{ token?: string }>().catch(() => ({} as any));
   if (token) {
     config.telegram.botToken = token;
-    saveConfig(config);
   }
   const result = await telegramBot.start(token);
+  if (result.success) {
+    config.telegram.enabled = true;
+    saveConfig(config);
+  }
   return c.json(result);
 });
 
 app.post('/api/bots/telegram/stop', async (c) => {
   const result = await telegramBot.stop();
+  if (result.success) {
+    config.telegram.enabled = false;
+    saveConfig(config);
+  }
   return c.json(result);
 });
 
@@ -814,11 +835,19 @@ app.get('/api/bots/whatsapp/status', (c) => {
 
 app.post('/api/bots/whatsapp/start', async (c) => {
   const result = await whatsappBot.start();
+  if (result.success) {
+    config.whatsapp.enabled = true;
+    saveConfig(config);
+  }
   return c.json(result);
 });
 
 app.post('/api/bots/whatsapp/logout', async (c) => {
   const result = await whatsappBot.logout();
+  if (result.success) {
+    config.whatsapp.enabled = false;
+    saveConfig(config);
+  }
   return c.json(result);
 });
 

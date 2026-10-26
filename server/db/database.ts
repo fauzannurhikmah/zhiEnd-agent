@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { 
   AppConfig, 
   ProcessStep, 
@@ -15,6 +16,11 @@ import {
 export const DB_DIR = path.join(__dirname, '..', '..', 'data');
 export const DB_PATH = path.join(DB_DIR, 'zhiend.db');
 export const LEGACY_CONFIG_PATH = path.join(DB_DIR, 'config.json');
+
+export function generateWorkspaceId(targetPath: string): string {
+  const norm = path.resolve(targetPath).toLowerCase();
+  return 'ws-' + crypto.createHash('md5').update(norm).digest('hex').slice(0, 16);
+}
 
 let dbInstance: Database.Database | null = null;
 
@@ -283,7 +289,7 @@ function migrateFromLegacyConfig(db: Database.Database): void {
     const name = path.basename(normPath) || normPath;
     const isAct = normPath.toLowerCase() === path.resolve(activeProject).toLowerCase() ? 1 : 0;
     const isRoot = normPath.toLowerCase() === 'd:\\works' ? 1 : 0;
-    const id = 'ws-' + Buffer.from(normPath).toString('base64url').slice(0, 16);
+    const id = generateWorkspaceId(normPath);
     insertWorkspace.run(id, name, normPath, isAct, isRoot);
   }
 
@@ -441,10 +447,14 @@ export function saveConfigToDb(newConfig: Partial<AppConfig>): void {
     if (existing) {
       db.prepare('UPDATE workspaces SET is_active = 1, last_opened_at = CURRENT_TIMESTAMP WHERE id = ?').run(existing.id);
     } else {
-      const id = 'ws-' + Buffer.from(norm).toString('base64url').slice(0, 16);
+      const id = generateWorkspaceId(norm);
       const name = path.basename(norm) || norm;
       const isRoot = norm.toLowerCase() === 'd:\\works' ? 1 : 0;
-      db.prepare('INSERT INTO workspaces (id, name, path, is_active, is_root) VALUES (?, ?, ?, 1, ?)').run(id, name, norm, isRoot);
+      db.prepare(`
+        INSERT INTO workspaces (id, name, path, is_active, is_root, last_opened_at) 
+        VALUES (?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(id) DO UPDATE SET is_active = 1, path = excluded.path, last_opened_at = CURRENT_TIMESTAMP
+      `).run(id, name, norm, isRoot);
     }
   }
 
@@ -525,10 +535,14 @@ export function setActiveWorkspace(targetPath: string): { success: boolean; acti
   if (existing) {
     db.prepare('UPDATE workspaces SET is_active = 1, last_opened_at = CURRENT_TIMESTAMP WHERE id = ?').run(existing.id);
   } else {
-    const id = 'ws-' + Buffer.from(norm).toString('base64url').slice(0, 16);
+    const id = generateWorkspaceId(norm);
     const name = path.basename(norm) || norm;
     const isRoot = norm.toLowerCase() === 'd:\\works' ? 1 : 0;
-    db.prepare('INSERT INTO workspaces (id, name, path, is_active, is_root) VALUES (?, ?, ?, 1, ?)').run(id, name, norm, isRoot);
+    db.prepare(`
+      INSERT INTO workspaces (id, name, path, is_active, is_root, last_opened_at) 
+      VALUES (?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(id) DO UPDATE SET is_active = 1, path = excluded.path, last_opened_at = CURRENT_TIMESTAMP
+    `).run(id, name, norm, isRoot);
   }
   return { success: true, activeProject: norm };
 }
@@ -828,10 +842,14 @@ export function getOrCreateDefaultSession(workspacePath?: string | null): ChatSe
     if (ws) {
       wsId = ws.id;
     } else {
-      const id = 'ws-' + Buffer.from(norm).toString('base64url').slice(0, 16);
+      const id = generateWorkspaceId(norm);
       const name = path.basename(norm) || norm;
       const isRoot = norm.toLowerCase() === 'd:\\works' ? 1 : 0;
-      db.prepare('INSERT OR IGNORE INTO workspaces (id, name, path, is_active, is_root) VALUES (?, ?, ?, 1, ?)').run(id, name, norm, isRoot);
+      db.prepare(`
+        INSERT INTO workspaces (id, name, path, is_active, is_root, last_opened_at) 
+        VALUES (?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(id) DO UPDATE SET is_active = 1, path = excluded.path, last_opened_at = CURRENT_TIMESTAMP
+      `).run(id, name, norm, isRoot);
       wsId = id;
     }
   }
@@ -877,10 +895,14 @@ export function createChatSession(data: { title: string; workspace_id?: string |
       if (existingByPath) {
         wsId = existingByPath.id;
       } else {
-        const id = 'ws-' + Buffer.from(norm).toString('base64url').slice(0, 16);
+        const id = generateWorkspaceId(norm);
         const name = path.basename(norm) || norm;
         const isRoot = norm.toLowerCase() === 'd:\\works' ? 1 : 0;
-        db.prepare('INSERT OR IGNORE INTO workspaces (id, name, path, is_active, is_root) VALUES (?, ?, ?, 1, ?)').run(id, name, norm, isRoot);
+        db.prepare(`
+          INSERT INTO workspaces (id, name, path, is_active, is_root, last_opened_at) 
+          VALUES (?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
+          ON CONFLICT(id) DO UPDATE SET is_active = 1, path = excluded.path, last_opened_at = CURRENT_TIMESTAMP
+        `).run(id, name, norm, isRoot);
         wsId = id;
       }
     }
