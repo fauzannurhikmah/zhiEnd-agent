@@ -12,6 +12,20 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#39;');
 }
 
+function isTableSeparator(line: string): boolean {
+  if (!line) return false;
+  const trimmed = line.trim();
+  return trimmed.includes('|') && trimmed.includes('-') && /^\|?(\s*:?-{2,}:?\s*\|?)+$/.test(trimmed);
+}
+
+function parseTableRow(line: string): string[] {
+  let trimmed = line.trim();
+  if (trimmed.startsWith('|')) trimmed = trimmed.slice(1);
+  if (trimmed.endsWith('|')) trimmed = trimmed.slice(0, -1);
+  const protectedLine = trimmed.replace(/\\\|/g, '\uE003PIPE\uE003');
+  return protectedLine.split('|').map(c => c.replace(/\uE003PIPE\uE003/g, '|').trim());
+}
+
 export function renderMarkdown(markdown: string): string {
   if (!markdown) return '';
 
@@ -71,6 +85,61 @@ export function renderMarkdown(markdown: string): string {
       if (inUl) { outputLines.push('</ul>'); inUl = false; }
       if (inOl) { outputLines.push('</ol>'); inOl = false; }
       outputLines.push('<hr class="my-4 border-white/10" />');
+      continue;
+    }
+
+    // Markdown Table (| Col 1 | Col 2 |)
+    if (trimmed.includes('|') && i + 1 < lines.length && isTableSeparator(lines[i + 1])) {
+      if (inUl) { outputLines.push('</ul>'); inUl = false; }
+      if (inOl) { outputLines.push('</ol>'); inOl = false; }
+
+      const headerCells = parseTableRow(trimmed);
+      const separatorCells = parseTableRow(lines[i + 1]);
+      const alignments = separatorCells.map(cell => {
+        const c = cell.trim();
+        const startColon = c.startsWith(':');
+        const endColon = c.endsWith(':');
+        if (startColon && endColon) return 'text-center';
+        if (endColon) return 'text-right';
+        return 'text-left';
+      });
+
+      i++; // skip separator line
+
+      const rows: string[][] = [];
+      while (i + 1 < lines.length) {
+        const nextLine = lines[i + 1].trim();
+        if (!nextLine || !nextLine.includes('|')) break;
+        if (isTableSeparator(nextLine) || nextLine.startsWith('```') || /^(\-{3,}|\*{3,})$/.test(nextLine)) break;
+
+        i++;
+        rows.push(parseTableRow(lines[i]));
+      }
+
+      let tableHtml = `<div class="my-3 overflow-x-auto rounded-xl border border-white/10 bg-zinc-950/80 shadow-lg shadow-black/30">
+        <table class="w-full border-collapse text-[12px] text-zinc-200">
+          <thead>
+            <tr class="bg-zinc-900/90 border-b border-white/10 text-[11px] font-semibold text-zinc-400 uppercase tracking-wider select-none">`;
+
+      headerCells.forEach((th, idx) => {
+        const align = alignments[idx] || 'text-left';
+        tableHtml += `<th class="px-3.5 py-2.5 whitespace-nowrap ${align}">${parseInline(th)}</th>`;
+      });
+
+      tableHtml += `</tr></thead><tbody class="divide-y divide-white/[0.06] font-sans">`;
+
+      rows.forEach(row => {
+        tableHtml += `<tr class="hover:bg-white/[0.03] transition-colors">`;
+        headerCells.forEach((_, idx) => {
+          const td = row[idx] !== undefined ? row[idx] : '';
+          const align = alignments[idx] || 'text-left';
+          tableHtml += `<td class="px-3.5 py-2.5 whitespace-nowrap ${align} align-middle">${parseInline(td)}</td>`;
+        });
+        tableHtml += `</tr>`;
+      });
+
+      tableHtml += `</tbody></table></div>`;
+      outputLines.push(tableHtml);
       continue;
     }
 
