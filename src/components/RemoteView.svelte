@@ -63,10 +63,12 @@
   let tgTokenInput = $state('');
   let tgAllowedInput = $state('');
   let waAllowedInput = $state('');
-  let customSubdomain = $state('');
+  let customSubdomain = $state('zhiend-agent');
   let isCopiedLocal = $state(false);
   let isCopiedPublic = $state(false);
   let isStartingWa = $state(false);
+  let isStartingTunnel = $state(false);
+  let isStoppingTunnel = $state(false);
   let securityPinInput = $state('');
   let isSavingPin = $state(false);
 
@@ -697,24 +699,40 @@
             </button>
           </div>
           <button
-            onclick={onStopTunnel}
-            class="w-full py-2 rounded-xl bg-zinc-900 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 border border-zinc-800 text-xs font-semibold cursor-pointer active:scale-95 transition"
+            disabled={isStoppingTunnel}
+            onclick={async () => {
+              isStoppingTunnel = true;
+              try {
+                await onStopTunnel();
+              } finally {
+                isStoppingTunnel = false;
+              }
+            }}
+            class="w-full py-2 rounded-xl bg-zinc-900 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 border border-zinc-800 text-xs font-semibold cursor-pointer active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Tutup Akses Publik (Stop Tunnel)
+            {isStoppingTunnel ? 'Menutup Akses...' : 'Tutup Akses Publik (Stop Tunnel)'}
           </button>
         {:else}
           <div class="flex gap-2">
             <input
               type="text"
               bind:value={customSubdomain}
-              placeholder="subdomain (opsional)"
+              placeholder="zhiend-agent"
               class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 font-mono outline-none focus:border-violet-500"
             />
             <button
-              onclick={() => onStartTunnel(customSubdomain)}
-              class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs shadow-md shadow-indigo-500/20 cursor-pointer active:scale-95 transition"
+              disabled={isStartingTunnel}
+              onclick={async () => {
+                isStartingTunnel = true;
+                try {
+                  await onStartTunnel(customSubdomain || 'zhiend-agent');
+                } finally {
+                  isStartingTunnel = false;
+                }
+              }}
+              class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs shadow-md shadow-indigo-500/20 cursor-pointer active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Buka
+              {isStartingTunnel ? 'Membuka...' : 'Buka'}
             </button>
           </div>
         {/if}

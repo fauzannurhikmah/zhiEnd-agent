@@ -306,7 +306,7 @@
 
 {#if isOpen}
   <div
-    class="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
+    class="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-150"
   >
     <!-- Click outside to close -->
     <button
@@ -319,37 +319,36 @@
 
     <!-- Modal Box -->
     <div
-      class="relative w-full max-w-2xl max-h-[90vh] rounded-3xl bg-zinc-950/95 border border-indigo-500/25 shadow-2xl shadow-indigo-950/40 flex flex-col overflow-hidden z-10 animate-in zoom-in-95 duration-200"
+      class="relative w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] rounded-3xl bg-zinc-950/95 border border-indigo-500/25 shadow-2xl shadow-indigo-950/40 flex flex-col overflow-hidden z-10 animate-in zoom-in-95 duration-200"
     >
       <!-- Modal Header -->
       <div
-        class="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-zinc-900/40 shrink-0"
+        class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/[0.08] bg-zinc-900/40 shrink-0 gap-2"
       >
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-2.5 min-w-0">
           <div
-            class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400"
+            class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0"
           >
-            <Bot class="w-5 h-5" />
+            <Bot class="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <h2 class="text-sm font-bold text-zinc-100 flex items-center gap-2">
+          <div class="min-w-0">
+            <h2 class="text-xs sm:text-sm font-bold text-zinc-100 flex items-center gap-2 truncate">
               Persona & Karakter AI
               <span
-                class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300"
+                class="text-[9px] sm:text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300"
               >
                 {personas.length} Tersedia
               </span>
             </h2>
-            <p class="text-[11px] text-zinc-400">
-              Pilih model terikat, sifat, dan custom avatar (foto, GIF,
-              atau video singkat)
+            <p class="text-[10px] sm:text-[11px] text-zinc-400 truncate">
+              Pilih model terikat, sifat, dan custom avatar
             </p>
           </div>
         </div>
 
         <button
           onclick={onClose}
-          class="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition cursor-pointer"
+          class="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition cursor-pointer shrink-0"
           title="Tutup (Esc)"
         >
           <X class="w-4 h-4" />
@@ -358,14 +357,14 @@
 
       <!-- Navigation Tabs -->
       <div
-        class="flex items-center gap-4 px-6 pt-3 border-b border-white/[0.06] text-xs shrink-0 bg-zinc-950/40"
+        class="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 pt-2.5 sm:pt-3 border-b border-white/[0.06] text-xs shrink-0 bg-zinc-950/40"
       >
         <button
           type="button"
           onclick={() => {
             activeTab = "list";
           }}
-          class="pb-2.5 px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
+          class="pb-2 sm:pb-2.5 px-2.5 sm:px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
           'list'
             ? 'border-indigo-500 text-indigo-300 font-bold'
             : 'border-transparent text-zinc-400 hover:text-zinc-200'}"
@@ -382,7 +381,7 @@
             }
             activeTab = "create";
           }}
-          class="pb-2.5 px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
+          class="pb-2 sm:pb-2.5 px-2.5 sm:px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
           'create'
             ? 'border-indigo-500 text-indigo-300 font-bold'
             : 'border-transparent text-zinc-400 hover:text-zinc-200'}"
@@ -398,33 +397,33 @@
       </div>
 
       <!-- Content Area -->
-      <div class="flex-1 overflow-y-auto p-6 space-y-4">
+      <div class="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-3 sm:space-y-4">
         {#if activeTab === "list"}
           <!-- Personas Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {#each personas as p (p.id)}
               {@const isSelected = activePersonaId === p.id}
               <div
-                class="p-3.5 rounded-2xl border transition flex flex-col justify-between gap-3 group relative {isSelected
+                class="p-3 sm:p-3.5 rounded-2xl border transition flex flex-col justify-between gap-3 group relative {isSelected
                   ? 'bg-indigo-950/30 border-indigo-500 shadow-md shadow-indigo-950/30'
                   : 'bg-zinc-900/40 hover:bg-zinc-900/70 border-white/[0.06] hover:border-white/[0.14]'}"
               >
                 <div class="flex flex-col gap-2.5">
                   <div class="flex items-start justify-between gap-2">
-                    <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="flex items-center gap-2.5 min-w-0 flex-1">
                       <!-- Render Avatar with AvatarView -->
                       <AvatarView
                         avatar={p.avatar}
                         name={p.name}
-                        size="lg"
+                        size="md"
                         className="rounded-2xl shrink-0 ring-1 ring-white/10"
                       />
 
-                      <div class="flex flex-col min-w-0">
+                      <div class="flex flex-col min-w-0 flex-1">
                         <h4
-                          class="text-xs font-bold text-zinc-100 flex items-center gap-1.5 truncate"
+                          class="text-xs font-bold text-zinc-100 flex items-center gap-1.5 min-w-0"
                         >
-                          <span class="truncate">{p.name}</span>
+                          <span class="truncate font-semibold">{p.name}</span>
                           {#if p.is_default}
                             <span
                               class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 shrink-0"
@@ -444,7 +443,7 @@
                     </div>
 
                     <!-- Action buttons: Edit & Delete -->
-                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <div class="flex items-center gap-1 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
                       <button
                         type="button"
                         onclick={() => startEditPersona(p)}

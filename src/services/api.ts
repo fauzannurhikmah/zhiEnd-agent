@@ -6,21 +6,27 @@ function getHeaders(): Record<string, string> {
   const pin = localStorage.getItem(PIN_STORAGE_KEY) || '';
   return {
     'Content-Type': 'application/json',
-    'x-security-pin': pin
+    'x-security-pin': pin,
+    'Bypass-Tunnel-Reminder': 'true'
   };
 }
 
 export const api = {
   // Auth
   async getAuthStatus(): Promise<{ hasPin: boolean }> {
-    const res = await fetch('/api/auth/status');
+    const res = await fetch('/api/auth/status', {
+      headers: { 'Bypass-Tunnel-Reminder': 'true' }
+    });
     return res.json();
   },
 
   async verifyPin(pin: string): Promise<{ success: boolean; authorized?: boolean; error?: string }> {
     const res = await fetch('/api/auth/verify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Bypass-Tunnel-Reminder': 'true'
+      },
       body: JSON.stringify({ pin })
     });
     return res.json();
@@ -186,7 +192,8 @@ export const api = {
     const res = await fetch('/api/chat/upload', {
       method: 'POST',
       headers: {
-        'x-security-pin': pin
+        'x-security-pin': pin,
+        'Bypass-Tunnel-Reminder': 'true'
       },
       body: formData
     });
@@ -198,28 +205,59 @@ export const api = {
   },
 
   async sendChat(prompt: string, model?: string, conversationId?: string, sessionId?: string, images?: string[]): Promise<{ success: boolean; error?: string }> {
-    try {
-      const res = await fetch('/api/agent/chat', {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({ prompt, model, conversationId, sessionId, images: images || [] })
-      });
-      if (!res.ok) {
+    const payload = JSON.stringify({ prompt, model, conversationId, sessionId, images: images || [] });
+    const maxAttempts = 4;
+    let lastError: any = null;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const res = await fetch('/api/agent/chat', {
+          method: 'POST',
+          headers: getHeaders(),
+          body: payload
+        });
+
+        if (res.ok) {
+          return await res.json();
+        }
+
         const text = await res.text();
         let errMsg = `Server error (${res.status})`;
         try {
           const parsed = JSON.parse(text);
           if (parsed.error) errMsg = parsed.error;
         } catch {}
+
+        // Transient proxy / localtunnel glitches
+        if ([502, 503, 504].includes(res.status) && attempt < maxAttempts) {
+          console.warn(`[Tunnel Retry] ${res.status} encountered, retrying (${attempt}/${maxAttempts})...`);
+          await new Promise(r => setTimeout(r, 1200 * attempt));
+          continue;
+        }
+
         throw new Error(errMsg);
+      } catch (e: any) {
+        lastError = e;
+        const isTunnelNetworkIssue = e.message?.includes('503') || 
+                                     e.message?.includes('Failed to fetch') || 
+                                     e.message?.includes('NetworkError');
+
+        if (attempt < maxAttempts && isTunnelNetworkIssue) {
+          console.warn(`[Tunnel Retry] Network issue encountered (${e.message}), retrying (${attempt}/${maxAttempts})...`);
+          await new Promise(r => setTimeout(r, 1200 * attempt));
+          continue;
+        }
+        break;
       }
-      return await res.json();
-    } catch (e: any) {
-      if (e.message?.includes('Unexpected end of JSON') || e.message?.includes('Failed to fetch')) {
-        throw new Error('Gagal terhubung ke backend server (port 3888). Pastikan server backend sedang aktif.');
-      }
-      throw e;
     }
+
+    if (lastError?.message?.includes('503')) {
+      throw new Error('Koneksi Public Tunnel (loca.lt) sempat terputus (503). Sistem telah mencoba menghubungkan kembali, silakan coba kirim lagi.');
+    }
+    if (lastError?.message?.includes('Unexpected end of JSON') || lastError?.message?.includes('Failed to fetch')) {
+      throw new Error('Gagal terhubung ke backend server (port 3888). Pastikan server backend sedang aktif.');
+    }
+    throw lastError;
   },
 
   async cancelTask(): Promise<{ success: boolean }> {

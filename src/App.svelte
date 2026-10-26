@@ -116,21 +116,30 @@
 
   onMount(async () => {
     // 1. PIN Auth check
-    const authStatus = await api.getAuthStatus();
-    if (authStatus.hasPin) {
-      const savedPin = localStorage.getItem(PIN_STORAGE_KEY);
-      if (!savedPin) {
-        isPinModalOpen = true;
-      } else {
-        const verifyRes = await api.verifyPin(savedPin);
-        if (!verifyRes.authorized) {
+    let needsAuth = false;
+    try {
+      const authStatus = await api.getAuthStatus();
+      if (authStatus?.hasPin) {
+        const savedPin = localStorage.getItem(PIN_STORAGE_KEY);
+        if (!savedPin) {
+          needsAuth = true;
           isPinModalOpen = true;
+        } else {
+          const verifyRes = await api.verifyPin(savedPin);
+          if (!verifyRes?.authorized) {
+            needsAuth = true;
+            isPinModalOpen = true;
+          }
         }
       }
+    } catch (e) {
+      console.warn('Auth check error:', e);
     }
 
-    // 2. Fetch Initial State
-    await refreshAll();
+    // 2. Fetch Initial State only if authorized
+    if (!needsAuth) {
+      await refreshAll();
+    }
 
     // 3. Connect Socket.io
     initSocket();
@@ -687,7 +696,7 @@
   <!-- Main Content Workspace Area -->
   <div class="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden bg-transparent">
     <!-- Top Subtle Breadcrumb Header -->
-    <header class="h-12 sm:h-11 px-2.5 sm:px-4 border-b border-white/[0.08] bg-zinc-950/60 backdrop-blur-md flex items-center justify-between shrink-0 select-none gap-2">
+    <header class="min-h-[50px] sm:h-11 pt-2 sm:pt-0 pb-1.5 sm:pb-0 px-3 sm:px-4 border-b border-white/[0.08] bg-zinc-950/80 backdrop-blur-md flex items-center justify-between shrink-0 select-none gap-2">
       <div class="flex items-center gap-1.5 sm:gap-2 text-xs font-mono text-zinc-400 min-w-0">
         <!-- Mobile Sidebar Hamburger Toggle -->
         <button
@@ -792,7 +801,7 @@
     </header>
 
     <!-- Main Viewport Area -->
-    <main class="flex-1 overflow-hidden p-3 min-h-0">
+    <main class="flex-1 overflow-hidden p-0 sm:p-2 md:p-3 min-h-0">
       {#if currentTab === 'chat'}
         <ChatView
           {messages}

@@ -51,11 +51,17 @@
 
   async function handleSelectFile(path: string, staged: boolean) {
     selectedFile = path;
+    const ext = path.split('.').pop()?.toLowerCase();
+    const binaryExts = ['db', 'db-shm', 'db-wal', 'png', 'jpg', 'jpeg', 'gif', 'ico', 'webp', 'pdf', 'zip', 'tar', 'gz', 'exe', 'bin'];
+    if (ext && binaryExts.includes(ext)) {
+      activeDiff = `[Berkas Biner]\nBerkas "${path}" merupakan berkas biner.\nPerbandingan diff baris teks tidak dapat ditampilkan.`;
+      return;
+    }
     activeDiff = 'Memuat diff...';
     try {
       activeDiff = await onLoadDiff(path, staged);
     } catch {
-      activeDiff = 'Gagal memuat diff.';
+      activeDiff = 'Tidak dapat memuat diff saat ini. Silakan coba beberapa saat lagi.';
     }
   }
 
@@ -84,7 +90,7 @@
   }
 </script>
 
-<div class="h-full flex flex-col gap-3 overflow-y-auto lg:overflow-hidden p-2 md:p-1 pb-20 md:pb-1">
+<div class="h-full flex flex-col gap-3 overflow-y-auto lg:overflow-hidden p-3 sm:p-2 md:p-1 pb-20 md:pb-1">
   <!-- Top Bar with Cinematic Header -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
     <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-mono">

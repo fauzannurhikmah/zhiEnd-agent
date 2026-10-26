@@ -11,8 +11,18 @@
     className?: string;
   } = $props();
 
+  let hasImageError = $state(false);
+  let retryCount = $state(0);
+
+  $effect(() => {
+    if (avatar) {
+      hasImageError = false;
+      retryCount = 0;
+    }
+  });
+
   const isVideo = $derived(() => {
-    if (!avatar) return false;
+    if (!avatar || hasImageError) return false;
     const str = avatar.trim().toLowerCase();
     return str.startsWith('data:video/') || 
            str.endsWith('.mp4') || 
@@ -22,7 +32,7 @@
   });
 
   const isImage = $derived(() => {
-    if (!avatar) return false;
+    if (!avatar || hasImageError) return false;
     const str = avatar.trim().toLowerCase();
     return str.startsWith('data:image/') || 
            str.startsWith('http://') || 
@@ -35,6 +45,19 @@
            str.endsWith('.webp') || 
            str.endsWith('.svg');
   });
+
+  function handleImageError(e: Event) {
+    if (retryCount < 2) {
+      retryCount++;
+      const target = e.target as HTMLImageElement;
+      if (target && avatar) {
+        const sep = avatar.includes('?') ? '&' : '?';
+        target.src = `${avatar}${sep}retry=${retryCount}&t=${Date.now()}`;
+        return;
+      }
+    }
+    hasImageError = true;
+  }
 
   const sizeClasses = {
     xs: 'w-4 h-4 text-[10px] rounded-md',
@@ -63,11 +86,12 @@
       src={avatar}
       alt={name}
       loading="lazy"
+      onerror={handleImageError}
       class="w-full h-full object-cover"
     />
   {:else}
     <span class="font-emoji select-none flex items-center justify-center leading-none">
-      {avatar || '🤖'}
+      {avatar && avatar.length <= 4 ? avatar : (name ? name.slice(0, 1).toUpperCase() : '🤖')}
     </span>
   {/if}
 </div>

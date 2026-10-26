@@ -258,13 +258,13 @@
 
 <div class="h-full flex flex-col justify-between overflow-hidden relative">
   <!-- Top Session Bar -->
-  <div class="flex items-center justify-between px-2.5 sm:px-4 py-1.5 sm:py-2 border-b border-white/[0.06] bg-zinc-950/40 backdrop-blur-md z-10 shrink-0 select-none gap-1.5">
-    <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+  <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2 border-b border-white/[0.06] bg-zinc-950/40 backdrop-blur-md z-10 shrink-0 select-none gap-1.5 sm:gap-2">
+    <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
       <MessageSquare class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-      <span class="text-xs font-semibold text-zinc-200 truncate max-w-[120px] sm:max-w-xs">
+      <span class="text-xs font-semibold text-zinc-200 truncate min-w-0 flex-1">
         {activeSession?.title || 'Diskusi Aktif'}
       </span>
-      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-900 border border-white/5 text-zinc-400 hidden sm:inline">
+      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-900 border border-white/5 text-zinc-400 hidden md:inline shrink-0">
         {activeSession?.workspace_id ? 'Workspace' : 'Global'}
       </span>
     </div>
@@ -274,11 +274,11 @@
       <button
         type="button"
         onclick={onOpenPersonaModal}
-        class="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-200 hover:text-indigo-300 transition cursor-pointer group shadow-sm max-w-[160px] sm:max-w-[280px]"
+        class="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-200 hover:text-indigo-300 transition cursor-pointer group shadow-sm max-w-[125px] xs:max-w-[155px] sm:max-w-[280px]"
         title={`Persona: ${activePersona?.name || 'Default'}${activePersona?.traits ? ` • Sifat: ${activePersona.traits}` : ''}`}
       >
         <AvatarView avatar={activePersona?.avatar} name={activePersona?.name} size="xs" className="rounded-md shrink-0" />
-        <span class="font-medium truncate max-w-[90px] sm:max-w-[110px]">{activePersona?.name || 'Default Persona'}</span>
+        <span class="font-medium truncate max-w-[65px] xs:max-w-[85px] sm:max-w-[120px]">{activePersona?.name || 'Default Persona'}</span>
         {#if activePersona?.traits}
           <span 
             class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-300 font-mono hidden md:inline truncate max-w-[120px]" 
@@ -293,7 +293,7 @@
       <button
         type="button"
         onclick={onCreateNewSession}
-        class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-300 hover:text-indigo-300 transition cursor-pointer"
+        class="flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-300 hover:text-indigo-300 transition cursor-pointer"
         title="Mulai sesi baru"
       >
         <Plus class="w-3 h-3 text-indigo-400" />
@@ -304,7 +304,7 @@
         <button
           type="button"
           onclick={onClearMessages}
-          class="flex items-center gap-1 px-2 py-1 rounded-lg hover:bg-rose-500/20 text-zinc-500 hover:text-rose-400 text-[11px] transition cursor-pointer"
+          class="flex items-center gap-1 p-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-rose-500/20 text-zinc-500 hover:text-rose-400 text-[11px] transition cursor-pointer"
           title="Bersihkan pesan di sesi ini"
         >
           <Trash2 class="w-3 h-3" />
@@ -426,7 +426,7 @@
       </div>
     {:else}
       <!-- Active Messages Stream -->
-      <div class="max-w-3xl mx-auto flex flex-col gap-5 sm:gap-6 pb-36 sm:pb-28">
+      <div class="max-w-3xl mx-auto flex flex-col gap-5 sm:gap-6 pb-20 sm:pb-24">
         {#each messages as msg (msg.id)}
           {#if msg.sender === 'user'}
             <div class="flex flex-col gap-1.5 items-end group">
@@ -702,7 +702,7 @@
 
   <!-- Floating Sticky Bottom Input (Shown when messages exist) -->
   {#if messages.length > 0}
-    <div class="absolute bottom-16 sm:bottom-4 inset-x-0 px-2 sm:px-4 pointer-events-none z-20">
+    <div class="absolute bottom-2 sm:bottom-4 inset-x-0 px-2 sm:px-4 pointer-events-none z-20">
       <div 
         role="region"
         aria-label="Kotak Input Mengambang"
@@ -738,13 +738,13 @@
           </div>
         {/if}
 
-        <div class="flex items-end gap-2 w-full">
+        <div class="flex items-end gap-1.5 sm:gap-2 w-full">
           <!-- Attachment Button -->
           <button
             type="button"
             onclick={() => fileInputRef?.click()}
             disabled={isBusy || isUploadingImage}
-            class="p-2 rounded-xl text-zinc-400 hover:text-indigo-300 hover:bg-zinc-900 transition cursor-pointer shrink-0 disabled:opacity-40"
+            class="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-indigo-300 hover:bg-zinc-900 transition cursor-pointer shrink-0 disabled:opacity-40"
             title="Lampirkan Gambar (atau paste / drag & drop)"
           >
             {#if isUploadingImage}
@@ -757,16 +757,16 @@
           <textarea
             bind:value={promptInput}
             onkeydown={handleKeyDown}
-            placeholder="Tulis instruksi selanjutnya... (atau paste screenshot gambar langsung)"
+            placeholder="Tulis instruksi... (atau lampirkan gambar)"
             rows="1"
-            class="flex-1 bg-transparent text-xs text-zinc-100 placeholder-zinc-500 outline-none resize-none px-2 py-1.5"
+            class="flex-1 bg-transparent text-xs text-zinc-100 placeholder-zinc-500 outline-none resize-none px-1.5 sm:px-2 py-1.5 leading-relaxed"
           ></textarea>
 
-          <div class="flex items-center gap-1.5 shrink-0">
+          <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {#if isBusy}
               <button
                 onclick={onCancelTask}
-                class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 transition cursor-pointer"
+                class="p-1.5 sm:p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 transition cursor-pointer"
                 title="Hentikan Task"
               >
                 <StopCircle class="w-4 h-4" />
@@ -775,7 +775,7 @@
 
             <button
               onclick={onClearMessages}
-              class="p-2 rounded-xl hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
+              class="hidden sm:flex p-2 rounded-xl hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
               title="Bersihkan Percakapan"
             >
               <Trash2 class="w-4 h-4" />
@@ -784,7 +784,7 @@
             <button
               onclick={handleSend}
               disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
-              class="p-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold transition cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95"
+              class="p-1.5 sm:p-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold transition cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95"
             >
               <ArrowUp class="w-4 h-4" />
             </button>

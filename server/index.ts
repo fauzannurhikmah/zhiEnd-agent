@@ -49,8 +49,20 @@ let config: AppConfig = loadConfig();
 const tunnelManager = new TunnelManager(config.port || 3888);
 const agentRunner = new AgentRunner(config, () => tunnelManager.publicUrl);
 
-// Auto-index active project context on start
-autoIndexWorkspaceContext(config.activeProject);
+// Auto-start persistent public tunnel on boot
+tunnelManager.startTunnel(config.tunnel?.subdomain || 'zhiend-agent').then((res) => {
+  if (res.success && res.url) {
+    console.log(`[Tunnel] Auto-started persistent tunnel at: ${res.url}`);
+    if (config.tunnel) {
+      config.tunnel.enabled = true;
+      config.tunnel.publicUrl = res.url;
+      config.tunnel.subdomain = 'zhiend-agent';
+      saveConfig(config);
+    }
+  }
+}).catch((err) => {
+  console.warn('[Tunnel] Auto-start failed:', err.message);
+});
 
 const onProjectChange = async (newPath: string) => {
   if (!fs.existsSync(newPath)) {
@@ -600,34 +612,6 @@ app.post('/api/chat/upload', async (c) => {
   }
 });
 
-// Static Uploads Serving
-app.get('/uploads/*', (c) => {
-  const relPath = c.req.path.replace(/^\/uploads\//, '');
-  const uploadsDir = path.resolve(__dirname, '..', 'data', 'uploads');
-  const filePath = path.resolve(uploadsDir, relPath);
-
-  // Mencegah directory traversal
-  if (!filePath.startsWith(uploadsDir) || !fs.existsSync(filePath)) {
-    return c.text('Not Found', 404);
-  }
-
-  const ext = path.extname(filePath).toLowerCase();
-  const mimeMap: Record<string, string> = {
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.webp': 'image/webp',
-    '.gif': 'image/gif',
-    '.svg': 'image/svg+xml'
-  };
-
-  const contentType = mimeMap[ext] || 'application/octet-stream';
-  const data = fs.readFileSync(filePath);
-  return c.body(data, 200, {
-    'Content-Type': contentType,
-    'Cache-Control': 'public, max-age=86400'
-  });
-});
 
 app.get('/api/projects/files', (c) => {
   const activeProj = config.activeProject;
@@ -1008,12 +992,26 @@ app.get('/api/network/info', async (c) => {
 
 app.post('/api/tunnel/start', async (c) => {
   const { subdomain } = await c.req.json<{ subdomain?: string }>().catch(() => ({} as any));
-  const result = await tunnelManager.startTunnel(subdomain);
+  const targetSub = subdomain?.trim() || config.tunnel?.subdomain || 'zhiend-agent';
+  const result = await tunnelManager.startTunnel(targetSub);
+  if (result.success && result.url) {
+    if (config.tunnel) {
+      config.tunnel.enabled = true;
+      config.tunnel.publicUrl = result.url;
+      config.tunnel.subdomain = targetSub;
+      saveConfig(config);
+    }
+  }
   return c.json(result);
 });
 
 app.post('/api/tunnel/stop', async (c) => {
   const result = await tunnelManager.stopTunnel();
+  if (config.tunnel) {
+    config.tunnel.enabled = false;
+    config.tunnel.publicUrl = '';
+    saveConfig(config);
+  }
   return c.json(result);
 });
 
@@ -1242,7 +1240,7 @@ app.get('/uploads/*', (c) => {
   const data = fs.readFileSync(filePath);
   return c.body(data, 200, {
     'Content-Type': mime,
-    'Cache-Control': 'public, max-age=86400'
+    'Cache-Control': 'public, max-age=31536000, immutable'
   });
 });
 

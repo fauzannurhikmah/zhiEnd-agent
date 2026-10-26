@@ -57,60 +57,108 @@ export class TunnelManager extends EventEmitter {
     }
   }
 
+  private currentSubdomain: string = 'zhiend-agent';
+
   public async startTunnel(subdomain: string = ''): Promise<{ success: boolean; url?: string; error?: string }> {
     if (this.tunnel) {
       await this.stopTunnel();
+      await new Promise(r => setTimeout(r, 1200));
     }
 
+    if (subdomain && subdomain.trim()) {
+      this.currentSubdomain = subdomain.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+    } else if (!this.currentSubdomain) {
+      this.currentSubdomain = 'zhiend-agent';
+    }
+
+    const targetSubdomain = this.currentSubdomain;
     this.tunnelStatus = 'connecting';
     this.errorMessage = null;
     this.emit('status_change', { status: this.tunnelStatus });
 
-    try {
-      const options: any = { port: this.port };
-      if (subdomain && subdomain.trim()) {
-        options.subdomain = subdomain.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
-      }
+    const maxAttempts = 6;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const options: any = { 
+          port: this.port,
+          local_host: '127.0.0.1'
+        };
+        if (targetSubdomain) {
+          options.subdomain = targetSubdomain;
+        }
 
-      this.tunnel = await localtunnel(options);
-      this.publicUrl = this.tunnel.url;
-      this.tunnelStatus = 'connected';
-      this.startHeartbeat();
+        const tun = await localtunnel(options);
 
-      this.tunnel.on('close', () => {
+        // Jika loca.lt sempat melempar random domain karena socket lama baru saja ditutup, tolak dan coba lagi
+        if (targetSubdomain && !tun.url.toLowerCase().includes(targetSubdomain)) {
+          console.warn(`[Tunnel] Diminta '${targetSubdomain}' tapi loca.lt mengembalikan '${tun.url}'. Menunggu pelepasan socket di loca.lt (${attempt}/${maxAttempts})...`);
+          try { tun.close(); } catch {}
+          if (attempt < maxAttempts) {
+            await new Promise(r => setTimeout(r, 2500));
+            continue;
+          } else {
+            this.stopHeartbeat();
+            this.tunnelStatus = 'error';
+            this.errorMessage = `Subdomain '${targetSubdomain}' masih dalam antrian pelepasan oleh server loca.lt. Mohon tunggu sekitar 5 detik lalu klik Buka lagi.`;
+            this.emit('status_change', { status: this.tunnelStatus, error: this.errorMessage });
+            return {
+              success: false,
+              error: this.errorMessage
+            };
+          }
+        }
+
+        this.tunnel = tun;
+        this.publicUrl = tun.url;
+        this.tunnelStatus = 'connected';
+        this.startHeartbeat();
+
+        this.tunnel.on('close', () => {
+          this.stopHeartbeat();
+          this.tunnel = null;
+          this.publicUrl = null;
+          this.tunnelStatus = 'stopped';
+          this.emit('status_change', { status: this.tunnelStatus });
+        });
+
+        this.tunnel.on('error', (err: any) => {
+          console.error('[Tunnel Error]', err?.message || err);
+          this.stopHeartbeat();
+          this.errorMessage = err.message;
+          this.tunnelStatus = 'error';
+          this.emit('status_change', { status: this.tunnelStatus, error: err.message });
+        });
+
+        this.emit('status_change', {
+          status: this.tunnelStatus,
+          url: this.publicUrl
+        });
+
+        return {
+          success: true,
+          url: this.publicUrl || undefined
+        };
+      } catch (err: any) {
+        console.warn(`[Tunnel] Gagal terhubung pada percobaan ${attempt}:`, err?.message || err);
+        if (attempt < maxAttempts) {
+          await new Promise(r => setTimeout(r, 2000));
+          continue;
+        }
         this.stopHeartbeat();
-        this.tunnel = null;
-        this.publicUrl = null;
-        this.tunnelStatus = 'stopped';
-        this.emit('status_change', { status: this.tunnelStatus });
-      });
-
-      this.tunnel.on('error', (err: any) => {
-        this.stopHeartbeat();
-        this.errorMessage = err.message;
         this.tunnelStatus = 'error';
+        this.errorMessage = err.message;
         this.emit('status_change', { status: this.tunnelStatus, error: err.message });
-      });
-
-      this.emit('status_change', {
-        status: this.tunnelStatus,
-        url: this.publicUrl
-      });
-
-      return {
-        success: true,
-        url: this.publicUrl || undefined
-      };
-    } catch (err: any) {
-      this.stopHeartbeat();
-      this.tunnelStatus = 'error';
-      this.errorMessage = err.message;
-      this.emit('status_change', { status: this.tunnelStatus, error: err.message });
-      return {
-        success: false,
-        error: err.message
-      };
+        return {
+          success: false,
+          error: err.message
+        };
+      }
     }
+
+    return {
+      success: false,
+      error: `Gagal mendapatkan subdomain '${targetSubdomain}'. Silakan coba lagi.`
+    };
   }
 
   private pingInterval: NodeJS.Timeout | null = null;
@@ -129,20 +177,39 @@ export class TunnelManager extends EventEmitter {
     return '';
   }
 
+  private failedPings: number = 0;
+
   private startHeartbeat(): void {
     this.stopHeartbeat();
+    this.failedPings = 0;
     this.pingInterval = setInterval(async () => {
       if (!this.publicUrl || this.tunnelStatus !== 'connected') return;
       try {
-        await fetch(`${this.publicUrl}/api/auth/status`, {
+        const res = await fetch(`${this.publicUrl}/api/auth/status`, {
           headers: { 'Bypass-Tunnel-Reminder': 'true' },
-          signal: AbortSignal.timeout(8000)
+          signal: AbortSignal.timeout(10000)
         });
+        if (res.ok) {
+          this.failedPings = 0;
+        } else if (res.status === 503) {
+          this.failedPings++;
+          console.warn(`[Tunnel Heartbeat] 503 from loca.lt (${this.failedPings}/3)...`);
+          if (this.failedPings >= 3) {
+            console.warn('[Tunnel Heartbeat] 3 consecutive 503s, reconnecting tunnel...');
+            this.failedPings = 0;
+            this.startTunnel(this.currentSubdomain).catch(() => {});
+          }
+        }
       } catch (e: any) {
-        console.warn('[Tunnel Heartbeat] Stale connection detected, reconnecting tunnel...');
-        this.startTunnel().catch(() => {});
+        this.failedPings++;
+        console.warn(`[Tunnel Heartbeat] Ping failed (${this.failedPings}/3): ${e.message}`);
+        if (this.failedPings >= 3) {
+          console.warn('[Tunnel Heartbeat] 3 consecutive ping failures, reconnecting tunnel...');
+          this.failedPings = 0;
+          this.startTunnel(this.currentSubdomain).catch(() => {});
+        }
       }
-    }, 45000);
+    }, 30000);
   }
 
   private stopHeartbeat(): void {

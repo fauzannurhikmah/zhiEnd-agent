@@ -1,5 +1,6 @@
 import { exec } from 'child_process';
 import fs from 'fs';
+import path from 'path';
 import { GitStatus, GitFile, CommitInfo } from './types';
 
 export interface CommandOutput {
@@ -106,12 +107,36 @@ export class GitManager {
   }
 
   public async getDiff(projectPath: string, filePath?: string | null, staged: boolean = false): Promise<string> {
-    let cmd = staged ? 'git diff --staged' : 'git diff';
-    if (filePath) {
-      cmd += ` -- "${filePath}"`;
+    if (!projectPath || !filePath) return 'Pilih file untuk melihat diff.';
+
+    const ext = filePath.split('.').pop()?.toLowerCase();
+    const binaryExts = ['db', 'db-shm', 'db-wal', 'png', 'jpg', 'jpeg', 'gif', 'ico', 'webp', 'pdf', 'zip', 'tar', 'gz', 'exe', 'bin'];
+    if (ext && binaryExts.includes(ext)) {
+      return `[Berkas Biner]\nBerkas "${filePath}" merupakan berkas biner.\nPerbandingan diff baris teks tidak dapat ditampilkan.`;
     }
+
+    let cmd = staged ? 'git diff --staged' : 'git diff';
+    cmd += ` -- "${filePath}"`;
     const res = await runGit(cmd, projectPath);
-    return res.stdout;
+
+    if (res.stdout && res.stdout.trim()) {
+      return res.stdout;
+    }
+
+    // Jika untracked dan belum ada diff, coba tampilkan isi file jika teks
+    try {
+      const fullPath = path.join(projectPath, filePath);
+      if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+        const stats = fs.statSync(fullPath);
+        if (stats.size > 200 * 1024) {
+          return `[Berkas Baru]\nUkuran berkas terlalu besar untuk ditampilkan (${(stats.size / 1024).toFixed(1)} KB).`;
+        }
+        const content = fs.readFileSync(fullPath, 'utf-8');
+        return `[Berkas Baru (Untracked)]\n` + content.split('\n').map(l => `+ ${l}`).join('\n');
+      }
+    } catch {}
+
+    return 'Tidak ada perubahan teks pada berkas yang dipilih.';
   }
 
   public async stage(projectPath: string, files: string[] = ['.']): Promise<CommandOutput> {
