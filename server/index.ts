@@ -854,11 +854,96 @@ app.get('/api/project/dev-server/status', async (c) => {
   return c.json(status);
 });
 
+// Kill all processes listening on SAFE_DEV_PORTS using direct Windows netstat + taskkill
+async function killProcessesOnDevPorts(): Promise<void> {
+  const { execSync } = await import('child_process');
+  try {
+    const netstatOutput = execSync('netstat -ano -p tcp', { encoding: 'utf8' });
+    const pidsToKill = new Set<number>();
+
+    for (const line of netstatOutput.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('TCP') || !trimmed.includes('LISTENING')) continue;
+
+      for (const port of SAFE_DEV_PORTS) {
+        const regex = new RegExp(`:${port}\\s+`);
+        if (regex.test(trimmed)) {
+          const parts = trimmed.split(/\s+/);
+          const pid = parseInt(parts[parts.length - 1], 10);
+          if (!isNaN(pid) && pid > 0 && pid !== process.pid) {
+            pidsToKill.add(pid);
+          }
+        }
+      }
+    }
+
+    for (const pid of pidsToKill) {
+      try {
+        execSync(`taskkill /F /T /PID ${pid}`, { stdio: 'ignore' });
+      } catch {}
+    }
+  } catch (e) {
+    console.error('Error killing processes on dev ports:', e);
+  }
+}
+
+// Stop Dev Server Completely: Kills process tree, powershell windows, ports, and orphaned node.exe
+async function stopActiveProjectDevServer(): Promise<{ success: boolean; message: string }> {
+  const { execSync, execFile } = await import('child_process');
+
+  // 1. Matikan process tree berdasarkan PID yang tercatat
+  if (activeDevServerPid) {
+    try {
+      execSync(`taskkill /F /T /PID ${activeDevServerPid}`, { stdio: 'ignore' });
+    } catch {}
+    activeDevServerPid = null;
+  }
+
+  // 2. Tutup semua jendela PowerShell / CMD berlabel zhiEnd-DevServer
+  try {
+    execFile('powershell.exe', [
+      '-NoProfile',
+      '-NonInteractive',
+      '-Command',
+      "Get-Process powershell,cmd -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like 'zhiEnd-DevServer*' } | Stop-Process -Force -ErrorAction SilentlyContinue"
+    ], () => {});
+  } catch {}
+
+  // 3. Matikan semua process yang menempati SAFE_DEV_PORTS (port 3000, 5174, dll.)
+  await killProcessesOnDevPorts();
+
+  // 4. Bersihkan proses node/cmd liar yang berjalan di direktori project aktif saat ini
+  if (config.activeProject && config.activeProject.length > 5) {
+    try {
+      const cleanProjPath = config.activeProject.replace(/\\/g, '\\\\');
+      execFile('powershell.exe', [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        `Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object { ($_.Name -match 'node|cmd|powershell') -and ($_.CommandLine -like '*${cleanProjPath}*') -and ($_.ProcessId -ne ${process.pid}) } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }`
+      ], () => {});
+    } catch {}
+  }
+
+  [200, 600, 1200, 2000].forEach((delay) => {
+    setTimeout(() => broadcastDevServerStatus(), delay);
+  });
+
+  return { success: true, message: 'Dev server dan jendela background berhasil dihentikan sepenuhnya.' };
+}
+
 async function startActiveProjectDevServer(): Promise<{ success: boolean; message: string; command?: string }> {
   const targetDir = config.activeProject;
   if (!targetDir || targetDir === 'D:\\Works' || targetDir === 'D:/Works' || !fs.existsSync(targetDir)) {
     return { success: false, message: 'Pilih project yang valid terlebih dahulu' };
   }
+
+  // PENTING: Bersihkan dulu proses sebelumnya & port yang mungkin masih nyangkut
+  // Hal ini mencegah error EADDRINUSE saat project dijalankan kembali setelah stop manual
+  await stopActiveProjectDevServer();
+
+  // Tunggu sejenak agar socket port OS benar-benar lepas
+  await new Promise((r) => setTimeout(r, 400));
 
   // Detect project type
   let cmd = 'npm run dev';
@@ -874,23 +959,32 @@ async function startActiveProjectDevServer(): Promise<{ success: boolean; messag
       cmd = 'npm run dev';
     }
   } else if (hasIndexHtml) {
-    // Pure HTML & CSS static website without package.json -> serve on port 3000
     cmd = 'npx -y serve -l 3000';
   }
 
   try {
-    const { exec } = await import('child_process');
-    const psCmd = `powershell -Command "$p = Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd ''${targetDir}''; ${cmd}' -WindowStyle Minimized -PassThru; $p.Id"`;
-    exec(psCmd, (err, stdout) => {
-      if (!err && stdout.trim()) {
-        const pid = parseInt(stdout.trim(), 10);
-        if (!isNaN(pid) && pid > 0) {
-          activeDevServerPid = pid;
-        }
-      }
+    const { spawn } = await import('child_process');
+    const cleanProjName = path.basename(targetDir);
+    const windowTitle = `zhiEnd-DevServer-[${cleanProjName}]`;
+
+    // Jalankan powershell dengan window title khusus agar dapat dilacak dan ditutup total saat stop
+    const psChild = spawn('powershell.exe', [
+      '-NoProfile',
+      '-Command',
+      `$host.ui.RawUI.WindowTitle = '${windowTitle}'; Set-Location '${targetDir}'; ${cmd}`
+    ], {
+      cwd: targetDir,
+      detached: true,
+      stdio: 'ignore',
+      windowsHide: false
     });
 
-    // Broadcast multiple times as port turns on
+    if (psChild.pid) {
+      activeDevServerPid = psChild.pid;
+      psChild.unref();
+    }
+
+    // Broadcast multiple times saat port mulai aktif
     [800, 1800, 3200, 5000].forEach((delay) => {
       setTimeout(() => broadcastDevServerStatus(), delay);
     });
@@ -910,30 +1004,8 @@ app.post('/api/project/dev-server/start', async (c) => {
 });
 
 app.post('/api/project/dev-server/stop', async (c) => {
-  const { exec } = await import('child_process');
-  
-  // 1. If we have activeDevServerPid, kill that process tree
-  if (activeDevServerPid) {
-    try {
-      exec(`taskkill /PID ${activeDevServerPid} /T /F`);
-    } catch {}
-    activeDevServerPid = null;
-  }
-
-  // 2. Kill processes ONLY on SAFE_DEV_PORTS (Strictly NEVER touch 5173 or 3888!)
-  const portsList = SAFE_DEV_PORTS.join(', ');
-  const psCmd = `powershell -Command "$agentPids = @(${process.pid}); Get-NetTCPConnection -LocalPort ${portsList} -ErrorAction SilentlyContinue | Where-Object { $agentPids -notcontains $_.OwningProcess } | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"`;
-  exec(psCmd, () => {
-    [300, 1000, 2000].forEach((delay) => {
-      setTimeout(() => broadcastDevServerStatus(), delay);
-    });
-  });
-
-  [300, 1000, 2000].forEach((delay) => {
-    setTimeout(() => broadcastDevServerStatus(), delay);
-  });
-
-  return c.json({ success: true, message: 'Dev server dihentikan.' });
+  const result = await stopActiveProjectDevServer();
+  return c.json(result);
 });
 
 // Network & Tunnel

@@ -123,13 +123,13 @@ ${formattedPaths.map(p => `• File Gambar: "${p}"`).join('\n')}
    - Jika pengguna meminta menjalankan projek ('jalankan projek ini', 'running dev', dll.):
      Sistem backend zhiEnd Agent OTOMATIS SUDAH MEMULAI Dev Server di latar belakang untuk workspace ini. Anda TIDAK PERLU lagi mengeksekusi 'npm run dev', 'pnpm dev', 'Start-Process', atau berulang-ulang mengecek port dengan 'Get-NetTCPConnection' / 'Start-Sleep'.
    - SEMUA project OTOMATIS BISA DIAKSES via Gateway zhiEnd Agent:
-     • Local Preview: [http://localhost:5173/preview/](http://localhost:5173/preview/) atau [http://localhost:${port}/preview/](http://localhost:${port}/preview/)
-     • Network Wi-Fi / LAN (HP & Laptop satu WiFi): [http://${localIp}:${port}/preview/](http://${localIp}:${port}/preview/)
-     ${publicTunnelUrl ? `• 🌐 Akses Publik Internet (HP / Luar Jaringan): [${publicTunnelUrl}/preview/](${publicTunnelUrl}/preview/)` : '• 🌐 Akses Publik Internet: Buka tab Remote Hub > Akses Jaringan untuk mengaktifkan Public Tunnel'}
-     • Dedicated Port 3000: [http://localhost:3000](http://localhost:3000)
-     • Dedicated LAN Port 3000: [http://${localIp}:3000](http://${localIp}:3000)
+     • Local Preview: http://localhost:5173/preview/ atau http://localhost:${port}/preview/
+     • Network Wi-Fi / LAN (HP & Laptop satu WiFi): http://${localIp}:${port}/preview/
+     ${publicTunnelUrl ? `• 🌐 Akses Publik Internet: ${publicTunnelUrl}/preview/` : '• 🌐 Akses Publik Internet: Buka tab Remote Hub > Akses Jaringan untuk mengaktifkan Public Tunnel'}
+     • Dedicated Port 3000: http://localhost:3000
+     • Dedicated LAN Port 3000: http://${localIp}:3000
    ATURAN MUTLAK:
-   - SELALU cantumkan tautan Live Preview Gateway & Local URL di atas secara rapi dan clickable (Markdown link).
+   - Cantumkan tautan Live Preview Gateway & Local URL di atas secara langsung menggunakan URL mentah (contoh: http://localhost:5173/preview/). JANGAN bungkus URL dengan tanda kurung markdown [url](url) agar langsung bisa diklik di WhatsApp dan browser HP!
    - DILARANG KERAS mematikan atau menghentikan port 5173 (zhiEnd Agent frontend) dan port ${port} (zhiEnd Agent backend)!
    - Berikan selalu URL yang rapi dan clickable agar pengguna bisa langsung mengkliknya di browser HP maupun laptop!
 
@@ -244,9 +244,9 @@ ${options.prompt}`;
             const previewLan = `http://${localIp}:${port}/preview/`;
             const previewPublic = publicTunnelUrl ? `${publicTunnelUrl}/preview/` : null;
 
-            let linksBlock = `\n\n━━━━━━━━━━━━━━━━━━━━━\n🌐 **Tautan Akses Projek (Aktif):**\n• 💻 **Local Preview:** [${previewLocal}](${previewLocal})\n• 📱 **Wi-Fi LAN (HP/Perangkat):** [${previewLan}](${previewLan})\n`;
+            let linksBlock = `\n\n━━━━━━━━━━━━━━━━━━━━━\n🌐 **Tautan Akses Projek (Aktif):**\n• 💻 **Local Preview:** ${previewLocal}\n• 📱 **Wi-Fi LAN (HP/Perangkat):** ${previewLan}\n`;
             if (previewPublic) {
-              linksBlock += `• 🌍 **Akses Publik Internet:** [${previewPublic}](${previewPublic})\n`;
+              linksBlock += `• 🌍 **Akses Publik Internet:** ${previewPublic}\n`;
             } else {
               linksBlock += `• 🌍 **Akses Publik Internet:** _(Buka tab Remote Hub > Akses Jaringan untuk mengaktifkan Public Tunnel)_\n`;
             }

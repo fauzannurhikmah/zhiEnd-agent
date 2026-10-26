@@ -87,6 +87,9 @@ export class WhatsAppBotManager extends EventEmitter {
   private async sendReply(sender: string, content: any): Promise<any> {
     if (!this.sock) return null;
     try {
+      if (typeof content?.text === 'string') {
+        content.text = formatForWhatsApp(content.text);
+      }
       const sent = await this.sock.sendMessage(sender, content);
       if (sent?.key?.id) {
         this.mySentMessageIds.add(sent.key.id);
@@ -691,5 +694,45 @@ export function getSafePersonaEmoji(avatar?: string | null): string {
     return '🎭';
   }
   return str;
+}
+
+export function formatForWhatsApp(text: string): string {
+  if (!text) return '';
+  let out = text;
+
+  // 1. Bersihkan file link lokal: [Label](file:///...) -> `Label`
+  out = out.replace(/\[([^\]]+)\]\(file:\/\/\/[^\s)]+\)/g, '`$1`');
+
+  // 2. Format tautan web [Label](URL) agar langsung clickable di WhatsApp:
+  // Jika label sama dengan URL atau berawalan http: ganti dengan URL mentah langsung
+  // Jika label adalah teks deskriptif: ubah menjadi `*Label:* URL`
+  out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_match, label, url) => {
+    const cleanLabel = label.trim();
+    const cleanUrl = url.trim();
+    if (
+      cleanLabel === cleanUrl ||
+      cleanLabel.startsWith('http://') ||
+      cleanLabel.startsWith('https://') ||
+      cleanLabel.replace(/[\/]/g, '') === cleanUrl.replace(/[\/]/g, '')
+    ) {
+      return cleanUrl;
+    }
+    return `*${cleanLabel}:* ${cleanUrl}`;
+  });
+
+  // 3. Hapus markdown image link jika ada: ![alt](url) -> url
+  out = out.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, '$2');
+
+  // 4. Beri spasi jika URL menempel pada tanda kurung: (http://...) -> ( http://... )
+  // Hal ini penting karena WhatsApp mobile sering menganggap tanda kurung tutup ')' sebagai bagian dari URL
+  out = out.replace(/\((https?:\/\/[^\s)]+)\)/g, '( $1 )');
+
+  // 5. Konversi markdown bold **text** menjadi format WhatsApp *text*
+  out = out.replace(/\*\*([^*]+)\*\*/g, '*$1*');
+
+  // 6. Konversi header markdown (### Header) menjadi format bold WhatsApp *Header*
+  out = out.replace(/^#{1,6}\s+(.+)$/gm, '*$1*');
+
+  return out;
 }
 
