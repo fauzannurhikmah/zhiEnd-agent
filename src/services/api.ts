@@ -179,12 +179,30 @@ export const api = {
   },
 
   // Agent
-  async sendChat(prompt: string, model?: string, conversationId?: string, sessionId?: string): Promise<{ success: boolean; error?: string }> {
+  async uploadChatImage(file: File): Promise<{ success: boolean; url: string; absolutePath: string; error?: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const pin = localStorage.getItem(PIN_STORAGE_KEY) || '';
+    const res = await fetch('/api/chat/upload', {
+      method: 'POST',
+      headers: {
+        'x-security-pin': pin
+      },
+      body: formData
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Gagal mengunggah gambar' }));
+      throw new Error(err.error || 'Gagal mengunggah gambar');
+    }
+    return res.json();
+  },
+
+  async sendChat(prompt: string, model?: string, conversationId?: string, sessionId?: string, images?: string[]): Promise<{ success: boolean; error?: string }> {
     try {
       const res = await fetch('/api/agent/chat', {
         method: 'POST',
         headers: getHeaders(),
-        body: JSON.stringify({ prompt, model, conversationId, sessionId })
+        body: JSON.stringify({ prompt, model, conversationId, sessionId, images: images || [] })
       });
       if (!res.ok) {
         const text = await res.text();

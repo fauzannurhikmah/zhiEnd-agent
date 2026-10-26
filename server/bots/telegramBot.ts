@@ -3,7 +3,7 @@ import { Telegraf } from 'telegraf';
 import { AppConfig, TelegramStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
-import { getPersonas, getPersonaById, saveConfigToDb } from '../db/database';
+import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, getOrCreateDefaultSession, saveMessageToDb } from '../db/database';
 import { getSafePersonaEmoji } from './whatsappBot';
 
 export interface TelegramBotOptions {
@@ -297,7 +297,7 @@ export class TelegramBotManager extends EventEmitter {
         }
       });
 
-      const handleCodingPrompt = async (ctx: any, promptText: string) => {
+      const handleCodingPrompt = async (ctx: any, promptText: string, images?: string[]) => {
         if (!promptText || !promptText.trim()) {
           return ctx.reply('⚠️ Masukkan instruksi coding.');
         }
@@ -306,23 +306,35 @@ export class TelegramBotManager extends EventEmitter {
           return ctx.reply('⏳ Agent sedang sibuk mengerjakan tugas lain. Gunakan `/cancel` jika ingin membatalkannya.');
         }
 
-        const activeProj = this.config.activeProject;
+        const activeProj = this.config.activeProject || 'D:\\Works';
         const activePersonaId = this.config.telegram?.personaId || 'persona-default';
         const activePersona = getPersonaById(activePersonaId) || getPersonaById('persona-default');
         const activeEmoji = getSafePersonaEmoji(activePersona?.avatar);
         const personaDisplay = activePersona ? `${activeEmoji} ${activePersona.name}` : '⚡ Standard';
 
+        const imageNote = images && images.length > 0 ? `\n🖼️ Terlampir ${images.length} gambar` : '';
         await ctx.reply(
-          `🤖 *${personaDisplay} Berjalan...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${promptText.slice(0, 100)}..."\n_Mohon tunggu sebentar..._`,
+          `🤖 *${personaDisplay} Berjalan...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${promptText.slice(0, 100)}..."${imageNote}\n_Mohon tunggu sebentar..._`,
           { parse_mode: 'Markdown' }
         );
+
+        // Sesi target di SQLite
+        let targetSessionId = 'default';
+        try {
+          const targetSession = getOrCreateDefaultSession(activeProj);
+          targetSessionId = targetSession.id;
+        } catch (e) {
+          console.error('Failed to resolve Telegram session:', e);
+        }
 
         try {
           const result = await this.agentRunner.run({
             prompt: promptText,
             cwd: activeProj,
+            sessionId: targetSessionId,
             personaId: activePersonaId,
-            model: activePersona?.preferred_model || this.config.antigravity?.defaultModel
+            model: activePersona?.preferred_model || this.config.antigravity?.defaultModel,
+            images: images || []
           });
 
           const resp = result.response || '(Tugas selesai tanpa output teks)';
@@ -349,6 +361,62 @@ export class TelegramBotManager extends EventEmitter {
         const text = ctx.message.text.trim();
         if (text.startsWith('/')) return;
         await handleCodingPrompt(ctx, text);
+      });
+
+      // Handle Telegram Inbound Photos
+      this.bot.on('photo', async (ctx) => {
+        const photos = ctx.message.photo;
+        if (!photos || photos.length === 0) return;
+        const bestPhoto = photos[photos.length - 1]; // Highest resolution
+        
+        try {
+          const fileLink = await ctx.telegram.getFileLink(bestPhoto.file_id);
+          const resp = await fetch(fileLink.href);
+          const buffer = Buffer.from(await resp.arrayBuffer());
+          const saved = saveChatUploadedFile(buffer, `tg_${bestPhoto.file_id}.jpg`);
+          const caption = (ctx.message as any).caption?.trim() || 'Tolong analisis dan periksa gambar terlampir ini.';
+
+          console.log(`[Telegram Photo] Saved to ${saved.url} (${saved.absolutePath})`);
+          this.emit('log', {
+            platform: 'telegram',
+            type: 'inbound',
+            sender: ctx.from?.username ? `@${ctx.from.username}` : String(ctx.from?.id),
+            text: `[Foto Terlampir] ${caption}`,
+            timestamp: Date.now()
+          });
+
+          await handleCodingPrompt(ctx, caption, [saved.url]);
+        } catch (err: any) {
+          console.error('Error handling Telegram photo:', err);
+          await ctx.reply(`⚠️ Gagal memproses gambar: ${err.message}`);
+        }
+      });
+
+      // Handle Telegram Inbound Documents (images sent as file)
+      this.bot.on('document', async (ctx) => {
+        const doc = ctx.message.document;
+        if (doc && doc.mime_type?.startsWith('image/')) {
+          try {
+            const fileLink = await ctx.telegram.getFileLink(doc.file_id);
+            const resp = await fetch(fileLink.href);
+            const buffer = Buffer.from(await resp.arrayBuffer());
+            const saved = saveChatUploadedFile(buffer, doc.file_name || `tg_doc_${doc.file_id}.jpg`);
+            const caption = (ctx.message as any).caption?.trim() || 'Tolong analisis dan periksa dokumen gambar ini.';
+
+            this.emit('log', {
+              platform: 'telegram',
+              type: 'inbound',
+              sender: ctx.from?.username ? `@${ctx.from.username}` : String(ctx.from?.id),
+              text: `[Dokumen Gambar] ${caption}`,
+              timestamp: Date.now()
+            });
+
+            await handleCodingPrompt(ctx, caption, [saved.url]);
+          } catch (err: any) {
+            console.error('Error handling Telegram document photo:', err);
+            await ctx.reply(`⚠️ Gagal memproses dokumen gambar: ${err.message}`);
+          }
+        }
       });
 
       this.bot.launch().catch(err => {

@@ -100,6 +100,7 @@ export interface ChatMessage {
   tools?: string[];
   steps?: ProcessStep[];
   thought?: string;
+  images?: string[];
   isStreaming?: boolean;
 }
 

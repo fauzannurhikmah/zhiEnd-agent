@@ -85,6 +85,7 @@ export interface AgentTask {
   steps?: ProcessStep[];
   thought?: string;
   sessionId?: string;
+  images?: string[];
 }
 
 export interface TunnelStatus {
@@ -177,6 +178,7 @@ export interface ChatMessageRecord {
   text: string;
   thought?: string;
   steps?: ProcessStep[];
+  images?: string[];
   model_used?: string;
   tokens_used?: number;
   created_at: string;

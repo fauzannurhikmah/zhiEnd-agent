@@ -29,6 +29,7 @@ export interface RunOptions {
   continueLast?: boolean;
   sessionId?: string;
   personaId?: string;
+  images?: string[];
 }
 
 export class AgentRunner extends EventEmitter {
@@ -96,22 +97,41 @@ ${persona.system_prompt}
 
     const selectedModel = options.model || personaModel || this.config.antigravity?.defaultModel || 'gemini-3.8-flash-high';
 
-    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}
-[Panduan Operasional Sistem]:
-1. Root direktori default untuk semua project adalah ${rootDir}. Jika diminta membuat project baru atau menyimpan file baru tanpa path absolut, SELALU buat dan simpan langsung di dalam ${rootDir} (contoh: ${rootDir}\\<nama-project>).
-2. PENTING - Menjalankan Project & URL Akses (Local, LAN, dan Public Internet):
-   - SEMUA project (baik statis HTML maupun framework) OTOMATIS BISA DIAKSES langsung via Gateway zhiEnd Agent:
+    let imagesContext = '';
+    if (options.images && options.images.length > 0) {
+      const formattedPaths = options.images.map(img => {
+        if (img.startsWith('/uploads/')) {
+          return path.join(__dirname, '..', 'data', img.replace(/^\//, '')).replace(/\\/g, '/');
+        }
+        return img;
+      });
+
+      imagesContext = `\n[Lampiran Gambar dari Pengguna]:
+Pengguna telah mengunggah gambar berikut untuk diperiksa:
+${formattedPaths.map(p => `• File Gambar: "${p}"`).join('\n')}
+(PANDUAN: Anda DAPAT melihat dan menganalisis visual gambar tersebut menggunakan tool view_file(AbsolutePath: "${formattedPaths[0]}"). Gunakan file gambar ini untuk memeriksa desain UI, mockup, screenshot error, atau tata letak yang diinginkan pengguna!)\n`;
+    }
+
+    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}${imagesContext}
+[Panduan Operasional Sistem & Efisiensi Eksekusi]:
+1. ATURAN EFISIENSI EKSEKUSI (Zero Redundancy):
+   - JANGAN PERNAH menjalankan perintah terminal/powershell atau membaca file yang sama berulang kali jika sudah berhasil 1 kali! Hanya boleh mengulang HANYA JIKA perintah sebelumnya error/gagal dan Anda perlu memperbaiki parameternya.
+   - DILARANG KERAS melakukan polling loop menggunakan tool manage_task (Action: 'status') berulang kali dalam satu giliran! Sistem berbasis event akan otomatis memberikan notifikasi saat background task selesai.
+   - Selesaikan tugas dengan langkah seminimal dan seefisien mungkin tanpa perulangan yang tidak perlu.
+2. Root direktori default untuk semua project adalah ${rootDir}. Jika diminta membuat project baru atau menyimpan file baru tanpa path absolut, SELALU buat dan simpan langsung di dalam ${rootDir} (contoh: ${rootDir}\\<nama-project>).
+3. PENTING - Menjalankan Project & Dev Server:
+   - Jika pengguna meminta menjalankan projek ('jalankan projek ini', 'running dev', dll.):
+     Sistem backend zhiEnd Agent OTOMATIS SUDAH MEMULAI Dev Server di latar belakang untuk workspace ini. Anda TIDAK PERLU lagi mengeksekusi 'npm run dev', 'pnpm dev', 'Start-Process', atau berulang-ulang mengecek port dengan 'Get-NetTCPConnection' / 'Start-Sleep'.
+   - SEMUA project OTOMATIS BISA DIAKSES via Gateway zhiEnd Agent:
      • Local Preview: [http://localhost:5173/preview/](http://localhost:5173/preview/) atau [http://localhost:${port}/preview/](http://localhost:${port}/preview/)
      • Network Wi-Fi / LAN (HP & Laptop satu WiFi): [http://${localIp}:${port}/preview/](http://${localIp}:${port}/preview/)
      ${publicTunnelUrl ? `• 🌐 Akses Publik Internet (HP / Luar Jaringan): [${publicTunnelUrl}/preview/](${publicTunnelUrl}/preview/)` : '• 🌐 Akses Publik Internet: Buka tab Remote Hub > Akses Jaringan untuk mengaktifkan Public Tunnel'}
-   - Jika pengguna meminta menjalankan dev server dedicated (port 3000):
-     EKSEKUSI PERINTAH SECARA NYATA via PowerShell/terminal (misal: Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd '${workingDir}'; npm run dev" -WindowStyle Minimized). JANGAN PERNAH hanya mengklaim di teks bahwa server sudah jalan tanpa menjalankannya!
-     • Dedicated Local Port 3000: [http://localhost:3000](http://localhost:3000)
+     • Dedicated Port 3000: [http://localhost:3000](http://localhost:3000)
      • Dedicated LAN Port 3000: [http://${localIp}:3000](http://${localIp}:3000)
    ATURAN MUTLAK:
-   - SELALU cantumkan tautan Live Preview Gateway di atas karena tautan tersebut DIJAMIN 100% PASTI AKTIF dan bisa dibuka pengguna seketika!
+   - SELALU cantumkan tautan Live Preview Gateway & Local URL di atas secara rapi dan clickable (Markdown link).
    - DILARANG KERAS mematikan atau menghentikan port 5173 (zhiEnd Agent frontend) dan port ${port} (zhiEnd Agent backend)!
-   - Berikan selalu URL yang rapi dan clickable (Markdown link) agar pengguna bisa langsung mengkliknya di browser HP maupun laptop!
+   - Berikan selalu URL yang rapi dan clickable agar pengguna bisa langsung mengkliknya di browser HP maupun laptop!
 
 Permintaan Pengguna:
 ${options.prompt}`;
@@ -140,7 +160,8 @@ ${options.prompt}`;
       response: '',
       conversationId: options.conversationId || null,
       toolsExecuted: [],
-      sessionId: options.sessionId
+      sessionId: options.sessionId,
+      images: options.images || []
     };
 
     this.emit('task_start', {
@@ -148,7 +169,8 @@ ${options.prompt}`;
       prompt: options.prompt,
       project: workingDir,
       model: selectedModel,
-      sessionId: options.sessionId
+      sessionId: options.sessionId,
+      images: options.images || []
     });
 
     return new Promise<AgentTask>((resolve, reject) => {
@@ -254,7 +276,8 @@ ${options.prompt}`;
             toolsExecuted: finishedTask.toolsExecuted,
             steps: finishedTask.steps || [],
             thought: finishedTask.thought || '',
-            sessionId: finishedTask.sessionId
+            sessionId: finishedTask.sessionId,
+            images: finishedTask.images || []
           });
 
           this.activeTask = null;
@@ -314,12 +337,17 @@ ${options.prompt}`;
         if (step.step_type === 'tool') {
           const toolName = step.tool_name || step.tool_info?.name || 'tool';
           const params = step.tool_info?.parameters || {};
+          const stepIdx = step.step_index !== undefined ? step.step_index : (step.id || step.tool_call_id);
+          const stepId = stepIdx !== undefined
+            ? `step_${taskId}_${stepIdx}`
+            : `step_${taskId}_${toolName}`;
           
           if (toolName === 'run_command') {
             const cmd = params.CommandLine || '';
             toolDesc = `run: ${cmd}`;
             processStep = {
-              id: 'step_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+              id: stepId,
+              stepIndex: step.step_index,
               type: 'run',
               title: 'Menjalankan Perintah',
               command: cmd,
@@ -334,7 +362,8 @@ ${options.prompt}`;
               : undefined;
             toolDesc = `read: ${fname}`;
             processStep = {
-              id: 'step_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+              id: stepId,
+              stepIndex: step.step_index,
               type: 'read',
               title: `Membaca ${fname}`,
               file: fname,
@@ -347,7 +376,8 @@ ${options.prompt}`;
             const fname = rawPath.replace(/\\/g, '/').split('/').pop() || rawPath;
             toolDesc = `write: ${fname}`;
             processStep = {
-              id: 'step_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+              id: stepId,
+              stepIndex: step.step_index,
               type: 'write',
               title: `Menulis ${fname}`,
               file: fname,
@@ -363,7 +393,8 @@ ${options.prompt}`;
               : undefined;
             toolDesc = `edit: ${fname}`;
             processStep = {
-              id: 'step_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+              id: stepId,
+              stepIndex: step.step_index,
               type: 'edit',
               title: `Mengubah ${fname}`,
               file: fname,
@@ -376,7 +407,8 @@ ${options.prompt}`;
             const dir = params.DirectoryPath ? params.DirectoryPath.replace(/\\/g, '/').split('/').pop() : 'dir';
             toolDesc = `ls: ${dir}`;
             processStep = {
-              id: 'step_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+              id: stepId,
+              stepIndex: step.step_index,
               type: 'list',
               title: `Memeriksa direktori ${dir}`,
               detail: `Daftar file di folder ${params.DirectoryPath || dir}`,
@@ -385,7 +417,8 @@ ${options.prompt}`;
           } else if (toolName === 'grep_search') {
             toolDesc = `grep: ${params.Query}`;
             processStep = {
-              id: 'step_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+              id: stepId,
+              stepIndex: step.step_index,
               type: 'search',
               title: `Mencari '${params.Query}'`,
               detail: `Pencarian kode di workspace`,
@@ -394,7 +427,8 @@ ${options.prompt}`;
           } else {
             toolDesc = toolName;
             processStep = {
-              id: 'step_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+              id: stepId,
+              stepIndex: step.step_index,
               type: 'tool',
               title: `Eksekusi ${toolName}`,
               detail: typeof params === 'object' ? JSON.stringify(params).slice(0, 100) : '',
@@ -408,22 +442,37 @@ ${options.prompt}`;
           }
           if (processStep) {
             this.activeTask.steps = this.activeTask.steps || [];
-            this.activeTask.steps.push(processStep);
+            const existingIdx = this.activeTask.steps.findIndex((s: any) => s.id === stepId);
+            if (existingIdx !== -1) {
+              this.activeTask.steps[existingIdx] = {
+                ...this.activeTask.steps[existingIdx],
+                ...processStep,
+                state: step.state || 'completed'
+              };
+            } else {
+              this.activeTask.steps.push(processStep);
+            }
           }
         } else if (step.step_type === 'thought' || step.thought || step.reasoning) {
           const thoughtText = step.thought || step.reasoning || step.text_delta || '';
           if (thoughtText && thoughtText.trim()) {
             this.activeTask.thought = (this.activeTask.thought || '') + thoughtText;
+            const thoughtId = `thought_${taskId}`;
             processStep = {
-              id: 'thought_' + Date.now(),
+              id: thoughtId,
               type: 'thought',
               title: 'Reasoning & Analisis',
-              thought: thoughtText,
-              detail: thoughtText,
+              thought: this.activeTask.thought,
+              detail: this.activeTask.thought,
               timestamp: Date.now()
             };
             this.activeTask.steps = this.activeTask.steps || [];
-            this.activeTask.steps.push(processStep);
+            const existingIdx = this.activeTask.steps.findIndex((s: any) => s.id === thoughtId);
+            if (existingIdx !== -1) {
+              this.activeTask.steps[existingIdx] = processStep;
+            } else {
+              this.activeTask.steps.push(processStep);
+            }
           }
         }
 

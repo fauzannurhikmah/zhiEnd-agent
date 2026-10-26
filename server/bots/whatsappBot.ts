@@ -2,6 +2,7 @@ import makeWASocket, {
   useMultiFileAuthState,
   DisconnectReason,
   fetchLatestBaileysVersion,
+  downloadMediaMessage,
   WASocket
 } from '@whiskeysockets/baileys';
 import pino from 'pino';
@@ -12,7 +13,7 @@ import { EventEmitter } from 'events';
 import { AppConfig, WhatsAppStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
-import { getPersonas, getPersonaById, saveConfigToDb } from '../db/database';
+import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, saveMessageToDb, getOrCreateDefaultSession } from '../db/database';
 
 export interface WhatsAppBotOptions {
   config: AppConfig;
@@ -245,15 +246,23 @@ export class WhatsAppBotManager extends EventEmitter {
                     (msg.message as any).viewOnceMessageV2?.message || 
                     msg.message;
 
+          const isImage = !!(
+            m?.imageMessage || 
+            (m?.documentMessage?.mimetype && m.documentMessage.mimetype.startsWith('image/'))
+          );
+
           const messageText = 
             m?.conversation ||
             m?.extendedTextMessage?.text ||
             m?.imageMessage?.caption ||
+            m?.documentMessage?.caption ||
             m?.videoMessage?.caption ||
             '';
 
           const text = messageText.trim();
-          if (!text) continue;
+          if (!text && !isImage) continue;
+
+          const effectiveText = text || 'Tolong analisis dan periksa gambar terlampir ini.';
 
           const botPhone = (this.user?.id || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
           const botLid = ((this.user as any)?.lid || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
@@ -267,15 +276,15 @@ export class WhatsAppBotManager extends EventEmitter {
 
           const isGroup = sender.endsWith('@g.us');
           const participant = msg.key.participant || (msg as any).participant;
-          const isCommand = text.startsWith('!') || text.startsWith('/') || ['help', 'menu', 'status'].includes(text.toLowerCase());
+          const isWhiteListed = this.isAuthorized(sender, participant);
+          const isCommand = effectiveText.startsWith('!') || effectiveText.startsWith('/') || ['help', 'menu', 'status'].includes(effectiveText.toLowerCase()) || (isImage && isWhiteListed);
 
           // PROTEKSI TOTAL UNTUK INCOMING CHAT:
           // Jika pesan BUKAN dari ruang obrolan diri sendiri ("Message Yourself"):
           if (!isSelfChat) {
-            const isWhiteListed = this.isAuthorized(sender, participant);
             // 1. Jika nomor pengirim/participant TIDAK terdaftar di allowedNumbers:
             //    DIAM TOTAL! Jangan pernah balas apapun ke nomor/grup tersebut!
-            // 2. Jika pengirim terdaftar di allowedNumbers tapi pesannya BUKAN perintah diawali ! atau /:
+            // 2. Jika pengirim terdaftar di allowedNumbers tapi pesannya BUKAN perintah diawali ! atau / (atau gambar):
             //    DIAM TOTAL! Jangan ganggu percakapan biasa!
             if (!isWhiteListed || !isCommand) {
               continue;
@@ -288,12 +297,12 @@ export class WhatsAppBotManager extends EventEmitter {
             continue;
           }
 
-          console.log(`[WhatsApp Inbound] From: ${sender} (self: ${isSelfChat}, fromMe: ${msg.key.fromMe}, group: ${isGroup}) | Text: "${text}"`);
+          console.log(`[WhatsApp Inbound] From: ${sender} (self: ${isSelfChat}, fromMe: ${msg.key.fromMe}, group: ${isGroup}, image: ${isImage}) | Text: "${effectiveText}"`);
           this.emit('log', {
             platform: 'whatsapp',
             type: 'inbound',
             sender,
-            text,
+            text: effectiveText,
             timestamp: Date.now()
           });
 
@@ -302,7 +311,31 @@ export class WhatsAppBotManager extends EventEmitter {
             continue;
           }
 
-          await this.handleCommand(sender, text, isSelfChat);
+          // Unduh lampiran gambar jika ada
+          const attachedImages: string[] = [];
+          if (isImage) {
+            try {
+              const buffer = await downloadMediaMessage(
+                msg,
+                'buffer',
+                {},
+                {
+                  logger: pino({ level: 'silent' }),
+                  reuploadRequest: this.sock?.updateMediaMessage
+                }
+              );
+              if (buffer && buffer.length > 0) {
+                const mime = m?.imageMessage?.mimetype || m?.documentMessage?.mimetype || 'image/jpeg';
+                const ext = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : 'jpg';
+                const saved = saveChatUploadedFile(buffer, `wa_${Date.now()}.${ext}`);
+                attachedImages.push(saved.url);
+              }
+            } catch (mediaErr) {
+              console.error('[WhatsApp] Gagal mengunduh gambar:', mediaErr);
+            }
+          }
+
+          await this.handleCommand(sender, effectiveText, isSelfChat, attachedImages);
         }
       });
 
@@ -318,7 +351,7 @@ export class WhatsAppBotManager extends EventEmitter {
     }
   }
 
-  private async handleCommand(sender: string, text: string, isSelfChat: boolean = false): Promise<void> {
+  private async handleCommand(sender: string, text: string, isSelfChat: boolean = false, images: string[] = []): Promise<void> {
     if (!this.sock) return;
     const activeProj = this.config.activeProject || 'Belum dipilih';
 
@@ -542,8 +575,8 @@ export class WhatsAppBotManager extends EventEmitter {
       return;
     }
 
-    // Safeguard: Jika bukan dari diri sendiri dan bukan command yang diawali ! atau /, abaikan
-    if (!isSelfChat && !text.startsWith('!') && !text.startsWith('/')) {
+    // Safeguard: Jika bukan dari diri sendiri dan bukan command yang diawali ! atau /, abaikan KECUALI ada gambar terlampir
+    if (!isSelfChat && !text.startsWith('!') && !text.startsWith('/') && (!images || images.length === 0)) {
       return;
     }
 
@@ -551,22 +584,37 @@ export class WhatsAppBotManager extends EventEmitter {
     if (text.startsWith('!code')) {
       codingPrompt = text.replace('!code', '').trim();
     }
+    if (!codingPrompt) {
+      codingPrompt = 'Tolong analisis dan periksa gambar terlampir ini.';
+    }
 
     if (this.agentRunner.isBusy()) {
       await this.sendReply(sender, { text: '⏳ Agent sedang sibuk dengan tugas lain. Ketik *!cancel* untuk batalkan.' });
       return;
     }
 
+    const imageNote = images && images.length > 0 ? `\n🖼️ Terlampir ${images.length} gambar` : '';
     await this.sendReply(sender, {
-      text: `🤖 *${personaDisplay} Memproses...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${codingPrompt.slice(0, 100)}..."\n_Mohon tunggu sebentar..._`
+      text: `🤖 *${personaDisplay} Memproses...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${codingPrompt.slice(0, 100)}..."${imageNote}\n_Mohon tunggu sebentar..._`
     });
+
+    // Sesi target di SQLite
+    let targetSessionId = 'default';
+    try {
+      const targetSession = getOrCreateDefaultSession(activeProj);
+      targetSessionId = targetSession.id;
+    } catch (e) {
+      console.error('Failed to resolve WhatsApp session:', e);
+    }
 
     try {
       const result = await this.agentRunner.run({
         prompt: codingPrompt,
         cwd: activeProj,
+        sessionId: targetSessionId,
         personaId: activePersonaId,
-        model: activePersona?.preferred_model || this.config.antigravity?.defaultModel
+        model: activePersona?.preferred_model || this.config.antigravity?.defaultModel,
+        images: images && images.length > 0 ? images : undefined
       });
 
       const resp = result.response || '(Tugas selesai tanpa respon teks)';

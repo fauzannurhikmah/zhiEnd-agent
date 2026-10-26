@@ -291,6 +291,7 @@
           tools: [],
           steps: m.steps || [],
           thought: m.thought || '',
+          images: m.images || [],
           isStreaming: false
         }));
       } else if (forceReset) {
@@ -441,7 +442,25 @@
             last.tools = [...(last.tools || []), toolLabel];
           }
           if (data.processStep) {
-            last.steps = [...(last.steps || []), data.processStep];
+            last.steps = last.steps || [];
+            const existingIdx = last.steps.findIndex(s => s.id === data.processStep.id);
+            if (existingIdx !== -1) {
+              last.steps[existingIdx] = { ...last.steps[existingIdx], ...data.processStep };
+            } else {
+              // Consecutive duplicate check (e.g. repeated polling manage_task or identical commands)
+              const prevStep = last.steps[last.steps.length - 1];
+              const isConsecutiveDuplicate = prevStep &&
+                prevStep.title === data.processStep.title &&
+                (prevStep.command === data.processStep.command || prevStep.detail === data.processStep.detail);
+
+              if (isConsecutiveDuplicate) {
+                prevStep.repeatCount = (prevStep.repeatCount || 1) + 1;
+                prevStep.timestamp = data.processStep.timestamp;
+                prevStep.detail = data.processStep.detail;
+              } else {
+                last.steps = [...last.steps, data.processStep];
+              }
+            }
           }
           if (data.thought) {
             last.thought = data.thought;
@@ -550,23 +569,28 @@
     });
   }
 
-  async function handleSendMessage(text: string) {
-    if (!text.trim() || isAgentBusy) return;
+  async function handleSendMessage(text: string, images?: string[]) {
+    const hasText = text && text.trim();
+    const hasImages = images && images.length > 0;
+    if ((!hasText && !hasImages) || isAgentBusy) return;
 
     if (!activeSessionId) {
       await handleCreateNewSession(false);
     }
 
+    const displayText = hasText ? text : (hasImages ? 'Tolong analisis gambar terlampir ini.' : '');
+
     messages = [...messages, {
       id: 'usr_' + Date.now(),
       sender: 'user',
-      text,
+      text: displayText,
+      images: images && images.length > 0 ? images : undefined,
       timestamp: Date.now()
     }];
 
     isAgentBusy = true;
     try {
-      await api.sendChat(text, config?.antigravity?.defaultModel, undefined, activeSessionId || undefined);
+      await api.sendChat(displayText, config?.antigravity?.defaultModel, undefined, activeSessionId || undefined, images);
     } catch (e: any) {
       isAgentBusy = false;
       messages = [...messages, {

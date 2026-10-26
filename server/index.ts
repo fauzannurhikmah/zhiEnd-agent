@@ -36,7 +36,8 @@ import {
   saveMessageToDb,
   clearSessionMessages,
   getOrCreateDefaultSession,
-  saveBase64Avatar
+  saveBase64Avatar,
+  saveChatUploadedFile
 } from './db/database';
 
 const app = new Hono();
@@ -471,6 +472,53 @@ app.post('/api/upload/avatar', async (c) => {
   }
 });
 
+// Chat Media Upload Endpoint (Attachments)
+app.post('/api/chat/upload', async (c) => {
+  try {
+    const chatDir = path.join(UPLOADS_DIR, 'chat');
+    if (!fs.existsSync(chatDir)) {
+      fs.mkdirSync(chatDir, { recursive: true });
+    }
+
+    const contentType = c.req.header('content-type') || '';
+    if (contentType.includes('multipart/form-data')) {
+      const body = await c.req.parseBody();
+      const file = body['file'];
+      if (!file || typeof file === 'string') {
+        return c.json({ error: 'No file uploaded' }, 400);
+      }
+
+      const fileObj = file as File;
+      const originalName = (fileObj as any).name || 'image.jpg';
+      const ext = path.extname(originalName) || '.jpg';
+      const filename = `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}${ext}`;
+      const filePath = path.join(chatDir, filename);
+
+      const arrayBuffer = await fileObj.arrayBuffer();
+      fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
+      const url = `/uploads/chat/${filename}`;
+      return c.json({ success: true, url, absolutePath: filePath.replace(/\\/g, '/'), filename });
+    } else {
+      const json = await c.req.json<{ dataUrl?: string; base64?: string; filename?: string }>().catch(() => ({} as any));
+      const raw = json.dataUrl || json.base64;
+      if (!raw) return c.json({ error: 'No image data provided' }, 400);
+
+      const matches = raw.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      const b64 = matches ? matches[2] : raw;
+      const ext = matches ? (matches[1].split('/')[1] || 'jpg') : (json.filename ? path.extname(json.filename).replace('.', '') : 'jpg');
+      const filename = `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const filePath = path.join(chatDir, filename);
+
+      fs.writeFileSync(filePath, Buffer.from(b64, 'base64'));
+      const url = `/uploads/chat/${filename}`;
+      return c.json({ success: true, url, absolutePath: filePath.replace(/\\/g, '/'), filename });
+    }
+  } catch (err: any) {
+    console.error('Chat upload error:', err);
+    return c.json({ error: 'Upload failed: ' + err.message }, 500);
+  }
+});
+
 
 // ==========================================
 // DATABASE: Chat Sessions & Messages (History)
@@ -512,6 +560,67 @@ app.post('/api/chat/messages/clear/:sessionId', (c) => {
   const sessionId = c.req.param('sessionId');
   const success = clearSessionMessages(sessionId);
   return c.json({ success });
+});
+
+// Chat Image Upload Endpoint
+app.post('/api/chat/upload', async (c) => {
+  try {
+    const contentType = c.req.header('content-type') || '';
+    if (contentType.includes('multipart/form-data')) {
+      const body = await c.req.parseBody();
+      const file = body['file'];
+      if (!file || !(file instanceof File)) {
+        return c.json({ error: 'Berkas gambar tidak ditemukan dalam formulir upload' }, 400);
+      }
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const result = saveChatUploadedFile(buffer, file.name);
+      return c.json({ success: true, ...result });
+    }
+
+    // Fallback: Base64 JSON
+    const jsonBody = await c.req.json<{ base64?: string; name?: string }>().catch(() => ({}));
+    if (jsonBody?.base64) {
+      const matches = jsonBody.base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+      const data = matches ? matches[2] : jsonBody.base64;
+      const buffer = Buffer.from(data, 'base64');
+      const result = saveChatUploadedFile(buffer, jsonBody.name || 'image.jpg');
+      return c.json({ success: true, ...result });
+    }
+
+    return c.json({ error: 'Format unggahan tidak didukung (harus multipart/form-data atau base64 JSON)' }, 400);
+  } catch (err: any) {
+    console.error('Chat upload error:', err);
+    return c.json({ error: 'Gagal mengunggah gambar: ' + err.message }, 500);
+  }
+});
+
+// Static Uploads Serving
+app.get('/uploads/*', (c) => {
+  const relPath = c.req.path.replace(/^\/uploads\//, '');
+  const uploadsDir = path.resolve(__dirname, '..', 'data', 'uploads');
+  const filePath = path.resolve(uploadsDir, relPath);
+
+  // Mencegah directory traversal
+  if (!filePath.startsWith(uploadsDir) || !fs.existsSync(filePath)) {
+    return c.text('Not Found', 404);
+  }
+
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeMap: Record<string, string> = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml'
+  };
+
+  const contentType = mimeMap[ext] || 'application/octet-stream';
+  const data = fs.readFileSync(filePath);
+  return c.body(data, 200, {
+    'Content-Type': contentType,
+    'Cache-Control': 'public, max-age=86400'
+  });
 });
 
 app.get('/api/projects/files', (c) => {
@@ -667,7 +776,8 @@ app.post('/api/agent/chat', async (c) => {
     model: body.model || sessionPersonaModel || config.antigravity?.defaultModel,
     conversationId: body.conversationId,
     continueLast: body.continueLast,
-    sessionId: targetSessionId
+    sessionId: targetSessionId,
+    images: Array.isArray(body.images) ? body.images : []
   }).catch(err => {
     console.error('Agent execution error:', err);
   });
@@ -1093,7 +1203,8 @@ try {
           id: 'usr-' + taskId,
           session_id: targetSessionId,
           sender: 'user',
-          text: data.prompt
+          text: data.prompt,
+          images: (data as any).images || []
         });
       }
       saveMessageToDb({

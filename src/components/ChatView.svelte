@@ -2,6 +2,7 @@
   import type { ChatMessage, AppConfig, ChatSessionItem, PersonaItem } from '../types';
   import AvatarView from './AvatarView.svelte';
   import { renderMarkdown } from '../services/markdown';
+  import { api } from '../services/api';
   import { 
     Send, 
     StopCircle, 
@@ -23,7 +24,13 @@
     FileText, 
     MessageSquare, 
     Plus,
-    Bot
+    Bot,
+    Paperclip,
+    Image as ImageIcon,
+    X,
+    Maximize2,
+    Loader2,
+    Download
   } from 'lucide-svelte';
 
   let {
@@ -43,18 +50,31 @@
     config: AppConfig | null;
     activeSession?: ChatSessionItem | null;
     activePersona?: PersonaItem | null;
-    onSendMessage: (text: string) => void;
+    onSendMessage: (text: string, images?: string[]) => void;
     onCancelTask: () => void;
     onClearMessages: () => void;
     onCreateNewSession?: () => void;
     onOpenPersonaModal?: () => void;
   } = $props();
 
+  interface AttachedImage {
+    url: string;
+    name: string;
+    size?: number;
+  }
+
   let promptInput = $state('');
   let messagesContainer: HTMLDivElement;
   let copiedMessageId = $state<string | null>(null);
   let expandedProcesses = $state<Record<string, boolean>>({});
   let prevStreamingStatus = $state<Record<string, boolean>>({});
+
+  // Image Upload & Lightbox state
+  let selectedImages = $state<AttachedImage[]>([]);
+  let isUploadingImage = $state(false);
+  let zoomImageUrl = $state<string | null>(null);
+  let fileInputRef = $state<HTMLInputElement | null>(null);
+  let isDragging = $state(false);
 
   function toggleProcess(id: string) {
     const current = isProcessExpanded(id);
@@ -101,11 +121,89 @@
     }
   }
 
+  async function uploadFiles(files: FileList | File[]) {
+    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (imageFiles.length === 0) return;
+
+    isUploadingImage = true;
+    try {
+      for (const file of imageFiles) {
+        const res = await api.uploadChatImage(file);
+        if (res && res.url) {
+          selectedImages = [...selectedImages, {
+            url: res.url,
+            name: file.name,
+            size: file.size
+          }];
+        }
+      }
+    } catch (err: any) {
+      console.error('Upload failed:', err);
+      alert(err.message || 'Gagal mengunggah gambar');
+    } finally {
+      isUploadingImage = false;
+      if (fileInputRef) fileInputRef.value = '';
+    }
+  }
+
+  function handleFileSelect(e: Event) {
+    const input = e.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      uploadFiles(input.files);
+    }
+  }
+
+  function handlePaste(e: ClipboardEvent) {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    const imageFiles: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        const file = item.getAsFile();
+        if (file) imageFiles.push(file);
+      }
+    }
+
+    if (imageFiles.length > 0) {
+      e.preventDefault();
+      uploadFiles(imageFiles);
+    }
+  }
+
+  function handleDragOver(e: DragEvent) {
+    e.preventDefault();
+    isDragging = true;
+  }
+
+  function handleDragLeave(e: DragEvent) {
+    e.preventDefault();
+    isDragging = false;
+  }
+
+  function handleDrop(e: DragEvent) {
+    e.preventDefault();
+    isDragging = false;
+    if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+      uploadFiles(e.dataTransfer.files);
+    }
+  }
+
+  function removeImage(index: number) {
+    selectedImages = selectedImages.filter((_, i) => i !== index);
+  }
+
   function handleSend() {
-    if (!promptInput.trim() || isBusy) return;
+    const hasText = Boolean(promptInput.trim());
+    const hasImages = selectedImages.length > 0;
+    if ((!hasText && !hasImages) || isBusy || isUploadingImage) return;
+
     const text = promptInput.trim();
+    const images = selectedImages.map(img => img.url);
     promptInput = '';
-    onSendMessage(text);
+    selectedImages = [];
+    onSendMessage(text, images);
   }
 
   function handleKeyDown(e: KeyboardEvent) {
@@ -234,22 +332,74 @@
         </div>
 
         <!-- Central Cinematic Prompt Box with Ambient Glow -->
-        <div class="w-full bg-zinc-950/80 backdrop-blur-2xl border border-indigo-500/30 hover:border-indigo-500/50 rounded-2xl p-3.5 shadow-2xl shadow-indigo-950/30 flex flex-col gap-3 transition-all focus-within:shadow-[0_0_35px_rgba(99,102,241,0.2)] focus-within:border-indigo-500">
+        <div 
+          role="region"
+          aria-label="Kotak Input Prompt"
+          class="w-full bg-zinc-950/80 backdrop-blur-2xl border transition-all rounded-2xl p-3.5 shadow-2xl shadow-indigo-950/30 flex flex-col gap-2.5 {isDragging ? 'border-indigo-400 bg-indigo-950/25 ring-2 ring-indigo-500/30' : 'border-indigo-500/30 hover:border-indigo-500/50 focus-within:shadow-[0_0_35px_rgba(99,102,241,0.2)] focus-within:border-indigo-500'}"
+          onpaste={handlePaste}
+          ondragover={handleDragOver}
+          ondragleave={handleDragLeave}
+          ondrop={handleDrop}
+        >
+          <!-- Uploaded Image Chips Preview -->
+          {#if selectedImages.length > 0}
+            <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-1">
+              {#each selectedImages as img, idx}
+                <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
+                  <img src={img.url} alt={img.name} class="w-7 h-7 object-cover rounded-lg border border-white/10" />
+                  <span class="max-w-[140px] truncate text-[11px] text-zinc-300 font-medium">{img.name}</span>
+                  <button
+                    type="button"
+                    onclick={() => removeImage(idx)}
+                    class="p-0.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer"
+                    title="Hapus gambar"
+                  >
+                    <X class="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              {/each}
+              {#if isUploadingImage}
+                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900/80 border border-indigo-500/30 text-[11px] text-indigo-300">
+                  <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                  <span>Mengunggah...</span>
+                </div>
+              {/if}
+            </div>
+          {/if}
+
           <textarea
             bind:value={promptInput}
             onkeydown={handleKeyDown}
-            placeholder="Tulis instruksi coding Anda (contoh: 'Perbaiki endpoint login', 'Refactor styling navbar', 'Tulis unit test')..."
+            placeholder="Tulis instruksi coding Anda (atau paste screenshot gambar langsung dengan Ctrl+V)..."
             rows="3"
             class="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none resize-none leading-relaxed"
           ></textarea>
 
           <div class="flex items-center justify-between pt-2 border-t border-white/[0.08] text-xs">
-            <span class="text-[11px] text-zinc-500 font-mono flex items-center gap-1.5">
-              Tekan <kbd class="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">Ctrl + Enter</kbd> untuk kirim
-            </span>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                onclick={() => fileInputRef?.click()}
+                disabled={isBusy || isUploadingImage}
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-300 hover:text-indigo-300 transition cursor-pointer disabled:opacity-40"
+                title="Unggah Gambar atau Screenshot (atau paste langsung)"
+              >
+                {#if isUploadingImage}
+                  <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                  <span>Mengunggah...</span>
+                {:else}
+                  <Paperclip class="w-3.5 h-3.5 text-zinc-400" />
+                  <span>Lampirkan Gambar</span>
+                {/if}
+              </button>
+              <span class="text-[11px] text-zinc-500 font-mono hidden sm:inline">
+                Tekan <kbd class="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">Ctrl + Enter</kbd>
+              </span>
+            </div>
+
             <button
               onclick={handleSend}
-              disabled={isBusy || !promptInput.trim()}
+              disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
               class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 transition cursor-pointer active:scale-95"
             >
               <span>Kirim</span>
@@ -289,6 +439,24 @@
               <div class="max-w-[85%] bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-none shadow-md shadow-indigo-600/20 text-xs leading-relaxed whitespace-pre-wrap font-sans text-[13px]">
                 {msg.text}
               </div>
+
+              <!-- User Attached Images Gallery -->
+              {#if msg.images && msg.images.length > 0}
+                <div class="flex flex-wrap gap-2 max-w-[85%] justify-end mt-1">
+                  {#each msg.images as imgUrl}
+                    <button
+                      type="button"
+                      onclick={() => zoomImageUrl = imgUrl}
+                      class="group/thumb relative rounded-xl overflow-hidden border border-white/10 hover:border-indigo-400/60 shadow-md bg-zinc-900 cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                    >
+                      <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
+                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
+                        <Maximize2 class="w-4 h-4 text-white drop-shadow" />
+                      </div>
+                    </button>
+                  {/each}
+                </div>
+              {/if}
 
               <!-- Action Toolbar for User Bubble -->
               {#if msg.text && !msg.isStreaming}
@@ -358,9 +526,12 @@
                       >
                         <div class="flex items-center gap-2 min-w-0">
                           {#if msg.isStreaming}
-                            <Sparkles class="w-3.5 h-3.5 text-indigo-400 animate-spin shrink-0" />
-                            <span class="text-xs font-semibold text-indigo-300">
-                              Sedang Menganalisis & Mengeksekusi...
+                            <div class="relative flex items-center justify-center w-2.5 h-2.5 shrink-0">
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-60"></span>
+                              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-400"></span>
+                            </div>
+                            <span class="text-xs font-medium text-indigo-300">
+                              Sedang Memproses...
                             </span>
                           {:else}
                             <CheckCircle2 class="w-3.5 h-3.5 text-emerald-400 shrink-0" />
@@ -425,6 +596,12 @@
                                           {st.command}
                                         </code>
                                       {/if}
+
+                                      {#if st.repeatCount && st.repeatCount > 1}
+                                        <span class="inline-flex items-center px-1.5 py-0.2 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-[9px] font-mono font-bold text-indigo-300" title={`Perintah dijalankan ${st.repeatCount} kali`}>
+                                          ×{st.repeatCount}
+                                        </span>
+                                      {/if}
                                     </div>
 
                                     {#if st.instruction}
@@ -438,12 +615,9 @@
 
                               <!-- Active in-progress indicator while streaming -->
                               {#if msg.isStreaming}
-                                <div class="flex items-center gap-2.5 text-indigo-300/80 text-xs py-1 pl-2">
-                                  <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping shrink-0"></span>
-                                  <div class="flex items-center gap-2 flex-1">
-                                    <span class="text-[11px] font-mono text-zinc-400">Menjalankan instruksi berikutnya...</span>
-                                    <div class="h-2 w-24 rounded skeleton-shimmer"></div>
-                                  </div>
+                                <div class="flex items-center gap-2 text-zinc-500 text-[11px] py-0.5 pl-2">
+                                  <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
+                                  <span class="font-sans">Melanjutkan langkah berikutnya...</span>
                                 </div>
                               {/if}
                             </div>
@@ -456,18 +630,14 @@
                               {/each}
                             </div>
                           {:else if msg.isStreaming}
-                            <!-- Skeleton Loader when process just started and no steps/tools/thought yet -->
-                            <div class="flex flex-col gap-2.5 py-1">
-                              <div class="flex items-center gap-2 text-indigo-300 text-[11px] font-mono">
-                                <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
-                                <span>Menganalisis kode & merencanakan tugas...</span>
+                            <!-- Minimalist Loading Indicator -->
+                            <div class="flex items-center gap-2.5 py-1 text-zinc-400">
+                              <div class="flex gap-1 items-center">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:-0.3s]"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:-0.15s]"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"></span>
                               </div>
-
-                              <div class="space-y-2 pl-3 border-l-2 border-indigo-500/20">
-                                <div class="h-2.5 w-4/5 rounded skeleton-shimmer"></div>
-                                <div class="h-2.5 w-3/5 rounded skeleton-shimmer"></div>
-                                <div class="h-2 w-2/5 rounded skeleton-shimmer"></div>
-                              </div>
+                              <span class="text-[11px] text-zinc-400 font-sans">Menganalisis & merencanakan tugas...</span>
                             </div>
                           {/if}
                         </div>
@@ -478,19 +648,26 @@
                   <!-- Main Message Content -->
                   <div class="prose-chat font-sans text-[13px] leading-relaxed">
                     {@html renderMarkdown(msg.text)}
+                    {#if msg.isStreaming && msg.text}
+                      <span class="inline-block w-1.5 h-3.5 bg-indigo-400 animate-pulse align-middle ml-0.5 rounded-xs"></span>
+                    {/if}
                   </div>
 
-                  <!-- Live Streaming Activity Indicator -->
-                  {#if msg.isStreaming}
-                    <div class="flex items-center gap-2 mt-2.5 pt-2 border-t border-white/[0.06] text-xs text-indigo-400 font-mono">
-                      <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
-                      {#if msg.steps && msg.steps.length > 0}
-                        <span>Eksekusi aktif: <span class="text-zinc-200 font-semibold">{msg.steps[msg.steps.length - 1].title}</span></span>
-                      {:else if msg.tools && msg.tools.length > 0}
-                        <span>Eksekusi: <span class="text-zinc-200">{msg.tools[msg.tools.length - 1]}</span>...</span>
-                      {:else}
-                        <span>Memproses instruksi & merencanakan tugas...</span>
-                      {/if}
+                  <!-- Agent Attached Images Gallery (if any) -->
+                  {#if msg.images && msg.images.length > 0}
+                    <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-white/[0.06]">
+                      {#each msg.images as imgUrl}
+                        <button
+                          type="button"
+                          onclick={() => zoomImageUrl = imgUrl}
+                          class="group/thumb relative rounded-xl overflow-hidden border border-white/10 hover:border-indigo-400/60 shadow-md bg-zinc-900 cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                        >
+                          <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
+                          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
+                            <Maximize2 class="w-4 h-4 text-white drop-shadow" />
+                          </div>
+                        </button>
+                      {/each}
                     </div>
                   {/if}
 
@@ -526,41 +703,149 @@
   <!-- Floating Sticky Bottom Input (Shown when messages exist) -->
   {#if messages.length > 0}
     <div class="absolute bottom-4 inset-x-0 px-4 pointer-events-none">
-      <div class="max-w-3xl mx-auto bg-zinc-950/90 backdrop-blur-2xl border border-indigo-500/30 rounded-2xl p-2.5 shadow-2xl shadow-indigo-950/30 pointer-events-auto flex items-end gap-2 focus-within:border-indigo-500">
-        <textarea
-          bind:value={promptInput}
-          onkeydown={handleKeyDown}
-          placeholder="Tulis instruksi selanjutnya..."
-          rows="1"
-          class="flex-1 bg-transparent text-xs text-zinc-100 placeholder-zinc-500 outline-none resize-none px-2 py-1.5"
-        ></textarea>
+      <div 
+        role="region"
+        aria-label="Kotak Input Mengambang"
+        class="max-w-3xl mx-auto bg-zinc-950/90 backdrop-blur-2xl border transition-all rounded-2xl p-2.5 shadow-2xl shadow-indigo-950/30 pointer-events-auto flex flex-col gap-2 {isDragging ? 'border-indigo-400 bg-indigo-950/25 ring-2 ring-indigo-500/30' : 'border-indigo-500/30 focus-within:border-indigo-500'}"
+        onpaste={handlePaste}
+        ondragover={handleDragOver}
+        ondragleave={handleDragLeave}
+        ondrop={handleDrop}
+      >
+        <!-- Uploaded Image Chips Preview -->
+        {#if selectedImages.length > 0}
+          <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-0.5">
+            {#each selectedImages as img, idx}
+              <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
+                <img src={img.url} alt={img.name} class="w-6 h-6 object-cover rounded-lg border border-white/10" />
+                <span class="max-w-[120px] truncate text-[11px] text-zinc-300 font-medium">{img.name}</span>
+                <button
+                  type="button"
+                  onclick={() => removeImage(idx)}
+                  class="p-0.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer"
+                  title="Hapus gambar"
+                >
+                  <X class="w-3 h-3" />
+                </button>
+              </div>
+            {/each}
+            {#if isUploadingImage}
+              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900/80 border border-indigo-500/30 text-[11px] text-indigo-300">
+                <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                <span>Mengunggah...</span>
+              </div>
+            {/if}
+          </div>
+        {/if}
 
-        <div class="flex items-center gap-1.5 shrink-0">
-          {#if isBusy}
+        <div class="flex items-end gap-2 w-full">
+          <!-- Attachment Button -->
+          <button
+            type="button"
+            onclick={() => fileInputRef?.click()}
+            disabled={isBusy || isUploadingImage}
+            class="p-2 rounded-xl text-zinc-400 hover:text-indigo-300 hover:bg-zinc-900 transition cursor-pointer shrink-0 disabled:opacity-40"
+            title="Lampirkan Gambar (atau paste / drag & drop)"
+          >
+            {#if isUploadingImage}
+              <Loader2 class="w-4 h-4 animate-spin text-indigo-400" />
+            {:else}
+              <Paperclip class="w-4 h-4" />
+            {/if}
+          </button>
+
+          <textarea
+            bind:value={promptInput}
+            onkeydown={handleKeyDown}
+            placeholder="Tulis instruksi selanjutnya... (atau paste screenshot gambar langsung)"
+            rows="1"
+            class="flex-1 bg-transparent text-xs text-zinc-100 placeholder-zinc-500 outline-none resize-none px-2 py-1.5"
+          ></textarea>
+
+          <div class="flex items-center gap-1.5 shrink-0">
+            {#if isBusy}
+              <button
+                onclick={onCancelTask}
+                class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 transition cursor-pointer"
+                title="Hentikan Task"
+              >
+                <StopCircle class="w-4 h-4" />
+              </button>
+            {/if}
+
             <button
-              onclick={onCancelTask}
-              class="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 transition cursor-pointer"
-              title="Hentikan Task"
+              onclick={onClearMessages}
+              class="p-2 rounded-xl hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
+              title="Bersihkan Percakapan"
             >
-              <StopCircle class="w-4 h-4" />
+              <Trash2 class="w-4 h-4" />
             </button>
-          {/if}
 
-          <button
-            onclick={onClearMessages}
-            class="p-2 rounded-xl hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
-            title="Bersihkan Percakapan"
-          >
-            <Trash2 class="w-4 h-4" />
-          </button>
+            <button
+              onclick={handleSend}
+              disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
+              class="p-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold transition cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95"
+            >
+              <ArrowUp class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  {/if}
 
-          <button
-            onclick={handleSend}
-            disabled={isBusy || !promptInput.trim()}
-            class="p-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold transition cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95"
-          >
-            <ArrowUp class="w-4 h-4" />
-          </button>
+  <!-- Hidden File Input for Image Uploads -->
+  <input
+    type="file"
+    accept="image/*"
+    multiple
+    bind:this={fileInputRef}
+    onchange={handleFileSelect}
+    class="hidden"
+  />
+
+  <!-- Lightbox Modal for Zooming Images -->
+  {#if zoomImageUrl}
+    <div 
+      role="dialog"
+      aria-modal="true"
+      tabindex="-1"
+      class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200"
+      onclick={() => zoomImageUrl = null}
+      onkeydown={(e) => { if (e.key === 'Escape') zoomImageUrl = null; }}
+    >
+      <div 
+        role="document"
+        class="relative max-w-4xl max-h-[90vh] bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+        onclick={(e) => e.stopPropagation()}
+        onkeydown={(e) => e.stopPropagation()}
+      >
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-zinc-900/80">
+          <span class="text-xs font-mono text-zinc-300 truncate max-w-md">{zoomImageUrl.split('/').pop()}</span>
+          <div class="flex items-center gap-2">
+            <a
+              href={zoomImageUrl}
+              target="_blank"
+              download
+              class="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition"
+              title="Buka / Unduh gambar"
+            >
+              <Download class="w-4 h-4" />
+            </a>
+            <button
+              type="button"
+              onclick={() => zoomImageUrl = null}
+              class="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition"
+              title="Tutup"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        <!-- Modal Image -->
+        <div class="p-2 overflow-auto flex items-center justify-center max-h-[calc(90vh-50px)]">
+          <img src={zoomImageUrl} alt="Pratinjau Gambar" class="max-w-full max-h-full object-contain rounded-lg" />
         </div>
       </div>
     </div>

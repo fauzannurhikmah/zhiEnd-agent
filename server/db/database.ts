@@ -130,6 +130,10 @@ function initTables(db: Database.Database): void {
     db.prepare('ALTER TABLE personas ADD COLUMN traits TEXT').run();
   } catch {}
 
+  try {
+    db.prepare('ALTER TABLE messages ADD COLUMN images_json TEXT').run();
+  } catch {}
+
   // Update default persona traits if missing
   try {
     db.prepare("UPDATE personas SET traits = 'Solutif, Teliti, & Adaptif' WHERE id = 'persona-default' AND (traits IS NULL OR traits = '')").run();
@@ -946,8 +950,12 @@ export function getSessionMessages(sessionId: string): ChatMessageRecord[] {
 
   return rows.map(r => {
     let steps: ProcessStep[] = [];
+    let images: string[] = [];
     try {
       if (r.steps_json) steps = JSON.parse(r.steps_json);
+    } catch {}
+    try {
+      if (r.images_json) images = JSON.parse(r.images_json);
     } catch {}
 
     return {
@@ -957,11 +965,28 @@ export function getSessionMessages(sessionId: string): ChatMessageRecord[] {
       text: r.text || '',
       thought: r.thought,
       steps,
+      images,
       model_used: r.model_used,
       tokens_used: r.tokens_used,
       created_at: r.created_at
     };
   });
+}
+
+export function saveChatUploadedFile(buffer: Buffer, originalName?: string): { url: string; absolutePath: string } {
+  const chatUploadsDir = path.join(__dirname, '..', '..', 'data', 'uploads', 'chat');
+  if (!fs.existsSync(chatUploadsDir)) {
+    fs.mkdirSync(chatUploadsDir, { recursive: true });
+  }
+  const ext = originalName ? path.extname(originalName).replace('.', '') : 'jpg';
+  const cleanExt = ['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(ext.toLowerCase()) ? ext.toLowerCase() : 'jpg';
+  const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${cleanExt}`;
+  const filePath = path.join(chatUploadsDir, filename);
+  fs.writeFileSync(filePath, buffer);
+  return {
+    url: `/uploads/chat/${filename}`,
+    absolutePath: filePath.replace(/\\/g, '/')
+  };
 }
 
 export function saveMessageToDb(msg: {
@@ -971,12 +996,14 @@ export function saveMessageToDb(msg: {
   text: string;
   thought?: string;
   steps?: ProcessStep[];
+  images?: string[];
   model_used?: string;
   tokens_used?: number;
 }): ChatMessageRecord {
   const db = getDb();
   const id = msg.id || 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
   const stepsJson = msg.steps && msg.steps.length > 0 ? JSON.stringify(msg.steps) : null;
+  const imagesJson = msg.images && msg.images.length > 0 ? JSON.stringify(msg.images) : null;
 
   // Ensure session exists
   let sessId = msg.session_id;
@@ -989,8 +1016,8 @@ export function saveMessageToDb(msg: {
   const textContent = msg.text !== undefined && msg.text !== null ? msg.text : '';
 
   db.prepare(`
-    INSERT OR REPLACE INTO messages (id, session_id, sender, text, thought, steps_json, model_used, tokens_used)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT OR REPLACE INTO messages (id, session_id, sender, text, thought, steps_json, images_json, model_used, tokens_used)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     sessId,
@@ -998,6 +1025,7 @@ export function saveMessageToDb(msg: {
     textContent,
     msg.thought || null,
     stepsJson,
+    imagesJson,
     msg.model_used || null,
     msg.tokens_used || 0
   );
@@ -1023,6 +1051,7 @@ export function saveMessageToDb(msg: {
     text: msg.text,
     thought: msg.thought,
     steps: msg.steps || [],
+    images: msg.images || [],
     model_used: msg.model_used,
     tokens_used: msg.tokens_used || 0,
     created_at: new Date().toISOString()
