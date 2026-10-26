@@ -116,15 +116,15 @@ export function renderMarkdown(markdown: string): string {
       continue;
     }
 
-    // Unordered list (- or *)
-    const ulMatch = trimmed.match(/^[-*]\s+(.+)$/);
+    // Unordered list (- or * or •)
+    const ulMatch = trimmed.match(/^([-*•]|\u2022)\s+(.+)$/);
     if (ulMatch) {
       if (inOl) { outputLines.push('</ol>'); inOl = false; }
       if (!inUl) { outputLines.push('<ul class="my-1.5 space-y-1">'); inUl = true; }
       outputLines.push(`
         <li class="flex items-start gap-2.5 text-zinc-200 text-xs leading-relaxed">
           <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0 shadow-sm shadow-indigo-400/40"></span>
-          <span class="flex-1">${parseInline(ulMatch[1])}</span>
+          <span class="flex-1">${parseInline(ulMatch[2])}</span>
         </li>
       `.trim());
       continue;
@@ -217,28 +217,38 @@ function parseInline(text: string): string {
     return `\uE001LINK${tokenIdx}\uE001`;
   });
 
-  // 3. Raw URLs in leftover text
-  s = s.replace(/(https?:\/\/[^\s<)]+)/g, (url) => {
-    return `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/30 border border-indigo-500/30 hover:border-indigo-500/50 text-indigo-300 hover:text-indigo-200 font-medium transition cursor-pointer group shadow-sm shadow-indigo-500/10">
-      <span class="underline decoration-indigo-400/40 underline-offset-2">${escapeHtml(url)}</span>
+  // 3. Raw URLs in leftover text -> Tokenize into linkTokens to protect from formatting regexes
+  s = s.replace(/(https?:\/\/[^\s<)]+)/g, (rawUrl) => {
+    let cleanUrl = rawUrl.trim();
+    let trailingPunct = '';
+    const matchPunct = cleanUrl.match(/[.,;!]+$/);
+    if (matchPunct) {
+      trailingPunct = matchPunct[0];
+      cleanUrl = cleanUrl.slice(0, -trailingPunct.length);
+    }
+    const tokenIdx = linkTokens.length;
+    const html = `<a href="${escapeHtml(cleanUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/30 border border-indigo-500/30 hover:border-indigo-500/50 text-indigo-300 hover:text-indigo-200 font-medium transition cursor-pointer group shadow-sm shadow-indigo-500/10">
+      <span class="underline decoration-indigo-400/40 underline-offset-2">${escapeHtml(cleanUrl)}</span>
       <svg class="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
       </svg>
     </a>`;
+    linkTokens.push(html);
+    return `\uE001LINK${tokenIdx}\uE001${trailingPunct}`;
   });
 
   // 4. Bold (**text** or __text__)
-  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
-  s = s.replace(/__([^_]+)__/g, '<strong class="font-bold text-white">$1</strong>');
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
+  s = s.replace(/(?<=^|[\s(])__([^\n_]+)__(?=$|[\s).,!?])/g, '<strong class="font-bold text-white">$1</strong>');
 
   // 5. Italic (*text* or _text_)
-  s = s.replace(/\*([^*]+)\*/g, '<em class="italic text-zinc-300">$1</em>');
-  s = s.replace(/_([^_]+)_/g, '<em class="italic text-zinc-300">$1</em>');
+  s = s.replace(/(?<=^|[\s(])\*([^*\n]+)\*(?=$|[\s).,!?])/g, '<em class="italic text-zinc-300">$1</em>');
+  s = s.replace(/(?<=^|[\s(])_([^\n_]+)_(?=$|[\s).,!?])/g, '<em class="italic text-zinc-300">$1</em>');
 
   // 6. Strikethrough (~~text~~)
-  s = s.replace(/~~([^~]+)~~/g, '<del class="line-through text-zinc-500">$1</del>');
+  s = s.replace(/~~([^~\n]+)~~/g, '<del class="line-through text-zinc-500">$1</del>');
 
-  // 7. Restore links
+  // 7. Restore links (all HTML safe and intact)
   s = s.replace(/\uE001LINK(\d+)\uE001/g, (_, idx) => {
     return linkTokens[parseInt(idx, 10)] || '';
   });

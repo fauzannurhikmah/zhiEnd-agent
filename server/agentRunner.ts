@@ -128,10 +128,9 @@ ${formattedPaths.map(p => `• File Gambar: "${p}"`).join('\n')}
      ${publicTunnelUrl ? `• 🌐 Akses Publik Internet: ${publicTunnelUrl}/preview/` : '• 🌐 Akses Publik Internet: Buka tab Remote Hub > Akses Jaringan untuk mengaktifkan Public Tunnel'}
      • Dedicated Port 3000: http://localhost:3000
      • Dedicated LAN Port 3000: http://${localIp}:3000
-   ATURAN MUTLAK:
-   - Cantumkan tautan Live Preview Gateway & Local URL di atas secara langsung menggunakan URL mentah (contoh: http://localhost:5173/preview/). JANGAN bungkus URL dengan tanda kurung markdown [url](url) agar langsung bisa diklik di WhatsApp dan browser HP!
+   ATURAN FORMAT RESPON:
+   - Sajikan tautan Live Preview Gateway & Dedicated Port menggunakan format Markdown yang rapi dan jelas.
    - DILARANG KERAS mematikan atau menghentikan port 5173 (zhiEnd Agent frontend) dan port ${port} (zhiEnd Agent backend)!
-   - Berikan selalu URL yang rapi dan clickable agar pengguna bisa langsung mengkliknya di browser HP maupun laptop!
 
 Permintaan Pengguna:
 ${options.prompt}`;

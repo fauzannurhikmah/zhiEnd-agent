@@ -4,7 +4,7 @@ import { AppConfig, TelegramStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
 import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, getOrCreateDefaultSession, saveMessageToDb } from '../db/database';
-import { getSafePersonaEmoji } from './whatsappBot';
+import { getSafePersonaEmoji, formatForWhatsApp } from './whatsappBot';
 
 export interface TelegramBotOptions {
   config: AppConfig;
@@ -337,7 +337,8 @@ export class TelegramBotManager extends EventEmitter {
             images: images || []
           });
 
-          const resp = result.response || '(Tugas selesai tanpa output teks)';
+          const rawResp = result.response || '(Tugas selesai tanpa output teks)';
+          const resp = formatForWhatsApp(rawResp);
           const chunkSize = 3800;
           for (let i = 0; i < resp.length; i += chunkSize) {
             const chunk = resp.slice(i, i + chunkSize);

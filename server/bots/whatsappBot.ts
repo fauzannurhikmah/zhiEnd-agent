@@ -210,7 +210,7 @@ export class WhatsAppBotManager extends EventEmitter {
               this.config.whatsapp.enabled = false;
             }
             try {
-              saveConfigToDb({ whatsapp: { enabled: false } });
+              saveConfigToDb({ whatsapp: { enabled: false, allowedNumbers: this.config.whatsapp?.allowedNumbers || [] } });
             } catch {}
             this.emit('status_change', this.getStatus());
           }
@@ -223,7 +223,7 @@ export class WhatsAppBotManager extends EventEmitter {
             this.config.whatsapp.enabled = true;
           }
           try {
-            saveConfigToDb({ whatsapp: { enabled: true } });
+            saveConfigToDb({ whatsapp: { enabled: true, allowedNumbers: this.config.whatsapp?.allowedNumbers || [] } });
           } catch {}
           this.emit('status_change', this.getStatus());
         }
@@ -324,7 +324,7 @@ export class WhatsAppBotManager extends EventEmitter {
                 {},
                 {
                   logger: pino({ level: 'silent' }),
-                  reuploadRequest: this.sock?.updateMediaMessage
+                  reuploadRequest: this.sock?.updateMediaMessage as any
                 }
               );
               if (buffer && buffer.length > 0) {
@@ -620,7 +620,8 @@ export class WhatsAppBotManager extends EventEmitter {
         images: images && images.length > 0 ? images : undefined
       });
 
-      const resp = result.response || '(Tugas selesai tanpa respon teks)';
+      const rawResp = result.response || '(Tugas selesai tanpa respon teks)';
+      const resp = formatForWhatsApp(rawResp);
       const chunkSize = 3500;
       for (let i = 0; i < resp.length; i += chunkSize) {
         await this.sendReply(sender, { text: resp.slice(i, i + chunkSize) });
@@ -703,9 +704,9 @@ export function formatForWhatsApp(text: string): string {
   // 1. Bersihkan file link lokal: [Label](file:///...) -> `Label`
   out = out.replace(/\[([^\]]+)\]\(file:\/\/\/[^\s)]+\)/g, '`$1`');
 
-  // 2. Format tautan web [Label](URL) agar langsung clickable di WhatsApp:
-  // Jika label sama dengan URL atau berawalan http: ganti dengan URL mentah langsung
-  // Jika label adalah teks deskriptif: ubah menjadi `*Label:* URL`
+  // 2. Format tautan web [Label](URL) agar langsung clickable dan ramah di WhatsApp:
+  // Jika label sama dengan URL atau berawalan http: tampilkan bare URL dengan baris baru/spasi
+  // Jika label adalah teks deskriptif: ubah menjadi `*Label:*\nURL`
   out = out.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_match, label, url) => {
     const cleanLabel = label.trim();
     const cleanUrl = url.trim();
@@ -715,24 +716,33 @@ export function formatForWhatsApp(text: string): string {
       cleanLabel.startsWith('https://') ||
       cleanLabel.replace(/[\/]/g, '') === cleanUrl.replace(/[\/]/g, '')
     ) {
-      return cleanUrl;
+      return `\n${cleanUrl}\n`;
     }
-    return `*${cleanLabel}:* ${cleanUrl}`;
+    return `*${cleanLabel}:*\n${cleanUrl}\n`;
   });
 
   // 3. Hapus markdown image link jika ada: ![alt](url) -> url
   out = out.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, '$2');
 
   // 4. Beri spasi jika URL menempel pada tanda kurung: (http://...) -> ( http://... )
-  // Hal ini penting karena WhatsApp mobile sering menganggap tanda kurung tutup ')' sebagai bagian dari URL
   out = out.replace(/\((https?:\/\/[^\s)]+)\)/g, '( $1 )');
 
-  // 5. Konversi markdown bold **text** menjadi format WhatsApp *text*
-  out = out.replace(/\*\*([^*]+)\*\*/g, '*$1*');
-
-  // 6. Konversi header markdown (### Header) menjadi format bold WhatsApp *Header*
+  // 5. Konversi header markdown (### Header) menjadi format bold WhatsApp *Header*
   out = out.replace(/^#{1,6}\s+(.+)$/gm, '*$1*');
 
-  return out;
+  // 6. Konversi markdown bold **text** atau __text__ menjadi format WhatsApp *text*
+  out = out.replace(/\*\*([^*\n]+)\*\*/g, '*$1*');
+  out = out.replace(/__([^_\n]+)__/g, '*$1*');
+
+  // 7. Standarisasi bullet point daftar agar seragam
+  out = out.replace(/^[-*]\s+/gm, '• ');
+
+  // 8. Bersihkan tag HTML jika ada yang tersisa
+  out = out.replace(/<\/?[a-zA-Z][^>]*>/g, '');
+
+  // 9. Rapikan baris kosong berlebih
+  out = out.replace(/\n{3,}/g, '\n\n');
+
+  return out.trim();
 }
 

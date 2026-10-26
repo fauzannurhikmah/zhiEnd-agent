@@ -578,7 +578,7 @@ app.post('/api/chat/upload', async (c) => {
     }
 
     // Fallback: Base64 JSON
-    const jsonBody = await c.req.json<{ base64?: string; name?: string }>().catch(() => ({}));
+    const jsonBody = (await c.req.json().catch(() => ({}))) as { base64?: string; name?: string };
     if (jsonBody?.base64) {
       const matches = jsonBody.base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
       const data = matches ? matches[2] : jsonBody.base64;
