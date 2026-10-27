@@ -66,23 +66,32 @@ tunnelManager.startTunnel(config.tunnel?.subdomain || 'zhiend-agent').then((res)
 });
 
 const onProjectChange = async (newPath: string) => {
-  if (!fs.existsSync(newPath)) {
-    return { success: false, error: 'Directory does not exist' };
-  }
-  const stat = fs.statSync(newPath);
-  if (!stat.isDirectory()) {
-    return { success: false, error: 'Path is not a directory' };
-  }
+  try {
+    if (!fs.existsSync(newPath)) {
+      return { success: false, error: 'Directory does not exist' };
+    }
+    const stat = fs.statSync(newPath);
+    if (!stat.isDirectory()) {
+      return { success: false, error: 'Path is not a directory' };
+    }
 
-  setActiveWorkspace(newPath);
-  config = loadConfig();
-  agentRunner.updateConfig(config);
-  telegramBot.updateConfig(config);
-  whatsappBot.updateConfig(config);
-  io?.emit('project_changed', { activeProject: config.activeProject });
-  broadcastDevServerStatus(true);
-  autoIndexWorkspaceContext(config.activeProject);
-  return { success: true, activeProject: config.activeProject };
+    setActiveWorkspace(newPath);
+    config = loadConfig();
+    agentRunner.updateConfig(config);
+    telegramBot.updateConfig(config);
+    whatsappBot.updateConfig(config);
+    io?.emit('project_changed', { activeProject: config.activeProject });
+    broadcastDevServerStatus(true);
+    try {
+      autoIndexWorkspaceContext(config.activeProject);
+    } catch (e: any) {
+      console.warn('[Workspace] Auto index warning:', e.message);
+    }
+    return { success: true, activeProject: config.activeProject };
+  } catch (err: any) {
+    console.error('Error changing project:', err);
+    return { success: false, error: err.message };
+  }
 };
 
 const telegramBot = new TelegramBotManager({
@@ -172,8 +181,8 @@ app.post('/api/config', async (c) => {
   }
 
   if (updates.telegram) {
-    if (updates.telegram.botToken && updates.telegram.botToken !== '••••••••') {
-      config.telegram.botToken = updates.telegram.botToken;
+    if (updates.telegram.botToken && !updates.telegram.botToken.includes('•') && updates.telegram.botToken.trim()) {
+      config.telegram.botToken = updates.telegram.botToken.trim();
     }
     if (updates.telegram.allowedUsers !== undefined) {
       config.telegram.allowedUsers = updates.telegram.allowedUsers;
@@ -327,7 +336,11 @@ app.post('/api/projects/create', async (c) => {
 });
 
 app.post('/api/projects/select', async (c) => {
-  const { path: targetPath } = await c.req.json<{ path: string }>();
+  const body = await c.req.json<{ path: string }>().catch(() => ({} as any));
+  const targetPath = body?.path;
+  if (!targetPath) {
+    return c.json({ success: false, error: 'Path is required' }, 400);
+  }
   const result = await onProjectChange(targetPath);
   if (!result.success) {
     return c.json(result, 400);
@@ -1063,10 +1076,11 @@ app.get('/api/bots/telegram/status', (c) => {
 
 app.post('/api/bots/telegram/start', async (c) => {
   const { token } = await c.req.json<{ token?: string }>().catch(() => ({} as any));
-  if (token) {
-    config.telegram.botToken = token;
+  const cleanToken = (token && !token.includes('•') && token.trim()) ? token.trim() : undefined;
+  if (cleanToken) {
+    config.telegram.botToken = cleanToken;
   }
-  const result = await telegramBot.start(token);
+  const result = await telegramBot.start(cleanToken);
   if (result.success) {
     config.telegram.enabled = true;
     saveConfig(config);

@@ -31,6 +31,9 @@ export class TelegramBotManager extends EventEmitter {
   public botInfo: any = null;
   public status: TelegramStatus['status'] = 'stopped';
   public errorMessage: string | null = null;
+  private isUserStopped: boolean = false;
+  private reconnectTimer: NodeJS.Timeout | null = null;
+  private isReconnecting: boolean = false;
   private mediaGroupBatches = new Map<string, {
     ctx: any;
     images: string[];
@@ -51,6 +54,11 @@ export class TelegramBotManager extends EventEmitter {
 
   public updateConfig(config: AppConfig): void {
     this.config = config;
+
+    // Jika bot enabled di database dan sedang offline bukan karena di-stop user, otomatis jalankan
+    if (this.config.telegram?.enabled && this.status !== 'running' && !this.isUserStopped) {
+      this.start().catch(() => {});
+    }
   }
 
   private isAuthorized(ctx: any): boolean {
@@ -64,19 +72,48 @@ export class TelegramBotManager extends EventEmitter {
   }
 
   public async start(token?: string): Promise<{ success: boolean; botInfo?: any; error?: string }> {
-    const botToken = token || this.config.telegram?.botToken;
-    if (!botToken || !botToken.trim()) {
+    this.isUserStopped = false;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+
+    // 1. Resolusi Token: abaikan bullet mask '••••••••', utamakan token bersih atau ambil langsung dari database SQLite
+    let botToken = (token && !token.includes('•') && token.trim()) ? token.trim() : this.config.telegram?.botToken;
+    if (!botToken || botToken.includes('•') || !botToken.trim()) {
+      try {
+        const dbCfg = loadConfigFromDb();
+        if (dbCfg.telegram?.botToken && !dbCfg.telegram.botToken.includes('•')) {
+          botToken = dbCfg.telegram.botToken.trim();
+          this.config.telegram.botToken = botToken;
+        }
+      } catch {}
+    }
+
+    if (!botToken || !botToken.trim() || botToken.includes('•')) {
       this.status = 'stopped';
-      this.errorMessage = 'No bot token provided';
-      return { success: false, error: 'Telegram bot token is empty' };
+      this.errorMessage = 'Token bot Telegram belum disetel';
+      this.emit('status_change', this.getStatus());
+      return { success: false, error: 'Telegram bot token is empty or invalid' };
     }
 
     if (this.bot) {
-      await this.stop();
+      await this.stop(false);
     }
 
     try {
+      this.status = 'connecting';
+      this.emit('status_change', this.getStatus());
+
       this.bot = new Telegraf(botToken.trim());
+
+      // Global error handler agar unhandled promise di middleware tidak mematikan bot
+      this.bot.catch((err: any, ctx: any) => {
+        console.error('[Telegram Bot] Middleware caught error:', err?.message || err);
+        try {
+          ctx?.reply('⚠️ Terjadi kendala saat memproses perintah ini.');
+        } catch {}
+      });
 
       this.bot.use(async (ctx, next) => {
         const text = ctx.message && 'text' in ctx.message ? (ctx.message as any).text : '';
@@ -588,10 +625,15 @@ export class TelegramBotManager extends EventEmitter {
       });
 
       this.bot.launch().catch(err => {
-        console.error('Telegram bot launch error:', err);
+        console.warn('[Telegram Bot] Polling error / network drop:', err?.message || err);
         this.status = 'error';
-        this.errorMessage = err.message;
+        this.errorMessage = err?.message || 'Koneksi terputus';
         this.emit('status_change', this.getStatus());
+
+        // Auto-reconnect watchdog jika bot diizinkan aktif dan bukan di-stop sengaja oleh user
+        if (!this.isUserStopped && this.config.telegram?.enabled) {
+          this.scheduleReconnect();
+        }
       });
 
       this.botInfo = await this.bot.telegram.getMe();
@@ -605,11 +647,42 @@ export class TelegramBotManager extends EventEmitter {
       this.status = 'error';
       this.errorMessage = err.message;
       this.emit('status_change', this.getStatus());
+
+      if (!this.isUserStopped && this.config.telegram?.enabled) {
+        this.scheduleReconnect();
+      }
       return { success: false, error: err.message };
     }
   }
 
-  public async stop(): Promise<{ success: boolean }> {
+  private scheduleReconnect(delayMs: number = 5000): void {
+    if (this.isUserStopped || this.isReconnecting) return;
+    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+
+    console.log(`[Telegram Bot] 🔄 Menjadwalkan rekoneksi otomatis dalam ${delayMs / 1000}s...`);
+    this.reconnectTimer = setTimeout(async () => {
+      this.reconnectTimer = null;
+      if (this.isUserStopped) return;
+      this.isReconnecting = true;
+      try {
+        console.log('[Telegram Bot] 🔄 Mencoba rekoneksi otomatis ke Telegram...');
+        await this.start();
+      } catch (e: any) {
+        console.warn('[Telegram Bot] Rekoneksi gagal, akan mencoba ulang nanti:', e?.message || e);
+      } finally {
+        this.isReconnecting = false;
+      }
+    }, delayMs);
+  }
+
+  public async stop(fromUser: boolean = true): Promise<{ success: boolean }> {
+    if (fromUser) {
+      this.isUserStopped = true;
+    }
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
     if (this.bot) {
       try {
         this.bot.stop();

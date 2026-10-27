@@ -187,7 +187,8 @@
 
   async function handleSaveTgConfig() {
     const list = tgAllowedInput.split(',').map(s => s.trim()).filter(Boolean);
-    await onSaveTelegramToken(tgTokenInput, list);
+    const tokenToSave = (tgTokenInput && !tgTokenInput.includes('•')) ? tgTokenInput.trim() : '';
+    await onSaveTelegramToken(tokenToSave, list);
   }
 
   async function handleSavePin() {
@@ -585,7 +586,7 @@
           </div>
 
           <button
-            onclick={() => onStartTelegram(tgTokenInput)}
+            onclick={() => onStartTelegram(tgTokenInput && !tgTokenInput.includes('•') ? tgTokenInput.trim() : '')}
             class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-sky-500/20 transition cursor-pointer active:scale-95"
           >
             Jalankan Bot Telegram

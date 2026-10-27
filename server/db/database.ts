@@ -484,7 +484,13 @@ export function saveConfigToDb(newConfig: Partial<AppConfig>): void {
   if (newConfig.telegram) {
     const existing = db.prepare('SELECT * FROM bot_integrations WHERE platform = ?').get('telegram') as any;
     const isEnabled = newConfig.telegram.enabled !== undefined ? (newConfig.telegram.enabled ? 1 : 0) : (existing?.is_enabled ?? 0);
-    const token = newConfig.telegram.botToken !== undefined ? newConfig.telegram.botToken : (existing?.token_or_session || '');
+    
+    // Strict protection: Never overwrite existing real token with bullets or empty string
+    let token = existing?.token_or_session || '';
+    if (newConfig.telegram.botToken && !newConfig.telegram.botToken.includes('•') && newConfig.telegram.botToken.trim()) {
+      token = newConfig.telegram.botToken.trim();
+    }
+
     const allowed = newConfig.telegram.allowedUsers !== undefined ? JSON.stringify(newConfig.telegram.allowedUsers) : (existing?.allowed_identifiers || '[]');
     const personaId = newConfig.telegram.personaId !== undefined ? newConfig.telegram.personaId : (existing?.default_persona_id || 'persona-default');
 
@@ -744,9 +750,19 @@ export function saveWorkspaceContext(workspaceId: string, ctx: Partial<Workspace
 export function autoIndexWorkspaceContext(workingDir: string): void {
   try {
     if (!fs.existsSync(workingDir)) return;
-    const db = getDb();
-    const ws = db.prepare('SELECT id FROM workspaces WHERE lower(path) = lower(?)').get(workingDir) as { id: string } | undefined;
-    const wsId = ws ? ws.id : workingDir;
+    const norm = path.resolve(workingDir);
+    let ws = db.prepare('SELECT id FROM workspaces WHERE lower(path) = lower(?)').get(norm) as { id: string } | undefined;
+    if (!ws) {
+      const id = generateWorkspaceId(norm);
+      const name = path.basename(norm) || norm;
+      const isRoot = norm.toLowerCase() === 'd:\\works' ? 1 : 0;
+      db.prepare(`
+        INSERT OR IGNORE INTO workspaces (id, name, path, is_active, is_root, last_opened_at)
+        VALUES (?, ?, ?, 1, ?, CURRENT_TIMESTAMP)
+      `).run(id, name, norm, isRoot);
+      ws = { id };
+    }
+    const wsId = ws.id;
 
     const pkgPath = path.join(workingDir, 'package.json');
     let tech = 'Pure Web / HTML';
