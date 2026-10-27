@@ -33,7 +33,8 @@
     Download,
     Mic,
     MicOff,
-    Volume2
+    Volume2,
+    CloudUpload
   } from 'lucide-svelte';
 
   let {
@@ -61,9 +62,13 @@
   } = $props();
 
   interface AttachedImage {
+    id: string;
     url: string;
+    localPreviewUrl?: string;
     name: string;
     size?: number;
+    isUploading?: boolean;
+    error?: string;
   }
 
   let promptInput = $state('');
@@ -77,7 +82,8 @@
   let isUploadingImage = $state(false);
   let zoomImageUrl = $state<string | null>(null);
   let fileInputRef = $state<HTMLInputElement | null>(null);
-  let isDragging = $state(false);
+  let dragCounter = $state(0);
+  let isDragging = $derived(dragCounter > 0);
 
   // Voice Command & Speech-to-Text State
   let isListening = $state(false);
@@ -253,6 +259,19 @@
     };
   });
 
+  // Prevent browser default file open navigation on drag & drop
+  $effect(() => {
+    const preventDragDefaults = (e: DragEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('dragover', preventDragDefaults);
+    window.addEventListener('drop', preventDragDefaults);
+    return () => {
+      window.removeEventListener('dragover', preventDragDefaults);
+      window.removeEventListener('drop', preventDragDefaults);
+    };
+  });
+
   async function handleCopy(id: string, text: string) {
     if (!text) return;
     try {
@@ -267,27 +286,63 @@
   }
 
   async function uploadFiles(files: FileList | File[]) {
-    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-    if (imageFiles.length === 0) return;
+    const rawFiles = Array.from(files);
+    const imageFiles = rawFiles.filter(f => {
+      return f.type.startsWith('image/') || /\.(png|jpe?g|webp|gif|svg|bmp|ico)$/i.test(f.name);
+    });
+
+    if (imageFiles.length === 0) {
+      if (rawFiles.length > 0) {
+        alert('Format berkas tidak didukung. Harap pilih gambar (PNG, JPG, WebP, GIF, SVG).');
+      }
+      return;
+    }
 
     isUploadingImage = true;
-    try {
-      for (const file of imageFiles) {
-        const res = await api.uploadChatImage(file);
+    for (const file of imageFiles) {
+      const tempId = 'img_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      let localPreviewUrl: string | undefined = undefined;
+      try {
+        localPreviewUrl = URL.createObjectURL(file);
+      } catch {}
+
+      const newImgItem: AttachedImage = {
+        id: tempId,
+        url: '',
+        localPreviewUrl,
+        name: file.name,
+        size: file.size,
+        isUploading: true
+      };
+
+      // Tampilkan seketika di antarmuka (zero delay visual feedback)
+      selectedImages = [...selectedImages, newImgItem];
+
+      // Upload ke server di latar belakang
+      api.uploadChatImage(file).then(res => {
         if (res && res.url) {
-          selectedImages = [...selectedImages, {
+          selectedImages = selectedImages.map(item => item.id === tempId ? {
+            ...item,
             url: res.url,
-            name: file.name,
-            size: file.size
-          }];
+            isUploading: false
+          } : item);
+        } else {
+          throw new Error(res?.error || 'Gagal mengunggah gambar');
         }
-      }
-    } catch (err: any) {
-      console.error('Upload failed:', err);
-      alert(err.message || 'Gagal mengunggah gambar');
-    } finally {
-      isUploadingImage = false;
-      if (fileInputRef) fileInputRef.value = '';
+      }).catch(err => {
+        console.error('Upload failed for file:', file.name, err);
+        if (localPreviewUrl) {
+          try { URL.revokeObjectURL(localPreviewUrl); } catch {}
+        }
+        selectedImages = selectedImages.filter(item => item.id !== tempId);
+        alert(`Gagal mengunggah ${file.name}: ${err.message || 'Terjadi kesalahan'}`);
+      }).finally(() => {
+        isUploadingImage = selectedImages.some(img => img.isUploading);
+      });
+    }
+
+    if (fileInputRef) {
+      fileInputRef.value = '';
     }
   }
 
@@ -317,35 +372,58 @@
     }
   }
 
-  function handleDragOver(e: DragEvent) {
+  function handleRootDragEnter(e: DragEvent) {
     e.preventDefault();
-    isDragging = true;
+    if (e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files')) {
+      dragCounter++;
+    }
   }
 
-  function handleDragLeave(e: DragEvent) {
+  function handleRootDragOver(e: DragEvent) {
     e.preventDefault();
-    isDragging = false;
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy';
+    }
   }
 
-  function handleDrop(e: DragEvent) {
+  function handleRootDragLeave(e: DragEvent) {
     e.preventDefault();
-    isDragging = false;
+    dragCounter = Math.max(0, dragCounter - 1);
+  }
+
+  function handleRootDrop(e: DragEvent) {
+    e.preventDefault();
+    dragCounter = 0;
     if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
       uploadFiles(e.dataTransfer.files);
     }
   }
 
   function removeImage(index: number) {
+    const target = selectedImages[index];
+    if (target?.localPreviewUrl) {
+      try { URL.revokeObjectURL(target.localPreviewUrl); } catch {}
+    }
     selectedImages = selectedImages.filter((_, i) => i !== index);
+    isUploadingImage = selectedImages.some(img => img.isUploading);
   }
 
   function handleSend() {
+    const readyImages = selectedImages.filter(img => img.url && !img.isUploading);
     const hasText = Boolean(promptInput.trim());
-    const hasImages = selectedImages.length > 0;
+    const hasImages = readyImages.length > 0;
     if ((!hasText && !hasImages) || isBusy || isUploadingImage) return;
 
     const text = promptInput.trim();
-    const images = selectedImages.map(img => img.url);
+    const images = readyImages.map(img => img.url);
+
+    // Bersihkan URL pratinjau lokal dari memori browser
+    selectedImages.forEach(img => {
+      if (img.localPreviewUrl) {
+        try { URL.revokeObjectURL(img.localPreviewUrl); } catch {}
+      }
+    });
+
     stopVoiceInput();
     promptInput = '';
     selectedImages = [];
@@ -402,7 +480,36 @@
   ];
 </script>
 
-<div class="h-full flex flex-col justify-between overflow-hidden relative">
+<div 
+  role="region"
+  aria-label="Tampilan Percakapan dan Zona Unggah Berkas"
+  class="h-full flex flex-col justify-between overflow-hidden relative"
+  ondragenter={handleRootDragEnter}
+  ondragover={handleRootDragOver}
+  ondragleave={handleRootDragLeave}
+  ondrop={handleRootDrop}
+>
+  <!-- Full-Viewport Drag & Drop Overlay -->
+  {#if isDragging}
+    <div 
+      class="absolute inset-0 z-50 bg-zinc-950/85 backdrop-blur-md flex flex-col items-center justify-center p-6 border-2 border-dashed border-indigo-500/80 rounded-2xl m-2 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none shadow-2xl shadow-indigo-950/60"
+    >
+      <div class="flex flex-col items-center gap-3 text-center pointer-events-none">
+        <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-lg shadow-indigo-500/20 animate-bounce">
+          <CloudUpload class="w-8 h-8" />
+        </div>
+        <div class="flex flex-col gap-1">
+          <p class="text-base sm:text-lg font-bold text-white tracking-tight">
+            Lepaskan gambar di sini
+          </p>
+          <p class="text-xs text-zinc-400 max-w-xs">
+            Lampirkan screenshot atau gambar rancangan (PNG, JPG, WebP, GIF, SVG)
+          </p>
+        </div>
+      </div>
+    </div>
+  {/if}
+
   <!-- Top Session Bar -->
   <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2 border-b border-white/[0.06] bg-zinc-950/40 backdrop-blur-md z-10 shrink-0 select-none gap-1.5 sm:gap-2">
     <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
@@ -483,33 +590,36 @@
           aria-label="Kotak Input Prompt"
           class="w-full bg-zinc-950/80 backdrop-blur-2xl border transition-all rounded-2xl p-3.5 shadow-2xl shadow-indigo-950/30 flex flex-col gap-2.5 {isDragging ? 'border-indigo-400 bg-indigo-950/25 ring-2 ring-indigo-500/30' : 'border-indigo-500/30 hover:border-indigo-500/50 focus-within:shadow-[0_0_35px_rgba(99,102,241,0.2)] focus-within:border-indigo-500'}"
           onpaste={handlePaste}
-          ondragover={handleDragOver}
-          ondragleave={handleDragLeave}
-          ondrop={handleDrop}
         >
           <!-- Uploaded Image Chips Preview -->
           {#if selectedImages.length > 0}
             <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-1">
               {#each selectedImages as img, idx}
-                <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
-                  <img src={img.url} alt={img.name} class="w-7 h-7 object-cover rounded-lg border border-white/10" />
-                  <span class="max-w-[140px] truncate text-[11px] text-zinc-300 font-medium">{img.name}</span>
+                <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
+                  <div class="relative w-7 h-7 shrink-0 rounded-lg overflow-hidden border border-white/10 bg-zinc-950">
+                    <img src={img.localPreviewUrl || img.url} alt={img.name} class="w-full h-full object-cover" />
+                    {#if img.isUploading}
+                      <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                        <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                      </div>
+                    {/if}
+                  </div>
+                  <div class="flex flex-col min-w-0 pr-1">
+                    <span class="max-w-[130px] truncate text-[11px] text-zinc-200 font-medium">{img.name}</span>
+                    {#if img.isUploading}
+                      <span class="text-[9px] text-indigo-400 font-mono animate-pulse leading-none">Mengunggah...</span>
+                    {/if}
+                  </div>
                   <button
                     type="button"
                     onclick={() => removeImage(idx)}
-                    class="p-0.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer"
+                    class="p-0.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer shrink-0"
                     title="Hapus gambar"
                   >
                     <X class="w-3.5 h-3.5" />
                   </button>
                 </div>
               {/each}
-              {#if isUploadingImage}
-                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900/80 border border-indigo-500/30 text-[11px] text-indigo-300">
-                  <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                  <span>Mengunggah...</span>
-                </div>
-              {/if}
             </div>
           {/if}
 
@@ -854,33 +964,36 @@
         aria-label="Kotak Input Mengambang"
         class="max-w-3xl mx-auto bg-zinc-950/95 backdrop-blur-2xl border transition-all rounded-2xl p-2 sm:p-2.5 shadow-2xl shadow-indigo-950/30 pointer-events-auto flex flex-col gap-2 {isDragging ? 'border-indigo-400 bg-indigo-950/25 ring-2 ring-indigo-500/30' : 'border-indigo-500/30 focus-within:border-indigo-500'}"
         onpaste={handlePaste}
-        ondragover={handleDragOver}
-        ondragleave={handleDragLeave}
-        ondrop={handleDrop}
       >
         <!-- Uploaded Image Chips Preview -->
         {#if selectedImages.length > 0}
           <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-0.5">
             {#each selectedImages as img, idx}
               <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
-                <img src={img.url} alt={img.name} class="w-6 h-6 object-cover rounded-lg border border-white/10" />
-                <span class="max-w-[120px] truncate text-[11px] text-zinc-300 font-medium">{img.name}</span>
+                <div class="relative w-6 h-6 shrink-0 rounded-lg overflow-hidden border border-white/10 bg-zinc-950">
+                  <img src={img.localPreviewUrl || img.url} alt={img.name} class="w-full h-full object-cover" />
+                  {#if img.isUploading}
+                    <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
+                      <Loader2 class="w-3 h-3 animate-spin text-indigo-400" />
+                    </div>
+                  {/if}
+                </div>
+                <div class="flex flex-col min-w-0 pr-1">
+                  <span class="max-w-[120px] truncate text-[11px] text-zinc-200 font-medium">{img.name}</span>
+                  {#if img.isUploading}
+                    <span class="text-[9px] text-indigo-400 font-mono animate-pulse leading-none">Mengunggah...</span>
+                  {/if}
+                </div>
                 <button
                   type="button"
                   onclick={() => removeImage(idx)}
-                  class="p-0.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer"
+                  class="p-0.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer shrink-0"
                   title="Hapus gambar"
                 >
                   <X class="w-3 h-3" />
                 </button>
               </div>
             {/each}
-            {#if isUploadingImage}
-              <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900/80 border border-indigo-500/30 text-[11px] text-indigo-300">
-                <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400" />
-                <span>Mengunggah...</span>
-              </div>
-            {/if}
           </div>
         {/if}
 

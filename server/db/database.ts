@@ -1114,7 +1114,7 @@ export function saveChatUploadedFile(buffer: Buffer, originalName?: string): { u
     fs.mkdirSync(chatUploadsDir, { recursive: true });
   }
   const ext = originalName ? path.extname(originalName).replace('.', '') : 'jpg';
-  const cleanExt = ['png', 'jpg', 'jpeg', 'webp', 'gif'].includes(ext.toLowerCase()) ? ext.toLowerCase() : 'jpg';
+  const cleanExt = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg', 'bmp'].includes(ext.toLowerCase()) ? ext.toLowerCase() : 'jpg';
   const filename = `img_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${cleanExt}`;
   const filePath = path.join(chatUploadsDir, filename);
   fs.writeFileSync(filePath, buffer);

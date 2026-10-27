@@ -518,47 +518,52 @@ app.post('/api/upload/avatar', async (c) => {
 // Chat Media Upload Endpoint (Attachments)
 app.post('/api/chat/upload', async (c) => {
   try {
-    const chatDir = path.join(UPLOADS_DIR, 'chat');
-    if (!fs.existsSync(chatDir)) {
-      fs.mkdirSync(chatDir, { recursive: true });
-    }
-
     const contentType = c.req.header('content-type') || '';
     if (contentType.includes('multipart/form-data')) {
       const body = await c.req.parseBody();
       const file = body['file'];
       if (!file || typeof file === 'string') {
-        return c.json({ error: 'No file uploaded' }, 400);
+        return c.json({ error: 'Berkas gambar tidak ditemukan dalam formulir upload' }, 400);
       }
 
       const fileObj = file as File;
       const originalName = (fileObj as any).name || 'image.jpg';
-      const ext = path.extname(originalName) || '.jpg';
-      const filename = `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}${ext}`;
-      const filePath = path.join(chatDir, filename);
-
       const arrayBuffer = await fileObj.arrayBuffer();
-      fs.writeFileSync(filePath, Buffer.from(arrayBuffer));
-      const url = `/uploads/chat/${filename}`;
-      return c.json({ success: true, url, absolutePath: filePath.replace(/\\/g, '/'), filename });
-    } else {
-      const json = await c.req.json<{ dataUrl?: string; base64?: string; filename?: string }>().catch(() => ({} as any));
-      const raw = json.dataUrl || json.base64;
-      if (!raw) return c.json({ error: 'No image data provided' }, 400);
-
-      const matches = raw.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-      const b64 = matches ? matches[2] : raw;
-      const ext = matches ? (matches[1].split('/')[1] || 'jpg') : (json.filename ? path.extname(json.filename).replace('.', '') : 'jpg');
-      const filename = `chat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const filePath = path.join(chatDir, filename);
-
-      fs.writeFileSync(filePath, Buffer.from(b64, 'base64'));
-      const url = `/uploads/chat/${filename}`;
-      return c.json({ success: true, url, absolutePath: filePath.replace(/\\/g, '/'), filename });
+      const buffer = Buffer.from(arrayBuffer);
+      const result = saveChatUploadedFile(buffer, originalName);
+      return c.json({
+        success: true,
+        url: result.url,
+        absolutePath: result.absolutePath,
+        filename: path.basename(result.absolutePath),
+        name: originalName,
+        size: buffer.length
+      });
     }
+
+    // Fallback: Base64 JSON
+    const jsonBody = (await c.req.json().catch(() => ({}))) as { dataUrl?: string; base64?: string; filename?: string; name?: string };
+    const raw = jsonBody?.dataUrl || jsonBody?.base64;
+    if (raw) {
+      const matches = raw.match(/^data:([A-Za-z-+/0-9]+);base64,(.+)$/);
+      const b64 = matches ? matches[2] : raw;
+      const buffer = Buffer.from(b64, 'base64');
+      const originalName = jsonBody.name || jsonBody.filename || 'image.jpg';
+      const result = saveChatUploadedFile(buffer, originalName);
+      return c.json({
+        success: true,
+        url: result.url,
+        absolutePath: result.absolutePath,
+        filename: path.basename(result.absolutePath),
+        name: originalName,
+        size: buffer.length
+      });
+    }
+
+    return c.json({ error: 'Format unggahan tidak didukung (harus multipart/form-data atau base64 JSON)' }, 400);
   } catch (err: any) {
     console.error('Chat upload error:', err);
-    return c.json({ error: 'Upload failed: ' + err.message }, 500);
+    return c.json({ error: 'Gagal mengunggah gambar: ' + err.message }, 500);
   }
 });
 
@@ -605,37 +610,6 @@ app.post('/api/chat/messages/clear/:sessionId', (c) => {
   return c.json({ success });
 });
 
-// Chat Image Upload Endpoint
-app.post('/api/chat/upload', async (c) => {
-  try {
-    const contentType = c.req.header('content-type') || '';
-    if (contentType.includes('multipart/form-data')) {
-      const body = await c.req.parseBody();
-      const file = body['file'];
-      if (!file || !(file instanceof File)) {
-        return c.json({ error: 'Berkas gambar tidak ditemukan dalam formulir upload' }, 400);
-      }
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const result = saveChatUploadedFile(buffer, file.name);
-      return c.json({ success: true, ...result });
-    }
-
-    // Fallback: Base64 JSON
-    const jsonBody = (await c.req.json().catch(() => ({}))) as { base64?: string; name?: string };
-    if (jsonBody?.base64) {
-      const matches = jsonBody.base64.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
-      const data = matches ? matches[2] : jsonBody.base64;
-      const buffer = Buffer.from(data, 'base64');
-      const result = saveChatUploadedFile(buffer, jsonBody.name || 'image.jpg');
-      return c.json({ success: true, ...result });
-    }
-
-    return c.json({ error: 'Format unggahan tidak didukung (harus multipart/form-data atau base64 JSON)' }, 400);
-  } catch (err: any) {
-    console.error('Chat upload error:', err);
-    return c.json({ error: 'Gagal mengunggah gambar: ' + err.message }, 500);
-  }
-});
 
 // Voice Transcription Endpoint (Web Audio Recording / Upload)
 app.post('/api/voice/transcribe', async (c) => {
