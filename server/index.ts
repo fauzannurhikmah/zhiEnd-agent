@@ -1285,10 +1285,56 @@ app.get('/uploads/*', (c) => {
   });
 });
 
-// Static assets serving (dist from Svelte Vite build)
+// Static assets serving (dist from Svelte Vite build + public assets fallback)
 const distDir = path.join(__dirname, '..', 'dist');
+const publicDir = path.join(__dirname, '..', 'public');
 
-app.use('/assets/*', serveStatic({ root: './dist' }));
+// Serve any static file from dist or public with full decodeURI support
+app.use('*', async (c, next) => {
+  const reqPath = c.req.path;
+  // Ignore API, uploads, preview, and socket routes
+  if (
+    reqPath.startsWith('/api') ||
+    reqPath.startsWith('/uploads') ||
+    reqPath.startsWith('/preview') ||
+    reqPath.startsWith('/socket.io')
+  ) {
+    return next();
+  }
+
+  try {
+    const decodedPath = decodeURIComponent(reqPath.replace(/^\/+/, ''));
+    if (decodedPath) {
+      // 1. Check in dist directory
+      const distCandidate = path.join(distDir, decodedPath);
+      if (fs.existsSync(distCandidate) && fs.statSync(distCandidate).isFile()) {
+        const mime = getFileMime(distCandidate);
+        return c.body(fs.readFileSync(distCandidate), 200, {
+          'Content-Type': mime,
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        });
+      }
+
+      // 2. Fallback check in public directory
+      const publicCandidate = path.join(publicDir, decodedPath);
+      if (fs.existsSync(publicCandidate) && fs.statSync(publicCandidate).isFile()) {
+        const mime = getFileMime(publicCandidate);
+        return c.body(fs.readFileSync(publicCandidate), 200, {
+          'Content-Type': mime,
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=86400'
+        });
+      }
+    }
+  } catch (err: any) {
+    console.warn('[Static Serve] URI decode error:', err.message);
+  }
+
+  return next();
+});
+
+// Single Page Application (SPA) entrypoint fallback
 app.get('*', (c) => {
   const indexHtmlPath = path.join(distDir, 'index.html');
   if (fs.existsSync(indexHtmlPath)) {

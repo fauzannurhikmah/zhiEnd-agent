@@ -135,9 +135,9 @@
     <div class="flex items-center justify-between px-2 pt-1">
       <div class="flex items-center gap-2.5">
         <img
-          src="/img/android-chrome-512x512.png"
+          src="/img/logo.png"
           alt="zhiEnd Agent Logo"
-          class="w-7 h-7"
+          class="w-7 h-7 object-contain rounded-md"
         />
         <span
           class="text-xs font-bold tracking-tight text-white flex items-center gap-1.5"

@@ -47,7 +47,7 @@
     <!-- Brand -->
     <div class="flex items-center gap-2.5">
       <img 
-        src="/img/zhiEnd%20Gradient%20Tech%20Logo.png" 
+        src="/img/logo.png" 
         alt="zhiEnd Logo" 
         class="w-9 h-9 rounded-lg object-contain shadow-md shadow-indigo-500/30 border border-white/10 p-0.5 bg-slate-900"
       />

@@ -133,4 +133,27 @@ Semua halaman dan komponen web UI di zhiEnd Agent **WAJIB** ramah pengguna mobil
 7. **Kewajiban Pengujian (Self-Audit)**:
    - Setiap kali membuat atau memodifikasi halaman / komponen UI, **WAJIB** membayangkan dan menguji tampilan pada resolusi layar mobile (375px / 390px / 414px) sebelum menyatakan tugas selesai.
 
+---
+
+## 6. Static Asset & Media Integrity over Public Tunnels & Proxies (Mandatory)
+
+Ketika web app diakses melalui **Public Tunnel** (seperti `localtunnel` / `*.loca.lt`, Cloudflare Tunnel, dsb.) atau reverse proxy, seluruh aset statis (gambar, icon, favicon, font) harus dipastikan dapat dimuat secara utuh tanpa error broken image:
+
+1. **Simpan Aset di Direktori `public/` (Bukan Hanya di `dist/`)**:
+   - Seluruh gambar, logo, dan favicon **WAJIB** diletakkan di dalam folder `public/` (misal `public/img/logo.png`, `public/favicon.ico`).
+   - Karena Vite build memiliki opsi `emptyOutDir: true`, setiap kali perintah `npm run build` dijalankan, folder `dist/` akan dihapus bersih lalu Vite menyalin ulang seluruh isi `public/` ke `dist/`. Jika aset hanya diletakkan di `dist/`, aset akan terhapus dan hilang saat build dijalankan.
+
+2. **Gunakan URL-Safe Naming (Kebab-case / Tanpa Spasi)**:
+   - Selalu gunakan nama file yang aman untuk URL web (contoh: `logo.png`, `zhiend-logo.png`, `favicon.png`).
+   - Hindari nama file dengan spasi (seperti `zhiEnd Gradient Tech Logo.png`). Beberapa reverse proxy atau tunnel proxy di internet sering kali gagal mem-parse atau me-rewrite URL encoding (`%20`), sehingga browser gagal memuat gambar.
+
+3. **Backend Static Middleware & Anti-HTML Fallback**:
+   - Dalam arsitektur SPA (Single Page Application), backend server menyediakan catch-all route `app.get('*')` yang menyajikan `index.html`.
+   - **Kritikal**: Server backend **WAJIB** mengecek dan menyajikan seluruh file statis (`/img/*`, `/favicon.ico`, `/assets/*`, `/uploads/*`, dsb.) dengan `Content-Type` biner yang tepat (`image/png`, `image/x-icon`, dsb.) dan `decodeURIComponent(path)` **SEBELUM** permintaan jatuh ke catch-all route `app.get('*')`.
+   - Jangan pernah membiarkan request gambar yang tidak cocok jatuh ke `index.html` (text/html), karena browser akan menganggap gambar korup dan menampilkan icon broken image di UI serta favicon rusak di title bar browser.
+
+4. **Verifikasi Pengujian Multi-Network**:
+   - Setiap kali menambahkan gambar atau favicon baru, verifikasi bahwa aset dapat di-load secara sukses di tiga lingkungan: Localhost, IP LAN Wi-Fi, dan Public Tunnel (`loca.lt`).
+
+
 
