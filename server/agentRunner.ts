@@ -5,6 +5,7 @@ import os from 'os';
 import { EventEmitter } from 'events';
 import { AppConfig, AgentTask } from './types';
 import { getWorkspaceContext, getCustomRootWorkspace, getChatSessionById, getPersonaById } from './db/database';
+import { parseDirectCommand, spawnDirectCommand } from './directCommandRunner';
 
 function getLocalIP(): string {
   const interfaces = os.networkInterfaces();
@@ -59,6 +60,14 @@ export class AgentRunner extends EventEmitter {
     }
 
     const workingDir = options.cwd || this.config.activeProject || process.cwd();
+
+    // ⚡ Fast-path: Direct CLI Execution (Bypass heavy autonomous AI loop for instant results)
+    const directCheck = parseDirectCommand(options.prompt);
+    if (directCheck.isDirect && directCheck.command) {
+      console.log(`[AgentRunner] ⚡ Fast Direct Command detected: "${directCheck.command}". Executing directly in "${workingDir}"...`);
+      return this.runDirectCommand(directCheck.command, options, workingDir);
+    }
+
     const cliPath = this.config.antigravity?.cliPath || 'agy.exe';
 
     const localIp = getLocalIP();
@@ -118,8 +127,13 @@ ${formattedPaths.map(p => `• File Gambar: "${p}"`).join('\n')}
    - JANGAN PERNAH menjalankan perintah terminal/powershell atau membaca file yang sama berulang kali jika sudah berhasil 1 kali! Hanya boleh mengulang HANYA JIKA perintah sebelumnya error/gagal dan Anda perlu memperbaiki parameternya.
    - DILARANG KERAS melakukan polling loop menggunakan tool manage_task (Action: 'status') berulang kali dalam satu giliran! Sistem berbasis event akan otomatis memberikan notifikasi saat background task selesai.
    - Selesaikan tugas dengan langkah seminimal dan seefisien mungkin tanpa perulangan yang tidak perlu.
-2. Root direktori default untuk semua project adalah ${rootDir}. Jika diminta membuat project baru atau menyimpan file baru tanpa path absolut, SELALU buat dan simpan langsung di dalam ${rootDir} (contoh: ${rootDir}\\<nama-project>).
-3. PENTING - Menjalankan Project & Dev Server:
+2. ATURAN EKSEKUSI PERINTAH TERMINAL / CLI (Anti Over-Verification):
+   - Jika pengguna meminta Anda menjalankan suatu perintah CLI/terminal tertentu (seperti npm, npx, git, script build, database push/migrate, dsb.):
+     a. CUKUP JALANKAN perintah yang diminta SATU KALI menggunakan run_command.
+     b. DILARANG KERAS melakukan 'over-verification' atau pengujian berlebih (seperti membuat script scratch uji coba, mengecek package.json berulang kali, mengecek git status/submodule, atau membaca file schema/config) KECUALI jika pengguna secara eksplisit memintanya!
+     c. Begitu perintah terminal selesai dan berhasil (exit code 0), SEGERA laporkan outputnya ke pengguna dan SELESAIKAN tugas saat itu juga. Jangan memperpanjang langkah!
+3. Root direktori default untuk semua project adalah ${rootDir}. Jika diminta membuat project baru atau menyimpan file baru tanpa path absolut, SELALU buat dan simpan langsung di dalam ${rootDir} (contoh: ${rootDir}\\<nama-project>).
+4. PENTING - Menjalankan Project & Dev Server:
    - Jika pengguna meminta menjalankan projek ('jalankan projek ini', 'running dev', dll.):
      Sistem backend zhiEnd Agent OTOMATIS SUDAH MEMULAI Dev Server di latar belakang untuk workspace ini. Anda TIDAK PERLU lagi mengeksekusi 'npm run dev', 'pnpm dev', 'Start-Process', atau berulang-ulang mengecek port dengan 'Get-NetTCPConnection' / 'Start-Sleep'.
    - PANDUAN TAUTAN AKSES PROJEK (Tampilkan dengan rapi, jelas, dan pisahkan untuk HP vs Laptop):
@@ -503,6 +517,121 @@ ${options.prompt}`;
         result: data.result
       });
     }
+  }
+
+  private async runDirectCommand(command: string, options: RunOptions, workingDir: string): Promise<AgentTask> {
+    const taskId = 'task_' + Date.now();
+    this.activeTask = {
+      id: taskId,
+      prompt: options.prompt,
+      project: workingDir,
+      model: '⚡ Direct CLI',
+      startTime: Date.now(),
+      status: 'running',
+      response: '',
+      conversationId: options.conversationId || null,
+      toolsExecuted: [`run_command: ${command}`],
+      sessionId: options.sessionId,
+      images: options.images || []
+    };
+
+    this.emit('task_start', {
+      taskId,
+      prompt: options.prompt,
+      project: workingDir,
+      model: '⚡ Direct CLI',
+      sessionId: options.sessionId,
+      images: options.images || []
+    });
+
+    this.emit('agent_step', {
+      taskId,
+      step: `⚡ Eksekusi Perintah Terminal: \`${command}\``,
+      tool: 'run_command',
+      toolArgs: { command }
+    });
+
+    return new Promise<AgentTask>((resolve) => {
+      let outputBuffer = '';
+      const proc = spawnDirectCommand(command, workingDir);
+      this.currentProcess = proc;
+
+      const appendData = (chunk: string) => {
+        outputBuffer += chunk;
+        this.emit('agent_delta', {
+          taskId,
+          delta: chunk,
+          accumulated: outputBuffer
+        });
+      };
+
+      proc.stdout?.on('data', (d) => appendData(d.toString()));
+      proc.stderr?.on('data', (d) => appendData(d.toString()));
+
+      proc.on('close', (code) => {
+        this.currentProcess = null;
+        if (!this.activeTask) return;
+
+        const duration = ((Date.now() - this.activeTask.startTime) / 1000).toFixed(2);
+        this.activeTask.duration = `${duration}s`;
+        this.activeTask.status = code === 0 ? 'completed' : 'failed';
+        this.activeTask.exitCode = code;
+
+        const cleanOutput = outputBuffer.trim() || '(Tidak ada output terminal)';
+        const statusEmoji = code === 0 ? '✅' : '⚠️';
+        const statusTitle = code === 0 ? 'Perintah berhasil dieksekusi' : `Perintah selesai dengan kode keluar ${code}`;
+
+        this.activeTask.response = `${statusEmoji} **${statusTitle}** dalam \`${duration}s\`:\n\n\`\`\`bash\n$ ${command}\n${cleanOutput}\n\`\`\``;
+
+        this.emit('agent_result', {
+          taskId,
+          response: this.activeTask.response,
+          duration: `${duration}s`,
+          status: this.activeTask.status
+        });
+
+        const finishedTask = { ...this.activeTask };
+        this.history.unshift(finishedTask);
+        if (this.history.length > 50) this.history.pop();
+
+        this.emit('task_end', {
+          id: finishedTask.id,
+          taskId: finishedTask.id,
+          prompt: finishedTask.prompt,
+          project: finishedTask.project,
+          model: finishedTask.model,
+          status: finishedTask.status,
+          response: finishedTask.response,
+          duration: finishedTask.duration,
+          conversationId: finishedTask.conversationId,
+          toolsExecuted: finishedTask.toolsExecuted,
+          steps: [{
+            title: `Terminal: ${command}`,
+            content: cleanOutput,
+            duration: `${duration}s`
+          }],
+          thought: `Mengeksekusi perintah terminal langsung tanpa loop AI untuk efisiensi maksimum.`,
+          sessionId: finishedTask.sessionId,
+          images: finishedTask.images || []
+        });
+
+        this.activeTask = null;
+        resolve(finishedTask);
+      });
+
+      proc.on('error', (err) => {
+        this.currentProcess = null;
+        if (this.activeTask) {
+          this.activeTask.status = 'error';
+          this.activeTask.response = `❌ **Gagal menjalankan perintah**: ${err.message}`;
+          this.activeTask.error = err.message;
+        }
+        this.emit('task_error', { taskId, error: err.message });
+        const finishedTask = this.activeTask ? { ...this.activeTask } : null;
+        this.activeTask = null;
+        resolve(finishedTask as any);
+      });
+    });
   }
 
   public cancel(): boolean {

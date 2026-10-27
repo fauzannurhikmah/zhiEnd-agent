@@ -129,6 +129,14 @@
 
         recognition.onerror = (event: any) => {
           console.warn('[Voice Recognition] Error:', event.error);
+          if (event.error === 'network' || event.error === 'service-not-allowed') {
+            // Google Speech cloud unreachable over LAN/tunnel HTTP. Fallback seamlessly to direct MediaRecorder!
+            console.log('[Voice Recognition] Cloud speech unavailable. Switching to direct MediaRecorder fallback...');
+            try { recognition.stop(); } catch {}
+            recognition = null;
+            startMediaRecorderVoice();
+            return;
+          }
           if (event.error === 'not-allowed') {
             voiceError = 'Izin mikrofon ditolak oleh browser. Buka setelan browser untuk mengizinkan.';
           } else if (event.error !== 'no-speech') {
@@ -922,7 +930,7 @@
           <textarea
             bind:value={promptInput}
             onkeydown={handleKeyDown}
-            placeholder={isListening ? "Mendengarkan suara Anda..." : (isTranscribingVoice ? "Mentranskripsi suara..." : "Tulis instruksi... (atau bicara / lampirkan gambar)")}
+            placeholder={isListening ? "Mendengarkan suara Anda..." : (isTranscribingVoice ? "Mentranskripsi suara..." : "Tulis instruksi atau perintah terminal (misal: npx prisma..., git status, !npm i)...")}
             rows="1"
             class="flex-1 bg-transparent text-xs text-zinc-100 placeholder-zinc-500 outline-none resize-none px-1.5 sm:px-2 py-1.5 leading-relaxed"
           ></textarea>
