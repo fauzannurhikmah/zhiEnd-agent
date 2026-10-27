@@ -15,6 +15,7 @@ import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
 import { voiceService } from '../voiceService';
 import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, saveMessageToDb, getOrCreateDefaultSession, getAllProjectsList } from '../db/database';
+import { extractGeneratedImages } from './telegramBot';
 
 export interface WhatsAppBotOptions {
   config: AppConfig;
@@ -788,10 +789,34 @@ export class WhatsAppBotManager extends EventEmitter {
       });
 
       const rawResp = result.response || '(Tugas selesai tanpa respon teks)';
-      const resp = formatForWhatsApp(rawResp);
-      const chunkSize = 3500;
-      for (let i = 0; i < resp.length; i += chunkSize) {
-        await this.sendReply(sender, { text: resp.slice(i, i + chunkSize) });
+      const { imagesToSend, cleanResponse } = extractGeneratedImages(rawResp, result.generatedImages);
+
+      let textToSend = cleanResponse || rawResp;
+      if (imagesToSend.length > 0) {
+        console.log(`[WhatsApp] Mengirim ${imagesToSend.length} foto hasil generasi AI ke ${sender}...`);
+        for (let i = 0; i < imagesToSend.length; i++) {
+          const imgPath = imagesToSend[i];
+          try {
+            const caption = (i === 0 && textToSend.length <= 1000) ? textToSend : undefined;
+            await this.sendReply(sender, {
+              image: fs.readFileSync(imgPath),
+              caption: caption ? formatForWhatsApp(caption) : undefined
+            });
+            if (caption) {
+              textToSend = '';
+            }
+          } catch (photoErr: any) {
+            console.error(`[WhatsApp] Gagal mengirim photo (${imgPath}):`, photoErr.message);
+          }
+        }
+      }
+
+      if (textToSend && textToSend.trim()) {
+        const resp = formatForWhatsApp(textToSend);
+        const chunkSize = 3500;
+        for (let i = 0; i < resp.length; i += chunkSize) {
+          await this.sendReply(sender, { text: resp.slice(i, i + chunkSize) });
+        }
       }
 
       if (result.status === 'completed') {

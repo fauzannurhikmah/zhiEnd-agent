@@ -175,6 +175,13 @@ Ketika pengguna meminta AI untuk membuat gambar (*image generation* seperti Toki
    - **Hapus Teks Lokasi File**: DILARANG KERAS menampilkan baris `📁 Lokasi File:` atau link path disk lokal yang merusak kerapian UI.
    - **Download saat Gambar Diklik**: Tombol download resolusi penuh disajikan secara terpusat dan elegan di dalam **Lightbox Modal** ketika pengguna mengklik gambar tersebut.
 
+4. **Bot Integration (Telegram & WhatsApp)**:
+   - Ketika AI menghasilkan gambar, bot Telegram & WhatsApp **WAJIB** mendeteksi file gambar di disk dan mengirimkan **FOTO ASLI** secara langsung (`ctx.replyWithPhoto({ source: path })` atau Baileys `sendMessage: image`) ke chat HP pengguna.
+   - Bersihkan teks balasan bot dari teks teknis seperti `![caption](file:///...)` dan `📁 Lokasi File:`, sehingga pengguna di HP menerima foto yang jernih dengan caption yang natural.
+
+5. **Anti-Double Image (Pemisahan Input User vs Output AI)**:
+   - Array `task.images` HANYA diperuntukkan bagi lampiran yang diunggah oleh pengguna. Gambar hasil generasi AI wajib disimpan di properti terpisah `task.generatedImages` agar gambar tidak tersimpan ke bubble user dan tidak muncul ganda (*double*).
+
 
 
 

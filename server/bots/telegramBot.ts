@@ -1,12 +1,56 @@
 import { EventEmitter } from 'events';
 import { Telegraf } from 'telegraf';
+import fs from 'fs';
+import path from 'path';
 import { AppConfig, TelegramStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
-import path from 'path';
 import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, getOrCreateDefaultSession, saveMessageToDb, getAllProjectsList } from '../db/database';
 import { getSafePersonaEmoji, formatForWhatsApp } from './whatsappBot';
 import { voiceService } from '../voiceService';
+
+export function extractGeneratedImages(response: string, taskGeneratedImages?: string[]): {
+  imagesToSend: string[];
+  cleanResponse: string;
+} {
+  const imagesToSend: string[] = [];
+  const seen = new Set<string>();
+
+  if (taskGeneratedImages && taskGeneratedImages.length > 0) {
+    for (const p of taskGeneratedImages) {
+      if (fs.existsSync(p) && !seen.has(p)) {
+        seen.add(p);
+        imagesToSend.push(p);
+      }
+    }
+  }
+
+  const imgRegex = /!?\[[^\]]*\]\(([^)]+\.(?:png|jpe?g|webp|gif|svg)[^)]*)\)/gi;
+  let match;
+  while ((match = imgRegex.exec(response)) !== null) {
+    let target = match[1].trim();
+    if (target.startsWith('file:///')) {
+      target = decodeURIComponent(target.replace(/^file:\/\/\//, ''));
+    }
+    if (/^\/[A-Za-z]:/.test(target)) {
+      target = target.substring(1);
+    }
+    target = path.normalize(target);
+    if (fs.existsSync(target) && !seen.has(target)) {
+      seen.add(target);
+      imagesToSend.push(target);
+    }
+  }
+
+  let cleanResponse = response
+    .replace(/!?\[[^\]]*\]\((?:file:\/\/\/)?[^)]+\)/gi, '')
+    .replace(/(?:^|\n)[^\S\r\n]*(?:📁\s*)?(?:\*\*)?Lokasi File:?(?:\*\*)?[^\S\r\n]*/gi, '')
+    .replace(/(?:^|\n)[^\S\r\n]*\[[^\]]*\.(?:png|jpe?g|webp|gif|svg)\]\([^\)]+\)[^\S\r\n]*/gi, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  return { imagesToSend, cleanResponse };
+}
 
 export interface TelegramBotOptions {
   config: AppConfig;
@@ -473,11 +517,35 @@ export class TelegramBotManager extends EventEmitter {
           });
 
           const rawResp = result.response || '(Tugas selesai tanpa output teks)';
-          const resp = formatForWhatsApp(rawResp);
-          const chunkSize = 3800;
-          for (let i = 0; i < resp.length; i += chunkSize) {
-            const chunk = resp.slice(i, i + chunkSize);
-            await ctx.reply(chunk);
+          const { imagesToSend, cleanResponse } = extractGeneratedImages(rawResp, result.generatedImages);
+
+          // 1. Jika ada file foto yang dihasilkan, kirim langsung sebagai foto Telegram!
+          let textToSend = cleanResponse || rawResp;
+          if (imagesToSend.length > 0) {
+            console.log(`[Telegram] Mengirim ${imagesToSend.length} foto hasil generasi AI...`);
+            for (let i = 0; i < imagesToSend.length; i++) {
+              const imgPath = imagesToSend[i];
+              try {
+                // Caption maksimal 1024 karakter di Telegram
+                const caption = (i === 0 && textToSend.length <= 1000) ? textToSend : undefined;
+                await ctx.replyWithPhoto({ source: imgPath }, caption ? { caption } : undefined);
+                if (caption) {
+                  textToSend = ''; // Sudah terkirim bersama foto
+                }
+              } catch (photoErr: any) {
+                console.error(`[Telegram] Gagal mengirim photo (${imgPath}):`, photoErr.message);
+              }
+            }
+          }
+
+          // 2. Kirim sisa teks jika masih ada
+          if (textToSend && textToSend.trim()) {
+            const resp = formatForWhatsApp(textToSend);
+            const chunkSize = 3800;
+            for (let i = 0; i < resp.length; i += chunkSize) {
+              const chunk = resp.slice(i, i + chunkSize);
+              await ctx.reply(chunk);
+            }
           }
 
           if (result.status === 'completed') {

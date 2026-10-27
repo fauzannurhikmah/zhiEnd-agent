@@ -284,25 +284,27 @@ ${options.prompt}`;
             });
           }
 
-          // Auto-detect and populate generated image paths into images array
+          // Auto-detect and populate generated image disk paths into generatedImages (separate from user upload images)
+          const genImages: string[] = [];
           if (this.activeTask.response) {
             const imgRegex = /!?\[[^\]]*\]\(([^)]+\.(?:png|jpe?g|webp|gif|svg)[^)]*)\)/gi;
             let match;
             while ((match = imgRegex.exec(this.activeTask.response)) !== null) {
               const rawUrl = match[1].trim();
-              let webUrl = rawUrl;
+              let diskPath = rawUrl;
               if (rawUrl.startsWith('file:///')) {
-                const clean = rawUrl.replace(/^file:\/\/\//, '');
-                webUrl = `/api/media/file?path=${encodeURIComponent(clean)}`;
-              } else if (/^[A-Za-z]:[/\\]/.test(rawUrl)) {
-                webUrl = `/api/media/file?path=${encodeURIComponent(rawUrl)}`;
+                diskPath = decodeURIComponent(rawUrl.replace(/^file:\/\/\//, ''));
               }
-              if (!this.activeTask.images) this.activeTask.images = [];
-              if (!this.activeTask.images.includes(webUrl)) {
-                this.activeTask.images.push(webUrl);
+              if (/^\/[A-Za-z]:/.test(diskPath)) {
+                diskPath = diskPath.substring(1);
+              }
+              diskPath = path.normalize(diskPath);
+              if (!genImages.includes(diskPath)) {
+                genImages.push(diskPath);
               }
             }
           }
+          this.activeTask.generatedImages = genImages;
 
           const finishedTask = { ...this.activeTask };
           this.history.unshift(finishedTask);
@@ -322,7 +324,8 @@ ${options.prompt}`;
             steps: finishedTask.steps || [],
             thought: finishedTask.thought || '',
             sessionId: finishedTask.sessionId,
-            images: finishedTask.images || []
+            images: options.images || [], // Hanya gambar yang diunggah oleh pengguna
+            generatedImages: genImages
           });
 
           this.activeTask = null;

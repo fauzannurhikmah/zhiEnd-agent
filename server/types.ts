@@ -93,6 +93,7 @@ export interface AgentTask {
   thought?: string;
   sessionId?: string;
   images?: string[];
+  generatedImages?: string[];
 }
 
 export interface TunnelStatus {
