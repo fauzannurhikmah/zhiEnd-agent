@@ -13,6 +13,7 @@ import { EventEmitter } from 'events';
 import { AppConfig, WhatsAppStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
+import { voiceService } from '../voiceService';
 import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, saveMessageToDb, getOrCreateDefaultSession, getAllProjectsList } from '../db/database';
 
 export interface WhatsAppBotOptions {
@@ -43,6 +44,13 @@ export class WhatsAppBotManager extends EventEmitter {
   private isStarting: boolean = false;
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private mySentMessageIds = new Set<string>();
+  private imageBatches: Map<string, {
+    sender: string;
+    isSelfChat: boolean;
+    images: string[];
+    captions: string[];
+    timer: NodeJS.Timeout;
+  }> = new Map();
 
   constructor(options: WhatsAppBotOptions) {
     super();
@@ -263,6 +271,11 @@ export class WhatsAppBotManager extends EventEmitter {
             (m?.documentMessage?.mimetype && m.documentMessage.mimetype.startsWith('image/'))
           );
 
+          const isAudio = !!(
+            m?.audioMessage ||
+            (m?.documentMessage?.mimetype && m.documentMessage.mimetype.startsWith('audio/'))
+          );
+
           const messageText = 
             m?.conversation ||
             m?.extendedTextMessage?.text ||
@@ -272,9 +285,9 @@ export class WhatsAppBotManager extends EventEmitter {
             '';
 
           const text = messageText.trim();
-          if (!text && !isImage) continue;
+          if (!text && !isImage && !isAudio) continue;
 
-          const effectiveText = text || 'Tolong analisis dan periksa gambar terlampir ini.';
+          let effectiveText = text || 'Tolong analisis dan periksa gambar terlampir ini.';
 
           const botPhone = (this.user?.id || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
           const botLid = ((this.user as any)?.lid || '').split(':')[0].split('@')[0].replace(/[^0-9]/g, '');
@@ -289,43 +302,67 @@ export class WhatsAppBotManager extends EventEmitter {
           const isGroup = sender.endsWith('@g.us');
           const participant = msg.key.participant || (msg as any).participant;
           const isWhiteListed = this.isAuthorized(sender, participant);
-          const isCommand = effectiveText.startsWith('!') || effectiveText.startsWith('/') || ['help', 'menu', 'status'].includes(effectiveText.toLowerCase()) || (isImage && isWhiteListed);
+          const isCommand = effectiveText.startsWith('!') || effectiveText.startsWith('/') || ['help', 'menu', 'status'].includes(effectiveText.toLowerCase()) || (isImage && isWhiteListed) || (isAudio && isWhiteListed);
 
           // PROTEKSI TOTAL UNTUK INCOMING CHAT:
-          // Jika pesan BUKAN dari ruang obrolan diri sendiri ("Message Yourself"):
           if (!isSelfChat) {
-            // 1. Jika nomor pengirim/participant TIDAK terdaftar di allowedNumbers:
-            //    DIAM TOTAL! Jangan pernah balas apapun ke nomor/grup tersebut!
-            // 2. Jika pengirim terdaftar di allowedNumbers tapi pesannya BUKAN perintah diawali ! atau / (atau gambar):
-            //    DIAM TOTAL! Jangan ganggu percakapan biasa!
             if (!isWhiteListed || !isCommand) {
               continue;
             }
           }
 
-          // Jika fromMe === true (pesan dikirim dari akun WA yang sama ke orang/grup lain):
-          // Jangan proses jika bukan di Message Yourself dan bukan command eksplisit
           if (msg.key.fromMe && !isSelfChat && !isCommand) {
             continue;
           }
 
-          console.log(`[WhatsApp Inbound] From: ${sender} (self: ${isSelfChat}, fromMe: ${msg.key.fromMe}, group: ${isGroup}, image: ${isImage}) | Text: "${effectiveText}"`);
+          console.log(`[WhatsApp Inbound] From: ${sender} (self: ${isSelfChat}, fromMe: ${msg.key.fromMe}, group: ${isGroup}, image: ${isImage}, audio: ${isAudio}) | Text: "${effectiveText}"`);
           this.emit('log', {
             platform: 'whatsapp',
             type: 'inbound',
             sender,
-            text: effectiveText,
+            text: isAudio ? '[Voice Note]' : effectiveText,
             timestamp: Date.now()
           });
 
-          // PENTING: Jangan pernah kirim pesan "Akses Ditolak" ke siapapun!
           if (!this.isAuthorized(sender, participant)) {
             continue;
           }
 
-          // Unduh lampiran gambar jika ada
-          const attachedImages: string[] = [];
+          // 1. Tangani Pesan Suara (Voice Note / Audio)
+          if (isAudio) {
+            try {
+              const audioBuffer = await downloadMediaMessage(
+                msg,
+                'buffer',
+                {},
+                {
+                  logger: pino({ level: 'silent' }),
+                  reuploadRequest: this.sock?.updateMediaMessage as any
+                }
+              );
+              if (audioBuffer && audioBuffer.length > 0) {
+                await this.sendReply(sender, { text: '🎙️ _Mendengarkan dan mentranskripsi pesan suara..._' });
+                const transRes = await voiceService.transcribeAudio(audioBuffer, `wa_voice_${Date.now()}.ogg`, 'audio/ogg');
+                if (transRes.success && transRes.text) {
+                  effectiveText = transRes.text;
+                  await this.sendReply(sender, { text: `🎙️ *Perintah Suara:* "${effectiveText}"` });
+                } else {
+                  await this.sendReply(sender, { text: `⚠️ Gagal mengenali suara: ${transRes.error || 'Suara kurang jelas'}` });
+                  continue;
+                }
+              }
+            } catch (err: any) {
+              console.error('[WhatsApp] Gagal mengunduh/transkripsi audio:', err);
+              continue;
+            }
+
+            await this.handleCommand(sender, effectiveText, isSelfChat, []);
+            continue;
+          }
+
+          // 2. Tangani Gambar (dengan Debounce Batching untuk Multiple Images / Album)
           if (isImage) {
+            let savedUrl: string | null = null;
             try {
               const buffer = await downloadMediaMessage(
                 msg,
@@ -340,14 +377,38 @@ export class WhatsAppBotManager extends EventEmitter {
                 const mime = m?.imageMessage?.mimetype || m?.documentMessage?.mimetype || 'image/jpeg';
                 const ext = mime.includes('png') ? 'png' : mime.includes('webp') ? 'webp' : 'jpg';
                 const saved = saveChatUploadedFile(buffer, `wa_${Date.now()}.${ext}`);
-                attachedImages.push(saved.url);
+                savedUrl = saved.url;
               }
             } catch (mediaErr) {
               console.error('[WhatsApp] Gagal mengunduh gambar:', mediaErr);
             }
+
+            if (savedUrl) {
+              const existing = this.imageBatches.get(sender);
+              if (existing) {
+                clearTimeout(existing.timer);
+                existing.images.push(savedUrl);
+                if (text) existing.captions.push(text);
+                existing.timer = setTimeout(() => {
+                  this.flushImageBatch(sender);
+                }, 1500);
+              } else {
+                const timer = setTimeout(() => {
+                  this.flushImageBatch(sender);
+                }, 1500);
+                this.imageBatches.set(sender, {
+                  sender,
+                  isSelfChat,
+                  images: [savedUrl],
+                  captions: text ? [text] : [],
+                  timer
+                });
+              }
+            }
+            continue;
           }
 
-          await this.handleCommand(sender, effectiveText, isSelfChat, attachedImages);
+          await this.handleCommand(sender, effectiveText, isSelfChat, []);
         }
       });
 
@@ -361,6 +422,16 @@ export class WhatsAppBotManager extends EventEmitter {
       this.emit('status_change', { status: this.status, error: err.message });
       return { success: false, error: err.message };
     }
+  }
+
+  private async flushImageBatch(sender: string): Promise<void> {
+    const batch = this.imageBatches.get(sender);
+    if (!batch) return;
+    this.imageBatches.delete(sender);
+
+    const finalCaption = batch.captions.find(c => c && c.trim()) || 'Tolong analisis dan periksa gambar-gambar terlampir ini.';
+    console.log(`[WhatsApp Album] Memproses ${batch.images.length} gambar dari ${sender} dengan instruksi: "${finalCaption}"`);
+    await this.handleCommand(sender, finalCaption, batch.isSelfChat, batch.images);
   }
 
   private async handleCommand(sender: string, text: string, isSelfChat: boolean = false, images: string[] = []): Promise<void> {
@@ -736,6 +807,9 @@ export class WhatsAppBotManager extends EventEmitter {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
     }
+
+    this.imageBatches.forEach(b => clearTimeout(b.timer));
+    this.imageBatches.clear();
 
     if (this.sock) {
       try {

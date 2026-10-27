@@ -46,9 +46,11 @@
   <div class="flex items-center gap-3">
     <!-- Brand -->
     <div class="flex items-center gap-2.5">
-      <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-500/30 font-bold text-lg">
-        ⚡
-      </div>
+      <img 
+        src="/img/zhiEnd%20Gradient%20Tech%20Logo.png" 
+        alt="zhiEnd Logo" 
+        class="w-9 h-9 rounded-lg object-contain shadow-md shadow-indigo-500/30 border border-white/10 p-0.5 bg-slate-900"
+      />
       <div>
         <div class="text-sm font-bold tracking-tight">
           zhiEnd<span class="text-indigo-400">Agent</span>

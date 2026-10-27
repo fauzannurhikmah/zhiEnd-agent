@@ -12,6 +12,7 @@ import { gitManager } from './gitManager';
 import { TunnelManager } from './tunnelManager';
 import { TelegramBotManager } from './bots/telegramBot';
 import { WhatsAppBotManager } from './bots/whatsappBot';
+import { voiceService } from './voiceService';
 import { AppConfig, FileItem, AgentTask } from './types';
 import {
   getWorkspaces,
@@ -200,6 +201,13 @@ app.post('/api/config', async (c) => {
   if (updates.tunnel) {
     if (updates.tunnel.subdomain !== undefined) config.tunnel.subdomain = updates.tunnel.subdomain;
     if (updates.tunnel.provider !== undefined) config.tunnel.provider = updates.tunnel.provider;
+  }
+
+  if (updates.voice) {
+    if (!config.voice) {
+      config.voice = {};
+    }
+    config.voice = { ...config.voice, ...updates.voice };
   }
 
   saveConfig(config);
@@ -609,6 +617,39 @@ app.post('/api/chat/upload', async (c) => {
   } catch (err: any) {
     console.error('Chat upload error:', err);
     return c.json({ error: 'Gagal mengunggah gambar: ' + err.message }, 500);
+  }
+});
+
+// Voice Transcription Endpoint (Web Audio Recording / Upload)
+app.post('/api/voice/transcribe', async (c) => {
+  try {
+    const contentType = c.req.header('content-type') || '';
+    if (contentType.includes('multipart/form-data')) {
+      const body = await c.req.parseBody();
+      const file = body['file'];
+      if (!file || !(file instanceof File)) {
+        return c.json({ error: 'Berkas audio tidak ditemukan dalam formulir upload' }, 400);
+      }
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const lang = typeof body['lang'] === 'string' ? body['lang'] : undefined;
+      const result = await voiceService.transcribeAudio(buffer, file.name, file.type, lang);
+      return c.json(result);
+    }
+
+    const jsonBody = (await c.req.json().catch(() => ({}))) as { base64?: string; name?: string; mimeType?: string; lang?: string };
+    if (jsonBody?.base64) {
+      const matches = jsonBody.base64.match(/^data:([A-Za-z-+/0-9]+);base64,(.+)$/);
+      const data = matches ? matches[2] : jsonBody.base64;
+      const mime = matches ? matches[1] : (jsonBody.mimeType || 'audio/ogg');
+      const buffer = Buffer.from(data, 'base64');
+      const result = await voiceService.transcribeAudio(buffer, jsonBody.name || 'audio.ogg', mime, jsonBody.lang);
+      return c.json(result);
+    }
+
+    return c.json({ error: 'Format unggahan audio tidak didukung' }, 400);
+  } catch (err: any) {
+    console.error('Voice transcription error:', err);
+    return c.json({ success: false, error: 'Gagal transkripsi suara: ' + err.message }, 500);
   }
 });
 

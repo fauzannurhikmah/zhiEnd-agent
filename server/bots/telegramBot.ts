@@ -6,6 +6,7 @@ import { GitManager } from '../gitManager';
 import path from 'path';
 import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, getOrCreateDefaultSession, saveMessageToDb, getAllProjectsList } from '../db/database';
 import { getSafePersonaEmoji, formatForWhatsApp } from './whatsappBot';
+import { voiceService } from '../voiceService';
 
 export interface TelegramBotOptions {
   config: AppConfig;
@@ -30,6 +31,12 @@ export class TelegramBotManager extends EventEmitter {
   public botInfo: any = null;
   public status: TelegramStatus['status'] = 'stopped';
   public errorMessage: string | null = null;
+  private mediaGroupBatches = new Map<string, {
+    ctx: any;
+    images: string[];
+    captions: string[];
+    timer: NodeJS.Timeout;
+  }>();
 
   constructor(options: TelegramBotOptions) {
     super();
@@ -455,7 +462,7 @@ export class TelegramBotManager extends EventEmitter {
         await handleCodingPrompt(ctx, text);
       });
 
-      // Handle Telegram Inbound Photos
+      // Handle Telegram Inbound Photos (with Media Group / Album support)
       this.bot.on('photo', async (ctx) => {
         const photos = ctx.message.photo;
         if (!photos || photos.length === 0) return;
@@ -466,21 +473,90 @@ export class TelegramBotManager extends EventEmitter {
           const resp = await fetch(fileLink.href);
           const buffer = Buffer.from(await resp.arrayBuffer());
           const saved = saveChatUploadedFile(buffer, `tg_${bestPhoto.file_id}.jpg`);
-          const caption = (ctx.message as any).caption?.trim() || 'Tolong analisis dan periksa gambar terlampir ini.';
+          const caption = (ctx.message as any).caption?.trim() || '';
+
+          const mediaGroupId = (ctx.message as any).media_group_id;
+          if (mediaGroupId) {
+            const existing = this.mediaGroupBatches.get(mediaGroupId);
+            if (existing) {
+              clearTimeout(existing.timer);
+              existing.images.push(saved.url);
+              if (caption) existing.captions.push(caption);
+              existing.timer = setTimeout(async () => {
+                const batch = this.mediaGroupBatches.get(mediaGroupId);
+                if (!batch) return;
+                this.mediaGroupBatches.delete(mediaGroupId);
+                const finalCaption = batch.captions.find(c => c && c.trim()) || 'Tolong analisis dan periksa gambar-gambar terlampir ini.';
+                console.log(`[Telegram Album] Memproses ${batch.images.length} foto media_group ${mediaGroupId}`);
+                await handleCodingPrompt(batch.ctx, finalCaption, batch.images);
+              }, 1200);
+            } else {
+              const timer = setTimeout(async () => {
+                const batch = this.mediaGroupBatches.get(mediaGroupId);
+                if (!batch) return;
+                this.mediaGroupBatches.delete(mediaGroupId);
+                const finalCaption = batch.captions.find(c => c && c.trim()) || 'Tolong analisis dan periksa gambar-gambar terlampir ini.';
+                console.log(`[Telegram Album] Memproses ${batch.images.length} foto media_group ${mediaGroupId}`);
+                await handleCodingPrompt(batch.ctx, finalCaption, batch.images);
+              }, 1200);
+
+              this.mediaGroupBatches.set(mediaGroupId, {
+                ctx,
+                images: [saved.url],
+                captions: caption ? [caption] : [],
+                timer
+              });
+            }
+            return;
+          }
 
           console.log(`[Telegram Photo] Saved to ${saved.url} (${saved.absolutePath})`);
           this.emit('log', {
             platform: 'telegram',
             type: 'inbound',
             sender: ctx.from?.username ? `@${ctx.from.username}` : String(ctx.from?.id),
-            text: `[Foto Terlampir] ${caption}`,
+            text: `[Foto Terlampir] ${caption || 'Pemeriksaan Gambar'}`,
             timestamp: Date.now()
           });
 
-          await handleCodingPrompt(ctx, caption, [saved.url]);
+          await handleCodingPrompt(ctx, caption || 'Tolong analisis dan periksa gambar terlampir ini.', [saved.url]);
         } catch (err: any) {
           console.error('Error handling Telegram photo:', err);
           await ctx.reply(`⚠️ Gagal memproses gambar: ${err.message}`);
+        }
+      });
+
+      // Handle Telegram Inbound Voice Notes / Audio
+      this.bot.on(['voice', 'audio'], async (ctx) => {
+        const voice = (ctx.message as any).voice || (ctx.message as any).audio;
+        if (!voice) return;
+
+        try {
+          const fileLink = await ctx.telegram.getFileLink(voice.file_id);
+          const resp = await fetch(fileLink.href);
+          const buffer = Buffer.from(await resp.arrayBuffer());
+
+          await ctx.reply('🎙️ _Mendengarkan dan mentranskripsi pesan suara..._', { parse_mode: 'Markdown' });
+          const transRes = await voiceService.transcribeAudio(buffer, `tg_voice_${voice.file_id}.ogg`, 'audio/ogg');
+          if (!transRes.success || !transRes.text) {
+            return ctx.reply(`⚠️ Gagal mengenali suara: ${transRes.error || 'Suara kurang jelas'}`);
+          }
+
+          const transcribed = transRes.text;
+          await ctx.reply(`🎙️ *Perintah Suara:* "${transcribed}"`, { parse_mode: 'Markdown' });
+
+          this.emit('log', {
+            platform: 'telegram',
+            type: 'inbound',
+            sender: ctx.from?.username ? `@${ctx.from.username}` : String(ctx.from?.id),
+            text: `[Voice Note] ${transcribed}`,
+            timestamp: Date.now()
+          });
+
+          await handleCodingPrompt(ctx, transcribed);
+        } catch (err: any) {
+          console.error('Error handling Telegram voice note:', err);
+          await ctx.reply(`⚠️ Gagal memproses pesan suara: ${err.message}`);
         }
       });
 

@@ -30,7 +30,10 @@
     X,
     Maximize2,
     Loader2,
-    Download
+    Download,
+    Mic,
+    MicOff,
+    Volume2
   } from 'lucide-svelte';
 
   let {
@@ -75,6 +78,130 @@
   let zoomImageUrl = $state<string | null>(null);
   let fileInputRef = $state<HTMLInputElement | null>(null);
   let isDragging = $state(false);
+
+  // Voice Command & Speech-to-Text State
+  let isListening = $state(false);
+  let isTranscribingVoice = $state(false);
+  let recognition: any = null;
+  let mediaRecorder: MediaRecorder | null = null;
+  let audioChunks: Blob[] = [];
+  let voiceError = $state<string | null>(null);
+
+  function toggleVoiceInput() {
+    if (isListening) {
+      stopVoiceInput();
+    } else {
+      startVoiceInput();
+    }
+  }
+
+  function startVoiceInput() {
+    voiceError = null;
+    const SpeechRec = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (SpeechRec) {
+      try {
+        recognition = new SpeechRec();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = config?.voice?.language === 'en' ? 'en-US' : 'id-ID';
+
+        const initialText = promptInput ? promptInput.trim() + ' ' : '';
+
+        recognition.onstart = () => {
+          isListening = true;
+        };
+
+        recognition.onresult = (event: any) => {
+          let interimTranscript = '';
+          let finalTranscript = '';
+
+          for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+              finalTranscript += event.results[i][0].transcript;
+            } else {
+              interimTranscript += event.results[i][0].transcript;
+            }
+          }
+
+          promptInput = initialText + finalTranscript + (interimTranscript ? interimTranscript : '');
+        };
+
+        recognition.onerror = (event: any) => {
+          console.warn('[Voice Recognition] Error:', event.error);
+          if (event.error === 'not-allowed') {
+            voiceError = 'Izin mikrofon ditolak oleh browser. Buka setelan browser untuk mengizinkan.';
+          } else if (event.error !== 'no-speech') {
+            voiceError = `Error suara: ${event.error}`;
+          }
+          stopVoiceInput();
+        };
+
+        recognition.onend = () => {
+          isListening = false;
+        };
+
+        recognition.start();
+        return;
+      } catch (e: any) {
+        console.warn('[Voice Recognition] Native Speech Recognition gagal, beralih ke perekam audio backend:', e);
+      }
+    }
+
+    // Fallback: MediaRecorder -> backend /api/voice/transcribe
+    startMediaRecorderVoice();
+  }
+
+  async function startMediaRecorderVoice() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop());
+        if (audioChunks.length === 0) return;
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        isTranscribingVoice = true;
+        try {
+          const lang = config?.voice?.language || 'id';
+          const res = await api.transcribeVoice(audioBlob, lang);
+          if (res.success && res.text) {
+            promptInput = (promptInput ? promptInput.trim() + ' ' : '') + res.text;
+          } else {
+            voiceError = res.error || 'Gagal mengenali suara.';
+          }
+        } catch (err: any) {
+          voiceError = err.message || 'Gagal memproses suara.';
+        } finally {
+          isTranscribingVoice = false;
+        }
+      };
+
+      mediaRecorder.start();
+      isListening = true;
+    } catch (err: any) {
+      console.error('Microphone access error:', err);
+      voiceError = 'Gagal mengakses mikrofon: ' + (err.message || 'Izin diperlukan');
+      isListening = false;
+    }
+  }
+
+  function stopVoiceInput() {
+    isListening = false;
+    if (recognition) {
+      try { recognition.stop(); } catch {}
+      recognition = null;
+    }
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      try { mediaRecorder.stop(); } catch {}
+      mediaRecorder = null;
+    }
+  }
 
   function toggleProcess(id: string) {
     const current = isProcessExpanded(id);
@@ -201,6 +328,7 @@
 
     const text = promptInput.trim();
     const images = selectedImages.map(img => img.url);
+    stopVoiceInput();
     promptInput = '';
     selectedImages = [];
     onSendMessage(text, images);
@@ -738,12 +866,31 @@
           </div>
         {/if}
 
+        <!-- Voice Listening / Error Banner -->
+        {#if isListening}
+          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-rose-500/10 border border-rose-500/25 text-[11px] text-rose-300 animate-in fade-in">
+            <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
+            <span class="font-medium truncate">Mendengarkan suara... Silakan bicara (klik ikon Mic lagi jika sudah selesai)</span>
+            <button type="button" onclick={stopVoiceInput} class="ml-auto text-xs px-2 py-0.5 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-200">Selesai</button>
+          </div>
+        {:else if isTranscribingVoice}
+          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-[11px] text-indigo-300 animate-in fade-in">
+            <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400 shrink-0" />
+            <span class="font-medium">Mentranskripsi suara ke teks...</span>
+          </div>
+        {:else if voiceError}
+          <div class="flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-[11px] text-amber-300 animate-in fade-in">
+            <span class="truncate">⚠️ {voiceError}</span>
+            <button type="button" onclick={() => voiceError = null} class="p-0.5 hover:text-white shrink-0"><X class="w-3 h-3" /></button>
+          </div>
+        {/if}
+
         <div class="flex items-end gap-1.5 sm:gap-2 w-full">
           <!-- Attachment Button -->
           <button
             type="button"
             onclick={() => fileInputRef?.click()}
-            disabled={isBusy || isUploadingImage}
+            disabled={isBusy || isUploadingImage || isListening}
             class="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-indigo-300 hover:bg-zinc-900 transition cursor-pointer shrink-0 disabled:opacity-40"
             title="Lampirkan Gambar (atau paste / drag & drop)"
           >
@@ -754,10 +901,28 @@
             {/if}
           </button>
 
+          <!-- Voice Command Microphone Button -->
+          <button
+            type="button"
+            onclick={toggleVoiceInput}
+            disabled={isBusy || isUploadingImage || isTranscribingVoice}
+            class="relative p-1.5 sm:p-2 rounded-xl transition cursor-pointer shrink-0 disabled:opacity-40 {isListening ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-[0_0_12px_#f43f5e]' : (isTranscribingVoice ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 animate-pulse' : 'text-zinc-400 hover:text-rose-400 hover:bg-zinc-900')}"
+            title={isListening ? 'Klik untuk selesai bicara' : (isTranscribingVoice ? 'Mentranskripsi suara...' : 'Perintah Suara (Speech-to-Text)')}
+          >
+            {#if isTranscribingVoice}
+              <Loader2 class="w-4 h-4 animate-spin text-indigo-400" />
+            {:else if isListening}
+              <Mic class="w-4 h-4 text-rose-400 animate-pulse" />
+              <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+            {:else}
+              <Mic class="w-4 h-4" />
+            {/if}
+          </button>
+
           <textarea
             bind:value={promptInput}
             onkeydown={handleKeyDown}
-            placeholder="Tulis instruksi... (atau lampirkan gambar)"
+            placeholder={isListening ? "Mendengarkan suara Anda..." : (isTranscribingVoice ? "Mentranskripsi suara..." : "Tulis instruksi... (atau bicara / lampirkan gambar)")}
             rows="1"
             class="flex-1 bg-transparent text-xs text-zinc-100 placeholder-zinc-500 outline-none resize-none px-1.5 sm:px-2 py-1.5 leading-relaxed"
           ></textarea>

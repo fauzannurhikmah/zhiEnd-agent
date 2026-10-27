@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AppConfig } from '../types';
-  import { X, Save, Sliders, Shield, FolderGit, Cpu, Send, MessageSquare, Globe, Plus, Trash2 } from 'lucide-svelte';
+  import { X, Save, Sliders, Shield, FolderGit, Cpu, Send, MessageSquare, Globe, Plus, Trash2, Mic } from 'lucide-svelte';
 
   let {
     config,
@@ -16,7 +16,7 @@
     onSave: (updates: Partial<AppConfig>) => Promise<boolean>;
   } = $props();
 
-  let activeTab = $state<'general' | 'antigravity' | 'telegram' | 'whatsapp' | 'tunnel'>('general');
+  let activeTab = $state<'general' | 'antigravity' | 'telegram' | 'whatsapp' | 'tunnel' | 'voice'>('general');
 
   // Form states initialized from config
   let formPort = $state(3888);
@@ -38,6 +38,12 @@
   let formWaPersonaId = $state('persona-default');
 
   let formTunnelSubdomain = $state('');
+
+  let formVoiceProvider = $state<'groq' | 'openai' | 'gemini'>('groq');
+  let formVoiceGroqKey = $state('');
+  let formVoiceOpenaiKey = $state('');
+  let formVoiceGeminiKey = $state('');
+  let formVoiceLang = $state('id');
 
   let isSaving = $state(false);
 
@@ -69,6 +75,12 @@
       formWaPersonaId = config.whatsapp?.personaId || 'persona-default';
 
       formTunnelSubdomain = config.tunnel?.subdomain || '';
+
+      formVoiceProvider = config.voice?.provider || 'groq';
+      formVoiceGroqKey = config.voice?.groqApiKey || '';
+      formVoiceOpenaiKey = config.voice?.openaiApiKey || '';
+      formVoiceGeminiKey = config.voice?.geminiApiKey || '';
+      formVoiceLang = config.voice?.language || 'id';
     }
   });
 
@@ -113,6 +125,13 @@
           provider: config?.tunnel?.provider || 'localtunnel',
           subdomain: formTunnelSubdomain.trim(),
           publicUrl: config?.tunnel?.publicUrl || ''
+        },
+        voice: {
+          provider: formVoiceProvider,
+          groqApiKey: formVoiceGroqKey.trim(),
+          openaiApiKey: formVoiceOpenaiKey.trim(),
+          geminiApiKey: formVoiceGeminiKey.trim(),
+          language: formVoiceLang
         }
       };
 
@@ -177,6 +196,12 @@
           class="py-2.5 border-b-2 flex items-center gap-1.5 cursor-pointer {activeTab === 'tunnel' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'}"
         >
           <Globe class="w-3.5 h-3.5" /> Remote Tunnel
+        </button>
+        <button
+          onclick={() => activeTab = 'voice'}
+          class="py-2.5 border-b-2 flex items-center gap-1.5 cursor-pointer {activeTab === 'voice' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-slate-200'}"
+        >
+          <Mic class="w-3.5 h-3.5" /> Voice / Suara
         </button>
       </div>
 
@@ -381,6 +406,84 @@
                 class="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-100 font-mono outline-none focus:border-indigo-500"
               />
               <span class="text-[11px] text-slate-500">Subdomain permanen yang akan digunakan saat memulai Public Tunnel.</span>
+            </div>
+          </div>
+        {/if}
+
+        <!-- VOICE / SPEECH-TO-TEXT -->
+        {#if activeTab === 'voice'}
+          <div class="flex flex-col gap-4">
+            <div class="p-3 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-slate-300 flex flex-col gap-1.5">
+              <span class="font-bold text-indigo-300 flex items-center gap-1.5">
+                <Mic class="w-4 h-4" /> Pengaturan Transkripsi Suara (Voice Command)
+              </span>
+              <p class="text-[11px] text-slate-400 leading-relaxed">
+                Digunakan untuk mengubah pesan suara (Voice Note di WhatsApp & Telegram) serta fallback suara Web Chat menjadi teks instruksi coding secara otomatis.
+              </p>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="form-voice-provider" class="font-bold text-slate-300">Penyedia Layanan (Transcription Engine):</label>
+              <select
+                id="form-voice-provider"
+                bind:value={formVoiceProvider}
+                class="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-100 outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                <option value="groq">Groq Whisper (Sangat Cepat ~0.8s & Gratis - Rekomendasi)</option>
+                <option value="openai">OpenAI Whisper (whisper-1)</option>
+                <option value="gemini">Google Gemini API (Multimodal Audio)</option>
+              </select>
+            </div>
+
+            {#if formVoiceProvider === 'groq'}
+              <div class="flex flex-col gap-1.5">
+                <label for="form-voice-groq" class="font-bold text-slate-300">Groq API Key:</label>
+                <input
+                  id="form-voice-groq"
+                  type="password"
+                  bind:value={formVoiceGroqKey}
+                  placeholder="gsk_..."
+                  class="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-100 font-mono outline-none focus:border-indigo-500"
+                />
+                <span class="text-[11px] text-slate-500">
+                  Dapatkan API Key gratis di <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">console.groq.com/keys</a>.
+                </span>
+              </div>
+            {:else if formVoiceProvider === 'openai'}
+              <div class="flex flex-col gap-1.5">
+                <label for="form-voice-openai" class="font-bold text-slate-300">OpenAI API Key:</label>
+                <input
+                  id="form-voice-openai"
+                  type="password"
+                  bind:value={formVoiceOpenaiKey}
+                  placeholder="sk-..."
+                  class="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-100 font-mono outline-none focus:border-indigo-500"
+                />
+              </div>
+            {:else if formVoiceProvider === 'gemini'}
+              <div class="flex flex-col gap-1.5">
+                <label for="form-voice-gemini" class="font-bold text-slate-300">Google Gemini API Key:</label>
+                <input
+                  id="form-voice-gemini"
+                  type="password"
+                  bind:value={formVoiceGeminiKey}
+                  placeholder="AIzaSy..."
+                  class="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-100 font-mono outline-none focus:border-indigo-500"
+                />
+              </div>
+            {/if}
+
+            <div class="flex flex-col gap-1.5">
+              <label for="form-voice-lang" class="font-bold text-slate-300">Bahasa Utama Perintah Suara:</label>
+              <select
+                id="form-voice-lang"
+                bind:value={formVoiceLang}
+                class="bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-100 outline-none focus:border-indigo-500 cursor-pointer"
+              >
+                <option value="id">Bahasa Indonesia (id)</option>
+                <option value="en">English (en)</option>
+                <option value="auto">Deteksi Otomatis (Auto)</option>
+              </select>
             </div>
           </div>
         {/if}

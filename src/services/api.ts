@@ -204,6 +204,27 @@ export const api = {
     return res.json();
   },
 
+  async transcribeVoice(audioFile: Blob | File, lang?: string): Promise<{ success: boolean; text?: string; error?: string }> {
+    const form = new FormData();
+    form.append('file', audioFile, 'voice_recording.webm');
+    if (lang) form.append('lang', lang);
+
+    const headers = getHeaders();
+    delete headers['Content-Type'];
+
+    const res = await fetch('/api/voice/transcribe', {
+      method: 'POST',
+      headers,
+      body: form
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Gagal mentranskripsi suara' }));
+      throw new Error(err.error || 'Gagal mentranskripsi suara');
+    }
+    return res.json();
+  },
+
   async sendChat(prompt: string, model?: string, conversationId?: string, sessionId?: string, images?: string[]): Promise<{ success: boolean; error?: string }> {
     const payload = JSON.stringify({ prompt, model, conversationId, sessionId, images: images || [] });
     const maxAttempts = 4;

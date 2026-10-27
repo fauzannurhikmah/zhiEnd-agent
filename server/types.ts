@@ -31,6 +31,13 @@ export interface AppConfig {
     subdomain: string;
     publicUrl: string;
   };
+  voice?: {
+    provider?: 'groq' | 'openai' | 'gemini';
+    groqApiKey?: string;
+    openaiApiKey?: string;
+    geminiApiKey?: string;
+    language?: string;
+  };
 }
 
 export interface GitFile {

@@ -412,6 +412,18 @@ export function loadConfigFromDb(): AppConfig {
     if (waRow?.allowed_identifiers) waAllowed = JSON.parse(waRow.allowed_identifiers);
   } catch {}
 
+  let voice: AppConfig['voice'] = {
+    provider: 'groq',
+    groqApiKey: '',
+    openaiApiKey: '',
+    geminiApiKey: '',
+    language: 'id'
+  };
+  try {
+    const voiceRaw = getSetting('voice_config');
+    if (voiceRaw) voice = { ...voice, ...JSON.parse(voiceRaw) };
+  } catch {}
+
   return {
     port,
     securityPin,
@@ -433,7 +445,8 @@ export function loadConfigFromDb(): AppConfig {
       allowedNumbers: waAllowed,
       personaId: waRow?.default_persona_id || 'persona-default'
     },
-    tunnel
+    tunnel,
+    voice
   };
 }
 
@@ -497,6 +510,14 @@ export function saveConfigToDb(newConfig: Partial<AppConfig>): void {
 
   if (newConfig.tunnel) {
     setSetting.run('tunnel_config', JSON.stringify(newConfig.tunnel));
+  }
+
+  if (newConfig.voice) {
+    const currentVoiceRaw = getSetting('voice_config');
+    let currentVoice = {};
+    try { if (currentVoiceRaw) currentVoice = JSON.parse(currentVoiceRaw); } catch {}
+    const updatedVoice = { ...currentVoice, ...newConfig.voice };
+    setSetting.run('voice_config', JSON.stringify(updatedVoice));
   }
 }
 
