@@ -243,6 +243,16 @@
     }
   });
 
+  // Global listener for inline markdown image click-to-zoom
+  $effect(() => {
+    (window as any).__zhiEndZoomImage = (url: string) => {
+      zoomImageUrl = url;
+    };
+    return () => {
+      delete (window as any).__zhiEndZoomImage;
+    };
+  });
+
   async function handleCopy(id: string, text: string) {
     if (!text) return;
     try {
@@ -979,6 +989,8 @@
 
   <!-- Lightbox Modal for Zooming Images -->
   {#if zoomImageUrl}
+    {@const fileName = decodeURIComponent((zoomImageUrl || '').split('/').pop()?.split('?')[0] || 'image.png')}
+    {@const downloadHref = zoomImageUrl ? (zoomImageUrl.includes('/api/media/file') ? (zoomImageUrl.includes('?') ? `${zoomImageUrl}&download=1` : `${zoomImageUrl}?download=1`) : zoomImageUrl) : '#'}
     <div 
       role="dialog"
       aria-modal="true"
@@ -995,16 +1007,18 @@
       >
         <!-- Modal Header -->
         <div class="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-zinc-900/80">
-          <span class="text-xs font-mono text-zinc-300 truncate max-w-md">{zoomImageUrl.split('/').pop()}</span>
+          <span class="text-xs font-mono text-zinc-300 truncate max-w-md" title={fileName}>{fileName}</span>
           <div class="flex items-center gap-2">
             <a
-              href={zoomImageUrl}
+              href={downloadHref}
+              download={fileName}
               target="_blank"
-              download
-              class="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition"
-              title="Buka / Unduh gambar"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer"
+              title="Download gambar ini ke perangkat Anda"
             >
-              <Download class="w-4 h-4" />
+              <Download class="w-3.5 h-3.5" />
+              <span>Download</span>
             </a>
             <button
               type="button"

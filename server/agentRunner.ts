@@ -151,6 +151,12 @@ ${formattedPaths.map(p => `• File Gambar: "${p}"`).join('\n')}
    ATURAN FORMAT RESPON:
    - Sajikan tautan di atas secara terstruktur menggunakan Markdown link atau list yang rapi.
    - DILARANG KERAS mematikan atau menghentikan port 5173 (zhiEnd Agent frontend) dan port ${port} (zhiEnd Agent backend)!
+5. ATURAN HASIL GENERASI GAMBAR (Ultra-Clean Visual Presentation):
+   - Jika pengguna meminta membuat atau menghasilkan gambar (menggunakan generate_image atau subagent pembuat gambar):
+     a. Cukup tampilkan gambar menggunakan format Markdown Image standar:
+        ![Deskripsi Gambar](path/ke/file_gambar.png)
+     b. DILARANG KERAS menyertakan teks '📁 Lokasi File:' atau mencantumkan path lokal di dalam teks respon. Tampilan harus bersih dan rapi tanpa teks lokasi file.
+     c. Pengguna akan mengunduh gambar langsung dengan mengklik gambar tersebut di antarmuka Web UI.
 
 Permintaan Pengguna:
 ${options.prompt}`;
@@ -276,6 +282,26 @@ ${options.prompt}`;
               delta: linksBlock,
               accumulated: this.activeTask.response
             });
+          }
+
+          // Auto-detect and populate generated image paths into images array
+          if (this.activeTask.response) {
+            const imgRegex = /!?\[[^\]]*\]\(([^)]+\.(?:png|jpe?g|webp|gif|svg)[^)]*)\)/gi;
+            let match;
+            while ((match = imgRegex.exec(this.activeTask.response)) !== null) {
+              const rawUrl = match[1].trim();
+              let webUrl = rawUrl;
+              if (rawUrl.startsWith('file:///')) {
+                const clean = rawUrl.replace(/^file:\/\/\//, '');
+                webUrl = `/api/media/file?path=${encodeURIComponent(clean)}`;
+              } else if (/^[A-Za-z]:[/\\]/.test(rawUrl)) {
+                webUrl = `/api/media/file?path=${encodeURIComponent(rawUrl)}`;
+              }
+              if (!this.activeTask.images) this.activeTask.images = [];
+              if (!this.activeTask.images.includes(webUrl)) {
+                this.activeTask.images.push(webUrl);
+              }
+            }
           }
 
           const finishedTask = { ...this.activeTask };

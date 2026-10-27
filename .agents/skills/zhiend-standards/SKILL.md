@@ -155,5 +155,26 @@ Ketika web app diakses melalui **Public Tunnel** (seperti `localtunnel` / `*.loc
 4. **Verifikasi Pengujian Multi-Network**:
    - Setiap kali menambahkan gambar atau favicon baru, verifikasi bahwa aset dapat di-load secara sukses di tiga lingkungan: Localhost, IP LAN Wi-Fi, dan Public Tunnel (`loca.lt`).
 
+---
+
+## 7. AI Image Generation & Inline Visual Presentation Standards (Mandatory)
+
+Ketika pengguna meminta AI untuk membuat gambar (*image generation* seperti Tokisaki Kurumi, ilustrasi konsep, mockup desain UI, diagram arsitektur, dsb.):
+
+1. **Inline Visual Card, Bukan Sekadar Path Teks**:
+   - DILARANG KERAS hanya menampilkan lokasi file teks mentah atau link `file:///...` yang tidak bisa dibuka browser karena batasan keamanan lokal (*browser security sandbox*).
+   - Seluruh hasil generasi gambar **WAJIB** dirender langsung sebagai **Visual Image Card** interaktif di dalam bubble chat.
+
+2. **Media Gateway Endpoint (`/api/media/file`)**:
+   - Browser modern memblokir protokol `file:///` dari halaman HTTP/HTTPS (`Not allowed to load local resource`).
+   - Sistem menggunakan backend gateway `/api/media/file?path=${encodeURIComponent(filePath)}` yang secara aman membaca file biner gambar dari folder artifact/workspace dan mengembalikannya dengan header MIME yang tepat (`image/png`, `image/jpeg`).
+   - Untuk mengunduh, gateway mendukung query parameter `&download=1` yang memicu header `Content-Disposition: attachment; filename="..."`.
+
+3. **Ultra-Clean Visual Presentation & Click-to-Download Ergonomics**:
+   - **Tanpa Tombol Download Berlebih**: Di dalam bubble chat, kartu gambar dibuat bersih (*clean frame visual*) tanpa footer tombol download ungu yang menumpuk.
+   - **Hapus Teks Lokasi File**: DILARANG KERAS menampilkan baris `📁 Lokasi File:` atau link path disk lokal yang merusak kerapian UI.
+   - **Download saat Gambar Diklik**: Tombol download resolusi penuh disajikan secara terpusat dan elegan di dalam **Lightbox Modal** ketika pengguna mengklik gambar tersebut.
+
+
 
 

@@ -26,6 +26,99 @@ function parseTableRow(line: string): string[] {
   return protectedLine.split('|').map(c => c.replace(/\uE003PIPE\uE003/g, '|').trim());
 }
 
+export function isImageExtension(urlOrPath: string): boolean {
+  const clean = urlOrPath.split('?')[0].split('#')[0].toLowerCase();
+  return /\.(png|jpe?g|webp|gif|svg|bmp|ico)$/.test(clean);
+}
+
+export function resolveMediaUrl(rawUrl: string): { webUrl: string; downloadUrl: string; fileName: string } {
+  let clean = rawUrl.trim();
+  let fileName = 'image.png';
+
+  if (clean.startsWith('file:///')) {
+    const filePath = clean.replace(/^file:\/\/\//, '');
+    fileName = decodeURIComponent(filePath.split('/').pop()?.split('\\').pop() || 'image.png');
+    return {
+      webUrl: `/api/media/file?path=${encodeURIComponent(filePath)}`,
+      downloadUrl: `/api/media/file?path=${encodeURIComponent(filePath)}&download=1`,
+      fileName
+    };
+  }
+
+  if (/^[A-Za-z]:[/\\]/.test(clean)) {
+    fileName = clean.split('/').pop()?.split('\\').pop() || 'image.png';
+    return {
+      webUrl: `/api/media/file?path=${encodeURIComponent(clean)}`,
+      downloadUrl: `/api/media/file?path=${encodeURIComponent(clean)}&download=1`,
+      fileName
+    };
+  }
+
+  if (clean.startsWith('/uploads/')) {
+    fileName = clean.split('/').pop() || 'image.png';
+    return {
+      webUrl: clean,
+      downloadUrl: clean,
+      fileName
+    };
+  }
+
+  if (clean.startsWith('http://') || clean.startsWith('https://')) {
+    fileName = clean.split('/').pop()?.split('?')[0] || 'image.png';
+    return {
+      webUrl: clean,
+      downloadUrl: clean,
+      fileName
+    };
+  }
+
+  // Relative path to image in active workspace or public
+  if (isImageExtension(clean)) {
+    fileName = clean.split('/').pop()?.split('\\').pop() || 'image.png';
+    return {
+      webUrl: `/api/media/file?path=${encodeURIComponent(clean)}`,
+      downloadUrl: `/api/media/file?path=${encodeURIComponent(clean)}&download=1`,
+      fileName
+    };
+  }
+
+  return {
+    webUrl: clean,
+    downloadUrl: clean,
+    fileName: clean.split('/').pop() || 'file'
+  };
+}
+
+export function renderImageCard(alt: string, rawUrl: string): string {
+  const { webUrl, fileName } = resolveMediaUrl(rawUrl);
+  const displayTitle = (alt && alt.trim()) ? alt.trim() : fileName;
+
+  return `
+    <div class="my-3 rounded-2xl overflow-hidden border border-white/10 bg-zinc-950/90 shadow-2xl max-w-[540px] group/imgcard animate-in fade-in duration-200">
+      <div 
+        class="relative bg-zinc-900/60 overflow-hidden flex items-center justify-center max-h-[500px] cursor-zoom-in" 
+        onclick="window.__zhiEndZoomImage && window.__zhiEndZoomImage('${escapeHtml(webUrl)}')"
+        title="Klik gambar untuk perbesar & unduh"
+      >
+        <img
+          src="${escapeHtml(webUrl)}"
+          alt="${escapeHtml(displayTitle)}"
+          loading="lazy"
+          class="w-full h-auto max-h-[500px] object-contain transition-transform duration-300 group-hover/imgcard:scale-[1.01]"
+        />
+        <div class="absolute inset-0 bg-black/25 opacity-0 group-hover/imgcard:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+          <span class="px-3.5 py-1.5 rounded-full bg-black/80 backdrop-blur-md text-[11px] font-medium text-white border border-white/20 flex items-center gap-1.5 shadow-xl">
+            <svg class="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+            </svg>
+            Klik untuk Perbesar & Unduh
+          </span>
+        </div>
+      </div>
+    </div>
+  `.trim();
+}
+
 export function renderMarkdown(markdown: string): string {
   if (!markdown) return '';
 
@@ -60,6 +153,11 @@ export function renderMarkdown(markdown: string): string {
     codeBlocks.push(html);
     return placeholder;
   });
+
+  // Clean redundant "Lokasi File" lines and image file link artifacts
+  processed = processed
+    .replace(/(?:^|\n)[^\S\r\n]*(?:📁\s*)?(?:\*\*)?Lokasi File:?(?:\*\*)?[^\S\r\n]*/gi, '\n')
+    .replace(/(?:^|\n)[^\S\r\n]*\[[^\]]*\.(?:png|jpe?g|webp|gif|svg)\]\(file:\/\/\/[^\)]+\)[^\S\r\n]*/gi, '\n');
 
   // 2. Process line by line
   const lines = processed.split(/\r?\n/);
@@ -213,18 +311,37 @@ export function renderMarkdown(markdown: string): string {
       continue;
     }
 
-    // Empty line
+    // Empty line (collapse multiple consecutive empty lines to single spacer)
     if (!trimmed) {
       if (inUl) { outputLines.push('</ul>'); inUl = false; }
       if (inOl) { outputLines.push('</ol>'); inOl = false; }
-      outputLines.push('<div class="h-2"></div>');
+      const lastLine = outputLines[outputLines.length - 1];
+      if (lastLine && lastLine !== '<div class="h-2"></div>' && !lastLine.startsWith('<hr')) {
+        outputLines.push('<div class="h-2"></div>');
+      }
+      continue;
+    }
+
+    // Image on standalone line: ![Alt](url) or ! [Alt](url)
+    const imgLineMatch = trimmed.match(/^!\s*\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imgLineMatch) {
+      const altText = imgLineMatch[1];
+      const rawUrl = imgLineMatch[2];
+      if (inUl) { outputLines.push('</ul>'); inUl = false; }
+      if (inOl) { outputLines.push('</ol>'); inOl = false; }
+      outputLines.push(renderImageCard(altText, rawUrl));
+      continue;
+    }
+
+    const inlineContent = parseInline(trimmed);
+    if (!inlineContent.trim()) {
       continue;
     }
 
     // Normal paragraph
     if (inUl) { outputLines.push('</ul>'); inUl = false; }
     if (inOl) { outputLines.push('</ol>'); inOl = false; }
-    outputLines.push(`<p class="leading-relaxed text-xs text-zinc-200">${parseInline(trimmed)}</p>`);
+    outputLines.push(`<p class="leading-relaxed text-xs text-zinc-200">${inlineContent}</p>`);
   }
 
   if (inUl) outputLines.push('</ul>');
@@ -247,8 +364,17 @@ function parseInline(text: string): string {
     return `\uE000INLINECODE${idx}\uE000`;
   });
 
-  // 2. Protect markdown links [label](url)
   const linkTokens: string[] = [];
+
+  // 1b. Protect and parse inline image markdown ![alt](url) or ! [alt](url)
+  s = s.replace(/!\s*\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
+    const tokenIdx = linkTokens.length;
+    const cardHtml = renderImageCard(alt, url);
+    linkTokens.push(cardHtml);
+    return `\uE001LINK${tokenIdx}\uE001`;
+  });
+
+  // 2. Protect markdown links [label](url)
   s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, url) => {
     const cleanUrl = url.trim();
     const tokenIdx = linkTokens.length;
@@ -259,7 +385,14 @@ function parseInline(text: string): string {
     });
 
     if (cleanUrl.startsWith('file:///')) {
-      const cleanPath = cleanUrl.replace('file:///', '');
+      const cleanPath = cleanUrl.replace(/^file:\/\/\//, '');
+      const isImg = isImageExtension(cleanPath);
+      const { downloadUrl, fileName } = resolveMediaUrl(cleanUrl);
+
+      if (isImg) {
+        return '';
+      }
+
       const html = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 mx-0.5 rounded bg-zinc-850 border border-zinc-700/60 text-zinc-300 font-mono text-[11px]" title="${escapeHtml(cleanPath)}">
         <svg class="w-3 h-3 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -271,6 +404,25 @@ function parseInline(text: string): string {
     }
 
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+      // If external link points directly to image and label is filename, allow download
+      if (isImageExtension(cleanUrl)) {
+        const { downloadUrl, fileName } = resolveMediaUrl(cleanUrl);
+        const html = `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 mx-0.5 rounded-lg bg-zinc-850 border border-zinc-700/60 text-zinc-300 font-mono text-[11px]">
+          <svg class="w-3.5 h-3.5 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <a href="${escapeHtml(cleanUrl)}" target="_blank" rel="noopener noreferrer" class="truncate max-w-[200px] text-indigo-300 hover:underline">${renderedLabel}</a>
+          <a href="${escapeHtml(downloadUrl)}" download="${escapeHtml(fileName)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 hover:text-white transition cursor-pointer text-[10px]" title="Download ${escapeHtml(fileName)}">
+            <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Unduh</span>
+          </a>
+        </span>`;
+        linkTokens.push(html);
+        return `\uE001LINK${tokenIdx}\uE001`;
+      }
+
       const html = `<a href="${escapeHtml(cleanUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/30 border border-indigo-500/30 hover:border-indigo-500/50 text-indigo-300 hover:text-indigo-200 font-medium transition cursor-pointer group shadow-sm shadow-indigo-500/10">
         <span class="underline decoration-indigo-400/40 underline-offset-2">${renderedLabel}</span>
         <svg class="w-3 h-3 text-indigo-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -120,7 +120,11 @@ app.use('*', cors({ origin: '*' }));
 // Security PIN Middleware for /api/*
 app.use('/api/*', async (c, next) => {
   const path = c.req.path;
-  if (path === '/api/auth/status' || path === '/api/auth/verify') {
+  if (
+    path === '/api/auth/status' ||
+    path === '/api/auth/verify' ||
+    path.startsWith('/api/media/file')
+  ) {
     return next();
   }
 
@@ -1296,6 +1300,61 @@ app.get('/uploads/*', (c) => {
   return c.body(data, 200, {
     'Content-Type': mime,
     'Cache-Control': 'public, max-age=31536000, immutable'
+  });
+});
+
+// Media & Generated Artifact Image Gateway (Allows browser to safely view & download local generated images)
+app.get('/api/media/file', (c) => {
+  let targetPath = c.req.query('path') || '';
+  if (!targetPath) {
+    return c.text('Path parameter required', 400);
+  }
+
+  try {
+    targetPath = decodeURIComponent(targetPath);
+  } catch {}
+
+  // Strip file:/// prefix
+  if (targetPath.startsWith('file:///')) {
+    targetPath = targetPath.replace(/^file:\/\/\//, '');
+  } else if (targetPath.startsWith('file://')) {
+    targetPath = targetPath.replace(/^file:\/\//, '');
+  }
+
+  // Handle leading slash on Windows drive letters (e.g. /C:/Users/...)
+  if (/^\/[A-Za-z]:/.test(targetPath)) {
+    targetPath = targetPath.substring(1);
+  }
+
+  // If path is relative, resolve from active workspace or cwd
+  if (!path.isAbsolute(targetPath)) {
+    const activeDir = config.activeProject || process.cwd();
+    targetPath = path.resolve(activeDir, targetPath);
+  } else {
+    targetPath = path.normalize(targetPath);
+  }
+
+  // Security check: Only allow image extensions
+  const ext = path.extname(targetPath).toLowerCase();
+  const allowedExtensions = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.bmp', '.ico'];
+  if (!allowedExtensions.includes(ext)) {
+    return c.text('Hanya format file gambar yang diizinkan untuk preview media.', 403);
+  }
+
+  if (!fs.existsSync(targetPath) || !fs.statSync(targetPath).isFile()) {
+    return c.text(`File media tidak ditemukan di disk: ${targetPath}`, 404);
+  }
+
+  const mime = getFileMime(targetPath);
+  const data = fs.readFileSync(targetPath);
+  const fileName = path.basename(targetPath);
+  const isDownload = c.req.query('download') === '1';
+
+  return c.body(data, 200, {
+    'Content-Type': mime,
+    'Content-Disposition': isDownload ? `attachment; filename="${fileName}"` : `inline; filename="${fileName}"`,
+    'Access-Control-Allow-Origin': '*',
+    'Cache-Control': 'public, max-age=86400'
   });
 });
 
