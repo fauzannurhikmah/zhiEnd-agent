@@ -520,5 +520,20 @@ export const api = {
       headers: getHeaders()
     });
     return res.json();
+  },
+
+  // AI Models & Providers
+  async getAIModels(): Promise<{ models: Array<{ id: string; name: string; provider: string; description?: string; hasKey?: boolean }> }> {
+    const res = await fetch('/api/ai-providers/models', { headers: getHeaders() });
+    return res.json();
+  },
+
+  async testAIProvider(data: { provider: string; apiKey?: string; baseUrl?: string }): Promise<{ success: boolean; message: string; modelTested?: string }> {
+    const res = await fetch('/api/ai-providers/test', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data)
+    });
+    return res.json();
   }
 };

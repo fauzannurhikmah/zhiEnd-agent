@@ -532,9 +532,17 @@
       >
         <AvatarView avatar={activePersona?.avatar} name={activePersona?.name} size="xs" className="rounded-md shrink-0" />
         <span class="font-medium truncate max-w-[65px] xs:max-w-[85px] sm:max-w-[120px]">{activePersona?.name || 'Default Persona'}</span>
+        {#if activePersona?.preferred_model}
+          <span 
+            class="text-[9px] px-1.5 py-0.2 rounded bg-zinc-800/80 border border-white/5 text-zinc-400 font-mono hidden lg:inline truncate max-w-[110px]" 
+            title={`Model: ${activePersona.preferred_model}`}
+          >
+            {activePersona.preferred_model.replace(/^(openai|grok|qwen|deepseek|gemini):/, '')}
+          </span>
+        {/if}
         {#if activePersona?.traits}
           <span 
-            class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-300 font-mono hidden md:inline truncate max-w-[120px]" 
+            class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-300 font-mono hidden xl:inline truncate max-w-[110px]" 
             title={activePersona.traits}
           >
             {activePersona.traits}

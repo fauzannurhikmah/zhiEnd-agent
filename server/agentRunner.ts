@@ -6,6 +6,7 @@ import { EventEmitter } from 'events';
 import { AppConfig, AgentTask } from './types';
 import { getWorkspaceContext, getCustomRootWorkspace, getChatSessionById, getPersonaById } from './db/database';
 import { parseDirectCommand, spawnDirectCommand } from './directCommandRunner';
+import { isExternalModel, runExternalLLM } from './llmRunner';
 
 function getLocalIP(): string {
   const interfaces = os.networkInterfaces();
@@ -37,6 +38,7 @@ export class AgentRunner extends EventEmitter {
   private config: AppConfig;
   private getTunnelUrl?: () => string | null;
   public currentProcess: ChildProcess | null = null;
+  public currentAbortController: AbortController | null = null;
   public activeTask: AgentTask | null = null;
   public history: AgentTask[] = [];
 
@@ -51,7 +53,7 @@ export class AgentRunner extends EventEmitter {
   }
 
   public isBusy(): boolean {
-    return this.currentProcess !== null;
+    return this.currentProcess !== null || this.currentAbortController !== null;
   }
 
   public async run(options: RunOptions): Promise<AgentTask> {
@@ -105,6 +107,11 @@ ${persona.system_prompt}
     }
 
     const selectedModel = options.model || personaModel || this.config.antigravity?.defaultModel || 'gemini-3.8-flash-high';
+
+    if (isExternalModel(selectedModel)) {
+      console.log(`[AgentRunner] 🌐 External AI Model detected: "${selectedModel}". Executing via LLM Provider API...`);
+      return this.runExternalAI(selectedModel, options, workingDir, cachedContextStr, personaStr);
+    }
 
     let imagesContext = '';
     if (options.images && options.images.length > 0) {
@@ -663,19 +670,194 @@ ${options.prompt}`;
     });
   }
 
+  private async runExternalAI(
+    selectedModel: string,
+    options: RunOptions,
+    workingDir: string,
+    cachedContextStr: string,
+    personaStr: string
+  ): Promise<AgentTask> {
+    const taskId = 'task_' + Date.now();
+    const localIp = getLocalIP();
+    const port = this.config.port || 3888;
+    const publicTunnelUrl = (this.getTunnelUrl ? this.getTunnelUrl() : null) || this.config.tunnel?.publicUrl || '';
+    const rootDir = getCustomRootWorkspace();
+
+    this.activeTask = {
+      id: taskId,
+      prompt: options.prompt,
+      project: workingDir,
+      model: selectedModel,
+      startTime: Date.now(),
+      status: 'running',
+      response: '',
+      conversationId: options.conversationId || null,
+      toolsExecuted: [],
+      sessionId: options.sessionId,
+      images: options.images || []
+    };
+
+    this.emit('task_start', {
+      taskId,
+      prompt: options.prompt,
+      project: workingDir,
+      model: selectedModel,
+      sessionId: options.sessionId,
+      images: options.images || []
+    });
+
+    const abortController = new AbortController();
+    this.currentAbortController = abortController;
+
+    const systemPrompt = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}
+[Panduan Operasional Sistem]:
+1. Anda adalah asisten AI coding cerdas untuk zhiEnd Agent yang beroperasi langsung di project: "${workingDir}".
+2. Root direktori default untuk project baru adalah ${rootDir}.
+3. Terapkan identitas dan sifat persona yang aktif dalam gaya respon, nada bicara, serta pendekatan solusi Anda.
+4. Berikan jawaban komprehensif, solusi koding yang elegan, type-safe, dan terstruktur dengan rapi.`;
+
+    try {
+      const result = await runExternalLLM({
+        prompt: options.prompt,
+        systemPrompt,
+        modelId: selectedModel,
+        config: this.config,
+        images: options.images,
+        onDelta: (delta) => {
+          if (!this.activeTask) return;
+          this.activeTask.response += delta;
+          this.emit('agent_delta', {
+            taskId,
+            delta,
+            accumulated: this.activeTask.response
+          });
+        },
+        onThought: (thought) => {
+          if (!this.activeTask) return;
+          this.activeTask.thought = thought;
+          this.emit('agent_thought', {
+            taskId,
+            thought
+          });
+        },
+        abortSignal: abortController.signal
+      });
+
+      this.currentAbortController = null;
+      if (!this.activeTask) {
+        throw new Error('Tugas dibatalkan.');
+      }
+
+      const duration = ((Date.now() - this.activeTask.startTime) / 1000).toFixed(1);
+      this.activeTask.duration = `${duration}s`;
+      this.activeTask.status = 'completed';
+      this.activeTask.exitCode = 0;
+      this.activeTask.response = result.response;
+      this.activeTask.thought = result.thought;
+
+      // Otomatis lampirkan link live preview & public tunnel jika permintaan adalah menjalankan projek
+      const isRunReq = /jalankan|running|run|start.*proje?k/i.test(options.prompt);
+      if (isRunReq && !this.activeTask.response.includes('/preview/')) {
+        const previewLocal = `http://localhost:5173/preview/`;
+        const previewLan = `http://${localIp}:${port}/preview/`;
+        const previewPublic = publicTunnelUrl ? `${publicTunnelUrl}/preview/` : null;
+
+        let linksBlock = `\n\n━━━━━━━━━━━━━━━━━━━━━\n🌐 **Tautan Akses Projek (Aktif):**\n• 💻 **Local Preview:** ${previewLocal}\n• 📱 **Wi-Fi LAN (HP/Perangkat):** ${previewLan}\n`;
+        if (previewPublic) {
+          linksBlock += `• 🌍 **Akses Publik Internet:** ${previewPublic}\n`;
+        } else {
+          linksBlock += `• 🌍 **Akses Publik Internet:** _(Buka tab Remote Hub > Akses Jaringan untuk mengaktifkan Public Tunnel)_\n`;
+        }
+        linksBlock += `━━━━━━━━━━━━━━━━━━━━━`;
+        this.activeTask.response += linksBlock;
+        this.emit('agent_delta', {
+          taskId,
+          delta: linksBlock,
+          accumulated: this.activeTask.response
+        });
+      }
+
+      // Auto-detect image paths if any
+      const genImages: string[] = [];
+      const imgRegex = /!?\[[^\]]*\]\(([^)]+\.(?:png|jpe?g|webp|gif|svg)[^)]*)\)/gi;
+      let match;
+      while ((match = imgRegex.exec(this.activeTask.response)) !== null) {
+        const rawUrl = match[1].trim();
+        let diskPath = rawUrl;
+        if (rawUrl.startsWith('file:///')) {
+          diskPath = decodeURIComponent(rawUrl.replace(/^file:\/\/\//, ''));
+        }
+        if (/^\/[A-Za-z]:/.test(diskPath)) {
+          diskPath = diskPath.substring(1);
+        }
+        diskPath = path.normalize(diskPath);
+        if (!genImages.includes(diskPath)) {
+          genImages.push(diskPath);
+        }
+      }
+      this.activeTask.generatedImages = genImages;
+
+      const finishedTask = { ...this.activeTask };
+      this.history.unshift(finishedTask);
+      if (this.history.length > 50) this.history.pop();
+
+      this.emit('task_end', {
+        id: finishedTask.id,
+        taskId: finishedTask.id,
+        prompt: finishedTask.prompt,
+        project: finishedTask.project,
+        model: finishedTask.model,
+        status: finishedTask.status,
+        response: finishedTask.response,
+        duration: finishedTask.duration,
+        conversationId: finishedTask.conversationId,
+        toolsExecuted: [],
+        steps: [],
+        thought: finishedTask.thought || '',
+        sessionId: finishedTask.sessionId,
+        images: options.images || [],
+        generatedImages: genImages
+      });
+
+      this.activeTask = null;
+      return finishedTask;
+    } catch (err: any) {
+      this.currentAbortController = null;
+      if (this.activeTask) {
+        this.activeTask.status = 'error';
+        this.activeTask.error = err.message;
+        this.activeTask.response = `❌ **Error**: ${err.message}`;
+      }
+      this.emit('task_error', { taskId, error: err.message });
+      const finishedTask = this.activeTask ? { ...this.activeTask } : null;
+      this.activeTask = null;
+      throw err;
+    }
+  }
+
   public cancel(): boolean {
+    let cancelled = false;
+
+    if (this.currentAbortController) {
+      this.currentAbortController.abort();
+      this.currentAbortController = null;
+      cancelled = true;
+    }
+
     if (this.currentProcess && this.currentProcess.pid) {
       try {
         spawn('taskkill', ['/pid', String(this.currentProcess.pid), '/f', '/t']);
         this.currentProcess = null;
+        cancelled = true;
       } catch (e) {
         console.error('Failed to kill agent process:', e);
       }
-      if (this.activeTask) {
-        this.activeTask.status = 'cancelled';
-        this.emit('task_cancelled', { taskId: this.activeTask.id });
-        this.activeTask = null;
-      }
+    }
+
+    if (cancelled && this.activeTask) {
+      this.activeTask.status = 'cancelled';
+      this.emit('task_cancelled', { taskId: this.activeTask.id });
+      this.activeTask = null;
       return true;
     }
     return false;

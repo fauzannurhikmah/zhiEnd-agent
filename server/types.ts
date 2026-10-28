@@ -3,6 +3,29 @@ export interface AntigravityModel {
   name: string;
 }
 
+export interface AIProviderKeyConfig {
+  apiKey: string;
+  baseUrl?: string;
+  enabled?: boolean;
+}
+
+export interface CustomAIProviderConfig {
+  id: string;
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+  models: { id: string; name: string }[];
+}
+
+export interface AIProvidersConfig {
+  openai?: AIProviderKeyConfig;
+  grok?: AIProviderKeyConfig;
+  qwen?: AIProviderKeyConfig;
+  deepseek?: AIProviderKeyConfig;
+  gemini?: AIProviderKeyConfig;
+  custom?: CustomAIProviderConfig[];
+}
+
 export interface AppConfig {
   port: number;
   securityPin: string;
@@ -13,6 +36,7 @@ export interface AppConfig {
     defaultModel: string;
     availableModels: AntigravityModel[];
   };
+  aiProviders?: AIProvidersConfig;
   telegram: {
     enabled: boolean;
     botToken: string;
@@ -107,7 +131,7 @@ export interface TunnelStatus {
 }
 
 export interface TelegramStatus {
-  status: 'stopped' | 'running' | 'error';
+  status: 'stopped' | 'connecting' | 'running' | 'error';
   botInfo?: { username?: string; id?: number } | null;
   error?: string | null;
 }

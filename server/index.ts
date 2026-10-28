@@ -13,6 +13,7 @@ import { TunnelManager } from './tunnelManager';
 import { TelegramBotManager } from './bots/telegramBot';
 import { WhatsAppBotManager } from './bots/whatsappBot';
 import { voiceService } from './voiceService';
+import { getAllAvailableModels, testProviderConnection } from './llmRunner';
 import { AppConfig, FileItem, AgentTask } from './types';
 import {
   getWorkspaces,
@@ -159,13 +160,22 @@ app.post('/api/auth/verify', async (c) => {
 
 // Config: Get and Save all configurations via UI
 app.get('/api/config', (c) => {
+  const aiCfg = config.aiProviders;
   const safeConfig = {
     ...config,
     telegram: {
       ...config.telegram,
       botTokenSet: !!config.telegram?.botToken,
       botToken: config.telegram?.botToken ? '••••••••' : ''
-    }
+    },
+    aiProviders: aiCfg ? {
+      openai: aiCfg.openai ? { ...aiCfg.openai, apiKey: aiCfg.openai.apiKey ? '••••••••' : '' } : undefined,
+      grok: aiCfg.grok ? { ...aiCfg.grok, apiKey: aiCfg.grok.apiKey ? '••••••••' : '' } : undefined,
+      qwen: aiCfg.qwen ? { ...aiCfg.qwen, apiKey: aiCfg.qwen.apiKey ? '••••••••' : '' } : undefined,
+      deepseek: aiCfg.deepseek ? { ...aiCfg.deepseek, apiKey: aiCfg.deepseek.apiKey ? '••••••••' : '' } : undefined,
+      gemini: aiCfg.gemini ? { ...aiCfg.gemini, apiKey: aiCfg.gemini.apiKey ? '••••••••' : '' } : undefined,
+      custom: (aiCfg.custom || []).map(cu => ({ ...cu, apiKey: cu.apiKey ? '••••••••' : '' }))
+    } : undefined
   };
   return c.json(safeConfig);
 });
@@ -182,6 +192,37 @@ app.post('/api/config', async (c) => {
     if (updates.antigravity.cliPath !== undefined) config.antigravity.cliPath = updates.antigravity.cliPath;
     if (updates.antigravity.defaultModel !== undefined) config.antigravity.defaultModel = updates.antigravity.defaultModel;
     if (updates.antigravity.availableModels !== undefined) config.antigravity.availableModels = updates.antigravity.availableModels;
+  }
+
+  if (updates.aiProviders) {
+    if (!config.aiProviders) config.aiProviders = {};
+    const mergeKey = (prov: 'openai' | 'grok' | 'qwen' | 'deepseek' | 'gemini') => {
+      const inc = updates.aiProviders?.[prov];
+      const cur = config.aiProviders?.[prov] || { apiKey: '', baseUrl: '' };
+      if (!inc) return cur;
+      let k = cur.apiKey || '';
+      if (inc.apiKey !== undefined) {
+        if (!inc.apiKey.includes('•') && inc.apiKey.trim()) {
+          k = inc.apiKey.trim();
+        } else if (inc.apiKey === '') {
+          k = '';
+        }
+      }
+      return {
+        ...cur,
+        ...inc,
+        apiKey: k
+      };
+    };
+
+    config.aiProviders.openai = mergeKey('openai');
+    config.aiProviders.grok = mergeKey('grok');
+    config.aiProviders.qwen = mergeKey('qwen');
+    config.aiProviders.deepseek = mergeKey('deepseek');
+    config.aiProviders.gemini = mergeKey('gemini');
+    if (updates.aiProviders.custom !== undefined) {
+      config.aiProviders.custom = updates.aiProviders.custom;
+    }
   }
 
   if (updates.telegram) {
@@ -229,6 +270,28 @@ app.post('/api/config', async (c) => {
   whatsappBot.updateConfig(config);
 
   return c.json({ success: true, config });
+});
+
+// AI Models & Providers API
+app.get('/api/ai-providers/models', (c) => {
+  return c.json({ models: getAllAvailableModels(config) });
+});
+
+app.post('/api/ai-providers/test', async (c) => {
+  const body = await c.req.json<{ provider: string; apiKey?: string; baseUrl?: string }>().catch(() => ({} as any));
+  const provider = body.provider;
+  let apiKey = body.apiKey;
+  let baseUrl = body.baseUrl;
+
+  if (!apiKey || apiKey.includes('•')) {
+    const provKey = provider as keyof NonNullable<typeof config.aiProviders>;
+    const stored = (config.aiProviders as any)?.[provKey];
+    if (stored?.apiKey) apiKey = stored.apiKey;
+    if (!baseUrl && stored?.baseUrl) baseUrl = stored.baseUrl;
+  }
+
+  const result = await testProviderConnection(provider, apiKey || '', baseUrl);
+  return c.json(result);
 });
 
 // Projects

@@ -17,6 +17,11 @@
     Loader2,
     Pencil,
     Save,
+    ChevronDown,
+    Key,
+    AlertTriangle,
+    CheckCircle2,
+    Cpu
   } from "lucide-svelte";
 
   let {
@@ -28,6 +33,7 @@
     onUpdatePersona,
     onDeletePersona,
     onClose,
+    onOpenSettings
   }: {
     isOpen: boolean;
     personas: PersonaItem[];
@@ -52,6 +58,7 @@
     ) => Promise<void>;
     onDeletePersona: (id: string) => Promise<void>;
     onClose: () => void;
+    onOpenSettings?: (tab?: string) => void;
   } = $props();
 
   let activeTab = $state<"list" | "create">("list");
@@ -69,6 +76,11 @@
   let avatarType = $state<"emoji" | "custom">("emoji");
   let fileInputRef = $state<HTMLInputElement | null>(null);
   let isUploadingAvatar = $state(false);
+
+  // AI Models state & dropdown
+  let availableModels = $state<Array<{ id: string; name: string; provider: string; description?: string; hasKey?: boolean }>>([]);
+  let isModelDropdownOpen = $state(false);
+  let currentModelInfo = $derived(getModelDetails(newPreferredModel));
 
   const emojiList = [
     "🤖",
@@ -116,22 +128,126 @@
         "Anda adalah Fullstack Web Engineer ahli dalam TypeScript, Vite, Tailwind CSS, dan modern UI component framework. Prioritaskan styling Cinematic Minimalist yang memukau, animasi halus, responsive design, dan kode yang modular.",
     },
     {
-      title: "DevOps Specialist",
-      avatar: "🛠️",
-      traits: "Pragmatis, Efisien, & Cepat",
-      model: "gemini-3.8-flash-medium",
+      title: "Qwen Coding Specialist",
+      avatar: "⚡",
+      traits: "Presisi, Efisien, & Cepat",
+      model: "qwen:qwen-2.5-coder-32b-instruct",
       prompt:
-        "Anda adalah DevOps Specialist yang menguasai Docker, CI/CD, Git branching, build optimization, dan server configuration. Berikan solusi deployment yang cepat, aman, dan tanpa downtime.",
+        "Anda adalah Qwen Coding Specialist yang menguasai arsitektur koding canggih, algoritma efisien, refactoring cepat, dan penyelesaian bug secara presisi.",
     },
     {
-      title: "Bug Hunter & Fixer",
-      avatar: "🎯",
-      traits: "Lugas, Tajam, & To the point",
-      model: "gemini-3.8-flash-high",
+      title: "Grok Logic Hacker",
+      avatar: "🧠",
+      traits: "Kreatif, Tajam, & Cerdas",
+      model: "grok:grok-2",
       prompt:
-        "Anda adalah debugging specialist yang tajam. Saat memeriksa error, telusuri root cause hingga ke akarnya, perbaiki file yang bermasalah secara teliti tanpa merusak fitur lain, dan jelaskan penyebab serta solusinya dengan lugas.",
+        "Anda adalah Grok Logic Hacker dengan penalaran tajam dan gaya komunikasi santai namun lugas, cepat, dan solutif.",
+    },
+    {
+      title: "DeepSeek Reasoning Architect",
+      avatar: "🎯",
+      traits: "Mendalam, Metodis, & Solutif",
+      model: "deepseek:deepseek-reasoner",
+      prompt:
+        "Anda adalah DeepSeek Reasoning Architect dengan pemikiran analitis berlapis (Chain of Thought) untuk membedah arsitektur sistem kompleks dan masalah koding yang rumit.",
     },
   ];
+
+  $effect(() => {
+    if (isOpen) {
+      api.getAIModels().then(res => {
+        if (res && res.models) {
+          availableModels = res.models;
+        }
+      }).catch(err => console.warn('Failed to load AI models in PersonaModal:', err));
+    }
+  });
+
+  function getModelDetails(modelId?: string | null) {
+    if (!modelId) {
+      return {
+        name: 'Gemini 3.8 Flash (High Reasoning)',
+        provider: 'antigravity',
+        label: 'Antigravity Core',
+        color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/25',
+        dotColor: 'bg-indigo-400',
+        hasKey: true
+      };
+    }
+
+    const found = availableModels.find(m => m.id === modelId);
+    const lower = modelId.toLowerCase();
+
+    if (lower.startsWith('openai:')) {
+      return {
+        name: found?.name || modelId.replace('openai:', ''),
+        provider: 'openai',
+        label: 'OpenAI',
+        color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25',
+        dotColor: 'bg-emerald-400',
+        hasKey: found?.hasKey ?? false
+      };
+    }
+    if (lower.startsWith('grok:') || lower.startsWith('xai:')) {
+      return {
+        name: found?.name || modelId.replace(/^(grok|xai):/, ''),
+        provider: 'grok',
+        label: 'xAI Grok',
+        color: 'text-violet-400 bg-violet-500/10 border-violet-500/25',
+        dotColor: 'bg-violet-400',
+        hasKey: found?.hasKey ?? false
+      };
+    }
+    if (lower.startsWith('qwen:')) {
+      return {
+        name: found?.name || modelId.replace('qwen:', ''),
+        provider: 'qwen',
+        label: 'Qwen',
+        color: 'text-amber-400 bg-amber-500/10 border-amber-500/25',
+        dotColor: 'bg-amber-400',
+        hasKey: found?.hasKey ?? false
+      };
+    }
+    if (lower.startsWith('deepseek:')) {
+      return {
+        name: found?.name || modelId.replace('deepseek:', ''),
+        provider: 'deepseek',
+        label: 'DeepSeek',
+        color: 'text-sky-400 bg-sky-500/10 border-sky-500/25',
+        dotColor: 'bg-sky-400',
+        hasKey: found?.hasKey ?? false
+      };
+    }
+    if (lower.startsWith('gemini:')) {
+      return {
+        name: found?.name || modelId.replace('gemini:', ''),
+        provider: 'gemini',
+        label: 'Gemini Direct',
+        color: 'text-blue-400 bg-blue-500/10 border-blue-500/25',
+        dotColor: 'bg-blue-400',
+        hasKey: found?.hasKey ?? false
+      };
+    }
+    if (lower.startsWith('custom:')) {
+      return {
+        name: found?.name || modelId,
+        provider: 'custom',
+        label: 'Custom',
+        color: 'text-purple-400 bg-purple-500/10 border-purple-500/25',
+        dotColor: 'bg-purple-400',
+        hasKey: found?.hasKey ?? false
+      };
+    }
+
+    return {
+      name: found?.name || modelId,
+      provider: 'antigravity',
+      label: 'Antigravity Core',
+      color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/25',
+      dotColor: 'bg-indigo-400',
+      hasKey: true
+    };
+  }
 
   function startEditPersona(p: PersonaItem) {
     editingPersonaId = p.id;
@@ -153,6 +269,7 @@
       avatarType = "emoji";
     }
     formError = "";
+    isModelDropdownOpen = false;
     activeTab = "create";
   }
 
@@ -164,6 +281,7 @@
     newSystemPrompt = "";
     newPreferredModel = "gemini-3.8-flash-high";
     avatarType = "emoji";
+    isModelDropdownOpen = false;
     formError = "";
     if (fileInputRef) fileInputRef.value = "";
   }
@@ -180,6 +298,7 @@
     newSystemPrompt = tpl.prompt;
     newPreferredModel = tpl.model;
     avatarType = "emoji";
+    isModelDropdownOpen = false;
   }
 
   async function handleFileSelect(e: Event) {
@@ -187,10 +306,8 @@
     const file = target.files?.[0];
     if (!file) return;
 
-    // Batas ukuran file 15MB
     if (file.size > 15 * 1024 * 1024) {
-      formError =
-        "Ukuran file avatar maksimal 15MB (gunakan video/gif durasi singkat).";
+      formError = "Ukuran file avatar maksimal 15MB (gunakan video/gif durasi singkat).";
       return;
     }
 
@@ -228,8 +345,7 @@
 
   async function handleGeneratePrompt() {
     if (!newTraits.trim() && !newName.trim()) {
-      formError =
-        "Tuliskan nama persona atau pilih sifat & karakteristik di atas terlebih dahulu.";
+      formError = "Tuliskan nama persona atau pilih sifat & karakteristik di atas terlebih dahulu.";
       return;
     }
 
@@ -289,67 +405,45 @@
 
       resetForm();
       activeTab = "list";
-    } catch (e: any) {
-      formError = e.message || "Gagal menyimpan persona.";
+    } catch (err: any) {
+      formError = err.message || "Gagal menyimpan persona.";
     } finally {
       isSubmitting = false;
     }
   }
-
-  function handleKeyDown(e: KeyboardEvent) {
-    if (!isOpen) return;
-    if (e.key === "Escape") onClose();
-  }
 </script>
-
-<svelte:window onkeydown={handleKeyDown} />
 
 {#if isOpen}
   <div
-    class="fixed inset-0 bg-black/85 backdrop-blur-xl z-50 flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-150"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
   >
-    <!-- Click outside to close -->
-    <button
-      type="button"
-      class="absolute inset-0 cursor-default bg-transparent border-0"
-      onclick={onClose}
-      tabindex="-1"
-      aria-label="Tutup modal"
-    ></button>
-
-    <!-- Modal Box -->
     <div
-      class="relative w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] rounded-3xl bg-zinc-950/95 border border-indigo-500/25 shadow-2xl shadow-indigo-950/40 flex flex-col overflow-hidden z-10 animate-in zoom-in-95 duration-200"
+      class="w-full max-w-2xl bg-zinc-950/95 border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-in zoom-in-95 duration-200"
     >
-      <!-- Modal Header -->
+      <!-- Header -->
       <div
-        class="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/[0.08] bg-zinc-900/40 shrink-0 gap-2"
+        class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/[0.08] flex items-center justify-between shrink-0 bg-zinc-900/60"
       >
-        <div class="flex items-center gap-2.5 min-w-0">
+        <div class="flex items-center gap-2.5">
           <div
-            class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-violet-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0"
+            class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shadow-sm"
           >
-            <Bot class="w-4 h-4 sm:w-5 sm:h-5" />
+            <Bot class="w-4 h-4" />
           </div>
-          <div class="min-w-0">
-            <h2 class="text-xs sm:text-sm font-bold text-zinc-100 flex items-center gap-2 truncate">
-              Persona & Karakter AI
-              <span
-                class="text-[9px] sm:text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/25 text-indigo-300"
-              >
-                {personas.length} Tersedia
-              </span>
-            </h2>
-            <p class="text-[10px] sm:text-[11px] text-zinc-400 truncate">
-              Pilih model terikat, sifat, dan custom avatar
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-white tracking-tight">
+              Karakter & Persona AI
+            </h3>
+            <p class="text-[11px] text-zinc-400">
+              Pilih karakter atau tautkan model AI (OpenAI, Grok, Qwen, DeepSeek, Gemini)
             </p>
           </div>
         </div>
 
         <button
+          type="button"
           onclick={onClose}
-          class="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition cursor-pointer shrink-0"
-          title="Tutup (Esc)"
+          class="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
         >
           <X class="w-4 h-4" />
         </button>
@@ -357,7 +451,7 @@
 
       <!-- Navigation Tabs -->
       <div
-        class="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 pt-2.5 sm:pt-3 border-b border-white/[0.06] text-xs shrink-0 bg-zinc-950/40"
+        class="flex items-center px-4 sm:px-6 pt-2.5 border-b border-white/[0.08] text-xs gap-3 sm:gap-4 shrink-0 bg-zinc-900/30"
       >
         <button
           type="button"
@@ -369,14 +463,14 @@
             ? 'border-indigo-500 text-indigo-300 font-bold'
             : 'border-transparent text-zinc-400 hover:text-zinc-200'}"
         >
-          <Sparkles class="w-3.5 h-3.5" />
-          <span>Daftar Persona</span>
+          <Bot class="w-3.5 h-3.5" />
+          <span>Daftar Persona ({personas.length})</span>
         </button>
 
         <button
           type="button"
           onclick={() => {
-            if (activeTab === "create" && editingPersonaId) {
+            if (activeTab !== "create") {
               resetForm();
             }
             activeTab = "create";
@@ -403,6 +497,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {#each personas as p (p.id)}
               {@const isSelected = activePersonaId === p.id}
+              {@const modelInfo = getModelDetails(p.preferred_model)}
               <div
                 class="p-3 sm:p-3.5 rounded-2xl border transition flex flex-col justify-between gap-3 group relative {isSelected
                   ? 'bg-indigo-950/30 border-indigo-500 shadow-md shadow-indigo-950/30'
@@ -432,13 +527,11 @@
                           {/if}
                         </h4>
 
-                        {#if p.preferred_model}
-                          <span
-                            class="text-[10px] font-mono text-indigo-400 truncate"
-                          >
-                            {p.preferred_model}
-                          </span>
-                        {/if}
+                        <!-- Model AI Badge with Provider color -->
+                        <div class="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono border {modelInfo.color} w-fit max-w-full">
+                          <span class="w-1.5 h-1.5 rounded-full {modelInfo.dotColor} shrink-0"></span>
+                          <span class="truncate">{modelInfo.label}: {modelInfo.name}</span>
+                        </div>
                       </div>
                     </div>
 
@@ -468,84 +561,60 @@
 
                   <!-- Traits Badge if present -->
                   {#if p.traits}
-                    <div class="flex items-center gap-1 min-w-0">
-                      <span
-                        class="text-[10px] font-medium px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 truncate max-w-full block"
-                        title={p.traits}
-                      >
-                        {p.traits}
-                      </span>
+                    <div
+                      class="text-[10px] text-zinc-400 font-mono px-2 py-1 rounded-lg bg-zinc-900/80 border border-white/5 truncate"
+                    >
+                      ✨ {p.traits}
                     </div>
                   {/if}
 
+                  <!-- Preview System Prompt -->
                   <p
-                    class="text-[11px] text-zinc-400 line-clamp-3 leading-relaxed italic"
+                    class="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed bg-black/20 p-2 rounded-xl"
                   >
-                    "{p.system_prompt}"
+                    {p.system_prompt}
                   </p>
                 </div>
 
-                <div
-                  class="flex items-center justify-between pt-2 border-t border-white/[0.06]"
+                <!-- Footer: Select button -->
+                <button
+                  type="button"
+                  onclick={() => {
+                    onSelectPersona(p);
+                    onClose();
+                  }}
+                  class="w-full py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer {isSelected
+                    ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/40'
+                    : 'bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-white/5'}"
                 >
                   {#if isSelected}
-                    <span
-                      class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400"
-                    >
-                      <Check class="w-3.5 h-3.5" /> Aktif di Sesi Ini
-                    </span>
+                    <Check class="w-3 h-3 text-indigo-400" />
+                    <span>Aktif Digunakan</span>
                   {:else}
-                    <button
-                      type="button"
-                      onclick={() => {
-                        onSelectPersona(p);
-                        onClose();
-                      }}
-                      class="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-indigo-600 hover:text-white text-zinc-300 text-xs font-semibold transition cursor-pointer active:scale-95 w-full text-center"
-                    >
-                      Terapkan di Chat
-                    </button>
+                    <span>Gunakan Persona Ini</span>
                   {/if}
-                </div>
+                </button>
               </div>
             {/each}
           </div>
         {:else}
-          <!-- Create / Edit Persona Form -->
-          <div class="flex flex-col gap-4 animate-in fade-in duration-200">
-            <!-- Edit Mode Header Alert -->
-            {#if editingPersonaId}
-              <div class="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-between text-xs animate-in fade-in duration-150">
-                <div class="flex items-center gap-2 min-w-0">
-                  <Pencil class="w-4 h-4 text-indigo-400 shrink-0" />
-                  <div class="truncate">
-                    <span class="font-bold text-zinc-100">Sedang Mengedit:</span>
-                    <span class="text-indigo-300 ml-1 font-semibold truncate">{newName || 'Persona'}</span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onclick={resetForm}
-                  class="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[11px] font-medium transition cursor-pointer shrink-0"
-                >
-                  Batal Edit & Buat Baru
-                </button>
-              </div>
-            {:else}
-              <!-- Quick Template Inspiration (Only in Create Mode) -->
+          <!-- Create / Edit Form -->
+          <div class="space-y-4">
+            <!-- Preset Templates Selector -->
+            {#if !editingPersonaId}
               <div class="space-y-1.5">
                 <span
                   class="text-xs font-semibold text-zinc-300 flex items-center gap-1.5"
                 >
-                  <Sparkles class="w-3.5 h-3.5 text-indigo-400" /> Pilih dari Template
-                  Cepat (Opsional):
+                  <Sparkles class="w-3.5 h-3.5 text-indigo-400" />
+                  Gunakan Template Praktis:
                 </span>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {#each templates as tpl}
                     <button
                       type="button"
                       onclick={() => applyTemplate(tpl)}
-                      class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800/80 border border-white/[0.06] hover:border-indigo-500/30 text-left transition cursor-pointer group"
+                      class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 hover:border-indigo-500/40 text-left transition cursor-pointer group flex flex-col"
                     >
                       <span class="text-lg">{tpl.avatar}</span>
                       <div
@@ -657,62 +726,31 @@
               </div>
             </div>
 
-            <!-- Form Inputs: Nama & Model -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div class="sm:col-span-2 space-y-1.5">
-                <label
-                  class="text-xs font-semibold text-zinc-300"
-                  for="persona-name">Nama Persona:</label
-                >
-                <input
-                  id="persona-name"
-                  type="text"
-                  bind:value={newName}
-                  placeholder="Contoh: Senior Fullstack Engineer"
-                  class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-zinc-100 outline-none placeholder-zinc-500"
-                />
-              </div>
-
-              <div class="space-y-1.5">
-                <label
-                  class="text-xs font-semibold text-zinc-300"
-                  for="persona-model">Model AI Terikat:</label
-                >
-                <select
-                  id="persona-model"
-                  bind:value={newPreferredModel}
-                  class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-zinc-100 outline-none cursor-pointer"
-                >
-                  <option value="gemini-3.8-flash-high"
-                    >Gemini 3.8 Flash High</option
-                  >
-                  <option value="gemini-3.8-flash-medium"
-                    >Gemini 3.8 Flash Medium</option
-                  >
-                  <option value="gemini-3.8-flash-low"
-                    >Gemini 3.8 Flash Low</option
-                  >
-                  <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
-                  <option value="claude-opus-4-6-thinking"
-                    >Claude Opus 4.6</option
-                  >
-                </select>
-              </div>
+            <!-- Name Input -->
+            <div class="space-y-1.5">
+              <label
+                class="text-xs font-semibold text-zinc-300"
+                for="persona-name"
+              >
+                Nama Persona:
+              </label>
+              <input
+                id="persona-name"
+                type="text"
+                bind:value={newName}
+                placeholder="Contoh: Senior Code Reviewer, UI Maestro, Security Audit..."
+                class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-zinc-100 outline-none placeholder-zinc-500"
+              />
             </div>
 
-            <!-- Sifat / Karakteristik Persona (Baru!) -->
+            <!-- Traits Input -->
             <div class="space-y-1.5">
-              <div class="flex items-center justify-between">
-                <label
-                  class="text-xs font-semibold text-zinc-300"
-                  for="persona-traits"
-                >
-                  Sifat & Karakteristik AI:
-                </label>
-                <span class="text-[10px] text-zinc-500 font-mono"
-                  >Menentukan kepribadian & cara merespon</span
-                >
-              </div>
+              <label
+                class="text-xs font-semibold text-zinc-300"
+                for="persona-traits"
+              >
+                Sifat & Karakteristik AI:
+              </label>
               <input
                 id="persona-traits"
                 type="text"
@@ -736,6 +774,133 @@
                   </button>
                 {/each}
               </div>
+            </div>
+
+            <!-- Preferred AI Model Selector (NEW & EXTENSIBLE) -->
+            <div class="space-y-1.5 relative">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                  <Cpu class="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Model AI Tertaut:</span>
+                </label>
+                {#if onOpenSettings}
+                  <button
+                    type="button"
+                    onclick={() => onOpenSettings?.('ai_providers')}
+                    class="text-[10px] text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1 font-mono cursor-pointer"
+                  >
+                    <Key class="w-3 h-3 text-amber-400" /> Atur API Keys di Pengaturan
+                  </button>
+                {/if}
+              </div>
+
+              <!-- Trigger Selector Button -->
+              <button
+                type="button"
+                onclick={() => isModelDropdownOpen = !isModelDropdownOpen}
+                class="w-full bg-zinc-900 border border-zinc-800 hover:border-indigo-500/60 rounded-xl px-3.5 py-2.5 text-xs text-zinc-100 flex items-center justify-between transition cursor-pointer shadow-sm group"
+              >
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="w-2 h-2 rounded-full {currentModelInfo.dotColor} shrink-0"></span>
+                  <div class="flex flex-col text-left min-w-0">
+                    <span class="font-bold text-zinc-100 truncate group-hover:text-indigo-300">
+                      {currentModelInfo.name}
+                    </span>
+                    <span class="text-[10px] text-zinc-500 font-mono">
+                      Provider: {currentModelInfo.label}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  {#if currentModelInfo.hasKey}
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono flex items-center gap-1">
+                      <CheckCircle2 class="w-2.5 h-2.5" /> Siap
+                    </span>
+                  {:else}
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono flex items-center gap-1">
+                      <AlertTriangle class="w-2.5 h-2.5" /> Butuh API Key
+                    </span>
+                  {/if}
+                  <ChevronDown class="w-4 h-4 text-zinc-400 group-hover:text-zinc-200 transition-transform {isModelDropdownOpen ? 'rotate-180' : ''}" />
+                </div>
+              </button>
+
+              <!-- Floating Dropdown Popover -->
+              {#if isModelDropdownOpen}
+                <div
+                  class="absolute left-0 right-0 top-full mt-1.5 z-50 bg-zinc-900/95 backdrop-blur-2xl border border-white/[0.12] rounded-2xl shadow-2xl p-2 max-h-72 overflow-y-auto space-y-1 animate-in fade-in zoom-in-95 duration-150"
+                >
+                  {#if availableModels.length === 0}
+                    <div class="p-3 text-center text-xs text-zinc-500">Memuat daftar model...</div>
+                  {:else}
+                    {#each ['antigravity', 'openai', 'grok', 'qwen', 'deepseek', 'gemini'] as prov}
+                      {@const provModels = availableModels.filter(m => m.provider === prov)}
+                      {#if provModels.length > 0}
+                        <div class="pt-2 pb-1 px-2.5 text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-wider flex items-center justify-between border-t border-white/5 first:border-t-0">
+                          <span>{prov === 'antigravity' ? '⚡ Antigravity CLI Core' : prov.toUpperCase()}</span>
+                          {#if prov !== 'antigravity'}
+                            <span class="text-[9px] font-normal lowercase {provModels.some(m => m.hasKey) ? 'text-emerald-400' : 'text-zinc-500'}">
+                              {provModels.some(m => m.hasKey) ? '● key aktif' : '○ belum ada key'}
+                            </span>
+                          {/if}
+                        </div>
+
+                        {#each provModels as m}
+                          {@const isCur = newPreferredModel === m.id}
+                          <button
+                            type="button"
+                            onclick={() => {
+                              newPreferredModel = m.id;
+                              isModelDropdownOpen = false;
+                            }}
+                            class="w-full px-2.5 py-2 rounded-xl flex items-center justify-between gap-2 text-left transition cursor-pointer {isCur ? 'bg-indigo-600/20 border border-indigo-500/40 text-indigo-200' : 'hover:bg-zinc-800 text-zinc-300'}"
+                          >
+                            <div class="flex flex-col min-w-0 flex-1">
+                              <div class="text-xs font-semibold flex items-center gap-1.5">
+                                <span class="truncate">{m.name}</span>
+                                {#if isCur}
+                                  <Check class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                                {/if}
+                              </div>
+                              {#if m.description}
+                                <span class="text-[10px] text-zinc-500 truncate">{m.description}</span>
+                              {/if}
+                            </div>
+
+                            <div class="shrink-0 flex items-center gap-1 text-[9px] font-mono">
+                              {#if m.hasKey}
+                                <span class="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Siap</span>
+                              {:else}
+                                <span class="px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">No Key</span>
+                              {/if}
+                            </div>
+                          </button>
+                        {/each}
+                      {/if}
+                    {/each}
+                  {/if}
+                </div>
+              {/if}
+
+              <!-- Warning if model doesn't have an API Key configured -->
+              {#if !currentModelInfo.hasKey}
+                <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    <AlertTriangle class="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span class="truncate">API Key untuk {currentModelInfo.label} belum diatur di Pengaturan.</span>
+                  </div>
+                  {#if onOpenSettings}
+                    <button
+                      type="button"
+                      onclick={() => onOpenSettings?.('ai_providers')}
+                      class="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[10px] font-bold transition shrink-0 cursor-pointer"
+                    >
+                      Isi Sekarang
+                    </button>
+                  {/if}
+                </div>
+              {/if}
             </div>
 
             <!-- System prompt instruction with AI Auto-Generate Button -->

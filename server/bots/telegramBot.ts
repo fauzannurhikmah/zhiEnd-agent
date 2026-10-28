@@ -5,7 +5,7 @@ import path from 'path';
 import { AppConfig, TelegramStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
-import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, getOrCreateDefaultSession, saveMessageToDb, getAllProjectsList } from '../db/database';
+import { getPersonas, getPersonaById, saveConfigToDb, loadConfigFromDb, saveChatUploadedFile, getOrCreateDefaultSession, saveMessageToDb, getAllProjectsList } from '../db/database';
 import { getSafePersonaEmoji, formatForWhatsApp } from './whatsappBot';
 import { voiceService } from '../voiceService';
 

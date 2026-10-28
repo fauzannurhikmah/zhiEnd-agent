@@ -63,6 +63,7 @@
 
   // Modals
   let isSettingsOpen = $state(false);
+  let settingsInitialTab = $state<'general' | 'antigravity' | 'ai_providers' | 'telegram' | 'whatsapp' | 'tunnel' | 'voice'>('general');
   let isProjectModalOpen = $state(false);
   let isPinModalOpen = $state(false);
   let isPushModalOpen = $state(false);
@@ -685,7 +686,7 @@
     onCloseMobile={() => isMobileSidebarOpen = false}
     onSelectTab={(tab) => { currentTab = tab; isMobileSidebarOpen = false; }}
     onOpenProjectModal={() => { isProjectModalOpen = true; isMobileSidebarOpen = false; }}
-    onOpenSettingsModal={() => { isSettingsOpen = true; isMobileSidebarOpen = false; }}
+    onOpenSettingsModal={() => { settingsInitialTab = 'general'; isSettingsOpen = true; isMobileSidebarOpen = false; }}
     onResetToRoot={handleResetToRoot}
     onSelectSession={handleSelectSession}
     onCreateNewSession={() => handleCreateNewSession(true)}
@@ -974,6 +975,7 @@
     {config}
     {personas}
     isOpen={isSettingsOpen}
+    initialTab={settingsInitialTab}
     onClose={() => isSettingsOpen = false}
     onSave={async (updates) => {
       const res = await api.updateConfig(updates);
@@ -1025,6 +1027,11 @@
     onUpdatePersona={handleUpdatePersona}
     onDeletePersona={handleDeletePersona}
     onClose={() => isPersonaModalOpen = false}
+    onOpenSettings={(tab) => {
+      isPersonaModalOpen = false;
+      settingsInitialTab = (tab as any) || 'ai_providers';
+      isSettingsOpen = true;
+    }}
   />
 
   <ConfirmModal

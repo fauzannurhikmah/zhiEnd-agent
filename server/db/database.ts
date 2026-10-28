@@ -424,6 +424,21 @@ export function loadConfigFromDb(): AppConfig {
     if (voiceRaw) voice = { ...voice, ...JSON.parse(voiceRaw) };
   } catch {}
 
+  let aiProviders: AppConfig['aiProviders'] = {
+    openai: { apiKey: '', baseUrl: 'https://api.openai.com/v1', enabled: false },
+    grok: { apiKey: '', baseUrl: 'https://api.x.ai/v1', enabled: false },
+    qwen: { apiKey: '', baseUrl: 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1', enabled: false },
+    deepseek: { apiKey: '', baseUrl: 'https://api.deepseek.com', enabled: false },
+    gemini: { apiKey: '', baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', enabled: false },
+    custom: []
+  };
+  try {
+    const aiProvidersRaw = getSetting('ai_providers_config');
+    if (aiProvidersRaw) {
+      aiProviders = { ...aiProviders, ...JSON.parse(aiProvidersRaw) };
+    }
+  } catch {}
+
   return {
     port,
     securityPin,
@@ -434,6 +449,7 @@ export function loadConfigFromDb(): AppConfig {
       defaultModel: getSetting('default_model', 'gemini-3.8-flash-high'),
       availableModels
     },
+    aiProviders,
     telegram: {
       enabled: tgRow ? Boolean(tgRow.is_enabled) : false,
       botToken: tgRow ? tgRow.token_or_session || '' : '',
@@ -453,6 +469,10 @@ export function loadConfigFromDb(): AppConfig {
 export function saveConfigToDb(newConfig: Partial<AppConfig>): void {
   const db = getDb();
   const setSetting = db.prepare('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)');
+  const getSetting = (key: string, def: string = ''): string => {
+    const row = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(key) as { value: string } | undefined;
+    return row ? row.value : def;
+  };
 
   if (newConfig.port !== undefined) setSetting.run('port', String(newConfig.port));
   if (newConfig.securityPin !== undefined) setSetting.run('security_pin', String(newConfig.securityPin));
@@ -479,6 +499,41 @@ export function saveConfigToDb(newConfig: Partial<AppConfig>): void {
     if (newConfig.antigravity.cliPath) setSetting.run('antigravity_cli_path', newConfig.antigravity.cliPath);
     if (newConfig.antigravity.defaultModel) setSetting.run('default_model', newConfig.antigravity.defaultModel);
     if (newConfig.antigravity.availableModels) setSetting.run('available_models', JSON.stringify(newConfig.antigravity.availableModels));
+  }
+
+  if (newConfig.aiProviders) {
+    const currentAiRaw = getSetting('ai_providers_config');
+    let currentAi: any = {};
+    try { if (currentAiRaw) currentAi = JSON.parse(currentAiRaw); } catch {}
+
+    const mergeProvider = (key: 'openai' | 'grok' | 'qwen' | 'deepseek' | 'gemini') => {
+      const incoming = newConfig.aiProviders?.[key];
+      const existing = currentAi[key] || {};
+      if (!incoming) return existing;
+      let apiKey = existing.apiKey || '';
+      if (incoming.apiKey !== undefined) {
+        if (!incoming.apiKey.includes('•') && incoming.apiKey.trim()) {
+          apiKey = incoming.apiKey.trim();
+        } else if (incoming.apiKey === '') {
+          apiKey = '';
+        }
+      }
+      return {
+        ...existing,
+        ...incoming,
+        apiKey
+      };
+    };
+
+    const updatedAi = {
+      openai: mergeProvider('openai'),
+      grok: mergeProvider('grok'),
+      qwen: mergeProvider('qwen'),
+      deepseek: mergeProvider('deepseek'),
+      gemini: mergeProvider('gemini'),
+      custom: newConfig.aiProviders.custom !== undefined ? newConfig.aiProviders.custom : (currentAi.custom || [])
+    };
+    setSetting.run('ai_providers_config', JSON.stringify(updatedAi));
   }
 
   if (newConfig.telegram) {
@@ -750,6 +805,7 @@ export function saveWorkspaceContext(workspaceId: string, ctx: Partial<Workspace
 export function autoIndexWorkspaceContext(workingDir: string): void {
   try {
     if (!fs.existsSync(workingDir)) return;
+    const db = getDb();
     const norm = path.resolve(workingDir);
     let ws = db.prepare('SELECT id FROM workspaces WHERE lower(path) = lower(?)').get(norm) as { id: string } | undefined;
     if (!ws) {
