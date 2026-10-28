@@ -189,6 +189,7 @@ export interface ChatSessionItem {
   workspace_id: string | null;
   persona_id: string | null;
   title: string;
+  conversation_id?: string | null;
   is_pinned: boolean;
   created_at: string;
   updated_at: string;

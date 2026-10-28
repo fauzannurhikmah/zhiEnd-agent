@@ -4,7 +4,7 @@ import path from 'path';
 import os from 'os';
 import { EventEmitter } from 'events';
 import { AppConfig, AgentTask } from './types';
-import { getWorkspaceContext, getCustomRootWorkspace, getChatSessionById, getPersonaById } from './db/database';
+import { getWorkspaceContext, getCustomRootWorkspace, getChatSessionById, getPersonaById, getSessionHistoryContext, updateChatSessionConversationId } from './db/database';
 import { parseDirectCommand, spawnDirectCommand } from './directCommandRunner';
 import { isExternalModel, runExternalLLM } from './llmRunner';
 
@@ -108,9 +108,16 @@ ${persona.system_prompt}
 
     const selectedModel = options.model || personaModel || this.config.antigravity?.defaultModel || 'gemini-3.8-flash-high';
 
+    // Ambil riwayat percakapan dari SQLite (hemat token via smart truncation)
+    const historyContext = options.sessionId
+      ? getSessionHistoryContext(options.sessionId, 8)
+      : { conversationId: null, historyMessages: [], historyText: '' };
+
+    const effectiveConversationId = options.conversationId || historyContext.conversationId || undefined;
+
     if (isExternalModel(selectedModel)) {
       console.log(`[AgentRunner] 🌐 External AI Model detected: "${selectedModel}". Executing via LLM Provider API...`);
-      return this.runExternalAI(selectedModel, options, workingDir, cachedContextStr, personaStr);
+      return this.runExternalAI(selectedModel, options, workingDir, cachedContextStr, personaStr, historyContext.historyMessages);
     }
 
     let imagesContext = '';
@@ -128,7 +135,12 @@ ${formattedPaths.map(p => `• File Gambar: "${p}"`).join('\n')}
 (PANDUAN: Anda DAPAT melihat dan menganalisis visual gambar tersebut menggunakan tool view_file(AbsolutePath: "${formattedPaths[0]}"). Gunakan file gambar ini untuk memeriksa desain UI, mockup, screenshot error, atau tata letak yang diinginkan pengguna!)\n`;
     }
 
-    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}${imagesContext}
+    // Jika Antigravity belum memiliki conversationId tersimpan, sertakan riwayat obrolan sebelumnya agar tetap nyambung
+    const chatHistorySnippet = (!effectiveConversationId && historyContext.historyText)
+      ? `${historyContext.historyText}\n`
+      : '';
+
+    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}${imagesContext}${chatHistorySnippet}
 [Panduan Operasional Sistem & Efisiensi Eksekusi]:
 1. ATURAN EFISIENSI EKSEKUSI (Zero Redundancy):
    - JANGAN PERNAH menjalankan perintah terminal/powershell atau membaca file yang sama berulang kali jika sudah berhasil 1 kali! Hanya boleh mengulang HANYA JIKA perintah sebelumnya error/gagal dan Anda perlu memperbaiki parameternya.
@@ -175,8 +187,8 @@ ${options.prompt}`;
       '--model', selectedModel
     ];
 
-    if (options.conversationId) {
-      args.push('--conversation', options.conversationId);
+    if (effectiveConversationId) {
+      args.push('--conversation', effectiveConversationId);
     } else if (options.continueLast) {
       args.push('-c');
     }
@@ -190,7 +202,7 @@ ${options.prompt}`;
       startTime: Date.now(),
       status: 'running',
       response: '',
-      conversationId: options.conversationId || null,
+      conversationId: effectiveConversationId || null,
       toolsExecuted: [],
       sessionId: options.sessionId,
       images: options.images || []
@@ -314,6 +326,9 @@ ${options.prompt}`;
           this.activeTask.generatedImages = genImages;
 
           const finishedTask = { ...this.activeTask };
+          if (finishedTask.conversationId && finishedTask.sessionId) {
+            updateChatSessionConversationId(finishedTask.sessionId, finishedTask.conversationId);
+          }
           this.history.unshift(finishedTask);
           if (this.history.length > 50) this.history.pop();
 
@@ -364,6 +379,9 @@ ${options.prompt}`;
 
     if (data.event === 'init') {
       this.activeTask.conversationId = data.conversation_id;
+      if (this.activeTask.sessionId && data.conversation_id) {
+        updateChatSessionConversationId(this.activeTask.sessionId, data.conversation_id);
+      }
       this.emit('agent_init', {
         taskId,
         conversationId: data.conversation_id,
@@ -374,6 +392,9 @@ ${options.prompt}`;
       if (step) {
         if (step.conversation_id) {
           this.activeTask.conversationId = step.conversation_id;
+          if (this.activeTask.sessionId) {
+            updateChatSessionConversationId(this.activeTask.sessionId, step.conversation_id);
+          }
         }
 
         if (step.text_delta) {
@@ -675,7 +696,8 @@ ${options.prompt}`;
     options: RunOptions,
     workingDir: string,
     cachedContextStr: string,
-    personaStr: string
+    personaStr: string,
+    historyMessages: Array<{ role: 'user' | 'assistant'; content: string }> = []
   ): Promise<AgentTask> {
     const taskId = 'task_' + Date.now();
     const localIp = getLocalIP();
@@ -720,6 +742,7 @@ ${options.prompt}`;
       const result = await runExternalLLM({
         prompt: options.prompt,
         systemPrompt,
+        history: historyMessages,
         modelId: selectedModel,
         config: this.config,
         images: options.images,

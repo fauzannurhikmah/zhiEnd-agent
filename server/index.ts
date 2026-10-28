@@ -39,7 +39,8 @@ import {
   clearSessionMessages,
   getOrCreateDefaultSession,
   saveBase64Avatar,
-  saveChatUploadedFile
+  saveChatUploadedFile,
+  updateChatSessionConversationId
 } from './db/database';
 
 const app = new Hono();
@@ -859,7 +860,7 @@ app.post('/api/agent/chat', async (c) => {
     prompt: body.prompt,
     cwd: workingDir,
     model: body.model || sessionPersonaModel || config.antigravity?.defaultModel,
-    conversationId: body.conversationId,
+    conversationId: body.conversationId || targetSession.conversation_id || undefined,
     continueLast: body.continueLast,
     sessionId: targetSessionId,
     images: Array.isArray(body.images) ? body.images : []
@@ -1511,6 +1512,9 @@ try {
         steps: data.steps,
         model_used: data.model
       });
+      if (data.conversationId) {
+        updateChatSessionConversationId(targetSessionId, data.conversationId);
+      }
     } catch (e) {
       console.error('Failed to auto-save chat message to SQLite:', e);
     }

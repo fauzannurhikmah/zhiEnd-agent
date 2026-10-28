@@ -269,6 +269,7 @@ export async function testProviderConnection(
 export async function runExternalLLM(options: {
   prompt: string;
   systemPrompt?: string;
+  history?: Array<{ role: 'user' | 'assistant'; content: string }>;
   modelId: string;
   config: AppConfig;
   images?: string[];
@@ -295,6 +296,18 @@ export async function runExternalLLM(options: {
       role: 'system',
       content: options.systemPrompt.trim()
     });
+  }
+
+  // Sisipkan riwayat percakapan sebelumnya jika ada (multi-turn memory)
+  if (options.history && Array.isArray(options.history)) {
+    for (const h of options.history) {
+      if (h.content && h.content.trim()) {
+        messages.push({
+          role: h.role === 'assistant' ? 'assistant' : 'user',
+          content: h.content.trim()
+        });
+      }
+    }
   }
 
   // Handle multimodal images if provided

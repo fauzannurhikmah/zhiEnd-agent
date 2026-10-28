@@ -134,6 +134,10 @@ function initTables(db: Database.Database): void {
     db.prepare('ALTER TABLE messages ADD COLUMN images_json TEXT').run();
   } catch {}
 
+  try {
+    db.prepare('ALTER TABLE chat_sessions ADD COLUMN conversation_id TEXT').run();
+  } catch {}
+
   // Update default persona traits if missing
   try {
     db.prepare("UPDATE personas SET traits = 'Solutif, Teliti, & Adaptif' WHERE id = 'persona-default' AND (traits IS NULL OR traits = '')").run();
@@ -983,6 +987,7 @@ export function getChatSessionById(id: string): ChatSessionItem | null {
     workspace_id: r.workspace_id,
     persona_id: r.persona_id,
     title: r.title,
+    conversation_id: r.conversation_id || null,
     is_pinned: Boolean(r.is_pinned),
     created_at: r.created_at,
     updated_at: r.updated_at,
@@ -1021,6 +1026,7 @@ export function getChatSessions(workspacePathOrId?: string | null): ChatSessionI
     workspace_id: r.workspace_id,
     persona_id: r.persona_id,
     title: r.title,
+    conversation_id: r.conversation_id || null,
     is_pinned: Boolean(r.is_pinned),
     created_at: r.created_at,
     updated_at: r.updated_at,
@@ -1063,7 +1069,7 @@ export function getOrCreateDefaultSession(workspacePath?: string | null): ChatSe
       VALUES (?, ?, 'persona-default', ?)
     `).run(id, wsId, title);
 
-    session = { id, workspace_id: wsId, persona_id: 'persona-default', title, is_pinned: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+    session = { id, workspace_id: wsId, persona_id: 'persona-default', title, conversation_id: null, is_pinned: 0, created_at: new Date().toISOString(), updated_at: new Date().toISOString() };
   }
 
   return {
@@ -1071,6 +1077,7 @@ export function getOrCreateDefaultSession(workspacePath?: string | null): ChatSe
     workspace_id: session.workspace_id,
     persona_id: session.persona_id,
     title: session.title,
+    conversation_id: session.conversation_id || null,
     is_pinned: Boolean(session.is_pinned),
     created_at: session.created_at,
     updated_at: session.updated_at
@@ -1119,6 +1126,7 @@ export function createChatSession(data: { title: string; workspace_id?: string |
     workspace_id: wsId,
     persona_id: personaId,
     title: data.title || 'Diskusi Baru',
+    conversation_id: null,
     is_pinned: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
@@ -1126,6 +1134,98 @@ export function createChatSession(data: { title: string; workspace_id?: string |
   };
 }
 
+export function updateChatSessionConversationId(sessionId: string, conversationId: string): boolean {
+  if (!sessionId || !conversationId) return false;
+  try {
+    const db = getDb();
+    db.prepare('UPDATE chat_sessions SET conversation_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(conversationId, sessionId);
+    return true;
+  } catch (e) {
+    console.error('[DB] Gagal memperbarui conversation_id sesi:', e);
+    return false;
+  }
+}
+
+export interface HistoryContextMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface SessionHistoryContext {
+  conversationId?: string | null;
+  historyMessages: HistoryContextMessage[];
+  historyText: string;
+}
+
+/**
+ * Mengambil konteks riwayat percakapan dari SQLite messages untuk sesi tertentu.
+ * Menggunakan batas maksimal pesan dan pemangkasan pintar (truncation) untuk menghemat token secara signifikan.
+ */
+export function getSessionHistoryContext(sessionId: string, maxMessages: number = 8): SessionHistoryContext {
+  if (!sessionId) {
+    return { conversationId: null, historyMessages: [], historyText: '' };
+  }
+  const db = getDb();
+
+  let conversationId: string | null = null;
+  try {
+    const sessionRow = db.prepare('SELECT conversation_id FROM chat_sessions WHERE id = ?').get(sessionId) as { conversation_id?: string | null } | undefined;
+    conversationId = sessionRow?.conversation_id || null;
+  } catch {}
+
+  const rows = db.prepare(`
+    SELECT sender, text 
+    FROM messages 
+    WHERE session_id = ? AND sender IN ('user', 'agent') AND text IS NOT NULL AND trim(text) != ''
+    ORDER BY created_at DESC 
+    LIMIT ?
+  `).all(sessionId, maxMessages) as Array<{ sender: string; text: string }>;
+
+  if (!rows || rows.length === 0) {
+    return { conversationId, historyMessages: [], historyText: '' };
+  }
+
+  // Susun secara kronologis: yang terlama ke terbaru
+  const chronological = rows.reverse();
+
+  const historyMessages: HistoryContextMessage[] = [];
+  const textParts: string[] = [];
+
+  for (const row of chronological) {
+    let cleanText = row.text.trim();
+    const role: 'user' | 'assistant' = row.sender === 'agent' ? 'assistant' : 'user';
+
+    // Optimasi Token Cerdas:
+    // Pesan assistant yang terlalu panjang (misal log terminal/kode ratusan baris) dipangkas bagian tengahnya
+    if (role === 'assistant' && cleanText.length > 1000) {
+      const head = cleanText.slice(0, 450);
+      const tail = cleanText.slice(-350);
+      cleanText = `${head}\n\n... [output teks panjang diringkas untuk menghemat token] ...\n\n${tail}`;
+    } else if (role === 'user' && cleanText.length > 1500) {
+      const head = cleanText.slice(0, 700);
+      const tail = cleanText.slice(-300);
+      cleanText = `${head}\n\n... [pertanyaan diringkas] ...\n\n${tail}`;
+    }
+
+    historyMessages.push({
+      role,
+      content: cleanText
+    });
+
+    const senderLabel = role === 'user' ? 'Pengguna' : 'Asisten';
+    textParts.push(`${senderLabel}: ${cleanText}`);
+  }
+
+  const historyText = textParts.length > 0
+    ? `\n[Riwayat Percakapan Sebelumnya]:\n${textParts.join('\n\n')}\n`
+    : '';
+
+  return {
+    conversationId,
+    historyMessages,
+    historyText
+  };
+}
 
 export function deleteChatSession(id: string): boolean {
   const db = getDb();
