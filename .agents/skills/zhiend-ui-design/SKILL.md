@@ -241,11 +241,14 @@ To make the retro-futuristic interface deeply tactile and alive without generic 
    - It performs a stepped phosphor re-draw in 4 distinct scanline stages (`steps(4, end)` at 0.18s), mimicking authentic CRT channel switching.
 3. **Mechanical Dropdown Unfold (`.animate-retro-dropdown`)**:
    - Custom select popovers unfold vertically from the hardware anchor with a rapid mechanical clip-path wipe (`cubic-bezier(0.16, 1, 0.3, 1)` at 0.15s).
-4. **Retro-Futuristic AI Streaming Telemetry & Radar Loader**:
-   - Replaces generic 3 bouncing dots completely.
-   - Active reasoning radar: Dot-matrix cycling sequence `[■ ■ ■ □ □]` powered by `.animate-radar-dot-1..5`.
-   - CRT Scanline Sweep: `.crt-scan-beam` shimmers across the telemetry block.
-   - Phosphor Typewriter Block Cursor: Trailing `█` cursor pulsing via `.animate-retro-cursor` at steps(1).
+4. **Minimalist Retro-Futuristic Telemetry Stream Loader**:
+   - Replaces generic 3 bouncing dots while avoiding cluttered animation stacks.
+   - Restrained, industrial precision: sleek Alabaster well (`#FCFCFA` with 1px border `#D0CEC7`).
+   - Laser Orange Diode: Single pulsing square mark `■` (`w-2 h-2 bg-[#FF5500] animate-pulse`).
+   - Stencil Telemetry Status: `:: ANALYZING TELEMETRY & REASONING MATRIX` in crisp `JetBrains Mono`.
+   - CRT Phosphor Cursor: Trailing typewriter block `█` pulsing via `.animate-retro-cursor` at `steps(1)`.
+   - Hardware Stream Status: Minimalist green processing diode (`bg-emerald-500 animate-pulse`) + `PROCESSING`.
+   - Strictly avoid piling up competing widgets (no disco VU meters or hazard stripes inside the loading well).
 5. **Reactive 4-Bar Equalizer & Telemetry Activity Meter (Navbar)**:
    - Top navbar features a 4-bar hardware telemetry meter (`emerald`, `amber`, `safety orange`).
    - Dynamically dances with real-time computational activity during agent task execution (`isAgentBusy`), and shifts levels tactfully on mouse hover.

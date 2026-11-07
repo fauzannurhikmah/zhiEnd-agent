@@ -79,7 +79,7 @@ The standards are modularly split into two specialized skills:
   - CRT Robot Mascot Pupil Tracking: Reactively computes cursor vector to translate pupils smoothly across the screen, with idle micro-drift and direct hover happy arc state (`◠  ◠`).
   - Stepped CRT Channel Switching (`.animate-retro-channel`): Modal tab transitions execute a stepped phosphor wipe.
   - Mechanical Dropdown Popovers (`.animate-retro-dropdown`): Custom selects unfold smoothly with mechanical precision.
-  - Retro-Futuristic AI Response Loading: Radar dot-matrix sequence (`[■ ■ ■ □ □]` via `.animate-radar-dot-1..5`), CRT scanline shimmer beam (`.crt-scan-beam`), operational telemetry banner, and phosphor block typewriter cursor (`.animate-retro-cursor` `█`) replacing generic 3-dot bounce.
+  - Minimalist Retro-Futuristic AI Loading: Restrained, industrial precision — single pulsing laser orange diode (`■`), clean JetBrains Mono text `:: ANALYZING TELEMETRY & REASONING MATRIX`, blinking phosphor typewriter block cursor (`█` via `.animate-retro-cursor`), and green processing LED diode in a sleek Alabaster well (`#FCFCFA`). Strictly avoids cluttered animation stacks.
   - Interactive Reticle & HUD Coordinates: Dynamic cursor coordinate tracking (`┌ RETICLE [042, 180] ┐`), rotating drafting crosshairs (`hover:rotate-45 cursor-crosshair`), and tactile soundbank pad clicks (`active:scale-[0.98] active:translate-y-0.5`).
   - Balanced Action Triggers: Strict vertical proportion (`h-8` / 32px height) for navbar buttons and Git Push triggers (`.btn-safety rounded-none`).
 - **Typography & Voice**: Technical grotesque + monospace (Syne 900 display, Chakra Petch tech, Silkscreen pixel, Space Grotesk body, JetBrains Mono stencil), line lengths < 75 characters.

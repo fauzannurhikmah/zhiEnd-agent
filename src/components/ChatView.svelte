@@ -959,37 +959,19 @@
                               {/each}
                             </div>
                           {:else if msg.isStreaming}
-                            <!-- Retro-Futuristic Telemetry Radar Stream Loader -->
-                            <div class="relative overflow-hidden flex items-center justify-between gap-3 px-3 py-2 bg-[#ECEAE5] border border-[#D0CEC7] font-tech text-xs rounded-none shadow-xs">
-                              <div class="crt-scan-beam"></div>
-                              <div class="flex items-center gap-3 z-10">
-                                <!-- Active 5-Block Pulse Radar -->
-                                <div class="flex items-center gap-1">
-                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-1"></span>
-                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-2"></span>
-                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-3"></span>
-                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-4"></span>
-                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-5"></span>
-                                </div>
-
-                                <!-- Oscilloscope VU Meter -->
-                                <div class="hidden sm:flex items-end gap-0.5 h-3.5 w-5 pb-0.5 border-l border-[#D0CEC7] pl-1.5" title="Oscilloscope Frequency">
-                                  <span class="w-1 bg-[#FF5500] animate-osc-1"></span>
-                                  <span class="w-1 bg-[#FF5500] animate-osc-2"></span>
-                                  <span class="w-1 bg-[#FFAA00] animate-osc-3"></span>
-                                  <span class="w-1 bg-emerald-500 animate-osc-4"></span>
-                                </div>
-
-                                <div class="flex items-center gap-1.5 font-stencil text-[11px] text-[#111315] font-bold uppercase tracking-wider">
-                                  <span class="text-[#FF5500] animate-spin inline-block">✕</span>
-                                  <span>:: ANALYZING TELEMETRY & REASONING MATRIX</span>
-                                </div>
+                            <!-- Minimalist Retro-Futuristic Telemetry Stream Loader -->
+                            <div class="flex items-center justify-between gap-3 px-3 py-2 bg-[#FCFCFA] border border-[#D0CEC7] font-tech text-xs rounded-none shadow-2xs">
+                              <div class="flex items-center gap-2 min-w-0">
+                                <span class="w-2 h-2 bg-[#FF5500] animate-pulse shrink-0"></span>
+                                <span class="font-stencil text-[11px] text-[#111315] font-semibold tracking-wider uppercase truncate">
+                                  :: ANALYZING TELEMETRY & REASONING MATRIX
+                                </span>
+                                <span class="inline-block w-1.5 h-3.5 bg-[#FF5500] animate-retro-cursor shrink-0"></span>
                               </div>
 
-                              <div class="flex items-center gap-2 z-10">
-                                <!-- Moving Raster Hazard Stripe -->
-                                <div class="hidden md:block w-20 h-2.5 retro-raster-bar border border-[#D0CEC7]"></div>
-                                <span class="inline-block w-2 h-3.5 bg-[#FF5500] animate-retro-cursor"></span>
+                              <div class="flex items-center gap-2 font-stencil text-[10px] text-[#60646C] shrink-0">
+                                <span class="w-1.5 h-1.5 bg-emerald-500 animate-pulse"></span>
+                                <span class="hidden sm:inline">PROCESSING</span>
                               </div>
                             </div>
                           {/if}
