@@ -77,17 +77,17 @@
         <p class="text-xs text-[#60646C] font-grotesk leading-relaxed break-words whitespace-pre-wrap">{dialog.notice.message}</p>
       </div>
 
-      <!-- Single Action Button (OK / Mengerti) - Capsule Pill -->
+      <!-- Single Action Button (OK / Mengerti) - Sharp 90° Frame -->
       <div class="pt-2 border-t border-[#D0CEC7]">
         <button
           type="button"
           onclick={() => dialog.closeNotice()}
-          class="w-full h-9 px-4 rounded-full {
+          class="w-full h-9 px-4 rounded-none {
             dialog.notice.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-500' :
             dialog.notice.type === 'error' ? 'bg-rose-600 hover:bg-rose-500' :
             dialog.notice.type === 'warning' ? 'bg-amber-600 hover:bg-amber-500' :
             'btn-safety'
-          } text-white text-xs font-bold uppercase tracking-wider shadow-sm transition cursor-pointer active:scale-95"
+          } text-white text-xs font-bold uppercase tracking-wider shadow-none transition cursor-pointer active:scale-95"
         >
           {dialog.notice.buttonText || 'ACKNOWLEDGE & CLOSE'}
         </button>

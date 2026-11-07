@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import type {
     AppConfig,
     GitStatus,
@@ -181,7 +181,7 @@
     <!-- Active Workspace Card & Create Button (Recessed Mechanical Well) -->
     <div class="flex items-center gap-1.5 w-full">
       <div
-        class="flex-1 min-w-0 flex items-center justify-between p-2 rounded-none bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#FF5500] transition group shadow-2xs font-tech"
+        class="flex-1 min-w-0 flex items-center justify-between p-2 rounded-none bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#A8A59C] transition group shadow-2xs font-tech"
       >
         <button
           onclick={onOpenProjectModal}
@@ -396,7 +396,7 @@
           <button
             type="button"
             onclick={() => onCreateNewSession?.()}
-            class="p-1 rounded-none bg-[#E5E3DD] hover:bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#FF5500] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer"
+            class="p-1 rounded-none bg-[#E5E3DD] hover:bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#A8A59C] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer"
             title="Mulai Chat Baru"
           >
             <Plus class="w-3 h-3" />

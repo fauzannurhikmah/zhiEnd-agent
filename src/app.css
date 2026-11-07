@@ -105,15 +105,37 @@ a:focus:not(:focus-visible),
   outline: none;
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* STRICT INDUSTRIAL ARCHITECTURAL ZERO-RADIUS ENFORCEMENT */
+*,
+::before,
+::after {
+  border-radius: 0px !important;
+}
 
-  *,
-  ::before,
-  ::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+/* ZERO RING & ZERO BORDER COLOR CHANGE ON ACTIVE / FOCUS */
+input,
+textarea,
+select,
+input:focus,
+input:active,
+textarea:focus,
+textarea:active,
+select:focus,
+select:active,
+.hardware-well:focus,
+.hardware-well:focus-within,
+.carbon-input:focus,
+.carbon-input:focus-within,
+.glass-input:focus,
+.glass-input:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #D0CEC7 !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-offset-width: 0px !important;
+  --tw-ring-width: 0px !important;
+  --tw-ring-offset-shadow: none !important;
+  --tw-ring-shadow: none !important;
 }
 
 /* ------------------------------------------------------------- */
@@ -163,8 +185,9 @@ a:focus:not(:focus-visible),
 .carbon-input:focus-within,
 .glass-input:focus,
 .glass-input:focus-within {
-  border-color: #FF5500;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px #FF5500;
+  border-color: #D0CEC7 !important;
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 /* 4. Sub-cards & Recessed Beds */
@@ -579,34 +602,71 @@ a:focus:not(:focus-visible),
 }
 
 /* Retro Dot Matrix Cycling Telemetry Radar */
-@keyframes dotMatrixStep {
-  0% {
-    opacity: 0.3;
-    transform: scale(0.9);
+@keyframes retroRadarPulse {
+  0%, 100% {
+    opacity: 0.2;
+    background-color: #8C9097;
+    transform: scale(0.85);
   }
-  50% {
+  30%, 65% {
     opacity: 1;
-    transform: scale(1.1);
     background-color: #FF5500;
-  }
-  100% {
-    opacity: 0.3;
-    transform: scale(0.9);
+    transform: scale(1.15);
   }
 }
 
 .animate-radar-dot-1 {
-  animation: dotMatrixStep 1.2s infinite ease-in-out;
+  animation: retroRadarPulse 0.8s infinite ease-in-out;
 }
 .animate-radar-dot-2 {
-  animation: dotMatrixStep 1.2s infinite ease-in-out 0.2s;
+  animation: retroRadarPulse 0.8s infinite ease-in-out 0.15s;
 }
 .animate-radar-dot-3 {
-  animation: dotMatrixStep 1.2s infinite ease-in-out 0.4s;
+  animation: retroRadarPulse 0.8s infinite ease-in-out 0.3s;
 }
 .animate-radar-dot-4 {
-  animation: dotMatrixStep 1.2s infinite ease-in-out 0.6s;
+  animation: retroRadarPulse 0.8s infinite ease-in-out 0.45s;
 }
 .animate-radar-dot-5 {
-  animation: dotMatrixStep 1.2s infinite ease-in-out 0.8s;
+  animation: retroRadarPulse 0.8s infinite ease-in-out 0.6s;
 }
+
+/* Moving Telemetry Raster Stripes */
+@keyframes retroRasterBar {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 32px 0;
+  }
+}
+
+.retro-raster-bar {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #FF5500 0px,
+    #FF5500 6px,
+    rgba(255, 85, 0, 0.15) 6px,
+    rgba(255, 85, 0, 0.15) 12px
+  );
+  background-size: 32px 32px;
+  animation: retroRasterBar 0.6s infinite linear !important;
+}
+
+/* Oscilloscope Wave Pulse */
+@keyframes oscPulse {
+  0%, 100% {
+    height: 4px;
+    opacity: 0.4;
+  }
+  50% {
+    height: 14px;
+    opacity: 1;
+    background-color: #FF5500;
+  }
+}
+
+.animate-osc-1 { animation: oscPulse 0.7s infinite ease-in-out 0.1s; }
+.animate-osc-2 { animation: oscPulse 0.7s infinite ease-in-out 0.25s; }
+.animate-osc-3 { animation: oscPulse 0.7s infinite ease-in-out 0.4s; }
+.animate-osc-4 { animation: oscPulse 0.7s infinite ease-in-out 0.55s; }

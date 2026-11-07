@@ -874,7 +874,7 @@
 
       <!-- Center Blueprint Telemetry Marker & Reactive Equalizer Activity Meter -->
       <div
-        class="hidden lg:flex items-center gap-2.5 text-[10px] font-stencil text-[#8C9097] px-2.5 py-1 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xs group hover:border-[#FF5500] transition-colors"
+        class="hidden lg:flex items-center gap-2.5 text-[10px] font-stencil text-[#8C9097] px-2.5 py-1 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xs group hover:border-[#A8A59C] transition-colors"
         title="Bus Activity Telemetry & Audio/Runtime Meter"
       >
         <span class="text-[#FF5500] font-bold">::</span>
@@ -975,10 +975,10 @@
           </button>
         {/if}
 
-        <!-- Flat Safety Capsule Push Action Button (ChainGPT Labs Style) -->
+        <!-- Flat Safety Push Action Button (100% Sharp 90° Frame) -->
         <button
           onclick={handleExecutePush}
-          class="btn-safety h-8 px-4 rounded-full text-white font-tech font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer active:scale-[0.97] shadow-none"
+          class="btn-safety h-8 px-4 rounded-none text-white font-tech font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer active:scale-[0.97] shadow-none"
           title="Git Push to GitHub"
         >
           <UploadCloud class="w-3.5 h-3.5" />
@@ -1168,7 +1168,7 @@
         <span class="text-[10px]">Source</span>
         {#if gitStatus?.files?.length}
           <span
-            class="absolute top-1.5 right-[30%] w-2 h-2 rounded-full bg-[#FF5500]"
+            class="absolute top-1.5 right-[30%] w-2 h-2 rounded-none bg-[#FF5500]"
           ></span>
         {/if}
       </button>
@@ -1188,7 +1188,7 @@
         <span class="text-[10px]">Remote</span>
         {#if whatsappStatus?.status === "connected" || telegramStatus?.status === "running"}
           <span
-            class="absolute top-1.5 right-[30%] w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"
+            class="absolute top-1.5 right-[30%] w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"
           ></span>
         {/if}
       </button>

@@ -10,11 +10,14 @@ description: "Distinctive UI/UX Design System for zhiEnd Agent. Opinionated 'Cyb
 > zhiEnd Agent is designed as an **Architectural Cyber-Industrial Blueprint** combined with **Tactile Field Hardware** (ChainGPT Labs aesthetic meets Teenage Engineering precision).
 >
 > **Hallmark Traits**:
-> 1. **Sharp 90° Architectural Grid Framework (`rounded-none`)**:
->    - All structural cards, bays, partner boxes, chat bubbles, dialogs, modals, inputs, and panel frames are **strictly sharp 90-degree corners (`rounded-none`)**.
->    - Pill capsules (`rounded-full`) are strictly reserved for **primary Safety Orange (`#FF5500`) CTA triggers** (e.g., `APPLY NOW`, `DISPATCH`, `INITIALIZE RUNTIME`, `PUSH // GIT`, `CONFIRM`) and the outer CRT robot monitor bezel.
+> 1. **Universal Zero-Radius Policy (`rounded-none` / `border-radius: 0px !important`)**:
+>    - Absolute 100% sharp 90-degree architectural corners across the ENTIRE application.
+>    - ZERO rounded corners anywhere: all buttons (including primary CTA triggers `.btn-safety`), cards, modals, tabs, inputs, badges, and chips are strictly sharp rectangular `rounded-none`.
 >    - Flat bold button surfaces: zero fake 3D bottom bevel borders (`border-b-2`), zero murky drop shadows — pure high-visibility Safety Orange (`#FF5500`) hardware switches.
-> 2. **Asymmetric CAD Blueprint Ground ("Random Grid tapi Ada Keteraturan")**:
+> 2. **Neutral Input Focus Policy (Zero Ring / Zero Orange Halo)**:
+>    - When any input, textarea, or mechanical well is focused or active, there must be NO ring, NO outline, and NO border color change to orange (`#FF5500`).
+>    - The border strictly remains neutral `#D0CEC7` (`outline: none !important; box-shadow: none !important; border-color: #D0CEC7 !important; --tw-ring-color: transparent !important`).
+> 3. **Asymmetric CAD Blueprint Ground ("Random Grid tapi Ada Keteraturan")**:
 >    - Large architectural drafting bands (navbar row, headline row, partner strip row, asymmetric column partitions) overlaid on a fine 24px dot-matrix CAD sub-grid (`.blueprint-cad-ground`) with 120px drafting seams and solid orange square intersection marks (`■`).
 > 3. **Technical Drafting Ornaments**:
 >    - Orange solid corner registration squares (`■`) anchoring major module bays.
@@ -31,8 +34,9 @@ description: "Distinctive UI/UX Design System for zhiEnd Agent. Opinionated 'Cyb
 >
 > **Strict Bans**:
 > - NO dark-mode black canvas backgrounds (`#000000`, `#08090C`, `#111111`).
-> - NO rounded corners on structural framing, cards, modals, or chat bubbles (`rounded-lg` / `rounded-xl` / `rounded-2xl` on structural cells are strictly banned; only `rounded-none`).
-> - NO generic 3 bouncing dots for AI streaming loading.
+> - NO rounded corners anywhere (`rounded-full`, `rounded-2xl`, `rounded-xl`, `rounded-lg`, `rounded-md`, `rounded-sm` are strictly banned; absolute 100% `rounded-none` across all buttons, cards, modals, tabs, and inputs).
+> - NO focus ring or orange active border on inputs/textareas (focus border must stay neutral `#D0CEC7`).
+> - NO generic 3 bouncing dots or static indicators for AI streaming loading.
 > - NO generic AI slop: centered 2x2 floating cards with blurry shadows, duplicate prompt boxes, or purple/indigo neon blobs.
 > - NO single-word gradient clipping or rainbow glow text.
 

@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import type { PersonaItem } from "../types";
   import AvatarView from "./AvatarView.svelte";
   import { api } from "../services/api";
@@ -506,7 +506,7 @@
               {@const isSelected = activePersonaId === p.id}
               {@const modelInfo = getModelDetails(p.preferred_model)}
               <div
-                class="p-3 sm:p-3.5 rounded-xl border transition-all flex flex-col justify-between gap-3 group relative active:scale-[0.99] shadow-2xs {isSelected
+                class="p-3 sm:p-3.5 rounded-none border transition-all flex flex-col justify-between gap-3 group relative active:scale-[0.99] shadow-2xs {isSelected
                   ? 'bg-[#FCFCFA] border-[#FF5500]'
                   : 'bg-[#FCFCFA] hover:border-[#A8A59C] border-[#D0CEC7]'}"
               >
@@ -518,7 +518,7 @@
                         avatar={p.avatar}
                         name={p.name}
                         size="md"
-                        className="rounded-lg shrink-0 ring-1 ring-[#D0CEC7]"
+                        className="rounded-none shrink-0 ring-1 ring-[#D0CEC7]"
                       />
 
                       <div class="flex flex-col min-w-0 flex-1">
@@ -528,15 +528,15 @@
                           <span class="truncate">{p.name}</span>
                           {#if p.is_default}
                             <span
-                              class="text-[9px] font-stencil px-1.5 py-0.5 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] shrink-0 font-bold"
+                              class="text-[9px] font-stencil px-1.5 py-0.5 rounded-none bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] shrink-0 font-bold"
                               >DEFAULT</span
                             >
                           {/if}
                         </h4>
 
                         <!-- Model AI Badge with Provider color -->
-                        <div class="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[9px] font-stencil border {modelInfo.color} w-fit max-w-full font-bold">
-                          <span class="w-1.5 h-1.5 rounded-full {modelInfo.dotColor} shrink-0"></span>
+                        <div class="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-none text-[9px] font-stencil border {modelInfo.color} w-fit max-w-full font-bold">
+                          <span class="w-1.5 h-1.5 rounded-none {modelInfo.dotColor} shrink-0"></span>
                           <span class="truncate">{modelInfo.label}: {modelInfo.name}</span>
                         </div>
                       </div>
@@ -547,7 +547,7 @@
                       <button
                         type="button"
                         onclick={() => startEditPersona(p)}
-                        class="p-1 rounded text-[#5C6066] hover:text-[#FF5500] hover:bg-[#E5E3DD] transition cursor-pointer"
+                        class="p-1 rounded-none text-[#5C6066] hover:text-[#FF5500] hover:bg-[#E5E3DD] transition cursor-pointer"
                         title="Edit persona ini"
                       >
                         <Pencil class="w-3.5 h-3.5" />
@@ -557,7 +557,7 @@
                         <button
                           type="button"
                           onclick={() => onDeletePersona(p.id)}
-                          class="p-1 rounded text-[#5C6066] hover:text-rose-600 hover:bg-rose-100 transition cursor-pointer"
+                          class="p-1 rounded-none text-[#5C6066] hover:text-rose-600 hover:bg-rose-100 transition cursor-pointer"
                           title="Hapus persona custom ini"
                         >
                           <Trash2 class="w-3.5 h-3.5" />
@@ -569,7 +569,7 @@
                   <!-- Traits Badge if present -->
                   {#if p.traits}
                     <div
-                      class="text-[10px] text-[#5C6066] font-stencil px-2 py-1 rounded bg-[#E5E3DD] border border-[#D0CEC7] truncate font-bold"
+                      class="text-[10px] text-[#5C6066] font-stencil px-2 py-1 rounded-none bg-[#E5E3DD] border border-[#D0CEC7] truncate font-bold"
                     >
                       :: {p.traits}
                     </div>
@@ -577,7 +577,7 @@
 
                   <!-- Preview System Prompt -->
                   <p
-                    class="text-[11px] text-[#5C6066] font-grotesk line-clamp-2 leading-relaxed bg-[#FCFCFA] p-2 rounded-lg border border-[#D0CEC7]"
+                    class="text-[11px] text-[#5C6066] font-grotesk line-clamp-2 leading-relaxed bg-[#FCFCFA] p-2 rounded-none border border-[#D0CEC7]"
                   >
                     {p.system_prompt}
                   </p>
@@ -590,12 +590,12 @@
                     onSelectPersona(p);
                     onClose();
                   }}
-                  class="w-full py-1.5 rounded-lg text-xs font-tech font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 {isSelected
+                  class="w-full py-1.5 rounded-none text-xs font-tech font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 {isSelected
                     ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#FF5500] shadow-2xs'
                     : 'btn-hardware'}"
                 >
                   {#if isSelected}
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="w-2 h-2 rounded-none bg-emerald-500 animate-pulse"></span>
                     <span>AKTIF DIGUNAKAN</span>
                   {:else}
                     <span>GUNAKAN PERSONA INI</span>
@@ -621,7 +621,7 @@
                     <button
                       type="button"
                       onclick={() => applyTemplate(tpl)}
-                      class="p-2.5 rounded-xl bg-[#FCFCFA] hover:bg-[#ECEAE5] border border-[#D0CEC7] hover:border-[#FF5500] text-left transition cursor-pointer group flex flex-col shadow-xs"
+                      class="p-2.5 rounded-none bg-[#FCFCFA] hover:bg-[#ECEAE5] border border-[#D0CEC7] hover:border-[#A8A59C] text-left transition cursor-pointer group flex flex-col shadow-xs"
                     >
                       <span class="text-lg">{tpl.avatar}</span>
                       <div
@@ -640,7 +640,7 @@
 
             <!-- Custom Avatar Picker & Upload Section -->
             <div
-              class="p-3.5 rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] flex flex-col gap-3 shadow-xs"
+              class="p-3.5 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] flex flex-col gap-3 shadow-xs"
             >
               <div class="flex items-center justify-between">
                 <span
@@ -661,13 +661,13 @@
                     avatar={newAvatar}
                     name={newName || "Avatar"}
                     size="xl"
-                    className="shadow-xs ring-2 ring-[#FF5500]/40 rounded-xl"
+                    className="shadow-xs /40 rounded-none"
                   />
                   {#if avatarType === "custom"}
                     <button
                       type="button"
                       onclick={() => resetAvatarToEmoji("🤖")}
-                      class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs hover:bg-rose-500 shadow-xs cursor-pointer"
+                      class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-none bg-rose-600 text-white flex items-center justify-center text-xs hover:bg-rose-500 shadow-xs cursor-pointer"
                       title="Reset ke emoji"
                     >
                       <X class="w-3 h-3" />
@@ -691,7 +691,7 @@
                       type="button"
                       disabled={isUploadingAvatar}
                       onclick={() => fileInputRef?.click()}
-                      class="btn-hardware px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shadow-xs"
+                      class="btn-hardware px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shadow-xs"
                     >
                       {#if isUploadingAvatar}
                         <Loader2 class="w-3.5 h-3.5 animate-spin text-[#FF5500]" />
@@ -706,7 +706,7 @@
                       <button
                         type="button"
                         onclick={() => resetAvatarToEmoji("🤖")}
-                        class="btn-hardware px-2.5 py-1.5 rounded-xl text-[#5C6066] hover:text-[#191B1D] text-xs transition cursor-pointer flex items-center gap-1 shadow-xs font-bold"
+                        class="btn-hardware px-2.5 py-1.5 rounded-none text-[#5C6066] hover:text-[#191B1D] text-xs transition cursor-pointer flex items-center gap-1 shadow-xs font-bold"
                       >
                         <RefreshCw class="w-3 h-3 text-[#FF5500]" />
                         <span>Gunakan Emoji</span>
@@ -720,7 +720,7 @@
                       <button
                         type="button"
                         onclick={() => resetAvatarToEmoji(em)}
-                        class="w-7 h-7 rounded-lg flex items-center justify-center text-sm transition cursor-pointer {avatarType ===
+                        class="w-7 h-7 rounded-none flex items-center justify-center text-sm transition cursor-pointer {avatarType ===
                           'emoji' && newAvatar === em
                           ? 'bg-[#FF5500] text-white scale-105 shadow-xs'
                           : 'bg-[#FCFCFA] border border-[#D0CEC7] hover:bg-[#ECEAE5]'}"
@@ -746,7 +746,7 @@
                 type="text"
                 bind:value={newName}
                 placeholder="Contoh: Senior Code Reviewer, UI Maestro, Security Audit..."
-                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
+                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#D0CEC7] rounded-none px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
               />
             </div>
 
@@ -763,7 +763,7 @@
                 type="text"
                 bind:value={newTraits}
                 placeholder="Contoh: Kritis, Teliti, Perfeksionis, Santai & Ramah..."
-                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
+                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#D0CEC7] rounded-none px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
               />
 
               <!-- Quick Trait Suggestion Chips -->
@@ -775,7 +775,7 @@
                   <button
                     type="button"
                     onclick={() => addTraitSuggestion(sug)}
-                    class="text-[10px] px-2 py-0.5 rounded-full bg-[#FCFCFA] hover:bg-orange-100 border border-[#D0CEC7] hover:border-[#FF5500] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer font-mono font-bold"
+                    class="text-[10px] px-2 py-0.5 rounded-none bg-[#FCFCFA] hover:bg-orange-100 border border-[#D0CEC7] hover:border-[#A8A59C] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer font-mono font-bold"
                   >
                     + {sug}
                   </button>
@@ -805,10 +805,10 @@
               <button
                 type="button"
                 onclick={() => isModelDropdownOpen = !isModelDropdownOpen}
-                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#FF5500] rounded-xl px-3.5 py-2.5 text-xs text-[#191B1D] flex items-center justify-between transition cursor-pointer shadow-xs group"
+                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#A8A59C] rounded-none px-3.5 py-2.5 text-xs text-[#191B1D] flex items-center justify-between transition cursor-pointer shadow-xs group"
               >
                 <div class="flex items-center gap-2.5 min-w-0">
-                  <span class="w-2 h-2 rounded-full {currentModelInfo.dotColor} shrink-0"></span>
+                  <span class="w-2 h-2 rounded-none {currentModelInfo.dotColor} shrink-0"></span>
                   <div class="flex flex-col text-left min-w-0">
                     <span class="font-bold text-[#191B1D] truncate group-hover:text-[#FF5500]">
                       {currentModelInfo.name}
@@ -821,11 +821,11 @@
 
                 <div class="flex items-center gap-2 shrink-0">
                   {#if currentModelInfo.hasKey}
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono font-bold flex items-center gap-1">
+                    <span class="text-[10px] px-2 py-0.5 rounded-none bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono font-bold flex items-center gap-1">
                       <CheckCircle2 class="w-2.5 h-2.5" /> Siap
                     </span>
                   {:else}
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-mono font-bold flex items-center gap-1">
+                    <span class="text-[10px] px-2 py-0.5 rounded-none bg-amber-100 text-amber-800 border border-amber-300 font-mono font-bold flex items-center gap-1">
                       <AlertTriangle class="w-2.5 h-2.5" /> Butuh API Key
                     </span>
                   {/if}
@@ -892,7 +892,7 @@
 
               <!-- Warning if model doesn't have an API Key configured -->
               {#if !currentModelInfo.hasKey}
-                <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-center justify-between gap-2">
+                <div class="p-2.5 rounded-none bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-center justify-between gap-2">
                   <div class="flex items-center gap-1.5 min-w-0">
                     <AlertTriangle class="w-3.5 h-3.5 text-amber-600 shrink-0" />
                     <span class="truncate font-medium">API Key untuk {currentModelInfo.label} belum diatur di Pengaturan.</span>
@@ -901,7 +901,7 @@
                     <button
                       type="button"
                       onclick={() => onOpenSettings?.('ai_providers')}
-                      class="btn-hardware px-2 py-1 rounded-lg text-amber-900 text-[10px] font-bold transition shrink-0 cursor-pointer shadow-xs"
+                      class="btn-hardware px-2 py-1 rounded-none text-amber-900 text-[10px] font-bold transition shrink-0 cursor-pointer shadow-xs"
                     >
                       Isi Sekarang
                     </button>
@@ -926,7 +926,7 @@
                   onclick={handleGeneratePrompt}
                   disabled={isGeneratingPrompt ||
                     (!newTraits.trim() && !newName.trim())}
-                  class="btn-safety flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold text-white transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group shadow-xs active:scale-95"
+                  class="btn-safety flex items-center gap-1.5 px-2.5 py-1 rounded-none text-[11px] font-bold text-white transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group shadow-xs active:scale-95"
                   title="Generate teks instruksi otomatis berbasis nama & sifat AI yang diisi di atas"
                 >
                   {#if isGeneratingPrompt}
@@ -946,7 +946,7 @@
                 bind:value={newSystemPrompt}
                 rows="5"
                 placeholder="Tuliskan aturan koding & instruksi spesifik, atau klik tombol 'Generate Instruksi' di atas untuk dibuatkan secara otomatis oleh AI..."
-                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl p-3 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] leading-relaxed resize-none shadow-xs font-mono"
+                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#D0CEC7] rounded-none p-3 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] leading-relaxed resize-none shadow-xs font-mono"
               ></textarea>
             </div>
 
@@ -962,7 +962,7 @@
               <button
                 type="button"
                 onclick={cancelForm}
-                class="btn-hardware px-4 py-2 rounded-lg text-[#111315] text-xs font-tech font-bold uppercase tracking-wider transition cursor-pointer shadow-2xs active:scale-95"
+                class="btn-hardware px-4 py-2 rounded-none text-[#111315] text-xs font-tech font-bold uppercase tracking-wider transition cursor-pointer shadow-2xs active:scale-95"
               >
                 BATAL
               </button>
@@ -973,7 +973,7 @@
                 disabled={isSubmitting ||
                   !newName.trim() ||
                   !newSystemPrompt.trim()}
-                class="btn-safety px-4 py-2 rounded-lg disabled:opacity-40 text-white text-xs font-tech font-bold uppercase tracking-wider shadow-2xs transition cursor-pointer active:scale-95 flex items-center gap-1.5"
+                class="btn-safety px-4 py-2 rounded-none disabled:opacity-40 text-white text-xs font-tech font-bold uppercase tracking-wider shadow-2xs transition cursor-pointer active:scale-95 flex items-center gap-1.5"
               >
                 {#if editingPersonaId}
                   <Save class="w-3.5 h-3.5" />

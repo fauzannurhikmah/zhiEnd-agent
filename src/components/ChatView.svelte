@@ -503,10 +503,10 @@
   <!-- Full-Viewport Drag & Drop Overlay -->
   {#if isDragging}
     <div 
-      class="absolute inset-0 z-50 bg-[#F4F3EE]/95 backdrop-blur-md flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#FF5500] rounded-2xl m-2 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none shadow-xl"
+      class="absolute inset-0 z-50 bg-[#F4F3EE]/95 backdrop-blur-md flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#FF5500] rounded-none m-2 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none shadow-xl"
     >
       <div class="flex flex-col items-center gap-3 text-center pointer-events-none">
-        <div class="w-16 h-16 rounded-2xl bg-[#FF5500]/10 border border-[#FF5500]/30 flex items-center justify-center text-[#FF5500] shadow-md animate-bounce">
+        <div class="w-16 h-16 rounded-none bg-[#FF5500]/10 border border-[#FF5500]/30 flex items-center justify-center text-[#FF5500] shadow-md animate-bounce">
           <CloudUpload class="w-8 h-8" />
         </div>
         <div class="flex flex-col gap-1">
@@ -528,7 +528,7 @@
       <span class="text-xs font-bold text-[#111315] uppercase tracking-wider truncate min-w-0 flex-1">
         {activeSession?.title || 'ACTIVE RUNTIME SESSION'}
       </span>
-      <span class="text-[9px] font-stencil px-1.5 py-0.2 rounded bg-white border border-[#D0CEC7] text-[#60646C] hidden md:inline shrink-0 font-semibold">
+      <span class="text-[9px] font-stencil px-1.5 py-0.2 rounded-none bg-white border border-[#D0CEC7] text-[#60646C] hidden md:inline shrink-0 font-semibold">
         {activeSession?.workspace_id ? 'WORKSPACE SCOPE' : 'GLOBAL SCOPE'}
       </span>
     </div>
@@ -538,14 +538,14 @@
       <button
         type="button"
         onclick={onOpenPersonaModal}
-        class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#FF5500] text-[11px] text-[#111315] transition cursor-pointer group shadow-2xs max-w-[125px] xs:max-w-[155px] sm:max-w-[280px]"
+        class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-none bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#A8A59C] text-[11px] text-[#111315] transition cursor-pointer group shadow-2xs max-w-[125px] xs:max-w-[155px] sm:max-w-[280px]"
         title={`Persona: ${activePersona?.name || 'Default'}${activePersona?.traits ? ` • Sifat: ${activePersona.traits}` : ''}`}
       >
-        <AvatarView avatar={activePersona?.avatar} name={activePersona?.name} size="xs" className="rounded-md shrink-0" />
+        <AvatarView avatar={activePersona?.avatar} name={activePersona?.name} size="xs" className="rounded-none shrink-0" />
         <span class="font-bold truncate max-w-[65px] xs:max-w-[85px] sm:max-w-[120px] uppercase">{activePersona?.name || 'Default'}</span>
         {#if activePersona?.preferred_model}
           <span 
-            class="text-[9px] px-1.5 py-0.2 rounded bg-[#E5E3DD] border border-[#D0CEC7] text-[#60646C] font-stencil hidden lg:inline truncate max-w-[110px]" 
+            class="text-[9px] px-1.5 py-0.2 rounded-none bg-[#E5E3DD] border border-[#D0CEC7] text-[#60646C] font-stencil hidden lg:inline truncate max-w-[110px]" 
             title={`Model: ${activePersona.preferred_model}`}
           >
             {activePersona.preferred_model.replace(/^(openai|grok|qwen|deepseek|gemini):/, '')}
@@ -557,7 +557,7 @@
       <button
         type="button"
         onclick={onCreateNewSession}
-        class="btn-hardware flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-[11px] text-[#111315] cursor-pointer"
+        class="btn-hardware flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-none text-[11px] text-[#111315] cursor-pointer"
         title="Mulai sesi baru"
       >
         <Plus class="w-3 h-3 text-[#FF5500]" />
@@ -568,7 +568,7 @@
         <button
           type="button"
           onclick={onClearMessages}
-          class="flex items-center gap-1 p-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 text-[11px] transition cursor-pointer"
+          class="flex items-center gap-1 p-1.5 sm:px-2 sm:py-1 rounded-none hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 text-[11px] transition cursor-pointer"
           title="Bersihkan pesan di sesi ini"
         >
           <Trash2 class="w-3 h-3" />
@@ -643,7 +643,7 @@
               <button
                 type="button"
                 onclick={() => setPrompt('Jelaskan struktur arsitektur codebase ini dan status modul utamanya.')}
-                class="btn-safety px-6 py-2.5 rounded-full text-white text-xs sm:text-sm font-tech font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-2.5 w-fit active:scale-95 shadow-none"
+                class="btn-safety px-6 py-2.5 rounded-none text-white text-xs sm:text-sm font-tech font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-2.5 w-fit active:scale-95 shadow-none"
               >
                 <Sparkles class="w-4 h-4" />
                 <span>INITIALIZE RUNTIME</span>
@@ -673,7 +673,7 @@
 
               <div class="flex items-center justify-between text-[10px] text-[#8C9097] border-b border-white/10 pb-2 relative z-10">
                 <span class="text-[#FFAA00] font-tech font-bold tracking-wider">┌ RETICLE [{hudCoord.x.toString().padStart(3, '0')},{hudCoord.y.toString().padStart(3, '0')}] ┐</span>
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="w-2 h-2 rounded-none bg-emerald-400 animate-pulse"></span>
               </div>
               
               <div class="space-y-2 text-[11px] relative z-10">
@@ -739,7 +739,7 @@
         <div class="mt-3 flex items-center justify-between text-[10px] font-stencil text-[#8C9097]">
           <div class="flex items-center gap-1.5">
             <span>SHORTCUT:</span>
-            <kbd class="px-1.5 py-0.5 rounded bg-white border border-[#D0CEC7] text-[#111315] font-bold">Ctrl + Enter</kbd>
+            <kbd class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#111315] font-bold">Ctrl + Enter</kbd>
             <span>TO SEND PROMPT</span>
           </div>
           <div class="hidden sm:flex items-center gap-2">
@@ -775,7 +775,7 @@
                     <button
                       type="button"
                       onclick={() => zoomImageUrl = imgUrl}
-                      class="group/thumb relative rounded-none overflow-hidden border border-[#D0CEC7] hover:border-[#FF5500] shadow-2xs bg-[#ECEAE5] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                      class="group/thumb relative rounded-none overflow-hidden border border-[#D0CEC7] hover:border-[#A8A59C] shadow-2xs bg-[#ECEAE5] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
                     >
                       <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
                       <div class="absolute inset-0 bg-black/30 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
@@ -856,8 +856,8 @@
                         <div class="flex items-center gap-2 min-w-0">
                           {#if msg.isStreaming}
                             <div class="relative flex items-center justify-center w-2.5 h-2.5 shrink-0">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF5500] opacity-60"></span>
-                              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FF5500]"></span>
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-none bg-[#FF5500] opacity-60"></span>
+                              <span class="relative inline-flex rounded-none h-1.5 w-1.5 bg-[#FF5500]"></span>
                             </div>
                             <span class="text-xs font-bold text-[#FF5500] uppercase tracking-wider">
                               EXECUTING WORKFLOW...
@@ -868,7 +868,7 @@
                               EXECUTION LOGS COMPLETED
                             </span>
                           {/if}
-                          <span class="text-[9px] font-stencil text-[#60646C] px-1.5 py-0.2 rounded bg-white border border-[#D0CEC7] font-bold">
+                          <span class="text-[9px] font-stencil text-[#60646C] px-1.5 py-0.2 rounded-none bg-white border border-[#D0CEC7] font-bold">
                             {(msg.steps?.length || msg.tools?.length || 1)} TRACES
                           </span>
                         </div>
@@ -960,21 +960,37 @@
                             </div>
                           {:else if msg.isStreaming}
                             <!-- Retro-Futuristic Telemetry Radar Stream Loader -->
-                            <div class="relative overflow-hidden flex items-center justify-between gap-3 px-3 py-2 bg-[#ECEAE5] border border-[#D0CEC7] font-tech text-xs rounded-none">
+                            <div class="relative overflow-hidden flex items-center justify-between gap-3 px-3 py-2 bg-[#ECEAE5] border border-[#D0CEC7] font-tech text-xs rounded-none shadow-xs">
                               <div class="crt-scan-beam"></div>
-                              <div class="flex items-center gap-2.5 z-10">
-                                <div class="flex items-center gap-1 font-mono font-bold text-[#FF5500] text-xs">
-                                  <span class="animate-radar-dot-1">■</span>
-                                  <span class="animate-radar-dot-2">■</span>
-                                  <span class="animate-radar-dot-3">■</span>
-                                  <span class="animate-radar-dot-4">■</span>
-                                  <span class="animate-radar-dot-5">■</span>
+                              <div class="flex items-center gap-3 z-10">
+                                <!-- Active 5-Block Pulse Radar -->
+                                <div class="flex items-center gap-1">
+                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-1"></span>
+                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-2"></span>
+                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-3"></span>
+                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-4"></span>
+                                  <span class="inline-block w-2.5 h-3 bg-[#FF5500] animate-radar-dot-5"></span>
                                 </div>
-                                <span class="text-[11px] font-bold text-[#111315] uppercase tracking-wider font-stencil">
-                                  :: ANALYZING TELEMETRY & REASONING MATRIX
-                                </span>
+
+                                <!-- Oscilloscope VU Meter -->
+                                <div class="hidden sm:flex items-end gap-0.5 h-3.5 w-5 pb-0.5 border-l border-[#D0CEC7] pl-1.5" title="Oscilloscope Frequency">
+                                  <span class="w-1 bg-[#FF5500] animate-osc-1"></span>
+                                  <span class="w-1 bg-[#FF5500] animate-osc-2"></span>
+                                  <span class="w-1 bg-[#FFAA00] animate-osc-3"></span>
+                                  <span class="w-1 bg-emerald-500 animate-osc-4"></span>
+                                </div>
+
+                                <div class="flex items-center gap-1.5 font-stencil text-[11px] text-[#111315] font-bold uppercase tracking-wider">
+                                  <span class="text-[#FF5500] animate-spin inline-block">✕</span>
+                                  <span>:: ANALYZING TELEMETRY & REASONING MATRIX</span>
+                                </div>
                               </div>
-                              <span class="inline-block w-2 h-3.5 bg-[#FF5500] animate-retro-cursor z-10"></span>
+
+                              <div class="flex items-center gap-2 z-10">
+                                <!-- Moving Raster Hazard Stripe -->
+                                <div class="hidden md:block w-20 h-2.5 retro-raster-bar border border-[#D0CEC7]"></div>
+                                <span class="inline-block w-2 h-3.5 bg-[#FF5500] animate-retro-cursor"></span>
+                              </div>
                             </div>
                           {/if}
                         </div>
@@ -997,7 +1013,7 @@
                         <button
                           type="button"
                           onclick={() => zoomImageUrl = imgUrl}
-                          class="group/thumb relative rounded-xl overflow-hidden border border-[#C8C5BC] hover:border-[#FF5500] shadow-sm bg-[#E9E7E0] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                          class="group/thumb relative rounded-none overflow-hidden border border-[#C8C5BC] hover:border-[#A8A59C] shadow-sm bg-[#E9E7E0] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
                         >
                           <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
                           <div class="absolute inset-0 bg-black/30 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
@@ -1016,7 +1032,7 @@
                     <button
                       type="button"
                       onclick={() => handleCopy(msg.id, msg.text)}
-                      class="flex items-center gap-1 text-[11px] text-[#5C6066] hover:text-[#191B1D] px-1.5 py-0.5 rounded hover:bg-[#DEDBD2] transition cursor-pointer"
+                      class="flex items-center gap-1 text-[11px] text-[#5C6066] hover:text-[#191B1D] px-1.5 py-0.5 rounded-none hover:bg-[#DEDBD2] transition cursor-pointer"
                       title="Salin teks"
                     >
                       {#if copiedMessageId === msg.id}
@@ -1042,7 +1058,7 @@
     <div 
       role="region"
       aria-label="Konsol Input Hardware"
-      class="max-w-4xl mx-auto flex flex-col gap-2 {isDragging ? 'ring-2 ring-[#FF5500]' : ''}"
+      class="max-w-4xl mx-auto flex flex-col gap-2 {isDragging ? '' : ''}"
       onpaste={handlePaste}
     >
       <!-- Console Telemetry Status Strip -->
@@ -1059,7 +1075,7 @@
       </div>
 
       <!-- Recessed Mechanical Input Well -->
-      <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] focus-within:border-[#FF5500] rounded-none p-2 shadow-2xs transition">
+      <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-2 shadow-2xs transition">
         <!-- 4 Corner Registration Marks -->
         <span class="reg-dot reg-dot-tl"></span>
         <span class="reg-dot reg-dot-tr"></span>
@@ -1101,7 +1117,7 @@
         <!-- Voice Listening / Error Banner -->
         {#if isListening}
           <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-none bg-rose-50 border border-rose-300 text-[11px] text-rose-900 animate-in fade-in font-stencil">
-            <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
+            <span class="w-2 h-2 rounded-none bg-rose-500 animate-ping shrink-0"></span>
             <span class="font-bold truncate">RECORDING AUDIO INTAKE... (KLIK MIC UNTUK SELESAI)</span>
             <button type="button" onclick={stopVoiceInput} class="ml-auto text-xs px-2 py-0.5 rounded-none bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold">SELESAI</button>
           </div>
@@ -1145,7 +1161,7 @@
               <Loader2 class="w-4 h-4 animate-spin text-[#FF5500]" />
             {:else if isListening}
               <Mic class="w-4 h-4 text-rose-600 animate-pulse" />
-              <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
+              <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-none bg-rose-500 animate-ping"></span>
             {:else}
               <Mic class="w-4 h-4" />
             {/if}
@@ -1181,7 +1197,7 @@
             <button
               onclick={handleSend}
               disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
-              class="btn-safety px-5 py-2 rounded-full text-white font-tech font-bold uppercase tracking-wider text-xs transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-none"
+              class="btn-safety px-5 py-2 rounded-none text-white font-tech font-bold uppercase tracking-wider text-xs transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-none"
             >
               <span>DISPATCH</span>
               <ArrowUp class="w-3.5 h-3.5" />
@@ -1217,7 +1233,7 @@
       <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
       <div 
         role="document"
-        class="relative max-w-4xl max-h-[90vh] bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl overflow-hidden shadow-2xl flex flex-col font-sans"
+        class="relative max-w-4xl max-h-[90vh] bg-[#FCFCFA] border-2 border-[#D0CEC7] rounded-none overflow-hidden shadow-2xl flex flex-col font-sans"
         onclick={(e) => e.stopPropagation()}
         onkeydown={(e) => e.stopPropagation()}
       >
@@ -1239,7 +1255,7 @@
               download={fileName}
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-safety text-white font-tech font-bold uppercase tracking-wider text-xs transition cursor-pointer active:scale-95 shadow-2xs"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-none btn-safety text-white font-tech font-bold uppercase tracking-wider text-xs transition cursor-pointer active:scale-95 shadow-none"
               title="Download gambar ini ke perangkat Anda"
             >
               <Download class="w-3.5 h-3.5" />
@@ -1248,7 +1264,7 @@
             <button
               type="button"
               onclick={() => zoomImageUrl = null}
-              class="p-1.5 rounded-lg hover:bg-[#D0CEC7]/60 text-[#5C6066] hover:text-[#111315] transition cursor-pointer"
+              class="p-1.5 rounded-none hover:bg-[#D0CEC7]/60 text-[#5C6066] hover:text-[#111315] transition cursor-pointer"
               title="Tutup"
             >
               <X class="w-4 h-4" />
@@ -1257,7 +1273,7 @@
         </div>
         <!-- Modal Image -->
         <div class="p-2 overflow-auto flex items-center justify-center max-h-[calc(90vh-50px)]">
-          <img src={zoomImageUrl} alt="Pratinjau Gambar" class="max-w-full max-h-full object-contain rounded-lg" />
+          <img src={zoomImageUrl} alt="Pratinjau Gambar" class="max-w-full max-h-full object-contain rounded-none" />
         </div>
       </div>
     </div>

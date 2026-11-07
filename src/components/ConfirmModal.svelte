@@ -122,7 +122,7 @@
         <button
           type="button"
           onclick={handleConfirmAction}
-          class="flex-1 h-9 rounded-full {activeVariant === 'danger' ? 'bg-rose-600 hover:bg-rose-500 shadow-sm' : activeVariant === 'warning' ? 'bg-amber-600 hover:bg-amber-500 shadow-sm' : 'btn-safety'} text-white text-xs font-bold uppercase tracking-wider shadow-sm transition cursor-pointer active:scale-95"
+          class="flex-1 h-9 rounded-none {activeVariant === 'danger' ? 'bg-rose-600 hover:bg-rose-500 shadow-none' : activeVariant === 'warning' ? 'bg-amber-600 hover:bg-amber-500 shadow-none' : 'btn-safety'} text-white text-xs font-bold uppercase tracking-wider shadow-none transition cursor-pointer active:scale-95"
         >
           {activeConfirmText}
         </button>

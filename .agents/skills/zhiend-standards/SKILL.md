@@ -31,10 +31,12 @@ The standards are modularly split into two specialized skills:
 ## 2. UI/UX Design Quick Reference (`zhiend-ui-design`)
 
 - **Design Philosophy**: Retro-Futuristic Cyber-Industrial Blueprint Grid (CIB-Grid) — edge-to-edge architectural drafting grid (inspired by ChainGPT Labs & Teenage Engineering). Strictly NO isolated floating cards with massive empty margins. 100% free of generic dark mode, zero blue/purple palettes, zero neon gradients, and zero AI-slop card kits.
-- **Sharp 90° Architectural Grid Framework (`rounded-none`)**:
-  - All structural cards, bays, partner boxes, chat bubbles, dialogs, modals, inputs, and panel frames are **strictly sharp 90-degree corners (`rounded-none`)**.
-  - Flat capsule pills (`rounded-full`) are strictly reserved for **primary Safety Orange (`#FF5500`) CTA triggers** (e.g. `APPLY NOW`, `DISPATCH`, `INITIALIZE RUNTIME`, `PUSH // GIT`, `CONFIRM`) and the outer CRT robot monitor bezel.
+- **Universal Zero-Radius Policy (`rounded-none` / `border-radius: 0px !important`)**:
+  - Absolute 100% sharp 90-degree architectural corners across the ENTIRE application.
+  - Zero rounded corners anywhere: all buttons (including primary CTA triggers `.btn-safety`), cards, modals, tabs, inputs, badges, and chips are strictly sharp rectangular `rounded-none`.
   - Pure flat tactile surfaces: zero fake 3D bottom bevel borders (`border-b-2`), zero murky drop shadows.
+- **Neutral Input Focus Policy (Zero Ring / Zero Orange Halo)**:
+  - When any input, textarea, or mechanical well is focused or active, there must be NO ring, NO outline, and NO border color change to orange (`#FF5500`). Border strictly remains neutral `#D0CEC7`.
 - **Drafting Blueprint Palette**:
   - `--canvas-concrete`: `#ECEAE5` (Light Drafting Concrete / Warm Off-White ground)
   - `--grid-seam`: `#D0CEC7` (1px architectural drafting rules & continuous cell partition seams)
@@ -79,6 +81,6 @@ The standards are modularly split into two specialized skills:
   - Mechanical Dropdown Popovers (`.animate-retro-dropdown`): Custom selects unfold smoothly with mechanical precision.
   - Retro-Futuristic AI Response Loading: Radar dot-matrix sequence (`[■ ■ ■ □ □]` via `.animate-radar-dot-1..5`), CRT scanline shimmer beam (`.crt-scan-beam`), operational telemetry banner, and phosphor block typewriter cursor (`.animate-retro-cursor` `█`) replacing generic 3-dot bounce.
   - Interactive Reticle & HUD Coordinates: Dynamic cursor coordinate tracking (`┌ RETICLE [042, 180] ┐`), rotating drafting crosshairs (`hover:rotate-45 cursor-crosshair`), and tactile soundbank pad clicks (`active:scale-[0.98] active:translate-y-0.5`).
-  - Balanced Action Triggers: Strict vertical proportion (`h-8` / 32px height) for navbar buttons and Git Push triggers (`.btn-safety rounded-full`).
+  - Balanced Action Triggers: Strict vertical proportion (`h-8` / 32px height) for navbar buttons and Git Push triggers (`.btn-safety rounded-none`).
 - **Typography & Voice**: Technical grotesque + monospace (Syne 900 display, Chakra Petch tech, Silkscreen pixel, Space Grotesk body, JetBrains Mono stencil), line lengths < 75 characters.
 - **Accessibility & Quality**: High WCAG AAA contrast (basalt on chalk bone), tactile `:active` press mechanics, zero emoji icons (100% Lucide SVG), and touch targets ≥ 44×44px.

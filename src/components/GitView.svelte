@@ -135,7 +135,7 @@
 
       <button
         onclick={onPush}
-        class="btn-safety px-4 py-1.5 rounded-full text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 uppercase tracking-wider shadow-none"
+        class="btn-safety px-4 py-1.5 rounded-none text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 uppercase tracking-wider shadow-none"
       >
         <UploadCloud class="w-3.5 h-3.5" /> Push to GitHub
       </button>
@@ -229,13 +229,13 @@
           bind:value={commitMessage}
           placeholder="e.g. fix: update responsive layout navbar"
           rows="2"
-          class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-none p-2 text-xs text-[#111315] placeholder-[#8C9097] outline-none resize-none transition shadow-2xs font-grotesk"
+          class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#D0CEC7] rounded-none p-2 text-xs text-[#111315] placeholder-[#8C9097] outline-none resize-none transition shadow-2xs font-grotesk"
         ></textarea>
 
         <button
           onclick={handleCommit}
           disabled={isCommitting || !commitMessage.trim()}
-          class="btn-safety w-full py-2 rounded-full disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 uppercase tracking-wider shadow-none"
+          class="btn-safety w-full py-2 rounded-none disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 uppercase tracking-wider shadow-none"
         >
           {isCommitting ? 'Committing...' : 'Commit Changes'}
         </button>

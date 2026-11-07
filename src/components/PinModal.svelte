@@ -71,12 +71,12 @@
             onkeydown={handleKeyDown}
             placeholder="••••"
             maxlength="12"
-            class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] focus:ring-1 focus:ring-[#FF5500] rounded-none p-2.5 text-center text-lg tracking-[0.3em] text-[#111315] font-stencil outline-none shadow-2xs"
+            class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-2.5 text-center text-lg tracking-[0.3em] text-[#111315] font-stencil outline-none shadow-2xs"
           />
           <button
             onclick={handleSubmit}
             disabled={isChecking || !pinValue.trim()}
-            class="btn-safety px-5 py-2.5 rounded-full text-white font-tech font-bold uppercase tracking-wider cursor-pointer disabled:opacity-40 active:scale-95 transition shadow-none"
+            class="btn-safety px-5 py-2.5 rounded-none text-white font-tech font-bold uppercase tracking-wider cursor-pointer disabled:opacity-40 active:scale-95 transition shadow-none"
           >
             <ArrowRight class="w-4 h-4" />
           </button>

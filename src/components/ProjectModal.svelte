@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { onMount } from 'svelte';
   import type { ScannedProject } from '../types';
   import { api } from '../services/api';
@@ -317,7 +317,7 @@
                   type="text"
                   bind:value={searchQuery}
                   placeholder="Filter direktori di D:\Works (contoh: sehati, crm, pacar, affiliate)..."
-                  class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-none pl-9 pr-3 py-2 text-xs text-[#111315] placeholder-[#8C9097] outline-none focus:border-[#FF5500] focus:ring-1 focus:ring-[#FF5500] transition font-grotesk shadow-2xs"
+                  class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-none pl-9 pr-3 py-2 text-xs text-[#111315] placeholder-[#8C9097] outline-none focus:border-[#D0CEC7]  transition font-grotesk shadow-2xs"
                 />
               </div>
 
@@ -349,7 +349,7 @@
                 <div class="flex items-center gap-2 shrink-0">
                   {#if isAtRoot()}
                     <span class="px-2.5 py-1 rounded-none bg-white border border-[#FF5500] text-[#FF5500] text-xs font-tech font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
-                      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span class="w-2 h-2 rounded-none bg-emerald-500 animate-pulse"></span>
                       <span>AKTIF</span>
                     </span>
                   {:else}
@@ -382,7 +382,7 @@
                 {@const hasChildren = node.children.length > 0}
                 {@const isExpanded = isNodeExpanded(node.id)}
 
-                <div class="rounded-xl border {isNodeCurrent ? 'border-[#FF5500] bg-[#FCFCFA] shadow-xs' : 'border-[#D0CEC7] bg-[#FCFCFA] hover:border-[#A8A59C]'} shrink-0 overflow-hidden shadow-2xs transition">
+                <div class="rounded-none border {isNodeCurrent ? 'border-[#FF5500] bg-[#FCFCFA] shadow-xs' : 'border-[#D0CEC7] bg-[#FCFCFA] hover:border-[#A8A59C]'} shrink-0 overflow-hidden shadow-2xs transition">
                   <!-- PARENT FOLDER ROW (CLICKABLE AREA) -->
                   <div
                     role="button"
@@ -411,7 +411,7 @@
                             e.stopPropagation();
                             toggleExpand(node.id);
                           }}
-                          class="p-1 rounded-md hover:bg-[#E5E3DD] text-[#5C6066] hover:text-[#111315] transition cursor-pointer shrink-0"
+                          class="p-1 rounded-none hover:bg-[#E5E3DD] text-[#5C6066] hover:text-[#111315] transition cursor-pointer shrink-0"
                           title={isExpanded ? 'Tutup turunan folder' : 'Buka turunan folder'}
                         >
                           {#if isExpanded}
@@ -424,7 +424,7 @@
                         <div class="w-6 shrink-0"></div>
                       {/if}
 
-                      <div class="w-8 h-8 rounded-lg {isNodeCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#111315] group-hover:bg-[#E5E3DD]'} border border-[#D0CEC7] flex items-center justify-center shrink-0 transition">
+                      <div class="w-8 h-8 rounded-none {isNodeCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#111315] group-hover:bg-[#E5E3DD]'} border border-[#D0CEC7] flex items-center justify-center shrink-0 transition">
                         <FolderGit class="w-4 h-4" />
                       </div>
 
@@ -434,12 +434,12 @@
                             {node.name}
                           </span>
                           {#if hasChildren}
-                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] font-stencil select-none font-bold">
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-none bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] font-stencil select-none font-bold">
                               {node.children.length} SUB-BAYS {isExpanded ? '▲' : '▼'}
                             </span>
                           {/if}
                           {#if node.isGit}
-                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#FCFCFA] text-[#5C6066] font-stencil flex items-center gap-1 border border-[#D0CEC7]">
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-none bg-[#FCFCFA] text-[#5C6066] font-stencil flex items-center gap-1 border border-[#D0CEC7]">
                               <GitBranch class="w-2.5 h-2.5 text-[#FF5500]" /> GIT
                             </span>
                           {/if}
@@ -451,8 +451,8 @@
                     <!-- RIGHT: CLEAN ACTIVE / HOVER INDICATOR -->
                     <div class="flex items-center gap-2 shrink-0 pr-1">
                       {#if isNodeCurrent}
-                        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#FCFCFA] border border-[#FF5500] text-[#FF5500] text-[10px] font-tech font-bold uppercase tracking-wider shadow-2xs">
-                          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-[#FCFCFA] border border-[#FF5500] text-[#FF5500] text-[10px] font-tech font-bold uppercase tracking-wider shadow-2xs">
+                          <span class="w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"></span>
                           <span>AKTIF</span>
                         </div>
                       {:else if hasChildren}
@@ -462,7 +462,7 @@
                             e.stopPropagation();
                             handleSelect(node.path);
                           }}
-                          class="btn-hardware px-2.5 py-1 text-[10px] rounded font-tech font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1 shadow-2xs active:scale-95"
+                          class="btn-hardware px-2.5 py-1 text-[10px] rounded-none font-tech font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1 shadow-2xs active:scale-95"
                           title={`Jadikan seluruh folder ${node.name} sebagai active workspace`}
                         >
                           <span>SET AKTIF</span>
@@ -485,7 +485,7 @@
 
                           {#if hasSubChildren}
                             <!-- SUB-FOLDER CONTAINER (e.g. CRM, Assets Management) -->
-                            <div class="rounded-lg border {isChildCurrent ? 'border-[#FF5500] bg-[#FCFCFA]' : 'border-[#D0CEC7] bg-[#FCFCFA] hover:border-[#A8A59C]'} overflow-hidden my-0.5 transition shadow-2xs">
+                            <div class="rounded-none border {isChildCurrent ? 'border-[#FF5500] bg-[#FCFCFA]' : 'border-[#D0CEC7] bg-[#FCFCFA] hover:border-[#A8A59C]'} overflow-hidden my-0.5 transition shadow-2xs">
                               <div
                                 role="button"
                                 tabindex="0"
@@ -512,7 +512,7 @@
                                       e.stopPropagation();
                                       toggleExpand(child.id);
                                     }}
-                                    class="p-1 rounded hover:bg-[#E5E3DD] text-[#5C6066] hover:text-[#111315] transition cursor-pointer shrink-0"
+                                    class="p-1 rounded-none hover:bg-[#E5E3DD] text-[#5C6066] hover:text-[#111315] transition cursor-pointer shrink-0"
                                     title={isChildExpanded ? 'Tutup sub-folder' : 'Buka sub-folder'}
                                   >
                                     {#if isChildExpanded}
@@ -522,7 +522,7 @@
                                     {/if}
                                   </button>
 
-                                  <div class="w-7 h-7 rounded {isChildCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#111315]'} border border-[#D0CEC7] flex items-center justify-center shrink-0 transition">
+                                  <div class="w-7 h-7 rounded-none {isChildCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#111315]'} border border-[#D0CEC7] flex items-center justify-center shrink-0 transition">
                                     <FolderGit class="w-3.5 h-3.5" />
                                   </div>
 
@@ -531,11 +531,11 @@
                                       <span class="text-xs font-bold font-tech uppercase tracking-wide {isChildCurrent ? 'text-[#FF5500]' : 'text-[#111315] group-hover:text-[#FF5500]'} truncate transition-colors">
                                         {child.name}
                                       </span>
-                                      <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] font-stencil select-none font-bold">
+                                      <span class="text-[9px] px-1.5 py-0.5 rounded-none bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] font-stencil select-none font-bold">
                                         {child.children.length} SUB-PROJECT {isChildExpanded ? '▲' : '▼'}
                                       </span>
                                       {#if child.isGit}
-                                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#FCFCFA] text-[#5C6066] font-stencil flex items-center gap-1 border border-[#D0CEC7]">
+                                        <span class="text-[9px] px-1.5 py-0.5 rounded-none bg-[#FCFCFA] text-[#5C6066] font-stencil flex items-center gap-1 border border-[#D0CEC7]">
                                           <GitBranch class="w-2.5 h-2.5 text-[#FF5500]" /> GIT
                                         </span>
                                       {/if}
@@ -546,8 +546,8 @@
 
                                 <div class="flex items-center gap-2 shrink-0 pr-1">
                                   {#if isChildCurrent}
-                                    <div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FCFCFA] border border-[#FF5500] text-[#FF5500] text-[10px] font-tech font-bold uppercase tracking-wider">
-                                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-[#FCFCFA] border border-[#FF5500] text-[#FF5500] text-[10px] font-tech font-bold uppercase tracking-wider">
+                                      <span class="w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"></span>
                                       <span>AKTIF</span>
                                     </div>
                                   {:else if hasSubChildren}
@@ -557,7 +557,7 @@
                                         e.stopPropagation();
                                         handleSelect(child.path);
                                       }}
-                                      class="btn-hardware px-2 py-0.5 text-[10px] rounded font-tech font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1 shadow-2xs active:scale-95"
+                                      class="btn-hardware px-2 py-0.5 text-[10px] rounded-none font-tech font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1 shadow-2xs active:scale-95"
                                       title={`Jadikan folder ${child.name} sebagai active workspace`}
                                     >
                                       <span>SET AKTIF</span>
@@ -580,14 +580,14 @@
                                         tabindex="0"
                                         onclick={() => handleSelect(subChild.path)}
                                         onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(subChild.path); }}
-                                        class="min-h-[38px] px-3 py-1.5 rounded-lg {isSubCurrent ? 'bg-[#FCFCFA] border-[#FF5500] text-[#FF5500]' : 'bg-[#FCFCFA] hover:bg-[#ECEAE5] border-[#D0CEC7] text-[#111315]'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group active:scale-[0.99] shadow-2xs"
+                                        class="min-h-[38px] px-3 py-1.5 rounded-none {isSubCurrent ? 'bg-[#FCFCFA] border-[#FF5500] text-[#FF5500]' : 'bg-[#FCFCFA] hover:bg-[#ECEAE5] border-[#D0CEC7] text-[#111315]'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group active:scale-[0.99] shadow-2xs"
                                         title={`Klik untuk buka workspace: ${subChild.name}`}
                                       >
                                         <div class="flex items-center gap-2.5 min-w-0 flex-1">
                                           <span class="text-[#8C9097] font-stencil text-xs select-none shrink-0">
                                             {isLastSub ? '└──' : '├──'}
                                           </span>
-                                          <div class="w-5 h-5 rounded {isSubCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#111315]'} border border-[#D0CEC7] flex items-center justify-center shrink-0 transition">
+                                          <div class="w-5 h-5 rounded-none {isSubCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#111315]'} border border-[#D0CEC7] flex items-center justify-center shrink-0 transition">
                                             <Package class="w-3 h-3" />
                                           </div>
                                           <div class="flex flex-col min-w-0 flex-1">
@@ -596,7 +596,7 @@
                                                 {subChild.name}
                                               </span>
                                               {#if subChild.isGit}
-                                                <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#FCFCFA] text-[#5C6066] font-stencil flex items-center gap-1 border border-[#D0CEC7]">
+                                                <span class="text-[9px] px-1.5 py-0.5 rounded-none bg-[#FCFCFA] text-[#5C6066] font-stencil flex items-center gap-1 border border-[#D0CEC7]">
                                                   <GitBranch class="w-2.5 h-2.5 text-[#FF5500]" /> GIT
                                                 </span>
                                               {/if}
@@ -607,8 +607,8 @@
 
                                         <div class="flex items-center gap-2 shrink-0 pr-1">
                                           {#if isSubCurrent}
-                                            <div class="flex items-center gap-1 px-2 py-0.5 rounded bg-[#FCFCFA] border border-[#FF5500] text-[#FF5500] text-[10px] font-tech font-bold uppercase tracking-wider">
-                                              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                            <div class="flex items-center gap-1 px-2 py-0.5 rounded-none bg-[#FCFCFA] border border-[#FF5500] text-[#FF5500] text-[10px] font-tech font-bold uppercase tracking-wider">
+                                              <span class="w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"></span>
                                               <span>AKTIF</span>
                                             </div>
                                           {:else}
@@ -628,14 +628,14 @@
                               tabindex="0"
                               onclick={() => handleSelect(child.path)}
                               onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(child.path); }}
-                              class="min-h-[40px] px-3 py-2 rounded-lg {isChildCurrent ? 'bg-[#FCFCFA] border-[#FF5500] text-[#FF5500]' : 'bg-[#FCFCFA] hover:bg-[#ECEAE5] border-[#D0CEC7] text-[#111315]'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group active:scale-[0.99] shadow-2xs"
+                              class="min-h-[40px] px-3 py-2 rounded-none {isChildCurrent ? 'bg-[#FCFCFA] border-[#FF5500] text-[#FF5500]' : 'bg-[#FCFCFA] hover:bg-[#ECEAE5] border-[#D0CEC7] text-[#111315]'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group active:scale-[0.99] shadow-2xs"
                               title={`Klik untuk buka: ${child.name}`}
                             >
                               <div class="flex items-center gap-2.5 min-w-0 flex-1">
                                 <span class="text-[#5C6066] font-mono text-xs select-none shrink-0">
                                   {isLastChild ? '└──' : '├──'}
                                 </span>
-                                <div class="w-6 h-6 rounded-md {isChildCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
+                                <div class="w-6 h-6 rounded-none {isChildCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
                                   <Package class="w-3.5 h-3.5" />
                                 </div>
                                 <div class="flex flex-col min-w-0 flex-1">
@@ -644,7 +644,7 @@
                                       {child.name}
                                     </span>
                                     {#if child.isGit}
-                                      <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#ECEAE5] text-[#5C6066] font-mono flex items-center gap-1 border border-[#D0CEC7]">
+                                      <span class="text-[9px] px-1.5 py-0.2 rounded-none bg-[#ECEAE5] text-[#5C6066] font-mono flex items-center gap-1 border border-[#D0CEC7]">
                                         <GitBranch class="w-2.5 h-2.5 text-[#5C6066]" /> git
                                       </span>
                                     {/if}
@@ -655,7 +655,7 @@
 
                               <div class="flex items-center gap-2 shrink-0 pr-1">
                                 {#if isChildCurrent}
-                                  <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-100 border border-[#FF5500] text-[#FF5500] text-[10px] font-mono font-bold">
+                                  <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-orange-100 border border-[#FF5500] text-[#FF5500] text-[10px] font-mono font-bold">
                                     <Check class="w-3 h-3 text-[#FF5500]" />
                                     <span>Active</span>
                                   </div>
@@ -679,7 +679,7 @@
       <!-- Tab 2: Create New Project (Default: D:\Works) -->
       {#if activeTab === 'create'}
         <div class="p-4 sm:p-6 flex flex-col gap-4 text-xs flex-1 overflow-y-auto min-h-0 bg-[#ECEAE5]">
-          <div class="p-3.5 rounded-lg bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xs flex flex-col gap-1.5">
+          <div class="p-3.5 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xs flex flex-col gap-1.5">
             <span class="font-tech font-bold uppercase tracking-wider text-[#FF5500] text-[11px]">:: DIREKTORI TARGET</span>
             <span class="text-[11px] text-[#5C6066] font-grotesk">Inisialisasi direktori codebase baru di dalam storage matrix D:\Works dengan Git otomatis.</span>
           </div>
@@ -691,7 +691,7 @@
               type="text"
               bind:value={newProjectName}
               placeholder="Contoh: my-awesome-app"
-              class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] focus:ring-1 focus:ring-[#FF5500] rounded-lg p-2.5 text-[#111315] font-stencil text-xs outline-none transition shadow-2xs"
+              class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#D0CEC7]  rounded-none p-2.5 text-[#111315] font-stencil text-xs outline-none transition shadow-2xs"
             />
           </div>
 
@@ -701,7 +701,7 @@
               id="new-proj-parent"
               type="text"
               bind:value={newProjectParent}
-              class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] focus:ring-1 focus:ring-[#FF5500] rounded-lg p-2.5 text-[#111315] font-stencil text-xs outline-none transition shadow-2xs"
+              class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#D0CEC7]  rounded-none p-2.5 text-[#111315] font-stencil text-xs outline-none transition shadow-2xs"
             />
             <span class="text-[10px] text-[#5C6066] font-stencil">
               LOKASI TUJUAN: <code class="text-[#FF5500] font-bold">{newProjectParent}\{newProjectName || '&lt;nama-project&gt;'}</code>
@@ -713,7 +713,7 @@
               type="checkbox"
               id="init-git-cb"
               bind:checked={initGit}
-              class="w-4 h-4 rounded cursor-pointer accent-[#FF5500]"
+              class="w-4 h-4 rounded-none cursor-pointer accent-[#FF5500]"
             />
             <label for="init-git-cb" class="text-[#111315] font-tech font-bold text-xs cursor-pointer select-none uppercase tracking-wide">
               Inisialisasi Git Repository (`git init`) otomatis
@@ -723,7 +723,7 @@
           <button
             onclick={handleCreateProject}
             disabled={isCreating || !newProjectName.trim()}
-            class="btn-safety mt-2 py-3 rounded-lg text-white font-tech font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-2xs transition cursor-pointer active:scale-95 disabled:opacity-40"
+            class="btn-safety mt-2 py-3 rounded-none text-white font-tech font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-2xs transition cursor-pointer active:scale-95 disabled:opacity-40"
           >
             <Sparkles class="w-4 h-4" />
             <span>{isCreating ? 'MEMBUAT PROJECT...' : 'BUAT & BUKA PROJECT DI ZHIEND'}</span>
@@ -742,12 +742,12 @@
                 type="text"
                 bind:value={manualPathInput}
                 placeholder="Contoh: C:\Users\zhien\my-project atau E:\Repos\backend"
-                class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] focus:ring-1 focus:ring-[#FF5500] rounded-lg p-2.5 text-[#111315] font-stencil text-xs outline-none transition shadow-2xs"
+                class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#D0CEC7]  rounded-none p-2.5 text-[#111315] font-stencil text-xs outline-none transition shadow-2xs"
               />
               <button
                 onclick={() => handleSelect(manualPathInput)}
                 disabled={isSelecting || !manualPathInput.trim()}
-                class="btn-safety px-5 py-2.5 rounded-lg text-white font-tech font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-2xs active:scale-95 transition disabled:opacity-40"
+                class="btn-safety px-5 py-2.5 rounded-none text-white font-tech font-bold uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-2xs active:scale-95 transition disabled:opacity-40"
               >
                 <span>BUKA</span>
                 <ArrowRight class="w-3.5 h-3.5" />
@@ -769,11 +769,11 @@
                   <button
                     type="button"
                     onclick={() => handleSelect(r)}
-                    class="p-2.5 min-h-[42px] shrink-0 rounded-lg {isCurrentProj ? 'bg-[#FCFCFA] border-[#FF5500] text-[#FF5500] font-bold' : 'bg-[#FCFCFA] hover:bg-[#ECEAE5] border-[#D0CEC7] text-[#111315]'} border flex items-center justify-between gap-3 text-left font-stencil text-xs cursor-pointer transition-all active:scale-[0.99] group shadow-2xs"
+                    class="p-2.5 min-h-[42px] shrink-0 rounded-none {isCurrentProj ? 'bg-[#FCFCFA] border-[#FF5500] text-[#FF5500] font-bold' : 'bg-[#FCFCFA] hover:bg-[#ECEAE5] border-[#D0CEC7] text-[#111315]'} border flex items-center justify-between gap-3 text-left font-stencil text-xs cursor-pointer transition-all active:scale-[0.99] group shadow-2xs"
                     title={`Buka: ${r}`}
                   >
                     <div class="flex items-center gap-2.5 min-w-0">
-                      <div class="w-6 h-6 rounded {isCurrentProj ? 'bg-[#FF5500] text-white' : 'bg-[#ECEAE5] text-[#111315]'} border border-[#D0CEC7] flex items-center justify-center shrink-0 transition">
+                      <div class="w-6 h-6 rounded-none {isCurrentProj ? 'bg-[#FF5500] text-white' : 'bg-[#ECEAE5] text-[#111315]'} border border-[#D0CEC7] flex items-center justify-center shrink-0 transition">
                         <FolderGit class="w-3 h-3" />
                       </div>
                       <span class="truncate">{r}</span>
@@ -781,8 +781,8 @@
 
                     <div class="flex items-center gap-2 shrink-0 pr-1">
                       {#if isCurrentProj}
-                        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#FCFCFA] border border-[#FF5500] text-[#FF5500] text-[10px] font-tech font-bold uppercase tracking-wider">
-                          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-[#FCFCFA] border border-[#FF5500] text-[#FF5500] text-[10px] font-tech font-bold uppercase tracking-wider">
+                          <span class="w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"></span>
                           <span>AKTIF</span>
                         </div>
                       {:else}

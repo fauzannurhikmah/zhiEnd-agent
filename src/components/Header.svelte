@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import type { AppConfig, GitStatus, TelegramStatus, WhatsAppStatus, TunnelStatus } from '../types';
   import { FolderOpen, GitBranch, Cpu, Send, MessageSquare, Globe, Settings as SettingsIcon, UploadCloud, ChevronDown } from 'lucide-svelte';
 
@@ -41,7 +41,7 @@
   }
 </script>
 
-<header class="glass-panel mx-3 mt-3 px-4 py-2.5 rounded-xl flex items-center justify-between gap-4 z-40 border border-slate-800/80 shadow-lg shadow-black/40">
+<header class="glass-panel mx-3 mt-3 px-4 py-2.5 rounded-none flex items-center justify-between gap-4 z-40 border border-slate-800/80 shadow-lg shadow-black/40">
   <!-- Left: Brand & Project Pill -->
   <div class="flex items-center gap-3">
     <!-- Brand -->
@@ -49,7 +49,7 @@
       <img 
         src="/img/logo.png" 
         alt="zhiEnd Logo" 
-        class="w-9 h-9 rounded-lg object-contain shadow-md shadow-indigo-500/30 border border-white/10 p-0.5 bg-slate-900"
+        class="w-9 h-9 rounded-none object-contain shadow-md shadow-indigo-500/30 border border-white/10 p-0.5 bg-slate-900"
       />
       <div>
         <div class="text-sm font-bold tracking-tight">
@@ -64,7 +64,7 @@
     <!-- Active Workspace Pill -->
     <button
       onclick={onOpenProjectModal}
-      class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-full text-xs transition cursor-pointer group"
+      class="flex items-center gap-2 bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 px-3 py-1.5 rounded-none text-xs transition cursor-pointer group"
       title="Klik untuk memilih atau membuka project lain"
     >
       <FolderOpen class="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
@@ -75,7 +75,7 @@
         </span>
       </div>
       {#if gitStatus?.isRepo}
-        <span class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full text-[10px] font-mono flex items-center gap-1">
+        <span class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-none text-[10px] font-mono flex items-center gap-1">
           <GitBranch class="w-2.5 h-2.5" /> {gitStatus.branch || 'main'}
         </span>
       {/if}
@@ -84,7 +84,7 @@
   </div>
 
   <!-- Center: Model Selector -->
-  <div class="flex items-center gap-2 bg-slate-900/60 border border-slate-800 px-3 py-1 rounded-lg">
+  <div class="flex items-center gap-2 bg-slate-900/60 border border-slate-800 px-3 py-1 rounded-none">
     <span class="text-[11px] text-violet-400 font-semibold flex items-center gap-1">
       ✨ Model:
     </span>
@@ -111,40 +111,40 @@
     <!-- Telegram Status -->
     <button
       onclick={() => onSelectTab && onSelectTab('remote')}
-      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border cursor-pointer hover:opacity-80 transition {telegramStatus?.status === 'running' ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400'}"
+      class="flex items-center gap-1.5 px-2.5 py-1 rounded-none text-[11px] border cursor-pointer hover:opacity-80 transition {telegramStatus?.status === 'running' ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400'}"
       title="Telegram Remote Bot: {telegramStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
     >
       <Send class="w-3 h-3 text-sky-400" />
       <span>TG</span>
-      <span class="w-1.5 h-1.5 rounded-full {telegramStatus?.status === 'running' ? 'bg-sky-400 shadow-[0_0_6px_#38bdf8]' : 'bg-slate-600'}"></span>
+      <span class="w-1.5 h-1.5 rounded-none {telegramStatus?.status === 'running' ? 'bg-sky-400 shadow-[0_0_6px_#38bdf8]' : 'bg-slate-600'}"></span>
     </button>
 
     <!-- WhatsApp Status -->
     <button
       onclick={() => onSelectTab && onSelectTab('remote')}
-      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border cursor-pointer hover:opacity-80 transition {whatsappStatus?.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400')}"
+      class="flex items-center gap-1.5 px-2.5 py-1 rounded-none text-[11px] border cursor-pointer hover:opacity-80 transition {whatsappStatus?.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400')}"
       title="WhatsApp Remote Bot: {whatsappStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
     >
       <MessageSquare class="w-3 h-3 text-emerald-400" />
       <span>WA</span>
-      <span class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-400 shadow-[0_0_6px_#fbbf24] animate-pulse' : 'bg-slate-600')}"></span>
+      <span class="w-1.5 h-1.5 rounded-none {whatsappStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-400 shadow-[0_0_6px_#fbbf24] animate-pulse' : 'bg-slate-600')}"></span>
     </button>
 
     <!-- Public Tunnel Status -->
     <button
       onclick={() => onSelectTab && onSelectTab('remote')}
-      class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] border cursor-pointer hover:opacity-80 transition {tunnelStatus?.status === 'connected' ? 'bg-violet-500/10 border-violet-500/30 text-violet-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400'}"
+      class="flex items-center gap-1.5 px-2.5 py-1 rounded-none text-[11px] border cursor-pointer hover:opacity-80 transition {tunnelStatus?.status === 'connected' ? 'bg-violet-500/10 border-violet-500/30 text-violet-300' : 'bg-slate-800/40 border-slate-700/50 text-slate-400'}"
       title="Public Tunnel: {tunnelStatus?.publicUrl || 'Local only'} (Klik untuk buka Remote Hub)"
     >
       <Globe class="w-3 h-3 text-violet-400" />
       <span>Remote</span>
-      <span class="w-1.5 h-1.5 rounded-full {tunnelStatus?.status === 'connected' ? 'bg-violet-400 shadow-[0_0_6px_#a78bfa]' : 'bg-slate-600'}"></span>
+      <span class="w-1.5 h-1.5 rounded-none {tunnelStatus?.status === 'connected' ? 'bg-violet-400 shadow-[0_0_6px_#a78bfa]' : 'bg-slate-600'}"></span>
     </button>
 
     <!-- Quick Push Button -->
     <button
       onclick={onQuickPush}
-      class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition cursor-pointer active:scale-95"
+      class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold text-xs px-3 py-1.5 rounded-none flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition cursor-pointer active:scale-95"
       title="Push perubahan ke GitHub"
     >
       <UploadCloud class="w-3.5 h-3.5" /> Push
@@ -153,7 +153,7 @@
     <!-- Settings Button -->
     <button
       onclick={onOpenSettingsModal}
-      class="p-2 rounded-lg bg-slate-800/60 hover:bg-slate-700/70 border border-slate-700/60 text-slate-300 hover:text-white transition cursor-pointer"
+      class="p-2 rounded-none bg-slate-800/60 hover:bg-slate-700/70 border border-slate-700/60 text-slate-300 hover:text-white transition cursor-pointer"
       title="Buka Pengaturan Lengkap (Semua Settingan Bisa Diatur di Sini)"
     >
       <SettingsIcon class="w-4 h-4" />

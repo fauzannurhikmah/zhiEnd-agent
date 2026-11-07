@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   let {
     avatar,
     name = 'Avatar',
@@ -60,11 +60,11 @@
   }
 
   const sizeClasses = {
-    xs: 'w-4 h-4 text-[10px] rounded-md',
-    sm: 'w-6 h-6 text-xs rounded-lg',
-    md: 'w-8 h-8 text-sm rounded-xl',
-    lg: 'w-11 h-11 text-lg rounded-2xl',
-    xl: 'w-16 h-16 text-2xl rounded-2xl'
+    xs: 'w-4 h-4 text-[10px] rounded-none',
+    sm: 'w-6 h-6 text-xs rounded-none',
+    md: 'w-8 h-8 text-sm rounded-none',
+    lg: 'w-11 h-11 text-lg rounded-none',
+    xl: 'w-16 h-16 text-2xl rounded-none'
   };
 </script>
 

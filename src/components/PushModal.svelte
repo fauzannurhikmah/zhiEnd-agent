@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import { UploadCloud, X, Loader2, CheckCircle2, AlertCircle } from 'lucide-svelte';
 
   let {

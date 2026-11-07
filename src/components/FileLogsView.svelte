@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
   import type { FileItem } from '../types';
   import { FolderTree, Terminal, RotateCw, Trash2, Folder, File, Code, FileText } from 'lucide-svelte';
 
