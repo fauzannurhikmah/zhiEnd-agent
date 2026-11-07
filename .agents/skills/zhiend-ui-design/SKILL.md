@@ -17,13 +17,14 @@ description: "Distinctive UI/UX Design System for zhiEnd Agent. Opinionated 'Cyb
 > 2. **Neutral Input Focus Policy (Zero Ring / Zero Orange Halo)**:
 >    - When any input, textarea, or mechanical well is focused or active, there must be NO ring, NO outline, and NO border color change to orange (`#FF5500`).
 >    - The border strictly remains neutral `#D0CEC7` (`outline: none !important; box-shadow: none !important; border-color: #D0CEC7 !important; --tw-ring-color: transparent !important`).
-> 3. **Clean CAD Dot Grid & Pinned Subtle Background HUD Matrix**:
->    - Clean architectural concrete chassis (`#ECEAE5`) with a subtle 32px CAD dot matrix grid (`radial-gradient`), layered with sparse asymmetrical drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), dedicated technical left rail (`✕`) and right rail (`◎`).
->    - **Pinned Viewport-Anchored HUD Matrix (Zero White Cards / Zero Essay Clutter)**:
->      - Raw technical coordinates (`[042, 180]`, `[SYS_LAT: 38.88°N // LONG: 121.04°E]`), vertical drafting ribbons (`:: SEC_04 // CAD_MATRIX_STREAM :: REV_2.4.1`, `:: DRAFTING GRID SEAMS NOMINAL`), corner brackets (`┌ ┐`, `└ ┘`), and drafting crosshairs (`✕`, `+`, `■`).
->      - Stamped directly onto the canvas with crisp subtle contrast (`text-[#7A7E85]`, `text-[#9A9EA6]`, `#FF5500` square markers).
->      - Strictly NO white background panels/cards (`bg-[#FCFCFA]`) and NO long essay paragraphs.
->      - Pinned to the non-scrolling viewport layer (`absolute inset-x-0 top-10 bottom-0 pointer-events-none`) so scrolling down through long chat history never leaves the telemetry behind ("tidak nyangkut di atas").
+> 3. **Unified CAD Dot Grid & Subtle Background HUD Matrix Across All Tabs**:
+>    - **Unified Background Ground**: ALL views across the application (Coding Agent, Source Control / Git, Remote Hub, and File Logs) strictly share the exact same background: concrete chassis (`#ECEAE5`), 32px CAD dot matrix grid (`radial-gradient`), and asymmetrical drafting rule seams (`.blueprint-cad-ground`).
+>    - **Subtle Background HUD Matrix (`<SubtleHudMatrix />`)**:
+>      - Randomly sized and positioned technical text & telemetry paragraphs (`text-[7px]`, `text-[7.5px]`, `text-[8.5px]`, `text-[9px]`, `text-[10px]`).
+>      - Dual-orientation: horizontal paragraph snippets (specs, protocol gateways, memory registers) and vertical ribbons (`[writing-mode:vertical-lr]`).
+>      - Stamped directly onto the canvas with delicate, non-distracting opacity (`text-[#7A7E85]/65`, `text-[#8C9097]/50`) so user remains 100% focused on chat content.
+>      - Pinned to the non-scrolling viewport layer so it never scrolls away or gets left behind at the top.
+>      - Strictly NO white background panels/cards (`bg-[#FCFCFA]`) around the background HUD telemetry.
 >    - **Per-Message Persona History Persistence**:
 >      - Switching persona mid-session updates future responses only. All historical messages in the chat stream retain the exact avatar, name, and traits of the persona active at the time they were generated.
 > 4. **Mini Pixel Robot Avatar Companion (`PixelRobotAvatarBuddy`)**:

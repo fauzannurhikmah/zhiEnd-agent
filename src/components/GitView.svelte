@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { GitStatus, CommitInfo } from '../types';
   import { dialog } from '../services/dialog.svelte';
+  import SubtleHudMatrix from './SubtleHudMatrix.svelte';
   import { 
     GitBranch, 
     UploadCloud, 
@@ -90,9 +91,12 @@
   }
 </script>
 
-<div class="h-full flex flex-col gap-3 overflow-y-auto lg:overflow-hidden p-3 sm:p-4 text-[#111315] font-tech">
+<div class="h-full flex flex-col gap-3 overflow-y-auto lg:overflow-hidden p-3 sm:p-4 text-[#111315] font-tech blueprint-cad-ground bg-[#ECEAE5] relative">
+  <!-- Pinned Subtle Retro-Futuristic Background HUD Matrix -->
+  <SubtleHudMatrix />
+
   <!-- Top Bar with Industrial Hardware Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#D0CEC7] pb-3">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#D0CEC7] pb-3 relative z-10">
     <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-stencil">
       <div class="flex items-center gap-1.5 text-[#111315] font-bold px-2.5 py-1 rounded-none bg-[#FCFCFA] border border-[#D0CEC7]">
         <GitBranch class="w-3.5 h-3.5 text-[#FF5500]" />
@@ -143,7 +147,7 @@
   </div>
 
   <!-- Split View: Files & Diff -->
-  <div class="flex-1 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-3 min-h-0">
+  <div class="flex-1 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-3 min-h-0 relative z-10">
     <!-- Left: Files & Commit -->
     <div class="relative flex flex-col gap-3 min-h-0 bg-[#ECEAE5] border border-[#D0CEC7] rounded-none p-3.5 shadow-2xs">
       <span class="reg-dot reg-dot-tl"></span>
@@ -285,7 +289,7 @@
 
   <!-- Recent commits bar -->
   {#if commits && commits.length > 0}
-    <div class="border-t border-[#D0CEC7] pt-2 flex items-center gap-4 text-xs font-stencil overflow-x-auto text-[#60646C]">
+    <div class="border-t border-[#D0CEC7] pt-2 flex items-center gap-4 text-xs font-stencil overflow-x-auto text-[#60646C] relative z-10">
       <span class="text-[#111315] font-bold shrink-0 uppercase">Recent:</span>
       {#each commits.slice(0, 4) as c}
         <div class="flex items-center gap-1.5 shrink-0">

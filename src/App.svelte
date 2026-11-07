@@ -811,9 +811,9 @@
 <div
   class="relative flex h-screen w-screen overflow-hidden bg-[#ECEAE5] text-[#111315] antialiased selection:bg-[#FF5500] selection:text-white"
 >
-  <!-- Industrial Blueprint Grid Background -->
+  <!-- Industrial Blueprint CAD Ground Background -->
   <div
-    class="fixed inset-0 pointer-events-none overflow-hidden z-0 blueprint-grid opacity-70"
+    class="fixed inset-0 pointer-events-none overflow-hidden z-0 blueprint-cad-ground opacity-90"
   ></div>
 
   <!-- Minimalist Clean Sidebar -->
@@ -1034,7 +1034,7 @@
 
     <!-- Main Viewport Area -->
     <main
-      class="flex-1 overflow-hidden p-0 min-h-0 flex flex-col relative blueprint-grid"
+      class="flex-1 overflow-hidden p-0 min-h-0 flex flex-col relative blueprint-cad-ground bg-[#ECEAE5]"
     >
       {#if currentTab === "chat"}
         <ChatView

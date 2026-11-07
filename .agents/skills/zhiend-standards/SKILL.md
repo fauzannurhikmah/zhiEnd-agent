@@ -48,10 +48,10 @@ The standards are modularly split into two specialized skills:
   - `--crt-void`: `#101114` (Deep charcoal CRT well for dot-matrix screens & viewfinder HUD boxes)
   - `--ink-basalt`: `#111315` (High-contrast basalt black for headlines, labels, and primary text)
   - `--stencil-slate`: `#60646C` (Technical stencil metadata, sub-labels, and timestamps)
-- **Clean CAD Dot Grid & Pinned Subtle Background HUD Matrix**:
-  - Warm off-white concrete chassis (`#ECEAE5`) with subtle 32px CAD dot matrix grid, sparse asymmetrical drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), left rail (`✕`), and right rail (`◎`).
-  - Viewport-anchored subtle HUD telemetry matrix: raw coordinates (`[042, 180]`, `[SYS_LAT: 38.88°N // LONG: 121.04°E]`), vertical ribbons (`:: SEC_04 // CAD_MATRIX_STREAM :: REV_2.4.1`), corner brackets (`┌ ┐`, `└ ┘`), and drafting crosshairs (`✕`, `+`, `■`).
-  - Strictly NO white background panels/cards (`bg-[#FCFCFA]`) and NO long essay paragraphs in the background.
+- **Unified CAD Dot Grid & Subtle Background HUD Matrix Across All Views**:
+  - Warm off-white concrete chassis (`#ECEAE5`) with subtle 32px CAD dot matrix grid, sparse asymmetrical drafting rules (4.5%, 24%, 76%, 95.5% vertical columns) unified across ALL views: Coding Agent (`chat`), Source Control (`git`), Remote Hub (`remote`), and File Logs (`files`).
+  - Viewport-anchored subtle HUD telemetry matrix (`<SubtleHudMatrix />`): randomized font sizes (`text-[7px]` to `text-[10px]`), dual orientation (horizontal paragraph snippets & vertical drafting ribbons), corner brackets (`┌ ┐`, `└ ┘`), and drafting crosshairs (`✕`, `+`, `■`).
+  - Non-distracting contrast (`text-[#7A7E85]/65`, `text-[#8C9097]/50`) stamped directly onto canvas (zero white box cards) so user remains focused on chat.
   - Pinned to the non-scrolling viewport layer so scrolling through long chat history never leaves telemetry behind.
   - **Per-Message Persona History Persistence**: Mid-session persona switches apply to future responses only; all historical messages preserve the exact avatar, name, and traits active when they were generated.
 - **Mini Pixel Robot Avatar Companion (`PixelRobotAvatarBuddy`)**:

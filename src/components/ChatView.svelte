@@ -3,6 +3,7 @@
   import AvatarView from './AvatarView.svelte';
   import CrtRobotMascot from './CrtRobotMascot.svelte';
   import PixelRobotAvatarBuddy from './PixelRobotAvatarBuddy.svelte';
+  import SubtleHudMatrix from './SubtleHudMatrix.svelte';
   import { renderMarkdown } from '../services/markdown';
   import { api } from '../services/api';
   import { 
@@ -589,67 +590,8 @@
     </div>
   </div>
 
-  <!-- Pinned Subtle Retro-Futuristic Background HUD Matrix (Zero white cards, zero essay clutter, anchored to viewport) -->
-  <div class="absolute inset-x-0 top-10 bottom-0 pointer-events-none select-none overflow-hidden z-0 font-stencil text-[#7A7E85]">
-    <!-- Top Left Coordinates & Registration -->
-    <div class="absolute top-6 left-6 flex items-center gap-2 text-[10px] tracking-wider hidden sm:flex">
-      <span class="w-1.5 h-1.5 bg-[#FF5500] inline-block"></span>
-      <span class="text-[#60646C] font-bold">CAD_MATRIX // SECTOR_01</span>
-      <span class="text-[#8C9097]">[042, 180]</span>
-    </div>
-
-    <!-- Top Right Telemetry & Coordinates -->
-    <div class="absolute top-6 right-8 text-right text-[9px] tracking-widest hidden sm:block">
-      <div class="text-[#60646C] font-mono font-bold">[SYS_LAT: 38.88°N // LONG: 121.04°E]</div>
-      <div class="text-[#8C9097] text-[8px]">FREQ: 144.00MHZ :: CH_01A</div>
-    </div>
-
-    <!-- Left Gutter Vertical Drafting Ribbon -->
-    <div class="absolute top-28 left-4 text-[9px] [writing-mode:vertical-lr] tracking-widest uppercase hidden md:flex items-center gap-3 text-[#7A7E85]">
-      <span class="text-[#FF5500]">■</span>
-      <span class="font-bold">:: SEC_04 // CAD_MATRIX_STREAM :: REV_2.4.1</span>
-      <span class="text-[#9A9EA6]">CHASSIS // AL-6061 // TOL ±0.002</span>
-    </div>
-
-    <!-- Right Gutter Vertical System Ribbon -->
-    <div class="absolute top-28 right-5 text-[9px] [writing-mode:vertical-lr] tracking-widest uppercase hidden md:flex items-center gap-3 text-[#7A7E85]">
-      <span class="font-bold">:: DRAFTING GRID SEAMS NOMINAL :: BUFFER 100% OK</span>
-      <span class="text-[#FF5500]">✕</span>
-      <span class="text-[#9A9EA6]">TEL_BUS // TX-3888 // PASS_THROUGH</span>
-    </div>
-
-    <!-- Mid-Screen Left Framing Viewfinder Reticle -->
-    <div class="absolute top-1/2 -translate-y-1/2 left-8 hidden lg:block text-[#9A9EA6]/75">
-      <div class="text-[10px] font-mono">┌ RETICLE ┐</div>
-      <div class="text-[8px] pl-2 text-[#7A7E85]">REF: TX-3888</div>
-      <div class="text-[10px] font-mono">└ 0x3888 ┘</div>
-    </div>
-
-    <!-- Mid-Screen Right Framing Viewfinder Reticle -->
-    <div class="absolute top-1/2 -translate-y-1/2 right-10 hidden lg:block text-right text-[#9A9EA6]/75">
-      <div class="text-[10px] font-mono">┌ AL-6061 ┐</div>
-      <div class="text-[8px] pr-2 text-[#7A7E85]">STATUS: NOMINAL</div>
-      <div class="text-[10px] font-mono">└ 100% OK ┘</div>
-    </div>
-
-    <!-- Bottom Left System Bus Tag -->
-    <div class="absolute bottom-20 left-6 text-[9px] tracking-wider hidden sm:flex items-center gap-2 text-[#7A7E85]">
-      <span class="w-1.5 h-1.5 bg-[#FF5500] inline-block"></span>
-      <span class="font-bold">AUTONOMOUS AGENT RUNTIME PROTOCOL // BUS: TX-3888</span>
-    </div>
-
-    <!-- Bottom Right Memory & Register Tag -->
-    <div class="absolute bottom-20 right-8 text-[8px] tracking-widest text-right hidden sm:block text-[#7A7E85]">
-      <div class="font-mono">REG_ADDR: 0x7FFE_4A2B_0019</div>
-      <div class="text-[#9A9EA6]">HEAP: 42.8MB // LEAK: 0.000%</div>
-    </div>
-
-    <!-- Subtle Drafting Crosshairs scattered across canvas -->
-    <div class="absolute top-24 left-[24%] text-[11px] text-[#8C9097]/40 select-none">✕</div>
-    <div class="absolute top-[62%] left-[28%] text-[11px] text-[#8C9097]/40 select-none">+</div>
-    <div class="absolute top-[32%] right-[22%] text-[11px] text-[#8C9097]/40 select-none">✕</div>
-    <div class="absolute bottom-[28%] right-[26%] text-[11px] text-[#8C9097]/40 select-none">+</div>
-  </div>
+  <!-- Pinned Subtle Retro-Futuristic Background HUD Matrix (Zero white cards, non-intrusive blueprint telemetry, anchored to viewport) -->
+  <SubtleHudMatrix className="top-10" />
 
   <!-- Content Viewport -->
   <div bind:this={messagesContainer} class="flex-1 overflow-y-auto relative z-10 bg-transparent {messages.length === 0 ? 'p-0 flex flex-col' : 'p-4 sm:p-6 pb-28 sm:pb-32'}">

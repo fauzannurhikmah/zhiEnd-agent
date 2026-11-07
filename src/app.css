@@ -362,12 +362,12 @@ select:active,
 /* CYBER-INDUSTRIAL BLUEPRINT GRID & DRAFTING ORNAMENTS          */
 /* ------------------------------------------------------------- */
 
-/* Architectural Blueprint Grid Background */
+/* Architectural Blueprint Grid Background (Unified with CAD Ground) */
 .blueprint-grid {
+  background-color: #ECEAE5;
   background-image:
-    linear-gradient(to right, #D0CEC7 1px, transparent 1px),
-    linear-gradient(to bottom, #D0CEC7 1px, transparent 1px);
-  background-size: 48px 48px;
+    radial-gradient(rgba(170, 168, 160, 0.45) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
 /* Corner Registration Square Dots */

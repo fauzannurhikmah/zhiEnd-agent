@@ -5,6 +5,7 @@
   import { api } from '../services/api';
   import { dialog } from '../services/dialog.svelte';
   import AvatarView from './AvatarView.svelte';
+  import SubtleHudMatrix from './SubtleHudMatrix.svelte';
   import { 
     MessageSquare, 
     Send, 
@@ -210,9 +211,12 @@
   }
 </script>
 
-<div class="h-full overflow-y-auto p-3.5 sm:p-4 md:p-6 pb-24 md:pb-6 custom-scrollbar select-none font-tech blueprint-cad-ground">
+<div class="h-full overflow-y-auto p-3.5 sm:p-4 md:p-6 pb-24 md:pb-6 custom-scrollbar select-none font-tech blueprint-cad-ground bg-[#ECEAE5] relative">
+  <!-- Pinned Subtle Retro-Futuristic Background HUD Matrix -->
+  <SubtleHudMatrix />
+
   <!-- Header Title -->
-  <div class="max-w-6xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3 border border-[#D0CEC7] bg-[#ECEAE5] p-3.5 shadow-2xs relative">
+  <div class="max-w-6xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3 border border-[#D0CEC7] bg-[#ECEAE5] p-3.5 shadow-2xs relative z-10">
     <span class="reg-dot reg-dot-tl"></span>
     <span class="reg-dot reg-dot-tr"></span>
     <div>

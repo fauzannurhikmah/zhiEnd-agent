@@ -1,6 +1,7 @@
-﻿<script lang="ts">
+<script lang="ts">
   import type { FileItem } from '../types';
   import { FolderTree, Terminal, RotateCw, Trash2, Folder, File, Code, FileText } from 'lucide-svelte';
+  import SubtleHudMatrix from './SubtleHudMatrix.svelte';
 
   let {
     files,
@@ -22,9 +23,12 @@
   }
 </script>
 
-<div class="h-full grid grid-cols-1 md:grid-cols-[320px_1fr] gap-3 overflow-y-auto md:overflow-hidden pb-20 md:pb-0 p-3 sm:p-4 text-[#111315] font-tech">
+<div class="h-full grid grid-cols-1 md:grid-cols-[320px_1fr] gap-3 overflow-y-auto md:overflow-hidden pb-20 md:pb-0 p-3 sm:p-4 text-[#111315] font-tech blueprint-cad-ground bg-[#ECEAE5] relative">
+  <!-- Pinned Subtle Retro-Futuristic Background HUD Matrix -->
+  <SubtleHudMatrix />
+
   <!-- Left: File Tree Explorer -->
-  <div class="relative bg-[#ECEAE5] border border-[#D0CEC7] p-3.5 rounded-none flex flex-col gap-2.5 h-64 md:h-auto overflow-hidden shadow-2xs">
+  <div class="relative z-10 bg-[#ECEAE5] border border-[#D0CEC7] p-3.5 rounded-none flex flex-col gap-2.5 h-64 md:h-auto overflow-hidden shadow-2xs">
     <span class="reg-dot reg-dot-tl"></span>
     <div class="flex items-center justify-between border-b border-[#D0CEC7] pb-2">
       <span class="text-xs font-bold text-[#111315] uppercase tracking-wider flex items-center gap-1.5">
@@ -75,7 +79,7 @@
   </div>
 
   <!-- Right: Terminal & Stream Logs (Authentic CRT Screen Look) -->
-  <div class="relative bg-[#ECEAE5] border border-[#D0CEC7] p-3.5 rounded-none flex flex-col gap-2.5 min-h-[320px] md:min-h-0 overflow-hidden shadow-2xs">
+  <div class="relative z-10 bg-[#ECEAE5] border border-[#D0CEC7] p-3.5 rounded-none flex flex-col gap-2.5 min-h-[320px] md:min-h-0 overflow-hidden shadow-2xs">
     <span class="reg-dot reg-dot-tr"></span>
     <div class="flex items-center justify-between border-b border-[#D0CEC7] pb-2">
       <span class="text-xs font-bold text-[#111315] uppercase tracking-wider flex items-center gap-1.5">
