@@ -522,6 +522,15 @@ export const api = {
     return res.json();
   },
 
+  async rollbackLastUserMessage(sessionId: string, messageIds?: string[]): Promise<{ success: boolean }> {
+    const res = await fetch('/api/chat/messages/rollback', {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ sessionId, messageIds })
+    });
+    return res.json();
+  },
+
   // AI Models & Providers
   async getAIModels(): Promise<{ models: Array<{ id: string; name: string; provider: string; description?: string; hasKey?: boolean }> }> {
     const res = await fetch('/api/ai-providers/models', { headers: getHeaders() });

@@ -37,6 +37,7 @@ import {
   getSessionMessages,
   saveMessageToDb,
   clearSessionMessages,
+  rollbackLastUserMessage,
   getOrCreateDefaultSession,
   saveBase64Avatar,
   saveChatUploadedFile,
@@ -671,6 +672,15 @@ app.get('/api/chat/messages/:sessionId', (c) => {
 app.post('/api/chat/messages/clear/:sessionId', (c) => {
   const sessionId = c.req.param('sessionId');
   const success = clearSessionMessages(sessionId);
+  return c.json({ success });
+});
+
+app.post('/api/chat/messages/rollback', async (c) => {
+  const body = await c.req.json<{ sessionId: string; messageIds?: string[] }>().catch(() => ({} as any));
+  if (!body?.sessionId) {
+    return c.json({ error: 'sessionId is required' }, 400);
+  }
+  const success = rollbackLastUserMessage(body.sessionId, body.messageIds);
   return c.json({ success });
 });
 

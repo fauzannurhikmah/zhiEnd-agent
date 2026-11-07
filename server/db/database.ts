@@ -1361,3 +1361,33 @@ export function clearSessionMessages(sessionId: string): boolean {
   db.prepare('DELETE FROM messages WHERE session_id = ?').run(sessionId);
   return true;
 }
+
+export function rollbackLastUserMessage(sessionId: string, specificIds?: string[]): boolean {
+  const db = getDb();
+  try {
+    // 1. Find the latest user message in this session BEFORE any deletions
+    const lastUser = db.prepare(`
+      SELECT rowid FROM messages 
+      WHERE session_id = ? AND sender = 'user' 
+      ORDER BY rowid DESC LIMIT 1
+    `).get(sessionId) as { rowid: number } | undefined;
+
+    if (lastUser) {
+      db.prepare(`
+        DELETE FROM messages 
+        WHERE session_id = ? AND rowid >= ?
+      `).run(sessionId, lastUser.rowid);
+    }
+
+    // 2. Also delete any explicitly provided specific IDs
+    if (specificIds && specificIds.length > 0) {
+      const placeholders = specificIds.map(() => '?').join(',');
+      db.prepare(`DELETE FROM messages WHERE id IN (${placeholders})`).run(...specificIds);
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Failed to rollback last user message:', err);
+    return false;
+  }
+}

@@ -752,16 +752,24 @@
   }
 
   async function handleEditLastMessage(newText: string) {
-    if (isAgentBusy || !newText.trim()) return;
+    if (isAgentBusy || !newText.trim() || !activeSessionId) return;
 
     // Cari index pesan user terakhir
     const lastUserIdx = messages.map(m => m.sender).lastIndexOf('user');
     if (lastUserIdx === -1) return;
 
     const originalImages = messages[lastUserIdx].images;
+    const messagesToDelete = messages.slice(lastUserIdx).map(m => m.id).filter(Boolean);
 
-    // Hapus pesan user terakhir dan pesan agen setelahnya agar respons AI diperbarui
+    // Hapus pesan user terakhir dan pesan agen setelahnya dari UI seketika
     messages = messages.slice(0, lastUserIdx);
+
+    // Hapus juga dari database SQLite agar tidak muncul kembali saat task selesai & di-reload
+    try {
+      await api.rollbackLastUserMessage(activeSessionId, messagesToDelete);
+    } catch (err) {
+      console.error('Failed to rollback message in database:', err);
+    }
 
     // Kirim ulang dengan prompt yang baru
     await handleSendMessage(newText, originalImages);
