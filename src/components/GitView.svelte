@@ -94,7 +94,7 @@
   <!-- Top Bar with Industrial Hardware Header -->
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#D0CEC7] pb-3">
     <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-stencil">
-      <div class="flex items-center gap-1.5 text-[#111315] font-bold px-2.5 py-1 rounded-lg bg-[#FCFCFA] border border-[#D0CEC7]">
+      <div class="flex items-center gap-1.5 text-[#111315] font-bold px-2.5 py-1 rounded-none bg-[#FCFCFA] border border-[#D0CEC7]">
         <GitBranch class="w-3.5 h-3.5 text-[#FF5500]" />
         <span>BRANCH: {gitStatus?.branch || 'HEAD'}</span>
       </div>
@@ -106,10 +106,10 @@
       {/if}
 
       <div class="flex items-center gap-1.5 text-[11px]">
-        <span class="px-2 py-0.5 rounded {gitStatus?.ahead ? 'bg-amber-100 text-amber-900 border border-amber-300 font-bold' : 'bg-[#E5E3DD] text-[#60646C]'}">
+        <span class="px-2 py-0.5 rounded-none {gitStatus?.ahead ? 'bg-amber-100 text-amber-900 border border-amber-300 font-bold' : 'bg-[#E5E3DD] text-[#60646C]'}">
           {gitStatus?.ahead || 0} ahead
         </span>
-        <span class="px-2 py-0.5 rounded {gitStatus?.behind ? 'bg-rose-100 text-rose-900 border border-rose-300 font-bold' : 'bg-[#E5E3DD] text-[#60646C]'}">
+        <span class="px-2 py-0.5 rounded-none {gitStatus?.behind ? 'bg-rose-100 text-rose-900 border border-rose-300 font-bold' : 'bg-[#E5E3DD] text-[#60646C]'}">
           {gitStatus?.behind || 0} behind
         </span>
       </div>
@@ -119,7 +119,7 @@
     <div class="flex items-center gap-2 self-start sm:self-auto">
       <button
         onclick={onPull}
-        class="btn-hardware px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer uppercase"
+        class="btn-hardware px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5 cursor-pointer uppercase"
         title="Git Pull"
       >
         <Download class="w-3.5 h-3.5 text-[#60646C]" /> Pull
@@ -127,7 +127,7 @@
 
       <button
         onclick={onRefresh}
-        class="btn-hardware p-2 rounded-lg text-[#60646C] hover:text-[#111315] cursor-pointer"
+        class="btn-hardware p-2 rounded-none text-[#60646C] hover:text-[#111315] cursor-pointer"
         title="Refresh status"
       >
         <RotateCw class="w-3.5 h-3.5" />
@@ -135,7 +135,7 @@
 
       <button
         onclick={onPush}
-        class="btn-safety px-4 py-1.5 rounded-lg text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 uppercase tracking-wider"
+        class="btn-safety px-4 py-1.5 rounded-full text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 uppercase tracking-wider shadow-none"
       >
         <UploadCloud class="w-3.5 h-3.5" /> Push to GitHub
       </button>
@@ -145,7 +145,7 @@
   <!-- Split View: Files & Diff -->
   <div class="flex-1 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-3 min-h-0">
     <!-- Left: Files & Commit -->
-    <div class="relative flex flex-col gap-3 min-h-0 bg-[#ECEAE5] border border-[#D0CEC7] rounded-xl p-3.5 shadow-2xs">
+    <div class="relative flex flex-col gap-3 min-h-0 bg-[#ECEAE5] border border-[#D0CEC7] rounded-none p-3.5 shadow-2xs">
       <span class="reg-dot reg-dot-tl"></span>
       <div class="flex items-center justify-between pb-2.5 border-b border-[#D0CEC7]">
         <span class="text-xs font-bold text-[#111315] uppercase tracking-wider">
@@ -172,7 +172,7 @@
             <button
               type="button"
               onclick={() => handleSelectFile(file.path, file.staged)}
-              class="w-full flex items-center justify-between p-2 rounded-lg text-left transition cursor-pointer {selectedFile === file.path ? 'bg-[#FCFCFA] border border-[#D0CEC7] text-[#111315] font-bold shadow-xs' : 'text-[#60646C] hover:bg-[#E5E3DD] hover:text-[#111315]'}"
+              class="w-full flex items-center justify-between p-2 rounded-none text-left transition cursor-pointer {selectedFile === file.path ? 'bg-[#FCFCFA] border border-[#D0CEC7] text-[#111315] font-bold shadow-xs' : 'text-[#60646C] hover:bg-[#E5E3DD] hover:text-[#111315]'}"
             >
               <div class="flex items-center gap-2 min-w-0">
                 <span
@@ -203,7 +203,7 @@
                 <span class="truncate text-[11px]">{file.path}</span>
               </div>
 
-              <span class="text-[9px] uppercase px-1.5 py-0.2 rounded font-bold {file.status === 'untracked' ? 'bg-amber-100 text-amber-900 border border-amber-300' : (file.status === 'added' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-orange-100 text-orange-900 border border-orange-300')}">
+              <span class="text-[9px] uppercase px-1.5 py-0.2 rounded-none font-bold {file.status === 'untracked' ? 'bg-amber-100 text-amber-900 border border-amber-300' : (file.status === 'added' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-orange-100 text-orange-900 border border-orange-300')}">
                 {file.status[0]}
               </span>
             </button>
@@ -229,13 +229,13 @@
           bind:value={commitMessage}
           placeholder="e.g. fix: update responsive layout navbar"
           rows="2"
-          class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-lg p-2 text-xs text-[#111315] placeholder-[#8C9097] outline-none resize-none transition shadow-2xs font-grotesk"
+          class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-none p-2 text-xs text-[#111315] placeholder-[#8C9097] outline-none resize-none transition shadow-2xs font-grotesk"
         ></textarea>
 
         <button
           onclick={handleCommit}
           disabled={isCommitting || !commitMessage.trim()}
-          class="btn-safety w-full py-2 rounded-lg disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 uppercase tracking-wider"
+          class="btn-safety w-full py-2 rounded-full disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 uppercase tracking-wider shadow-none"
         >
           {isCommitting ? 'Committing...' : 'Commit Changes'}
         </button>
@@ -243,13 +243,13 @@
     </div>
 
     <!-- Right: Diff Viewer -->
-    <div class="relative flex flex-col min-h-0 bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-4 overflow-hidden shadow-2xs">
+    <div class="relative flex flex-col min-h-0 bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-4 overflow-hidden shadow-2xs">
       <span class="reg-dot reg-dot-tr"></span>
       <div class="flex items-center justify-between pb-2.5 border-b border-[#D0CEC7] text-xs font-stencil">
         <span class="text-[#111315] font-bold truncate">
           {selectedFile ? selectedFile : 'Pilih file untuk diff'}
         </span>
-        <span class="text-[10px] uppercase px-2 py-0.5 rounded bg-[#E5E3DD] text-[#60646C] border border-[#D0CEC7] font-bold">
+        <span class="text-[10px] uppercase px-2 py-0.5 rounded-none bg-[#E5E3DD] text-[#60646C] border border-[#D0CEC7] font-bold">
           Diff Viewer
         </span>
       </div>

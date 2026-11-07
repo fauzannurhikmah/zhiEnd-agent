@@ -29,7 +29,7 @@
 
 {#if isOpen}
   <div class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="relative w-full max-w-lg rounded-xl flex flex-col bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-[#111315] font-tech">
+    <div class="relative w-full max-w-lg rounded-none flex flex-col bg-[#FCFCFA] border-2 border-[#D0CEC7] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-[#111315] font-tech">
       <!-- 4 Corner Registration Marks -->
       <span class="reg-dot reg-dot-tl"></span>
       <span class="reg-dot reg-dot-tr"></span>
@@ -39,7 +39,7 @@
       <!-- Modal Header Seam -->
       <div class="px-4 py-3 border-b border-[#D0CEC7] bg-[#ECEAE5] flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="w-7 h-7 rounded-lg bg-[#FF5500] text-white flex items-center justify-center font-bold shadow-xs">
+          <div class="w-7 h-7 rounded-none bg-[#FF5500] text-white flex items-center justify-center font-bold shadow-xs">
             <UploadCloud class="w-4 h-4" />
           </div>
           <div>
@@ -47,14 +47,14 @@
             <p class="text-[10px] text-[#60646C] font-stencil leading-none mt-0.5">:: SYNCING ACTIVE REPO TO GITHUB</p>
           </div>
         </div>
-        <button onclick={onClose} class="text-[#8C9097] hover:text-[#111315] p-1 rounded-lg hover:bg-[#E5E3DD] transition cursor-pointer" title="Tutup">
+        <button onclick={onClose} class="text-[#8C9097] hover:text-[#111315] p-1 rounded-none hover:bg-[#E5E3DD] transition cursor-pointer" title="Tutup">
           <X class="w-4 h-4" />
         </button>
       </div>
 
       <div class="p-4 sm:p-5 flex flex-col gap-3 text-xs">
         <!-- Status indicator banner -->
-        <div class="flex items-center gap-2.5 p-3 rounded-lg border font-stencil text-xs {
+        <div class="flex items-center gap-2.5 p-3 rounded-none border font-stencil text-xs {
           status === 'running' ? 'bg-orange-50 border-orange-300 text-[#FF5500]' :
           status === 'success' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' :
           'bg-rose-50 border-rose-300 text-rose-800'
@@ -77,7 +77,7 @@
             <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
             TERMINAL TELEMETRY STREAM:
           </span>
-          <div class="relative bg-[#101114] p-3 rounded-lg border border-black/50 font-stencil text-[11px] leading-relaxed text-emerald-400 max-h-52 overflow-y-auto crt-screen">
+          <div class="relative bg-[#101114] p-3 rounded-none border border-black/50 font-stencil text-[11px] leading-relaxed text-emerald-400 max-h-52 overflow-y-auto crt-screen">
             <!-- Scanline Texture Overlay -->
             <div class="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.3)_50%)] bg-[length:100%_4px]"></div>
             <pre class="whitespace-pre-wrap relative z-10">{outputLogs || 'Memulai proses git push...'}</pre>
@@ -86,7 +86,7 @@
 
         <button
           onclick={onClose}
-          class="btn-hardware w-full h-9 mt-1 rounded-lg text-[#111315] font-bold text-xs uppercase tracking-wider cursor-pointer active:translate-y-0.5"
+          class="btn-hardware w-full h-9 mt-1 rounded-none text-[#111315] font-bold text-xs uppercase tracking-wider cursor-pointer active:scale-95"
         >
           {status === 'running' ? 'BACKGROUND PROCESS' : 'CLOSE TELEMETRY'}
         </button>

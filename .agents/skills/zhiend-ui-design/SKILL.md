@@ -10,18 +10,29 @@ description: "Distinctive UI/UX Design System for zhiEnd Agent. Opinionated 'Cyb
 > zhiEnd Agent is designed as an **Architectural Cyber-Industrial Blueprint** combined with **Tactile Field Hardware** (ChainGPT Labs aesthetic meets Teenage Engineering precision).
 >
 > **Hallmark Traits**:
-> 1. **Architectural Grid Matrix**: Continuous 1px hairline drafting grid seams dividing the entire interface into clean modular architectural cells.
-> 2. **Technical Drafting Ornaments**:
+> 1. **Sharp 90° Architectural Grid Framework (`rounded-none`)**:
+>    - All structural cards, bays, partner boxes, chat bubbles, dialogs, modals, inputs, and panel frames are **strictly sharp 90-degree corners (`rounded-none`)**.
+>    - Pill capsules (`rounded-full`) are strictly reserved for **primary Safety Orange (`#FF5500`) CTA triggers** (e.g., `APPLY NOW`, `DISPATCH`, `INITIALIZE RUNTIME`, `PUSH // GIT`, `CONFIRM`) and the outer CRT robot monitor bezel.
+>    - Flat bold button surfaces: zero fake 3D bottom bevel borders (`border-b-2`), zero murky drop shadows — pure high-visibility Safety Orange (`#FF5500`) hardware switches.
+> 2. **Asymmetric CAD Blueprint Ground ("Random Grid tapi Ada Keteraturan")**:
+>    - Large architectural drafting bands (navbar row, headline row, partner strip row, asymmetric column partitions) overlaid on a fine 24px dot-matrix CAD sub-grid (`.blueprint-cad-ground`) with 120px drafting seams and solid orange square intersection marks (`■`).
+> 3. **Technical Drafting Ornaments**:
 >    - Orange solid corner registration squares (`■`) anchoring major module bays.
 >    - Corner viewfinder reticle brackets (`┌ ┐` and `└ ┘`) framing telemetry and visualizer boxes.
 >    - Drafting crosshair square boxes (`✕` / `+`).
 >    - Dot-matrix array indicators (`::`) for technical status and sub-navigation.
-> 3. **Retro-Futuristic CRT Robot Mascot**: Chunky chamfered hardware body with a warm glowing orange bevel and a deep dark CRT screen displaying **animated dot-matrix pixel eyes (`●  ●`)** that react to agent operational states.
-> 4. **Ultra-Wide Modular Block Typography**: Bold geometric modular letterforms for hero headers, paired with crisp monospaced technical stencils and clean sans-serif body text.
-> 5. **Partner-Style Horizontal Macro Deck**: Clean architectural rectangular bays along the bottom of the dashboard for direct macro trigger execution.
+> 4. **Retro-Futuristic CRT Robot Mascot**: Chunky hardware body with a warm glowing orange bevel and a deep dark CRT screen displaying **animated dot-matrix pixel eyes (`●  ●`)** that reactively track the user's cursor across the viewport.
+> 5. **Retro-Futuristic Micro-Kinetics**:
+>    - Stepped CRT channel reveal (`.animate-retro-channel`) on modal tab switches (`steps(4, end)` refresh).
+>    - Mechanical unfold (`.animate-retro-dropdown`) on dropdown menus.
+>    - Telemetry radar scanning (`.animate-radar-dot-1..5`), CRT scanline sweep (`.crt-scan-beam`), and phosphor block typewriter cursor (`.animate-retro-cursor` `█`) on streaming AI responses.
+> 6. **Ultra-Wide Modular Block Typography**: Bold geometric modular letterforms for hero headers, paired with crisp monospaced technical stencils and clean sans-serif body text.
+> 7. **Partner-Style Horizontal Macro Deck**: Clean architectural rectangular bays along the bottom of the dashboard for direct macro trigger execution.
 >
 > **Strict Bans**:
 > - NO dark-mode black canvas backgrounds (`#000000`, `#08090C`, `#111111`).
+> - NO rounded corners on structural framing, cards, modals, or chat bubbles (`rounded-lg` / `rounded-xl` / `rounded-2xl` on structural cells are strictly banned; only `rounded-none`).
+> - NO generic 3 bouncing dots for AI streaming loading.
 > - NO generic AI slop: centered 2x2 floating cards with blurry shadows, duplicate prompt boxes, or purple/indigo neon blobs.
 > - NO single-word gradient clipping or rainbow glow text.
 
@@ -194,17 +205,18 @@ All dialogs, alerts, and system prompts follow the **Cyber-Industrial Blueprint 
   - `Lightbox Modal`: `:: TELEMETRY ASSET // LIGHTBOX INSPECT`
 - **Frame & Geometry**:
   - Backdrop: `bg-black/60 backdrop-blur-xs`
-  - Modal Chassis: `bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl shadow-2xl relative overflow-hidden`
-  - 4 Corner Registration Marks (`.reg-dot`): Orange square marks (`■`) anchored at all four corners.
+  - Modal Chassis: `bg-[#FCFCFA] border-2 border-[#D0CEC7] rounded-none shadow-2xl relative overflow-hidden`
+  - 4 Corner Registration Marks (`.reg-dot`): Solid orange square marks (`■`) anchored at all four corners.
 - **Header Seam**:
   - Milled putty band (`bg-[#E5E3DD] border-b border-[#D0CEC7] px-4 py-3 flex items-center justify-between font-tech`)
   - Prefix with technical dot-matrix identifier, rotating crosshair (`.crosshair-box`), and close trigger.
-- **Segmented Navigation Bays**:
-  - In multi-tab modals (`ProjectModal`, `SettingsModal`, `PersonaModal`), tabs are styled as hardware channel selectors (`bg-[#E5E3DD] border-b border-[#D0CEC7]`).
-  - Active tab: `bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs`.
+- **Segmented Navigation Bays with Stepped Channel Switch**:
+  - In multi-tab modals (`ProjectModal`, `SettingsModal`, `PersonaModal`), tabs are styled as hardware channel selectors (`bg-[#E5E3DD] border-b border-[#D0CEC7] rounded-none`).
+  - Active tab: `bg-[#FCFCFA] text-[#FF5500] border-t-2 border-t-[#FF5500] border-x border-x-[#D0CEC7] font-bold shadow-2xs`.
+  - Tab transition kinetic: Wrapped in `{#key activeTab} <div class="animate-retro-channel">` executing a stepped 4-phase CRT channel refresh (`steps(4, end)`).
 - **Button System**:
-  - Neutral / Abort: Tactile putty button (`btn-hardware` / `bg-[#E5E3DD] hover:bg-[#D0CEC7] text-[#111315] font-tech font-bold uppercase tracking-wider`).
-  - Action / Destructive: Laser orange or hazard crimson trigger (`btn-safety` / `bg-rose-600 hover:bg-rose-700 text-white font-tech font-bold uppercase tracking-wider`).
+  - Primary CTA / Confirm: Flat Safety Orange capsule pill (`btn-safety` / `rounded-full px-5 py-2 text-white font-tech font-bold uppercase tracking-wider`).
+  - Neutral / Tool / Cancel: Sharp tactile putty button (`btn-hardware` / `rounded-none border border-[#D0CEC7] bg-[#FCFCFA] hover:bg-[#ECEAE5] text-[#111315] font-tech font-bold uppercase tracking-wider`).
 - **Telemetry Shells (`PushModal.svelte`)**:
   - Embedded console stream resides inside a recessed CRT Void well (`#101114`) with scanline pattern, displaying phosphor green/emerald log text.
 
@@ -220,22 +232,32 @@ To make the retro-futuristic interface deeply tactile and alive without generic 
      - Clamped pupil shift: translates up to ±8px horizontally and ±6px vertically.
      - Natural idle drift: Micro-floats gently when the cursor is stationary.
      - Direct hover reaction: Dilates or transforms into happy arcs (`◠  ◠`).
-2. **Reactive 4-Bar Equalizer & Telemetry Activity Meter (Navbar)**:
+2. **Stepped CRT Channel Reveal (`.animate-retro-channel`)**:
+   - Tab switching in modals (`SettingsModal`, `ProjectModal`, `PersonaModal`) does not cut abruptly or slide like a generic web app.
+   - It performs a stepped phosphor re-draw in 4 distinct scanline stages (`steps(4, end)` at 0.18s), mimicking authentic CRT channel switching.
+3. **Mechanical Dropdown Unfold (`.animate-retro-dropdown`)**:
+   - Custom select popovers unfold vertically from the hardware anchor with a rapid mechanical clip-path wipe (`cubic-bezier(0.16, 1, 0.3, 1)` at 0.15s).
+4. **Retro-Futuristic AI Streaming Telemetry & Radar Loader**:
+   - Replaces generic 3 bouncing dots completely.
+   - Active reasoning radar: Dot-matrix cycling sequence `[■ ■ ■ □ □]` powered by `.animate-radar-dot-1..5`.
+   - CRT Scanline Sweep: `.crt-scan-beam` shimmers across the telemetry block.
+   - Phosphor Typewriter Block Cursor: Trailing `█` cursor pulsing via `.animate-retro-cursor` at steps(1).
+5. **Reactive 4-Bar Equalizer & Telemetry Activity Meter (Navbar)**:
    - Top navbar features a 4-bar hardware telemetry meter (`emerald`, `amber`, `safety orange`).
    - Dynamically dances with real-time computational activity during agent task execution (`isAgentBusy`), and shifts levels tactfully on mouse hover.
-3. **Tactical Sidebar Switches with Live Status Diodes**:
+6. **Tactical Sidebar Switches with Live Status Diodes**:
    - Sidebar navigation buttons feature mechanical keyboard depression (`active:scale-[0.98] active:translate-y-0.5`).
    - Active tab features a softly pulsing green micro-LED diode (`bg-emerald-500 animate-pulse`) paired with the solid orange registration mark (`■`).
-4. **Interactive Drafting Crosshair Reticles**:
+7. **Interactive Drafting Crosshair Reticles**:
    - Header and modal crosshairs (`.crosshair-box`) smoothly rotate 45° with tactile precision on hover (`hover:rotate-45 cursor-crosshair transition-transform duration-300`).
-5. **Dynamic Reticle HUD Coordinates**:
+8. **Dynamic Reticle HUD Coordinates**:
    - The telemetry viewfinder tracks deck cursor coordinates in real time: `┌ RETICLE [042, 180] ┐`.
    - Subtle scanning light wave pulses across the viewfinder screen.
-6. **Tactile Soundbank Bays**:
+9. **Tactile Soundbank Bays**:
    - Bottom macro bays feature physical keyboard switch kinetics (`active:scale-[0.98] active:translate-y-0.5 active:bg-[#E5E3DD] transition-all`).
-7. **Proportional Action Triggers & Navbar Rhythm**:
+10. **Proportional Action Triggers & Navbar Rhythm**:
    - Navbar action triggers maintain strict vertical proportion (`h-8` / 32px height) across all items.
-   - Primary deployment triggers (e.g. `Push to GitHub`) are styled with `.btn-safety` at matching height, preserving visual balance.
+   - Primary deployment triggers (e.g. `Push to GitHub`) are styled with `.btn-safety rounded-full` at matching height, preserving visual balance.
 
 ---
 

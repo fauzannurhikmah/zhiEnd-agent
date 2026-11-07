@@ -38,7 +38,7 @@
 
 {#if isOpen}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-    <div class="w-full max-w-sm rounded-xl overflow-hidden flex flex-col bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl animate-in fade-in zoom-in-95 duration-200 relative">
+    <div class="w-full max-w-sm rounded-none overflow-hidden flex flex-col bg-[#FCFCFA] border-2 border-[#D0CEC7] shadow-2xl animate-in fade-in zoom-in-95 duration-200 relative">
       <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
       <span class="reg-dot reg-dot-tl"></span>
       <span class="reg-dot reg-dot-tr"></span>
@@ -55,7 +55,7 @@
       </div>
 
       <div class="p-5 sm:p-6 flex flex-col items-center gap-4 text-center text-[#111315]">
-        <div class="w-12 h-12 rounded-lg bg-[#ECEAE5] border border-[#D0CEC7] flex items-center justify-center text-[#FF5500] shadow-2xs">
+        <div class="w-12 h-12 rounded-none bg-[#ECEAE5] border border-[#D0CEC7] flex items-center justify-center text-[#FF5500] shadow-2xs">
           <Shield class="w-6 h-6" />
         </div>
 
@@ -71,12 +71,12 @@
             onkeydown={handleKeyDown}
             placeholder="••••"
             maxlength="12"
-            class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] focus:ring-1 focus:ring-[#FF5500] rounded-lg p-2.5 text-center text-lg tracking-[0.3em] text-[#111315] font-stencil outline-none shadow-2xs"
+            class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] focus:ring-1 focus:ring-[#FF5500] rounded-none p-2.5 text-center text-lg tracking-[0.3em] text-[#111315] font-stencil outline-none shadow-2xs"
           />
           <button
             onclick={handleSubmit}
             disabled={isChecking || !pinValue.trim()}
-            class="btn-safety px-4 py-2.5 rounded-lg text-white font-tech font-bold uppercase tracking-wider cursor-pointer disabled:opacity-40 active:scale-95 transition shadow-2xs"
+            class="btn-safety px-5 py-2.5 rounded-full text-white font-tech font-bold uppercase tracking-wider cursor-pointer disabled:opacity-40 active:scale-95 transition shadow-none"
           >
             <ArrowRight class="w-4 h-4" />
           </button>

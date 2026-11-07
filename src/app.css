@@ -190,41 +190,40 @@ a:focus:not(:focus-visible),
   transform: translateY(-1px);
 }
 
-/* 6. Primary Safety Hazard Orange Action Switch */
+/* 6. Primary Safety Hazard Orange Action Switch (ChainGPT Labs Style: Flat, Bold, Capsule) */
 .btn-safety,
 .btn-telemetry,
 .glass-btn-primary {
   background: #FF5500;
   color: #FFFFFF;
   font-weight: 700;
-  border: 1px solid #E04B00;
-  border-bottom: 2px solid #B33C00;
-  box-shadow: 0 2px 4px rgba(255, 85, 0, 0.2);
-  transition: all 0.08s ease;
+  border: 1px solid #FF5500;
+  box-shadow: none;
+  transition: all 0.1s ease;
 }
 
 .btn-safety:hover,
 .btn-telemetry:hover,
 .glass-btn-primary:hover {
-  background: #E64D00;
+  background: #E04B00;
+  border-color: #E04B00;
+  box-shadow: none;
 }
 
 .btn-safety:active,
 .btn-telemetry:active,
 .glass-btn-primary:active {
-  transform: translateY(1px);
-  border-bottom-width: 1px;
+  transform: scale(0.97);
   box-shadow: none;
 }
 
-/* 7. Tactile Mechanical Tool Button */
+/* 7. Tactile Architectural Tool Button (Sharp 90° Frame) */
 .btn-hardware,
 .btn-tool,
 .glass-btn-secondary {
-  background: #E9E7E0;
-  border: 1px solid #C8C5BC;
-  border-bottom: 2px solid #A8A59C;
-  color: #191B1D;
+  background: #FCFCFA;
+  border: 1px solid #D0CEC7;
+  color: #111315;
   font-weight: 600;
   transition: all 0.08s ease;
 }
@@ -232,15 +231,16 @@ a:focus:not(:focus-visible),
 .btn-hardware:hover,
 .btn-tool:hover,
 .glass-btn-secondary:hover {
-  background: #DEDBD2;
-  color: #000000;
+  background: #ECEAE5;
+  border-color: #A8A59C;
+  color: #111315;
 }
 
 .btn-hardware:active,
 .btn-tool:active,
 .glass-btn-secondary:active {
-  transform: translateY(1px);
-  border-bottom-width: 1px;
+  transform: scale(0.98);
+  background: #E5E3DD;
 }
 
 /* 8. Hardware Pill & Stenciled Status Badges */
@@ -482,4 +482,131 @@ a:focus:not(:focus-visible),
 .crt-eye {
   animation: crtBlink 4s infinite ease-in-out;
   transform-origin: center;
+}
+
+/* ------------------------------------------------------------- */
+/* RETRO-FUTURISTIC KINETICS: CAD GROUND, CHANNELS & DROPDOWNS   */
+/* ------------------------------------------------------------- */
+
+/* Architectural CAD Blueprint Ground: Random grid tapi ada keteraturan */
+.blueprint-cad-ground {
+  background-color: #ECEAE5;
+  background-image:
+    radial-gradient(#C8C5BC 1px, transparent 1px),
+    linear-gradient(to right, rgba(208, 206, 199, 0.5) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(208, 206, 199, 0.5) 1px, transparent 1px);
+  background-size: 24px 24px, 120px 120px, 120px 120px;
+}
+
+/* Stepped CRT Channel Reveal (for tab switching in modals) */
+@keyframes retroChannelReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: brightness(1.25) contrast(1.1);
+  }
+  40% {
+    opacity: 0.7;
+    filter: brightness(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: brightness(1) contrast(1);
+  }
+}
+
+.animate-retro-channel {
+  animation: retroChannelReveal 0.18s steps(4, end) forwards;
+}
+
+/* Retro Dropdown Mechanical Unfold */
+@keyframes retroDropdownUnfold {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.85) translateY(-6px);
+    clip-path: inset(0 0 100% 0);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1) translateY(0);
+    clip-path: inset(0 0 0% 0);
+  }
+}
+
+.animate-retro-dropdown {
+  animation: retroDropdownUnfold 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: top center;
+}
+
+/* Retro CRT Phosphor Block Cursor */
+@keyframes retroCursorBlink {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
+}
+
+.animate-retro-cursor {
+  animation: retroCursorBlink 0.75s infinite steps(1);
+}
+
+/* Retro CRT Scanline Shimmer / Beam */
+@keyframes crtScanBeam {
+  0% {
+    top: -100%;
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.2;
+  }
+  100% {
+    top: 200%;
+    opacity: 0;
+  }
+}
+
+.crt-scan-beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 85, 0, 0.12), transparent);
+  pointer-events: none;
+  animation: crtScanBeam 2.5s infinite linear;
+}
+
+/* Retro Dot Matrix Cycling Telemetry Radar */
+@keyframes dotMatrixStep {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+    background-color: #FF5500;
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(0.9);
+  }
+}
+
+.animate-radar-dot-1 {
+  animation: dotMatrixStep 1.2s infinite ease-in-out;
+}
+.animate-radar-dot-2 {
+  animation: dotMatrixStep 1.2s infinite ease-in-out 0.2s;
+}
+.animate-radar-dot-3 {
+  animation: dotMatrixStep 1.2s infinite ease-in-out 0.4s;
+}
+.animate-radar-dot-4 {
+  animation: dotMatrixStep 1.2s infinite ease-in-out 0.6s;
+}
+.animate-radar-dot-5 {
+  animation: dotMatrixStep 1.2s infinite ease-in-out 0.8s;
 }

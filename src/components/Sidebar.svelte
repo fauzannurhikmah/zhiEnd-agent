@@ -138,16 +138,16 @@
           <img
             src="/img/logo.png"
             alt="zhiEnd Agent Logo"
-            class="w-7 h-7 object-contain rounded-md border border-[#D0CEC7]"
+            class="w-7 h-7 object-contain rounded-none border border-[#D0CEC7]"
           />
-          <span class="absolute -top-1 -right-1 w-2 h-2 bg-[#FF5500] rounded-xs" title="Registration dot"></span>
+          <span class="absolute -top-1 -right-1 w-2 h-2 bg-[#FF5500] rounded-none" title="Registration dot"></span>
         </div>
         <div class="flex flex-col">
           <span
             class="text-xs font-black tracking-tight text-[#111315] flex items-center gap-1 font-tech uppercase"
           >
             zhiEnd <span
-              class="bg-[#FF5500] text-white px-1.5 py-0.2 rounded text-[8px] font-mono font-bold tracking-wider uppercase"
+              class="bg-[#FF5500] text-white px-1.5 py-0.2 rounded-none text-[8px] font-mono font-bold tracking-wider uppercase"
               >LABS</span
             >
           </span>
@@ -158,9 +158,9 @@
       <div class="flex items-center gap-2">
         {#if isAgentBusy}
           <span
-            class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-100 border border-amber-300 text-[10px] text-amber-900 font-mono font-semibold"
+            class="flex items-center gap-1.5 px-2 py-0.5 rounded-none bg-amber-100 border border-amber-300 text-[10px] text-amber-900 font-mono font-semibold"
           >
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"
+            <span class="w-1.5 h-1.5 rounded-none bg-amber-500 animate-pulse"
             ></span>
             busy
           </span>
@@ -169,7 +169,7 @@
           <button
             type="button"
             onclick={onCloseMobile}
-            class="md:hidden p-1.5 rounded-lg text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2] transition cursor-pointer"
+            class="md:hidden p-1.5 rounded-none text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2] transition cursor-pointer"
             title="Tutup Menu"
           >
             <X class="w-4 h-4" />
@@ -181,7 +181,7 @@
     <!-- Active Workspace Card & Create Button (Recessed Mechanical Well) -->
     <div class="flex items-center gap-1.5 w-full">
       <div
-        class="flex-1 min-w-0 flex items-center justify-between p-2 rounded-xl bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#FF5500] transition group shadow-2xs font-tech"
+        class="flex-1 min-w-0 flex items-center justify-between p-2 rounded-none bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#FF5500] transition group shadow-2xs font-tech"
       >
         <button
           onclick={onOpenProjectModal}
@@ -216,7 +216,7 @@
           {#if !isRootWorkspace()}
             <button
               onclick={onResetToRoot}
-              class="p-1 rounded-md hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 transition cursor-pointer"
+              class="p-1 rounded-none hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 transition cursor-pointer"
               title="Clear Workspace (Kembali ke Root D:\Works)"
             >
               <X class="w-3.5 h-3.5" />
@@ -234,7 +234,7 @@
 
       <button
         onclick={onOpenProjectModal}
-        class="btn-hardware p-2.5 rounded-xl shrink-0"
+        class="btn-hardware p-2.5 rounded-none shrink-0"
         title="Buka / Buat Project Baru di D:\Works"
       >
         <Plus class="w-3.5 h-3.5" />
@@ -245,7 +245,7 @@
     <nav class="flex flex-col gap-1.5 pt-2 font-tech">
       <button
         onclick={() => handleTabClick("chat")}
-        class="flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-none text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
         'chat'
           ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-2xs'
           : 'text-[#60646C] hover:text-[#111315] hover:bg-[#FCFCFA]/80 hover:border-[#D0CEC7] border border-transparent'}"
@@ -260,7 +260,7 @@
         </div>
         {#if currentTab === 'chat'}
           <span class="flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"></span>
             <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
           </span>
         {/if}
@@ -268,7 +268,7 @@
 
       <button
         onclick={() => handleTabClick("git")}
-        class="flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-none text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
         'git'
           ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-2xs'
           : 'text-[#60646C] hover:text-[#111315] hover:bg-[#FCFCFA]/80 hover:border-[#D0CEC7] border border-transparent'}"
@@ -283,13 +283,13 @@
         </div>
         {#if gitStatus?.files?.length}
           <span
-            class="px-2 py-0.5 rounded bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] font-stencil text-[10px] font-bold animate-pulse"
+            class="px-2 py-0.5 rounded-none bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] font-stencil text-[10px] font-bold animate-pulse"
           >
             {gitStatus.files.length}
           </span>
         {:else if currentTab === 'git'}
           <span class="flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"></span>
             <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
           </span>
         {/if}
@@ -297,7 +297,7 @@
 
       <button
         onclick={() => handleTabClick("remote")}
-        class="flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-none text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
         'remote'
           ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-2xs'
           : 'text-[#60646C] hover:text-[#111315] hover:bg-[#FCFCFA]/80 hover:border-[#D0CEC7] border border-transparent'}"
@@ -313,13 +313,13 @@
         <div class="flex items-center gap-1.5">
           {#if whatsappStatus?.status === "connected"}
             <span
-              class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+              class="w-2 h-2 rounded-none bg-emerald-500 animate-pulse"
               title="WhatsApp Connected"
             ></span>
           {/if}
           {#if telegramStatus?.status === "running"}
             <span
-              class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"
+              class="w-2 h-2 rounded-none bg-sky-500 animate-pulse"
               title="Telegram Online"
             ></span>
           {/if}
@@ -331,7 +331,7 @@
 
       <button
         onclick={() => handleTabClick("files")}
-        class="flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-none text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
         'files'
           ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-2xs'
           : 'text-[#60646C] hover:text-[#111315] hover:bg-[#FCFCFA]/80 hover:border-[#D0CEC7] border border-transparent'}"
@@ -346,7 +346,7 @@
         </div>
         {#if currentTab === 'files'}
           <span class="flex items-center gap-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"></span>
             <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
           </span>
         {/if}
@@ -366,12 +366,12 @@
         <div class="flex items-center gap-1">
           <!-- Scope switcher: Project vs Global -->
           <div
-            class="flex items-center bg-[#E5E3DD] rounded-lg p-0.5 border border-[#D0CEC7] text-[9px] font-stencil"
+            class="flex items-center bg-[#E5E3DD] rounded-none p-0.5 border border-[#D0CEC7] text-[9px] font-stencil"
           >
             <button
               type="button"
               onclick={() => onToggleScope?.("workspace")}
-              class="px-1.5 py-0.5 rounded transition cursor-pointer {historyScope ===
+              class="px-1.5 py-0.5 rounded-none transition cursor-pointer {historyScope ===
               'workspace'
                 ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] font-bold shadow-xs'
                 : 'text-[#5C6066] hover:text-[#111315]'}"
@@ -382,7 +382,7 @@
             <button
               type="button"
               onclick={() => onToggleScope?.("global")}
-              class="px-1.5 py-0.5 rounded transition cursor-pointer {historyScope ===
+              class="px-1.5 py-0.5 rounded-none transition cursor-pointer {historyScope ===
               'global'
                 ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] font-bold shadow-xs'
                 : 'text-[#5C6066] hover:text-[#111315]'}"
@@ -396,7 +396,7 @@
           <button
             type="button"
             onclick={() => onCreateNewSession?.()}
-            class="p-1 rounded-md bg-[#E5E3DD] hover:bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#FF5500] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer"
+            class="p-1 rounded-none bg-[#E5E3DD] hover:bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#FF5500] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer"
             title="Mulai Chat Baru"
           >
             <Plus class="w-3 h-3" />
@@ -410,7 +410,7 @@
           {#each chatSessions as sess (sess.id)}
             {@const isActive = activeSessionId === sess.id}
             <div
-              class="group/item flex items-center justify-between px-2 py-1.5 rounded-lg transition cursor-pointer {isActive
+              class="group/item flex items-center justify-between px-2 py-1.5 rounded-none transition cursor-pointer {isActive
                 ? 'bg-[#FCFCFA] border border-[#D0CEC7] text-[#111315] font-bold shadow-xs'
                 : 'hover:bg-[#E5E3DD] border border-transparent text-[#60646C] hover:text-[#111315]'}"
             >
@@ -427,7 +427,7 @@
                 <span class="text-xs truncate flex-1">{sess.title}</span>
                 {#if sess.message_count && sess.message_count > 0}
                   <span
-                    class="text-[9px] px-1.5 py-0.2 rounded font-mono {isActive
+                    class="text-[9px] px-1.5 py-0.2 rounded-none font-mono {isActive
                       ? 'bg-[#FF5500]/15 text-[#FF5500]'
                       : 'bg-[#E5E3DD] text-[#5C6066]'} shrink-0"
                   >
@@ -442,7 +442,7 @@
                   e.stopPropagation();
                   onDeleteSession?.(sess.id);
                 }}
-                class="opacity-0 group-hover/item:opacity-100 p-1 rounded hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 transition cursor-pointer shrink-0 ml-1"
+                class="opacity-0 group-hover/item:opacity-100 p-1 rounded-none hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 transition cursor-pointer shrink-0 ml-1"
                 title="Hapus sesi chat"
               >
                 <Trash2 class="w-2.5 h-2.5" />
@@ -451,7 +451,7 @@
           {/each}
         {:else}
           <div
-            class="p-3 text-center rounded-xl bg-[#FCFCFA] border border-dashed border-[#D0CEC7] flex flex-col items-center gap-1.5"
+            class="p-3 text-center rounded-none bg-[#FCFCFA] border border-dashed border-[#D0CEC7] flex flex-col items-center gap-1.5"
           >
             <span class="text-[11px] text-[#5C6066]">Belum ada riwayat chat</span
             >
@@ -474,7 +474,7 @@
   >
     <div class="flex items-center gap-1.5 text-[11px] text-[#5C6066]">
       <span
-        class="w-2 h-2 rounded-full {tunnelStatus?.status === 'connected'
+        class="w-2 h-2 rounded-none {tunnelStatus?.status === 'connected'
           ? 'bg-[#FF5500]'
           : 'bg-[#8C9097]'}"
       ></span>
@@ -485,7 +485,7 @@
 
     <button
       onclick={onOpenSettingsModal}
-      class="p-2 rounded-lg hover:bg-[#D0CEC7] text-[#5C6066] hover:text-[#111315] transition cursor-pointer"
+      class="p-2 rounded-none hover:bg-[#D0CEC7] text-[#5C6066] hover:text-[#111315] transition cursor-pointer"
       title="Pengaturan Sistem"
     >
       <SettingsIcon class="w-3.5 h-3.5" />

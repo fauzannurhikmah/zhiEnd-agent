@@ -68,8 +68,8 @@
       aria-label="Tutup modal"
     ></button>
 
-    <!-- Cyber-Industrial Confirmation Modal Box -->
-    <div class="relative w-full max-w-sm rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl p-5 flex flex-col gap-4 text-center z-10 animate-in zoom-in-95 duration-200 text-[#111315] font-tech">
+    <!-- Cyber-Industrial Confirmation Modal Box (Sharp 90° Framing) -->
+    <div class="relative w-full max-w-sm rounded-none bg-[#FCFCFA] border-2 border-[#D0CEC7] shadow-2xl p-5 flex flex-col gap-4 text-center z-10 animate-in zoom-in-95 duration-200 text-[#111315] font-tech">
       <!-- 4 Corner Registration Marks -->
       <span class="reg-dot reg-dot-tl"></span>
       <span class="reg-dot reg-dot-tr"></span>
@@ -85,7 +85,7 @@
         <button 
           type="button"
           onclick={handleCancelAction}
-          class="p-0.5 rounded text-[#8C9097] hover:text-[#111315] hover:bg-[#E5E3DD] transition cursor-pointer"
+          class="p-0.5 rounded-none text-[#8C9097] hover:text-[#111315] hover:bg-[#E5E3DD] transition cursor-pointer"
           title="Tutup"
         >
           <X class="w-3.5 h-3.5" />
@@ -93,7 +93,7 @@
       </div>
 
       <!-- Icon Header -->
-      <div class="w-12 h-12 rounded-xl mx-auto flex items-center justify-center {activeVariant === 'danger' ? 'bg-rose-100 border border-rose-300 text-rose-600' : activeVariant === 'warning' ? 'bg-amber-100 border border-amber-300 text-amber-600' : 'bg-orange-100 border border-orange-300 text-[#FF5500]'}">
+      <div class="w-12 h-12 rounded-none mx-auto flex items-center justify-center border {activeVariant === 'danger' ? 'bg-rose-50 border-rose-300 text-rose-600' : activeVariant === 'warning' ? 'bg-amber-50 border-amber-300 text-amber-600' : 'bg-orange-50 border-orange-300 text-[#FF5500]'}">
         {#if activeVariant === 'danger'}
           <Trash2 class="w-5 h-5 animate-pulse" />
         {:else if activeVariant === 'warning'}
@@ -114,7 +114,7 @@
         <button
           type="button"
           onclick={handleCancelAction}
-          class="btn-hardware flex-1 h-9 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer active:translate-y-0.5"
+          class="btn-hardware flex-1 h-9 rounded-none text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95"
         >
           {activeCancelText}
         </button>
@@ -122,7 +122,7 @@
         <button
           type="button"
           onclick={handleConfirmAction}
-          class="flex-1 h-9 rounded-lg {activeVariant === 'danger' ? 'bg-rose-600 hover:bg-rose-500 shadow-sm' : activeVariant === 'warning' ? 'bg-amber-600 hover:bg-amber-500 shadow-sm' : 'btn-safety'} text-white text-xs font-bold uppercase tracking-wider shadow-sm transition cursor-pointer active:translate-y-0.5"
+          class="flex-1 h-9 rounded-full {activeVariant === 'danger' ? 'bg-rose-600 hover:bg-rose-500 shadow-sm' : activeVariant === 'warning' ? 'bg-amber-600 hover:bg-amber-500 shadow-sm' : 'btn-safety'} text-white text-xs font-bold uppercase tracking-wider shadow-sm transition cursor-pointer active:scale-95"
         >
           {activeConfirmText}
         </button>

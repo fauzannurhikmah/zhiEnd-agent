@@ -31,6 +31,10 @@ The standards are modularly split into two specialized skills:
 ## 2. UI/UX Design Quick Reference (`zhiend-ui-design`)
 
 - **Design Philosophy**: Retro-Futuristic Cyber-Industrial Blueprint Grid (CIB-Grid) — edge-to-edge architectural drafting grid (inspired by ChainGPT Labs & Teenage Engineering). Strictly NO isolated floating cards with massive empty margins. 100% free of generic dark mode, zero blue/purple palettes, zero neon gradients, and zero AI-slop card kits.
+- **Sharp 90° Architectural Grid Framework (`rounded-none`)**:
+  - All structural cards, bays, partner boxes, chat bubbles, dialogs, modals, inputs, and panel frames are **strictly sharp 90-degree corners (`rounded-none`)**.
+  - Flat capsule pills (`rounded-full`) are strictly reserved for **primary Safety Orange (`#FF5500`) CTA triggers** (e.g. `APPLY NOW`, `DISPATCH`, `INITIALIZE RUNTIME`, `PUSH // GIT`, `CONFIRM`) and the outer CRT robot monitor bezel.
+  - Pure flat tactile surfaces: zero fake 3D bottom bevel borders (`border-b-2`), zero murky drop shadows.
 - **Drafting Blueprint Palette**:
   - `--canvas-concrete`: `#ECEAE5` (Light Drafting Concrete / Warm Off-White ground)
   - `--grid-seam`: `#D0CEC7` (1px architectural drafting rules & continuous cell partition seams)
@@ -42,6 +46,8 @@ The standards are modularly split into two specialized skills:
   - `--crt-void`: `#101114` (Deep charcoal CRT well for dot-matrix screens & viewfinder HUD boxes)
   - `--ink-basalt`: `#111315` (High-contrast basalt black for headlines, labels, and primary text)
   - `--stencil-slate`: `#60646C` (Technical stencil metadata, sub-labels, and timestamps)
+- **Asymmetric CAD Ground ("Random Grid tapi Ada Keteraturan")**:
+  - Large architectural layout bands (navbar row, hero headline row, partner strip row, asymmetric columns) overlaid on a fine 24px dot-matrix CAD sub-grid (`.blueprint-cad-ground`) with 120px drafting seams and solid orange square intersection marks (`■`).
 - **Retro-Futuristic Typography Scale**:
   - `.font-display`: `Syne` 900 Black for giant modular headline letterforms (`Z H I E N D   C O R E`).
   - `.font-tech`: `Chakra Petch` 700 Bold for industrial navigation switches and soundbank bays.
@@ -60,24 +66,19 @@ The standards are modularly split into two specialized skills:
   - 3-column hero cockpit (Mission/Headline, CRT Robot Mascot, Viewfinder HUD).
   - 4-bay partner-style horizontal macro strip (`[01 // AUDIT]`, `[02 // RECON]`, `[03 // DEBUG]`, `[04 // SHIP]`).
   - Permanently anchored recessed input well at the bottom.
-- **Universal Modal Consistency**:
+- **Universal Modal Consistency (0% Dark Mode Tolerance)**:
   - Every single modal (`ProjectModal`, `SettingsModal`, `PersonaModal`, `ConfirmModal`, `NoticeModal`, `PinModal`, `PushModal`), popover, and lightbox is 100% compliant with the `#FCFCFA` / `#ECEAE5` / `#D0CEC7` / `#FF5500` blueprint matrix.
   - Zero tolerance for dark mode (`bg-zinc-950`, `bg-zinc-900`, `indigo`, `violet`).
-  - `.hardware-well`: Recessed alabaster bay with subtle mechanical inset bevel.
-  - `.btn-hardware`: Tactile mechanical push-button with 2px physical bottom bevel.
-  - `.btn-safety`: Vivid safety hazard orange (`#FF5500`) tactile switch.
-  - `.bubble-user-hardware`: Alabaster bay with safety orange micro-tab.
-  - `.bubble-agent-hardware`: Engineered putty deck with mechanical telemetry logger.
+  - Stepped CRT Channel Switching (`.animate-retro-channel`): In multi-tab modals, tabs switch using authentic 4-phase CRT scanline refreshes (`steps(4, end)`).
+  - Mechanical Dropdown Unfolds (`.animate-retro-dropdown`): Popovers unfold from top with rapid mechanical clip-path sweeps.
+  - 4 corner registration marks `■` (`.reg-dot`), sharp 90° corners (`rounded-none`), top drafting seams (`:: PROTOCOL CONFIRMATION`), alabaster ground (`#FCFCFA`), and putty headers (`#E5E3DD`).
+  - Terminal streams (`PushModal`) reside strictly inside a recessed CRT Void well (`#101114`) with green phosphor readout.
 - **Interactive Micro/Macro Kinetics & Cursor Eye Tracking**:
   - CRT Robot Mascot Pupil Tracking: Reactively computes cursor vector to translate pupils smoothly across the screen, with idle micro-drift and direct hover happy arc state (`◠  ◠`).
+  - Stepped CRT Channel Switching (`.animate-retro-channel`): Modal tab transitions execute a stepped phosphor wipe.
+  - Mechanical Dropdown Popovers (`.animate-retro-dropdown`): Custom selects unfold smoothly with mechanical precision.
+  - Retro-Futuristic AI Response Loading: Radar dot-matrix sequence (`[■ ■ ■ □ □]` via `.animate-radar-dot-1..5`), CRT scanline shimmer beam (`.crt-scan-beam`), operational telemetry banner, and phosphor block typewriter cursor (`.animate-retro-cursor` `█`) replacing generic 3-dot bounce.
   - Interactive Reticle & HUD Coordinates: Dynamic cursor coordinate tracking (`┌ RETICLE [042, 180] ┐`), rotating drafting crosshairs (`hover:rotate-45 cursor-crosshair`), and tactile soundbank pad clicks (`active:scale-[0.98] active:translate-y-0.5`).
-  - Balanced Action Triggers: Strict vertical proportion (`h-8` / 32px height) for navbar buttons and Git Push triggers (`.btn-safety`).
-- **Universal Modal Consistency (0% Dark Mode Tolerance)**:
-  - Every single modal (`ConfirmModal`, `NoticeModal`, `PushModal`, `ProjectModal`, `SettingsModal`, `PersonaModal`, `PinModal`), popover, and lightbox is 100% compliant with the CIB-Grid matrix.
-  - Framed with 4 corner registration marks `■` (`.reg-dot`), top drafting seams (`:: PROTOCOL CONFIRMATION`), alabaster ground (`#FCFCFA`), and putty headers (`#E5E3DD`).
-  - Terminal streams (`PushModal`) reside strictly inside a recessed CRT Void well (`#101114`) with green phosphor readout.
-- **Instrument Cockpit Layout Architecture (Anti-AI-Slop Formations)**:
-  - Ban on generic 2x2 SaaS card kits, centered hero clichés, and duplicate center prompt boxes.
-  - Required Layout: 3-column architectural blueprint cockpit, 4-bay partner-style horizontal macro strip (`[01 // AUDIT]`, `[02 // RECON]`, `[03 // DEBUG]`, `[04 // SHIP]`), real-time telemetry registers, and a permanently anchored bottom control console.
+  - Balanced Action Triggers: Strict vertical proportion (`h-8` / 32px height) for navbar buttons and Git Push triggers (`.btn-safety rounded-full`).
 - **Typography & Voice**: Technical grotesque + monospace (Syne 900 display, Chakra Petch tech, Silkscreen pixel, Space Grotesk body, JetBrains Mono stencil), line lengths < 75 characters.
 - **Accessibility & Quality**: High WCAG AAA contrast (basalt on chalk bone), tactile `:active` press mechanics, zero emoji icons (100% Lucide SVG), and touch targets ≥ 44×44px.

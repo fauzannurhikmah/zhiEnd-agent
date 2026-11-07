@@ -236,7 +236,7 @@
 
 {#if isOpen}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
-    <div class="w-full max-w-3xl h-[92vh] sm:h-[85vh] bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl flex flex-col shadow-2xl overflow-hidden font-sans relative">
+    <div class="w-full max-w-3xl h-[92vh] sm:h-[85vh] bg-[#FCFCFA] border-2 border-[#D0CEC7] rounded-none flex flex-col shadow-2xl overflow-hidden font-sans relative">
       <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
       <span class="reg-dot reg-dot-tl"></span>
       <span class="reg-dot reg-dot-tr"></span>
@@ -246,11 +246,11 @@
       <!-- Top Architectural Drafting Header Seam -->
       <div class="px-4 py-3 border-b border-[#D0CEC7] bg-[#ECEAE5] flex items-center justify-between shrink-0 font-tech">
         <div class="flex items-center gap-2.5 min-w-0">
-          <span class="crosshair-box w-6 h-6 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair shrink-0"></span>
+          <span class="crosshair-box w-6 h-6 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair shrink-0 rounded-none"></span>
           <div class="min-w-0">
             <h3 class="text-xs sm:text-sm font-bold text-[#111315] tracking-wider flex items-center gap-2 truncate uppercase">
               <span>:: WORKSPACE DIRECTORY // MATRIX</span>
-              <span class="text-[9px] sm:text-[10px] font-stencil px-1.5 py-0.5 rounded bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] font-bold hidden xs:inline">
+              <span class="text-[9px] sm:text-[10px] font-stencil px-1.5 py-0.5 rounded-none bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] font-bold hidden xs:inline">
                 ROOT: D:\Works
               </span>
             </h3>
@@ -259,32 +259,32 @@
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <span class="hidden sm:inline font-stencil text-[10px] text-[#8C9097]">SYS // CH-01</span>
-          <button onclick={onClose} class="text-[#5C6066] hover:text-[#111315] p-1.5 rounded-lg hover:bg-[#D0CEC7]/60 transition-colors cursor-pointer" title="Tutup Matrix">
+          <button onclick={onClose} class="text-[#5C6066] hover:text-[#111315] p-1.5 rounded-none hover:bg-[#D0CEC7]/60 transition-colors cursor-pointer" title="Tutup Matrix">
             <X class="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      <!-- Segmented Cyber-Industrial Navigation Bays -->
+      <!-- Segmented Cyber-Industrial Navigation Bays (Sharp 90° Channels) -->
       <div class="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-[#D0CEC7] bg-[#E5E3DD] text-xs font-tech font-bold overflow-x-auto gap-2 shrink-0 scrollbar-none">
         <div class="flex gap-1.5 shrink-0">
           <button
             onclick={() => activeTab = 'scan'}
-            class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer uppercase tracking-wider transition-all active:scale-95 {activeTab === 'scan' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+            class="px-3 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer uppercase tracking-wider transition-all active:scale-95 {activeTab === 'scan' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
           >
             <FolderGit class="w-3.5 h-3.5" />
             <span>D:\Works ({scannedProjects.length})</span>
           </button>
           <button
             onclick={() => activeTab = 'create'}
-            class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer uppercase tracking-wider transition-all active:scale-95 {activeTab === 'create' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+            class="px-3 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer uppercase tracking-wider transition-all active:scale-95 {activeTab === 'create' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
           >
             <Plus class="w-3.5 h-3.5" />
             <span>Buat Project</span>
           </button>
           <button
             onclick={() => activeTab = 'manual'}
-            class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer uppercase tracking-wider transition-all active:scale-95 {activeTab === 'manual' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+            class="px-3 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer uppercase tracking-wider transition-all active:scale-95 {activeTab === 'manual' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
           >
             <Folder class="w-3.5 h-3.5" />
             <span>Path Manual</span>
@@ -295,7 +295,7 @@
           <button
             onclick={() => loadScannedProjects('D:\\Works')}
             disabled={isScanning}
-            class="text-[11px] text-[#5C6066] hover:text-[#111315] flex items-center gap-1.5 cursor-pointer font-stencil font-semibold px-2 py-1 rounded hover:bg-[#ECEAE5] transition-colors"
+            class="text-[11px] text-[#5C6066] hover:text-[#111315] flex items-center gap-1.5 cursor-pointer font-stencil font-semibold px-2 py-1 rounded-none hover:bg-[#ECEAE5] transition-colors"
             title="Scan ulang direktori D:\Works"
           >
             <RotateCw class="w-3 h-3 {isScanning ? 'animate-spin text-[#FF5500]' : ''}" />
@@ -304,63 +304,66 @@
         {/if}
       </div>
 
-      <!-- Tab 1: Auto-scanned Projects in D:\Works -->
-      {#if activeTab === 'scan'}
-        <div class="p-3.5 sm:p-4 flex flex-col gap-3 flex-1 overflow-hidden min-h-0 bg-[#ECEAE5]">
-          <!-- Search input well -->
-          <div class="relative shrink-0">
-            <Search class="w-3.5 h-3.5 text-[#5C6066] absolute left-3 top-3" />
-            <input
-              type="text"
-              bind:value={searchQuery}
-              placeholder="Filter direktori di D:\Works (contoh: sehati, crm, pacar, affiliate)..."
-              class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-lg pl-9 pr-3 py-2 text-xs text-[#111315] placeholder-[#8C9097] outline-none focus:border-[#FF5500] focus:ring-1 focus:ring-[#FF5500] transition font-grotesk shadow-2xs"
-            />
-          </div>
-
-          <!-- Root Folder (D:\Works) & Clear Workspace Hero Card -->
-          <div class="rounded-lg border {isAtRoot() ? 'border-[#FF5500] bg-[#FCFCFA] shadow-xs' : 'border-[#D0CEC7] bg-[#FCFCFA] hover:border-[#A8A59C]'} p-3 flex items-center justify-between gap-3 shrink-0 transition relative group">
-            <div
-              role="button"
-              tabindex="0"
-              onclick={() => handleSelect('D:\\Works')}
-              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect('D:\\Works'); }}
-              class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
-            >
-              <div class="w-8 h-8 rounded-lg {isAtRoot() ? 'bg-[#FF5500] text-white' : 'bg-[#E5E3DD] text-[#111315] group-hover:bg-[#FF5500] group-hover:text-white'} border border-[#D0CEC7] flex items-center justify-center transition-all shrink-0">
-                <Folder class="w-4 h-4" />
+      <!-- Tab Content with Retro Channel Switch Animation -->
+      {#key activeTab}
+        <div class="flex-1 flex flex-col overflow-hidden min-h-0 animate-retro-channel">
+          <!-- Tab 1: Auto-scanned Projects in D:\Works -->
+          {#if activeTab === 'scan'}
+            <div class="p-3.5 sm:p-4 flex flex-col gap-3 flex-1 overflow-hidden min-h-0 bg-[#ECEAE5]">
+              <!-- Search input well -->
+              <div class="relative shrink-0">
+                <Search class="w-3.5 h-3.5 text-[#5C6066] absolute left-3 top-3" />
+                <input
+                  type="text"
+                  bind:value={searchQuery}
+                  placeholder="Filter direktori di D:\Works (contoh: sehati, crm, pacar, affiliate)..."
+                  class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-none pl-9 pr-3 py-2 text-xs text-[#111315] placeholder-[#8C9097] outline-none focus:border-[#FF5500] focus:ring-1 focus:ring-[#FF5500] transition font-grotesk shadow-2xs"
+                />
               </div>
-              <div class="flex flex-col min-w-0">
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold font-tech uppercase tracking-wider text-[#111315] group-hover:text-[#FF5500] transition-colors">D:\Works (Root Folder)</span>
-                  <span class="px-1.5 py-0.5 rounded bg-[#E5E3DD] text-[#5C6066] border border-[#D0CEC7] text-[10px] font-stencil font-bold">
-                    DEFAULT ROOT
-                  </span>
-                </div>
-                <p class="text-[11px] text-[#5C6066] font-grotesk truncate">
-                  Tanpa direktori terisolasi. Akses penuh ke seluruh subfolder D:\Works.
-                </p>
-              </div>
-            </div>
 
-            <div class="flex items-center gap-2 shrink-0">
-              {#if isAtRoot()}
-                <span class="px-2.5 py-1 rounded-lg bg-white border border-[#FF5500] text-[#FF5500] text-xs font-tech font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>AKTIF</span>
-                </span>
-              {:else}
-                <button
-                  type="button"
+              <!-- Root Folder (D:\Works) & Clear Workspace Hero Card -->
+              <div class="rounded-none border {isAtRoot() ? 'border-[#FF5500] bg-[#FCFCFA] shadow-xs' : 'border-[#D0CEC7] bg-[#FCFCFA] hover:border-[#A8A59C]'} p-3 flex items-center justify-between gap-3 shrink-0 transition relative group">
+                <div
+                  role="button"
+                  tabindex="0"
                   onclick={() => handleSelect('D:\\Works')}
-                  class="btn-hardware px-3 py-1.5 rounded-lg text-xs font-tech font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95"
+                  onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect('D:\\Works'); }}
+                  class="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                 >
-                  <RotateCw class="w-3 h-3 text-[#FF5500]" />
-                  <span>SET ROOT</span>
-                </button>
-              {/if}
-            </div>
-          </div>
+                  <div class="w-8 h-8 rounded-none {isAtRoot() ? 'bg-[#FF5500] text-white' : 'bg-[#E5E3DD] text-[#111315] group-hover:bg-[#FF5500] group-hover:text-white'} border border-[#D0CEC7] flex items-center justify-center transition-all shrink-0">
+                    <Folder class="w-4 h-4" />
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold font-tech uppercase tracking-wider text-[#111315] group-hover:text-[#FF5500] transition-colors">D:\Works (Root Folder)</span>
+                      <span class="px-1.5 py-0.5 rounded-none bg-[#E5E3DD] text-[#5C6066] border border-[#D0CEC7] text-[10px] font-stencil font-bold">
+                        DEFAULT ROOT
+                      </span>
+                    </div>
+                    <p class="text-[11px] text-[#5C6066] font-grotesk truncate">
+                      Tanpa direktori terisolasi. Akses penuh ke seluruh subfolder D:\Works.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                  {#if isAtRoot()}
+                    <span class="px-2.5 py-1 rounded-none bg-white border border-[#FF5500] text-[#FF5500] text-xs font-tech font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-2xs">
+                      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                      <span>AKTIF</span>
+                    </span>
+                  {:else}
+                    <button
+                      type="button"
+                      onclick={() => handleSelect('D:\\Works')}
+                      class="btn-hardware px-3 py-1.5 rounded-none text-xs font-tech font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95"
+                    >
+                      <RotateCw class="w-3 h-3 text-[#FF5500]" />
+                      <span>SET ROOT</span>
+                    </button>
+                  {/if}
+                </div>
+              </div>
 
           <!-- Structured Tree View -->
           <div class="flex-1 overflow-y-auto flex flex-col gap-2.5 pr-1.5 min-h-0 font-sans">
@@ -793,6 +796,8 @@
           {/if}
         </div>
       {/if}
+    </div>
+    {/key}
 
     </div>
   </div>

@@ -579,14 +579,14 @@
   </div>
 
   <!-- Content Viewport -->
-  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto {messages.length === 0 ? 'p-0 flex flex-col' : 'p-4 sm:p-6 pb-28 sm:pb-32 blueprint-grid'}">
+  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto {messages.length === 0 ? 'p-0 flex flex-col' : 'p-4 sm:p-6 pb-28 sm:pb-32 blueprint-cad-ground'}">
     {#if messages.length === 0}
       <!-- Cyber-Industrial Blueprint Grid (CIB-Grid) Full-Bleed Cockpit Deck -->
       <div 
         role="region"
         aria-label="Blueprint Cockpit Deck"
         onmousemove={handleDeckMouseMove}
-        class="w-full flex-1 flex flex-col justify-between blueprint-grid p-4 sm:p-6 lg:p-8 relative"
+        class="w-full flex-1 flex flex-col justify-between blueprint-cad-ground p-4 sm:p-6 lg:p-8 relative"
       >
         <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
         <span class="reg-dot reg-dot-tl"></span>
@@ -597,13 +597,13 @@
         <!-- Top Drafting Header Seam -->
         <div class="flex items-center justify-between pb-3 mb-2 border-b border-[#D0CEC7] font-tech text-[11px] text-[#5C6066]">
           <div class="flex items-center gap-2">
-            <span class="crosshair-box w-5 h-5 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair"></span>
+            <span class="crosshair-box w-5 h-5 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair rounded-none"></span>
             <span class="font-bold tracking-wider text-[#111315]">ZHIEND // AUTONOMOUS AGENT RUNTIME</span>
             <span class="text-[#FF5500] font-bold">■ LABS DRAFTING MATRIX</span>
           </div>
           <div class="hidden sm:flex items-center gap-3 font-stencil text-[10px]">
             <span class="text-[#8C9097]">:: SYS_BUS_NOMINAL</span>
-            <span class="px-2 py-0.5 rounded bg-white border border-[#D0CEC7] font-bold text-[#111315]">REV 2.4</span>
+            <span class="px-2 py-0.5 rounded-none bg-white border border-[#D0CEC7] font-bold text-[#111315]">REV 2.4</span>
           </div>
         </div>
 
@@ -621,7 +621,7 @@
         <!-- Main 3-Column Cockpit Deck -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center flex-1 my-auto">
           
-          <!-- Left Cell (Col 1-5): Mission Brief & Primary CTA -->
+          <!-- Left Cell (Col 1-5): Mission Brief & Primary CTA (ChainGPT Labs Style: Flat Orange Capsule) -->
           <div class="lg:col-span-5 flex flex-col justify-between h-full gap-4 py-2">
             <div>
               <p class="text-xs sm:text-sm text-[#444850] font-grotesk leading-relaxed">
@@ -643,10 +643,10 @@
               <button
                 type="button"
                 onclick={() => setPrompt('Jelaskan struktur arsitektur codebase ini dan status modul utamanya.')}
-                class="btn-safety px-6 py-3 rounded-full text-white text-xs sm:text-sm font-tech font-bold uppercase tracking-wider transition cursor-pointer shadow-sm hover:shadow-md flex items-center gap-2.5 w-fit active:scale-95"
+                class="btn-safety px-6 py-2.5 rounded-full text-white text-xs sm:text-sm font-tech font-bold uppercase tracking-wider transition cursor-pointer flex items-center gap-2.5 w-fit active:scale-95 shadow-none"
               >
                 <Sparkles class="w-4 h-4" />
-                INITIALIZE RUNTIME
+                <span>INITIALIZE RUNTIME</span>
               </button>
             </div>
           </div>
@@ -665,9 +665,9 @@
             </div>
           </div>
 
-          <!-- Right Cell (Col 9-12): Viewfinder Telemetry Box -->
+          <!-- Right Cell (Col 9-12): Viewfinder Telemetry Box (Sharp 90° Frame) -->
           <div class="lg:col-span-3">
-            <div class="viewfinder-box p-4 rounded-xl text-white font-stencil flex flex-col gap-3 shadow-xl relative overflow-hidden group">
+            <div class="viewfinder-box p-4 rounded-none text-white font-stencil flex flex-col gap-3 shadow-xl relative overflow-hidden group border border-white/10">
               <!-- Animated Scanning Wave Overlay -->
               <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#FF5500]/10 to-transparent pointer-events-none animate-pulse"></div>
 
@@ -704,28 +704,28 @@
 
         </div>
 
-        <!-- Bottom 4-Bay Partner-Style Macro Strip (Like Chainlink, TRON, BNB, OKX in Reference) -->
+        <!-- Bottom 4-Bay Partner-Style Macro Strip (Exact Chainlink, TRON, BNB, OKX Sharp Cell Architecture) -->
         <div class="mt-6 pt-4 border-t border-[#D0CEC7] w-full">
           <div class="flex items-center justify-between mb-2.5 font-tech text-[10px] text-[#5C6066]">
             <span class="font-bold tracking-wider uppercase text-[#111315]">OUR DIRECT DISPATCH BAYS // SOUNDBANK:</span>
             <span class="hidden sm:inline text-[#8C9097]">SELECT BAY TO DISPATCH</span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 border border-[#D0CEC7] bg-white rounded-xl overflow-hidden p-1 shadow-2xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-[#D0CEC7] bg-[#FCFCFA] rounded-none divide-y sm:divide-y-0 sm:divide-x divide-[#D0CEC7] shadow-xs">
             {#each suggestions as s, idx}
               <button
                 type="button"
                 onclick={() => setPrompt(s.prompt)}
-                class="p-3 bg-[#FCFCFA] hover:bg-[#ECEAE5] active:bg-[#E5E3DD] active:scale-[0.98] active:translate-y-0.5 border border-transparent hover:border-[#D0CEC7] rounded-lg flex flex-col justify-between gap-2.5 transition-all text-left cursor-pointer group"
+                class="p-4 bg-[#FCFCFA] hover:bg-[#ECEAE5] active:bg-[#E5E3DD] active:scale-[0.99] transition-all text-left cursor-pointer group flex flex-col justify-between gap-3 rounded-none relative"
               >
                 <div class="flex items-center justify-between w-full">
-                  <span class="text-[9px] font-stencil font-bold px-1.5 py-0.5 rounded bg-white group-hover:bg-[#FF5500] text-[#5C6066] group-hover:text-white border border-[#D0CEC7] transition">
+                  <span class="text-[9px] font-stencil font-bold px-1.5 py-0.5 rounded-none bg-[#E5E3DD] group-hover:bg-[#FF5500] text-[#5C6066] group-hover:text-white border border-[#D0CEC7] transition">
                     BAY 0{idx + 1}
                   </span>
                   <s.icon class="w-3.5 h-3.5 text-[#FF5500] group-hover:scale-110 transition-transform" />
                 </div>
                 <div>
-                  <div class="text-xs font-bold text-[#111315] group-hover:text-[#FF5500] transition-colors font-tech uppercase">
+                  <div class="text-xs font-bold text-[#111315] group-hover:text-[#FF5500] transition-colors font-tech uppercase tracking-wide">
                     {s.title}
                   </div>
                   <p class="text-[10px] text-[#5C6066] font-grotesk line-clamp-1 mt-0.5">{s.desc}</p>
@@ -763,7 +763,7 @@
               </div>
 
               <!-- User Bubble Content (Architectural Alabaster Well) -->
-              <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-3.5 sm:p-4 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-grotesk text-[#111315] max-w-[92%] sm:max-w-[85%] shadow-2xs">
+              <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-3.5 sm:p-4 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-grotesk text-[#111315] max-w-[92%] sm:max-w-[85%] shadow-2xs">
                 <span class="reg-dot reg-dot-tr"></span>
                 {msg.text}
               </div>
@@ -775,7 +775,7 @@
                     <button
                       type="button"
                       onclick={() => zoomImageUrl = imgUrl}
-                      class="group/thumb relative rounded-lg overflow-hidden border border-[#D0CEC7] hover:border-[#FF5500] shadow-2xs bg-[#ECEAE5] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                      class="group/thumb relative rounded-none overflow-hidden border border-[#D0CEC7] hover:border-[#FF5500] shadow-2xs bg-[#ECEAE5] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
                     >
                       <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
                       <div class="absolute inset-0 bg-black/30 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
@@ -792,7 +792,7 @@
                   <button
                     type="button"
                     onclick={() => handleCopy(msg.id, msg.text)}
-                    class="flex items-center gap-1 text-[11px] text-[#60646C] hover:text-[#111315] px-1.5 py-0.5 rounded hover:bg-[#E5E3DD] transition cursor-pointer font-stencil"
+                    class="flex items-center gap-1 text-[11px] text-[#60646C] hover:text-[#111315] px-1.5 py-0.5 rounded-none hover:bg-[#E5E3DD] transition cursor-pointer font-stencil"
                     title="Salin teks"
                   >
                     {#if copiedMessageId === msg.id}
@@ -815,7 +815,7 @@
                   avatar={activePersona?.avatar}
                   name={activePersona?.name}
                   size="md"
-                  className="rounded-xl border border-[#D0CEC7] shadow-2xs"
+                  className="rounded-none border border-[#D0CEC7] shadow-2xs"
                 />
               </div>
 
@@ -827,7 +827,7 @@
                   </span>
                   {#if activePersona?.traits}
                     <span 
-                      class="text-[9px] px-2 py-0.5 rounded bg-[#E5E3DD] border border-[#D0CEC7] text-[#60646C] font-stencil truncate max-w-[140px] sm:max-w-[280px] md:max-w-[360px]"
+                      class="text-[9px] px-2 py-0.5 rounded-none bg-[#E5E3DD] border border-[#D0CEC7] text-[#60646C] font-stencil truncate max-w-[140px] sm:max-w-[280px] md:max-w-[360px]"
                       title={`Sifat & Karakteristik: ${activePersona.traits}`}
                     >
                       {activePersona.traits}
@@ -841,12 +841,12 @@
                 </div>
 
                 <!-- Agent Bubble Content (Architectural Blueprint Log Panel) -->
-                <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-3.5 sm:p-4 text-[#111315] text-xs leading-relaxed shadow-xs font-grotesk">
+                <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-3.5 sm:p-4 text-[#111315] text-xs leading-relaxed shadow-xs font-grotesk">
                   <span class="reg-dot reg-dot-tl"></span>
                   <!-- Professional Execution & Reasoning Accordion -->
                   {#if (msg.steps && msg.steps.length > 0) || (msg.tools && msg.tools.length > 0) || msg.thought || msg.isStreaming}
                     {@const isExp = isProcessExpanded(msg.id, msg.isStreaming)}
-                    <div class="mb-3 rounded-lg border transition-all duration-200 overflow-hidden {isExp ? 'border-[#D0CEC7] bg-[#E5E3DD]/40' : 'border-[#D0CEC7] bg-[#E5E3DD]/20 hover:border-[#A8A59C]'} font-tech">
+                    <div class="mb-3 rounded-none border transition-all duration-200 overflow-hidden {isExp ? 'border-[#D0CEC7] bg-[#E5E3DD]/40' : 'border-[#D0CEC7] bg-[#E5E3DD]/20 hover:border-[#A8A59C]'} font-tech">
                       <!-- Accordion Header Button -->
                       <button
                         type="button"
@@ -886,11 +886,11 @@
                         <div class="p-3 border-t border-[#D0CEC7] flex flex-col gap-2.5 text-xs bg-[#FCFCFA] animate-in fade-in duration-150">
                           <!-- Reasoning / Thinking Box -->
                           {#if msg.thought}
-                            <div class="p-2.5 rounded-lg bg-amber-50/70 border border-amber-300 text-amber-950 italic text-[11px] leading-relaxed flex gap-2">
+                            <div class="p-2.5 rounded-none bg-amber-50/70 border border-amber-300 text-amber-950 italic text-[11px] leading-relaxed flex gap-2">
                               <Sparkles class="w-3.5 h-3.5 text-[#FF5500] shrink-0 mt-0.5" />
                               <div class="flex flex-col gap-0.5">
                                 <span class="text-[10px] font-bold text-[#C26D2B] not-italic font-mono uppercase tracking-wider">
-                                  Reasoning & Analisis
+                                  :: Reasoning & Analisis Matrix
                                 </span>
                                 <span>{msg.thought}</span>
                               </div>
@@ -902,32 +902,32 @@
                             <div class="space-y-1.5 pl-1 border-l-2 border-[#FF5500]/30 ml-2">
                               {#each msg.steps as st}
                                 <div class="flex items-start gap-2.5 text-[#191B1D] text-xs py-0.5 pl-2">
-                                  <span class="w-1.5 h-1.5 rounded-full {st.type === 'edit' || st.type === 'write' ? 'bg-[#FF5500]' : 'bg-[#E5A91A]'} mt-1.5 shrink-0"></span>
+                                  <span class="w-1.5 h-1.5 {st.type === 'edit' || st.type === 'write' ? 'bg-[#FF5500]' : 'bg-[#E5A91A]'} mt-1.5 shrink-0"></span>
 
                                   <div class="flex-1 flex flex-col min-w-0">
                                     <div class="flex items-center gap-1.5 flex-wrap">
                                       <span class="font-bold text-[#191B1D]">{st.title}</span>
 
                                       {#if st.file}
-                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] font-semibold">
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-none bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] font-semibold">
                                           <FileCode class="w-2.5 h-2.5 text-[#FF5500]" /> {st.file}
                                         </span>
                                       {/if}
 
                                       {#if st.lines}
-                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-amber-100 border border-amber-300 text-[10px] font-mono text-amber-900 font-bold">
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-none bg-amber-100 border border-amber-300 text-[10px] font-mono text-amber-900 font-bold">
                                           {st.lines}
                                         </span>
                                       {/if}
 
                                       {#if st.command}
-                                        <code class="px-1.5 py-0.2 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] max-w-sm truncate font-semibold">
+                                        <code class="px-1.5 py-0.2 rounded-none bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] max-w-sm truncate font-semibold">
                                           {st.command}
                                         </code>
                                       {/if}
 
                                       {#if st.repeatCount && st.repeatCount > 1}
-                                        <span class="inline-flex items-center px-1.5 py-0.2 rounded-full bg-[#FF5500]/15 border border-[#FF5500]/30 text-[9px] font-mono font-bold text-[#FF5500]" title={`Perintah dijalankan ${st.repeatCount} kali`}>
+                                        <span class="inline-flex items-center px-1.5 py-0.2 rounded-none bg-[#FF5500]/15 border border-[#FF5500]/30 text-[9px] font-mono font-bold text-[#FF5500]" title={`Perintah dijalankan ${st.repeatCount} kali`}>
                                           ×{st.repeatCount}
                                         </span>
                                       {/if}
@@ -944,29 +944,37 @@
 
                               <!-- Active in-progress indicator while streaming -->
                               {#if msg.isStreaming}
-                                <div class="flex items-center gap-2 text-[#5C6066] text-[11px] py-0.5 pl-2">
-                                  <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse shrink-0"></span>
-                                  <span class="font-sans font-medium">Melanjutkan langkah berikutnya...</span>
+                                <div class="flex items-center gap-2 text-[#111315] text-[11px] py-1 pl-2 font-tech">
+                                  <span class="w-1.5 h-1.5 bg-[#FF5500] animate-retro-cursor shrink-0"></span>
+                                  <span class="font-stencil text-[#FF5500] font-bold uppercase tracking-wider">:: EXECUTING SUBSYSTEM INSTRUCTION...</span>
                                 </div>
                               {/if}
                             </div>
                           {:else if msg.tools && msg.tools.length > 0}
                             <div class="flex flex-wrap gap-1.5">
                               {#each msg.tools as tool}
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] font-semibold">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-none bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] font-semibold">
                                   <Wrench class="w-2.5 h-2.5 text-[#FF5500]" /> {tool}
                                 </span>
                               {/each}
                             </div>
                           {:else if msg.isStreaming}
-                            <!-- Minimalist Loading Indicator -->
-                            <div class="flex items-center gap-2.5 py-1 text-[#5C6066]">
-                              <div class="flex gap-1 items-center">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-bounce [animation-delay:-0.3s]"></span>
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-bounce [animation-delay:-0.15s]"></span>
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-bounce"></span>
+                            <!-- Retro-Futuristic Telemetry Radar Stream Loader -->
+                            <div class="relative overflow-hidden flex items-center justify-between gap-3 px-3 py-2 bg-[#ECEAE5] border border-[#D0CEC7] font-tech text-xs rounded-none">
+                              <div class="crt-scan-beam"></div>
+                              <div class="flex items-center gap-2.5 z-10">
+                                <div class="flex items-center gap-1 font-mono font-bold text-[#FF5500] text-xs">
+                                  <span class="animate-radar-dot-1">■</span>
+                                  <span class="animate-radar-dot-2">■</span>
+                                  <span class="animate-radar-dot-3">■</span>
+                                  <span class="animate-radar-dot-4">■</span>
+                                  <span class="animate-radar-dot-5">■</span>
+                                </div>
+                                <span class="text-[11px] font-bold text-[#111315] uppercase tracking-wider font-stencil">
+                                  :: ANALYZING TELEMETRY & REASONING MATRIX
+                                </span>
                               </div>
-                              <span class="text-[11px] text-[#5C6066] font-sans font-medium">Menganalisis & merencanakan tugas...</span>
+                              <span class="inline-block w-2 h-3.5 bg-[#FF5500] animate-retro-cursor z-10"></span>
                             </div>
                           {/if}
                         </div>
@@ -978,7 +986,7 @@
                   <div class="prose-chat font-sans text-[13px] leading-relaxed text-[#191B1D]">
                     {@html renderMarkdown(msg.text)}
                     {#if msg.isStreaming && msg.text}
-                      <span class="inline-block w-1.5 h-3.5 bg-[#FF5500] animate-pulse align-middle ml-0.5 rounded-xs"></span>
+                      <span class="inline-block w-2 h-4 bg-[#FF5500] animate-retro-cursor align-middle ml-1"></span>
                     {/if}
                   </div>
 
@@ -1046,12 +1054,12 @@
         </div>
         <div class="flex items-center gap-2">
           <span>SHORTCUT:</span>
-          <kbd class="px-1 py-0.2 rounded bg-[#FCFCFA] border border-[#D0CEC7] text-[#111315] font-bold">Ctrl + Enter</kbd>
+          <kbd class="px-1 py-0.2 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] text-[#111315] font-bold">Ctrl + Enter</kbd>
         </div>
       </div>
 
       <!-- Recessed Mechanical Input Well -->
-      <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] focus-within:border-[#FF5500] rounded-xl p-2 shadow-2xs transition">
+      <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] focus-within:border-[#FF5500] rounded-none p-2 shadow-2xs transition">
         <!-- 4 Corner Registration Marks -->
         <span class="reg-dot reg-dot-tl"></span>
         <span class="reg-dot reg-dot-tr"></span>
@@ -1062,8 +1070,8 @@
         {#if selectedImages.length > 0}
           <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-1.5 border-b border-[#D0CEC7]/60 mb-2">
             {#each selectedImages as img, idx}
-              <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#ECEAE5] border border-[#D0CEC7] text-xs text-[#111315] shadow-2xs animate-in fade-in zoom-in-95 duration-150">
-                <div class="relative w-6 h-6 shrink-0 rounded overflow-hidden border border-[#D0CEC7] bg-[#DEDBD2]">
+              <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-none bg-[#ECEAE5] border border-[#D0CEC7] text-xs text-[#111315] shadow-2xs animate-in fade-in zoom-in-95 duration-150">
+                <div class="relative w-6 h-6 shrink-0 rounded-none overflow-hidden border border-[#D0CEC7] bg-[#DEDBD2]">
                   <img src={img.localPreviewUrl || img.url} alt={img.name} class="w-full h-full object-cover" />
                   {#if img.isUploading}
                     <div class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center">
@@ -1080,7 +1088,7 @@
                 <button
                   type="button"
                   onclick={() => removeImage(idx)}
-                  class="p-0.5 rounded hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 transition cursor-pointer shrink-0"
+                  class="p-0.5 rounded-none hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 transition cursor-pointer shrink-0"
                   title="Hapus gambar"
                 >
                   <X class="w-3 h-3" />
@@ -1092,18 +1100,18 @@
 
         <!-- Voice Listening / Error Banner -->
         {#if isListening}
-          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg bg-rose-50 border border-rose-300 text-[11px] text-rose-900 animate-in fade-in font-stencil">
+          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-none bg-rose-50 border border-rose-300 text-[11px] text-rose-900 animate-in fade-in font-stencil">
             <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
             <span class="font-bold truncate">RECORDING AUDIO INTAKE... (KLIK MIC UNTUK SELESAI)</span>
-            <button type="button" onclick={stopVoiceInput} class="ml-auto text-xs px-2 py-0.5 rounded bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold">SELESAI</button>
+            <button type="button" onclick={stopVoiceInput} class="ml-auto text-xs px-2 py-0.5 rounded-none bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold">SELESAI</button>
           </div>
         {:else if isTranscribingVoice}
-          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg bg-orange-50 border border-orange-300 text-[11px] text-[#FF5500] animate-in fade-in font-stencil font-semibold">
+          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-none bg-orange-50 border border-orange-300 text-[11px] text-[#FF5500] animate-in fade-in font-stencil font-semibold">
             <Loader2 class="w-3.5 h-3.5 animate-spin text-[#FF5500] shrink-0" />
             <span>TRANSCRIBING AUDIO WAVEFORM...</span>
           </div>
         {:else if voiceError}
-          <div class="flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-lg bg-amber-50 border border-amber-300 text-[11px] text-amber-900 animate-in fade-in font-stencil">
+          <div class="flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-none bg-amber-50 border border-amber-300 text-[11px] text-amber-900 animate-in fade-in font-stencil">
             <span class="truncate">⚠️ {voiceError}</span>
             <button type="button" onclick={() => voiceError = null} class="p-0.5 hover:text-black shrink-0"><X class="w-3 h-3" /></button>
           </div>
@@ -1115,7 +1123,7 @@
             type="button"
             onclick={() => fileInputRef?.click()}
             disabled={isBusy || isUploadingImage || isListening}
-            class="p-2 rounded-lg text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] transition cursor-pointer shrink-0 disabled:opacity-40"
+            class="p-2 rounded-none text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] transition cursor-pointer shrink-0 disabled:opacity-40"
             title="Lampirkan Gambar (atau paste / drag & drop)"
           >
             {#if isUploadingImage}
@@ -1130,7 +1138,7 @@
             type="button"
             onclick={toggleVoiceInput}
             disabled={isBusy || isUploadingImage || isTranscribingVoice}
-            class="relative p-2 rounded-lg transition cursor-pointer shrink-0 disabled:opacity-40 {isListening ? 'bg-rose-100 text-rose-600 border border-rose-300' : (isTranscribingVoice ? 'bg-orange-100 text-[#FF5500] border border-orange-300 animate-pulse' : 'text-[#60646C] hover:text-rose-600 hover:bg-[#E5E3DD]')}"
+            class="relative p-2 rounded-none transition cursor-pointer shrink-0 disabled:opacity-40 {isListening ? 'bg-rose-100 text-rose-600 border border-rose-300' : (isTranscribingVoice ? 'bg-orange-100 text-[#FF5500] border border-orange-300 animate-pulse' : 'text-[#60646C] hover:text-rose-600 hover:bg-[#E5E3DD]')}"
             title={isListening ? 'Klik untuk selesai bicara' : (isTranscribingVoice ? 'Mentranskripsi suara...' : 'Perintah Suara (Speech-to-Text)')}
           >
             {#if isTranscribingVoice}
@@ -1155,7 +1163,7 @@
             {#if isBusy}
               <button
                 onclick={onCancelTask}
-                class="p-2 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 transition cursor-pointer"
+                class="p-2 rounded-none bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 transition cursor-pointer"
                 title="Hentikan Task"
               >
                 <StopCircle class="w-4 h-4" />
@@ -1164,7 +1172,7 @@
 
             <button
               onclick={onClearMessages}
-              class="hidden sm:flex p-2 rounded-lg hover:bg-[#E5E3DD] text-[#8C9097] hover:text-[#111315] transition cursor-pointer"
+              class="hidden sm:flex p-2 rounded-none hover:bg-[#E5E3DD] text-[#8C9097] hover:text-[#111315] transition cursor-pointer"
               title="Bersihkan Percakapan"
             >
               <Trash2 class="w-4 h-4" />
@@ -1173,7 +1181,7 @@
             <button
               onclick={handleSend}
               disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
-              class="btn-safety px-4 py-2 rounded-lg text-white font-tech font-bold uppercase tracking-wider text-xs transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5"
+              class="btn-safety px-5 py-2 rounded-full text-white font-tech font-bold uppercase tracking-wider text-xs transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5 shadow-none"
             >
               <span>DISPATCH</span>
               <ArrowUp class="w-3.5 h-3.5" />

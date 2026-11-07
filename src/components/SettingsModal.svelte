@@ -260,7 +260,7 @@
 
 {#if isOpen}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-2 sm:p-4">
-    <div class="w-full max-w-3xl rounded-xl flex flex-col max-h-[92vh] sm:max-h-[85vh] bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-200 relative">
+    <div class="w-full max-w-3xl rounded-none flex flex-col max-h-[92vh] sm:max-h-[85vh] bg-[#FCFCFA] border-2 border-[#D0CEC7] shadow-2xl overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-200 relative">
       <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
       <span class="reg-dot reg-dot-tl"></span>
       <span class="reg-dot reg-dot-tr"></span>
@@ -270,7 +270,7 @@
       <!-- Modal Header -->
       <div class="px-4 py-3 border-b border-[#D0CEC7] flex items-center justify-between shrink-0 bg-[#ECEAE5] font-tech">
         <div class="flex items-center gap-2.5 min-w-0">
-          <span class="crosshair-box w-6 h-6 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair shrink-0"></span>
+          <span class="crosshair-box w-6 h-6 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair shrink-0 rounded-none"></span>
           <div class="min-w-0">
             <h3 class="text-xs sm:text-sm font-bold text-[#111315] tracking-wider flex items-center gap-2 truncate uppercase">
               <span>:: SYSTEM CONFIGURATION // PREFERENCES</span>
@@ -281,60 +281,61 @@
 
         <div class="flex items-center gap-2 shrink-0">
           <span class="hidden sm:inline font-stencil text-[10px] text-[#8C9097]">BUS: :{formPort}</span>
-          <button onclick={onClose} class="text-[#5C6066] hover:text-[#111315] p-1.5 rounded-lg hover:bg-[#D0CEC7]/60 transition-colors cursor-pointer" title="Tutup Pengaturan">
+          <button onclick={onClose} class="text-[#5C6066] hover:text-[#111315] p-1.5 rounded-none hover:bg-[#D0CEC7]/60 transition-colors cursor-pointer" title="Tutup Pengaturan">
             <X class="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      <!-- Settings Navigation Tabs -->
+      <!-- Settings Navigation Tabs (Sharp 90° Channels) -->
       <div class="flex border-b border-[#D0CEC7] px-3 sm:px-4 py-1.5 gap-1.5 text-xs font-tech font-bold uppercase tracking-wider overflow-x-auto bg-[#E5E3DD] shrink-0 scrollbar-none">
         <button
           onclick={() => activeTab = 'general'}
-          class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'general' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+          class="px-2.5 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'general' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
         >
           <Shield class="w-3.5 h-3.5" /> UMUM & PIN
         </button>
         <button
           onclick={() => activeTab = 'ai_providers'}
-          class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'ai_providers' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+          class="px-2.5 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'ai_providers' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
         >
           <Key class="w-3.5 h-3.5 text-[#FF5500]" /> AI API KEYS & MODEL
         </button>
         <button
           onclick={() => activeTab = 'antigravity'}
-          class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'antigravity' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+          class="px-2.5 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'antigravity' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
         >
           <Cpu class="w-3.5 h-3.5" /> ANTIGRAVITY CORE
         </button>
         <button
           onclick={() => activeTab = 'telegram'}
-          class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'telegram' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+          class="px-2.5 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'telegram' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
         >
           <Send class="w-3.5 h-3.5" /> TELEGRAM
         </button>
         <button
           onclick={() => activeTab = 'whatsapp'}
-          class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'whatsapp' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+          class="px-2.5 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'whatsapp' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
         >
           <MessageSquare class="w-3.5 h-3.5" /> WHATSAPP
         </button>
         <button
           onclick={() => activeTab = 'tunnel'}
-          class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'tunnel' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+          class="px-2.5 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'tunnel' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
         >
           <Globe class="w-3.5 h-3.5" /> TUNNEL
         </button>
         <button
           onclick={() => activeTab = 'voice'}
-          class="px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'voice' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
+          class="px-2.5 py-1.5 rounded-none flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition-all active:scale-95 {activeTab === 'voice' ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs' : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
         >
           <Mic class="w-3.5 h-3.5" /> VOICE
         </button>
       </div>
 
-      <!-- Tab Content Area -->
-      <div class="flex-1 overflow-y-auto p-4 sm:p-5 text-xs bg-[#ECEAE5]">
+      <!-- Tab Content Area with Retro Channel Switch Animation -->
+      {#key activeTab}
+        <div class="flex-1 overflow-y-auto p-4 sm:p-5 text-xs bg-[#ECEAE5] animate-retro-channel">
         
         <!-- ========================================== -->
         <!-- AI PROVIDERS & API KEYS                    -->
@@ -1079,6 +1080,7 @@
           </div>
         {/if}
       </div>
+      {/key}
 
       <!-- Modal Footer -->
       <div class="px-4 sm:px-6 py-3 border-t border-[#D0CEC7] flex items-center justify-end gap-2.5 bg-[#E5E3DD] shrink-0 font-tech">

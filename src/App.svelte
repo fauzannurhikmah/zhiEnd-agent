@@ -827,7 +827,7 @@
         <button
           type="button"
           onclick={() => (isMobileSidebarOpen = true)}
-          class="md:hidden p-1.5 rounded-lg text-[#5C6066] hover:text-[#111315] hover:bg-black/[0.05] transition cursor-pointer shrink-0"
+          class="md:hidden p-1.5 rounded-none text-[#5C6066] hover:text-[#111315] hover:bg-black/[0.05] transition cursor-pointer shrink-0"
           title="Buka Menu Sidebar"
           aria-label="Buka Menu Sidebar"
         >
@@ -855,7 +855,7 @@
           >
           <button
             onclick={handleResetToRoot}
-            class="px-1.5 sm:px-2 py-0.5 rounded bg-[#E5E3DD] hover:bg-rose-100 text-[9px] sm:text-[10px] text-[#5C6066] hover:text-rose-600 border border-[#D0CEC7] transition cursor-pointer shrink-0 font-stencil"
+            class="px-1.5 sm:px-2 py-0.5 rounded-none bg-[#E5E3DD] hover:bg-rose-100 text-[9px] sm:text-[10px] text-[#5C6066] hover:text-rose-600 border border-[#D0CEC7] transition cursor-pointer shrink-0 font-stencil"
             title="Clear Workspace (Reset ke Root D:\Works)"
           >
             Clear
@@ -874,7 +874,7 @@
 
       <!-- Center Blueprint Telemetry Marker & Reactive Equalizer Activity Meter -->
       <div
-        class="hidden lg:flex items-center gap-2.5 text-[10px] font-stencil text-[#8C9097] px-2.5 py-1 rounded-lg bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xs group hover:border-[#FF5500] transition-colors"
+        class="hidden lg:flex items-center gap-2.5 text-[10px] font-stencil text-[#8C9097] px-2.5 py-1 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xs group hover:border-[#FF5500] transition-colors"
         title="Bus Activity Telemetry & Audio/Runtime Meter"
       >
         <span class="text-[#FF5500] font-bold">::</span>
@@ -883,10 +883,10 @@
         
         <!-- Interactive 4-Bar Hardware Activity Equalizer -->
         <div class="flex items-end gap-0.5 h-3.5 w-6 pb-0.5" aria-label="Runtime Telemetry Equalizer">
-          <span class="w-1 bg-emerald-500 rounded-2xs transition-all duration-300 {isAgentBusy ? 'h-3 animate-bounce' : 'h-1.5 group-hover:h-2.5'}"></span>
-          <span class="w-1 bg-emerald-500 rounded-2xs transition-all duration-300 {isAgentBusy ? 'h-2 animate-pulse' : 'h-2.5 group-hover:h-3'}"></span>
-          <span class="w-1 bg-[#FFAA00] rounded-2xs transition-all duration-300 {isAgentBusy ? 'h-3 animate-ping' : 'h-1 group-hover:h-2'}"></span>
-          <span class="w-1 bg-[#FF5500] rounded-2xs transition-all duration-300 {isAgentBusy ? 'h-3.5 animate-bounce' : 'h-2 group-hover:h-1'}"></span>
+          <span class="w-1 bg-emerald-500 rounded-none transition-all duration-300 {isAgentBusy ? 'h-3 animate-bounce' : 'h-1.5 group-hover:h-2.5'}"></span>
+          <span class="w-1 bg-emerald-500 rounded-none transition-all duration-300 {isAgentBusy ? 'h-2 animate-pulse' : 'h-2.5 group-hover:h-3'}"></span>
+          <span class="w-1 bg-[#FFAA00] rounded-none transition-all duration-300 {isAgentBusy ? 'h-3 animate-ping' : 'h-1 group-hover:h-2'}"></span>
+          <span class="w-1 bg-[#FF5500] rounded-none transition-all duration-300 {isAgentBusy ? 'h-3.5 animate-bounce' : 'h-2 group-hover:h-1'}"></span>
         </div>
         
         <span class="text-[#5C6066]">0x3888</span>
@@ -896,7 +896,7 @@
         <!-- Quick Remote Indicators -->
         <button
           onclick={() => (currentTab = "remote")}
-          class="h-8 flex items-center gap-1.5 px-2.5 rounded-lg border text-xs font-stencil transition cursor-pointer active:scale-95 {whatsappStatus?.status ===
+          class="h-8 flex items-center gap-1.5 px-2.5 rounded-none border text-xs font-stencil transition cursor-pointer active:scale-95 {whatsappStatus?.status ===
           'connected'
             ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
             : whatsappStatus?.status === 'qr_ready'
@@ -908,7 +908,7 @@
           <MessageSquare class="w-3.5 h-3.5 text-emerald-600" />
           <span class="hidden sm:inline">WA</span>
           <span
-            class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status ===
+            class="w-1.5 h-1.5 rounded-none {whatsappStatus?.status ===
             'connected'
               ? 'bg-emerald-500'
               : whatsappStatus?.status === 'qr_ready'
@@ -919,7 +919,7 @@
 
         <button
           onclick={() => (currentTab = "remote")}
-          class="h-8 flex items-center gap-1.5 px-2.5 rounded-lg border text-xs font-stencil transition cursor-pointer active:scale-95 {telegramStatus?.status ===
+          class="h-8 flex items-center gap-1.5 px-2.5 rounded-none border text-xs font-stencil transition cursor-pointer active:scale-95 {telegramStatus?.status ===
           'running'
             ? 'bg-sky-50 border-sky-300 text-sky-800'
             : 'bg-[#FCFCFA] border-[#D0CEC7] text-[#60646C] hover:bg-[#E5E3DD]'}"
@@ -929,7 +929,7 @@
           <Send class="w-3.5 h-3.5 text-sky-600" />
           <span class="hidden sm:inline">TG</span>
           <span
-            class="w-1.5 h-1.5 rounded-full {telegramStatus?.status ===
+            class="w-1.5 h-1.5 rounded-none {telegramStatus?.status ===
             'running'
               ? 'bg-sky-500'
               : 'bg-[#8C9097]'}"
@@ -939,9 +939,9 @@
         <!-- Quick Dev Server Widget -->
         {#if devServer.isRunning}
           <div
-            class="h-8 flex items-center gap-1.5 px-2.5 rounded-lg bg-emerald-50 border border-emerald-300 font-stencil"
+            class="h-8 flex items-center gap-1.5 px-2.5 rounded-none bg-emerald-50 border border-emerald-300 font-stencil"
           >
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+            <span class="w-2 h-2 rounded-none bg-emerald-500 animate-pulse"
             ></span>
             <a
               href={devServer.activePorts[0]?.url || "http://localhost:3000"}
@@ -954,7 +954,7 @@
             </a>
             <button
               onclick={handleToggleDevServer}
-              class="p-0.5 ml-0.5 rounded hover:bg-rose-100 text-rose-600 transition cursor-pointer"
+              class="p-0.5 ml-0.5 rounded-none hover:bg-rose-100 text-rose-600 transition cursor-pointer"
               title="Hentikan Dev Server"
             >
               <Square class="w-3 h-3 fill-rose-600" />
@@ -964,7 +964,7 @@
           <button
             onclick={handleToggleDevServer}
             disabled={isStartingDev}
-            class="h-8 flex items-center gap-1.5 px-3 rounded-lg bg-[#FCFCFA] hover:bg-[#E5E3DD] border border-[#D0CEC7] text-[#111315] text-xs font-tech font-bold uppercase transition cursor-pointer active:scale-95 disabled:opacity-50"
+            class="h-8 flex items-center gap-1.5 px-3 rounded-none bg-[#FCFCFA] hover:bg-[#E5E3DD] border border-[#D0CEC7] text-[#111315] text-xs font-tech font-bold uppercase transition cursor-pointer active:scale-95 disabled:opacity-50"
             title="Jalankan Dev Server Project Aktif"
           >
             <Play class="w-3 h-3 text-emerald-600 fill-emerald-600" />
@@ -975,10 +975,10 @@
           </button>
         {/if}
 
-        <!-- Proportional Push to GitHub Action Button -->
+        <!-- Flat Safety Capsule Push Action Button (ChainGPT Labs Style) -->
         <button
           onclick={handleExecutePush}
-          class="btn-safety h-8 px-3.5 sm:px-4 rounded-lg text-white font-tech font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer active:translate-y-0.5 shadow-2xs hover:shadow-xs"
+          class="btn-safety h-8 px-4 rounded-full text-white font-tech font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer active:scale-[0.97] shadow-none"
           title="Git Push to GitHub"
         >
           <UploadCloud class="w-3.5 h-3.5" />

@@ -418,7 +418,7 @@
     class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
   >
     <div
-      class="w-full max-w-2xl bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] font-sans animate-in zoom-in-95 duration-200 relative"
+      class="w-full max-w-2xl bg-[#FCFCFA] border-2 border-[#D0CEC7] rounded-none shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] font-sans animate-in zoom-in-95 duration-200 relative"
     >
       <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
       <span class="reg-dot reg-dot-tl"></span>
@@ -431,7 +431,7 @@
         class="px-4 py-3 border-b border-[#D0CEC7] flex items-center justify-between shrink-0 bg-[#ECEAE5] font-tech"
       >
         <div class="flex items-center gap-2.5 min-w-0">
-          <span class="crosshair-box w-6 h-6 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair shrink-0"></span>
+          <span class="crosshair-box w-6 h-6 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair shrink-0 rounded-none"></span>
           <div class="min-w-0">
             <h3 class="text-xs sm:text-sm font-bold text-[#111315] tracking-wider flex items-center gap-2 truncate uppercase">
               <span>:: AGENT PERSONA // MATRIX REGISTRY</span>
@@ -447,7 +447,7 @@
           <button
             type="button"
             onclick={onClose}
-            class="p-1.5 rounded-lg text-[#5C6066] hover:text-[#111315] hover:bg-[#D0CEC7]/60 transition-colors cursor-pointer"
+            class="p-1.5 rounded-none text-[#5C6066] hover:text-[#111315] hover:bg-[#D0CEC7]/60 transition-colors cursor-pointer"
             title="Tutup Registry"
           >
             <X class="w-4 h-4" />
@@ -455,7 +455,7 @@
         </div>
       </div>
 
-      <!-- Segmented Cyber-Industrial Navigation Bays -->
+      <!-- Segmented Cyber-Industrial Navigation Bays (Sharp 90° Channels) -->
       <div
         class="flex items-center px-3 sm:px-4 py-2 border-b border-[#D0CEC7] text-xs font-tech font-bold gap-2 shrink-0 bg-[#E5E3DD]"
       >
@@ -464,7 +464,7 @@
           onclick={() => {
             activeTab = "list";
           }}
-          class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 uppercase tracking-wider transition-all active:scale-95 cursor-pointer {activeTab ===
+          class="px-3 py-1.5 rounded-none flex items-center gap-1.5 uppercase tracking-wider transition-all active:scale-95 cursor-pointer {activeTab ===
           'list'
             ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs'
             : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
@@ -481,7 +481,7 @@
             }
             activeTab = "create";
           }}
-          class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 uppercase tracking-wider transition-all active:scale-95 cursor-pointer {activeTab ===
+          class="px-3 py-1.5 rounded-none flex items-center gap-1.5 uppercase tracking-wider transition-all active:scale-95 cursor-pointer {activeTab ===
           'create'
             ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs'
             : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
@@ -496,8 +496,9 @@
         </button>
       </div>
 
-      <!-- Content Area -->
-      <div class="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-3 sm:space-y-4 bg-[#ECEAE5]">
+      <!-- Content Area with Retro Channel Switch Animation -->
+      {#key activeTab}
+        <div class="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-3 sm:space-y-4 bg-[#ECEAE5] animate-retro-channel">
         {#if activeTab === "list"}
           <!-- Personas Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -832,10 +833,10 @@
                 </div>
               </button>
 
-              <!-- Floating Dropdown Popover -->
+              <!-- Floating Dropdown Popover with Retro Mechanical Unfolding -->
               {#if isModelDropdownOpen}
                 <div
-                  class="absolute left-0 right-0 top-full mt-1.5 z-50 bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl shadow-2xl p-2 max-h-72 overflow-y-auto space-y-1 animate-in fade-in zoom-in-95 duration-150"
+                  class="absolute left-0 right-0 top-full mt-1 z-50 bg-[#FCFCFA] border-2 border-[#D0CEC7] rounded-none shadow-2xl p-2 max-h-72 overflow-y-auto space-y-1 animate-retro-dropdown"
                 >
                   {#if availableModels.length === 0}
                     <div class="p-3 text-center text-xs text-[#5C6066] font-mono">Memuat daftar model...</div>
@@ -860,10 +861,10 @@
                               newPreferredModel = m.id;
                               isModelDropdownOpen = false;
                             }}
-                            class="w-full px-2.5 py-2 rounded-xl flex items-center justify-between gap-2 text-left transition cursor-pointer {isCur ? 'bg-orange-100 border border-[#FF5500] text-[#FF5500] font-bold' : 'hover:bg-[#ECEAE5] text-[#191B1D]'}"
+                            class="w-full px-2.5 py-2 rounded-none flex items-center justify-between gap-2 text-left transition cursor-pointer {isCur ? 'bg-[#ECEAE5] border border-[#FF5500] text-[#FF5500] font-bold' : 'hover:bg-[#ECEAE5] text-[#111315]'}"
                           >
                             <div class="flex flex-col min-w-0 flex-1">
-                              <div class="text-xs font-semibold flex items-center gap-1.5">
+                              <div class="text-xs font-semibold flex items-center gap-1.5 font-tech">
                                 <span class="truncate">{m.name}</span>
                                 {#if isCur}
                                   <Check class="w-3.5 h-3.5 text-[#FF5500] shrink-0" />
@@ -874,11 +875,11 @@
                               {/if}
                             </div>
 
-                            <div class="shrink-0 flex items-center gap-1 text-[9px] font-mono">
+                            <div class="shrink-0 flex items-center gap-1 text-[9px] font-stencil">
                               {#if m.hasKey}
-                                <span class="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">Siap</span>
+                                <span class="px-1.5 py-0.2 rounded-none bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">READY</span>
                               {:else}
-                                <span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-300 font-bold">No Key</span>
+                                <span class="px-1.5 py-0.2 rounded-none bg-amber-100 text-amber-800 border border-amber-300 font-bold">NO KEY</span>
                               {/if}
                             </div>
                           </button>
@@ -986,6 +987,7 @@
           </div>
         {/if}
       </div>
+      {/key}
     </div>
   </div>
 {/if}
