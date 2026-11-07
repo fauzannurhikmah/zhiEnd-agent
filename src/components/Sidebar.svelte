@@ -125,13 +125,13 @@
 {/if}
 
 <aside
-  class="fixed md:static inset-y-0 left-0 z-50 md:z-10 w-72 md:w-64 max-w-[85vw] bg-zinc-950/95 md:bg-zinc-950/80 backdrop-blur-2xl border-r border-white/[0.08] flex flex-col justify-between shrink-0 select-none shadow-2xl md:shadow-none transition-transform duration-300 ease-in-out {isMobileOpen
+  class="fixed md:static inset-y-0 left-0 z-50 md:z-10 w-72 md:w-64 max-w-[85vw] bg-[#0c0e12]/95 md:bg-[#0c0e12]/85 backdrop-blur-xl border-r border-[#222630] flex flex-col justify-between shrink-0 select-none shadow-2xl md:shadow-none transition-transform duration-300 ease-in-out {isMobileOpen
     ? 'translate-x-0'
     : '-translate-x-full md:translate-x-0'}"
 >
   <!-- Top: Logo & Workspace -->
   <div class="flex flex-col gap-3 p-3">
-    <!-- Brand with subtle gradient glow -->
+    <!-- Brand with disciplined precision typography -->
     <div class="flex items-center justify-between px-2 pt-1">
       <div class="flex items-center gap-2.5">
         <img
@@ -143,7 +143,7 @@
           class="text-xs font-bold tracking-tight text-white flex items-center gap-1.5"
         >
           zhiEnd <span
-            class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400 font-mono text-[10px]"
+            class="text-[#00e5ff] font-mono text-[10px] tracking-wider uppercase font-semibold"
             >agent</span
           >
         </span>
@@ -175,7 +175,7 @@
     <!-- Active Workspace Card & Create Button (Proportional & Clean) -->
     <div class="flex items-center gap-1.5 w-full">
       <div
-        class="flex-1 min-w-0 flex items-center justify-between p-2 rounded-xl bg-zinc-900/60 hover:bg-zinc-900/90 border border-white/[0.06] hover:border-white/[0.14] transition group"
+        class="flex-1 min-w-0 flex items-center justify-between p-2 rounded-xl bg-[#101216] hover:bg-[#161920] border border-[#222630] hover:border-[#2a303c] transition group"
       >
         <button
           onclick={onOpenProjectModal}
@@ -184,7 +184,7 @@
         >
           <FolderGit
             class="w-4 h-4 {isRootWorkspace()
-              ? 'text-indigo-400'
+              ? 'text-[#00e5ff]'
               : 'text-emerald-400'} group-hover:scale-105 transition-transform shrink-0"
           />
           <div class="flex flex-col min-w-0 flex-1">
@@ -192,7 +192,7 @@
               >{projectName()}</span
             >
             {#if isRootWorkspace()}
-              <span class="text-[10px] text-indigo-400/80 font-mono"
+              <span class="text-[10px] text-[#00e5ff]/80 font-mono"
                 >default root</span
               >
             {:else if gitStatus?.isRepo}
@@ -228,26 +228,26 @@
 
       <button
         onclick={onOpenProjectModal}
-        class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-900 border border-white/[0.06] hover:border-indigo-500/40 text-zinc-400 hover:text-indigo-300 transition cursor-pointer shrink-0 shadow-sm"
+        class="p-2.5 rounded-xl bg-[#101216] hover:bg-[#161920] border border-[#222630] hover:border-[#00e5ff]/40 text-zinc-400 hover:text-[#00e5ff] transition cursor-pointer shrink-0 shadow-sm"
         title="Buka / Buat Project Baru di D:\Works"
       >
         <Plus class="w-3.5 h-3.5" />
       </button>
     </div>
 
-    <!-- Navigation with cinematic active gradient pill -->
+    <!-- Navigation with Cold Carbon Precision active states -->
     <nav class="flex flex-col gap-1 pt-2">
       <button
         onclick={() => handleTabClick("chat")}
         class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab ===
         'chat'
-          ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm'
-          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
+          ? 'carbon-tab-active font-semibold'
+          : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#161920]'}"
       >
         <div class="flex items-center gap-2.5">
           <Terminal
             class="w-4 h-4 {currentTab === 'chat'
-              ? 'text-indigo-400'
+              ? 'text-[#00e5ff]'
               : 'text-zinc-400'}"
           />
           <span>AI Coding Agent</span>
@@ -258,20 +258,20 @@
         onclick={() => handleTabClick("git")}
         class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab ===
         'git'
-          ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm'
-          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
+          ? 'carbon-tab-active font-semibold'
+          : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#161920]'}"
       >
         <div class="flex items-center gap-2.5">
           <GitBranch
             class="w-4 h-4 {currentTab === 'git'
-              ? 'text-sky-400'
+              ? 'text-[#00e5ff]'
               : 'text-zinc-400'}"
           />
           <span>Source Control</span>
         </div>
         {#if gitStatus?.files?.length}
           <span
-            class="px-2 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-mono text-[10px] font-bold"
+            class="px-2 py-0.5 rounded-full bg-[#00e5ff]/15 border border-[#00e5ff]/30 text-[#00e5ff] font-mono text-[10px] font-bold"
           >
             {gitStatus.files.length}
           </span>
@@ -282,13 +282,13 @@
         onclick={() => handleTabClick("remote")}
         class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab ===
         'remote'
-          ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm'
-          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
+          ? 'carbon-tab-active font-semibold'
+          : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#161920]'}"
       >
         <div class="flex items-center gap-2.5">
           <TowerControl
             class="w-4 h-4 {currentTab === 'remote'
-              ? 'text-violet-400'
+              ? 'text-[#00e5ff]'
               : 'text-zinc-400'}"
           />
           <span>Remote Hub</span>
@@ -313,13 +313,13 @@
         onclick={() => handleTabClick("files")}
         class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab ===
         'files'
-          ? 'bg-gradient-to-r from-indigo-500/20 via-indigo-600/15 to-violet-500/10 border border-indigo-500/30 text-white font-semibold shadow-sm'
-          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/50'}"
+          ? 'carbon-tab-active font-semibold'
+          : 'text-zinc-400 hover:text-zinc-200 hover:bg-[#161920]'}"
       >
         <div class="flex items-center gap-2.5">
           <FolderTree
             class="w-4 h-4 {currentTab === 'files'
-              ? 'text-amber-400'
+              ? 'text-[#00e5ff]'
               : 'text-zinc-400'}"
           />
           <span>Files & Logs</span>
@@ -328,10 +328,10 @@
     </nav>
 
     <!-- Riwayat Chat Section -->
-    <div class="flex flex-col gap-1.5 pt-2.5 border-t border-white/[0.06]">
+    <div class="flex flex-col gap-1.5 pt-2.5 border-t border-[#222630]">
       <div class="flex items-center justify-between px-1">
         <div class="flex items-center gap-1.5">
-          <MessageSquare class="w-3 h-3 text-indigo-400" />
+          <MessageSquare class="w-3 h-3 text-[#00e5ff]" />
           <span class="text-[11px] font-semibold text-zinc-300"
             >Riwayat Chat</span
           >
@@ -340,14 +340,14 @@
         <div class="flex items-center gap-1">
           <!-- Scope switcher: Project vs Global -->
           <div
-            class="flex items-center bg-zinc-900 rounded-lg p-0.5 border border-white/5 text-[9px] font-mono"
+            class="flex items-center bg-[#101216] rounded-lg p-0.5 border border-[#222630] text-[9px] font-mono"
           >
             <button
               type="button"
               onclick={() => onToggleScope?.("workspace")}
               class="px-1.5 py-0.5 rounded transition cursor-pointer {historyScope ===
               'workspace'
-                ? 'bg-indigo-600 text-white font-bold'
+                ? 'bg-[#161920] text-[#00e5ff] border border-[#00e5ff]/30 font-bold'
                 : 'text-zinc-500 hover:text-zinc-300'}"
               title="Chat khusus project ini"
             >
@@ -358,7 +358,7 @@
               onclick={() => onToggleScope?.("global")}
               class="px-1.5 py-0.5 rounded transition cursor-pointer {historyScope ===
               'global'
-                ? 'bg-indigo-600 text-white font-bold'
+                ? 'bg-[#161920] text-[#00e5ff] border border-[#00e5ff]/30 font-bold'
                 : 'text-zinc-500 hover:text-zinc-300'}"
               title="Chat global"
             >
@@ -370,7 +370,7 @@
           <button
             type="button"
             onclick={() => onCreateNewSession?.()}
-            class="p-1 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-white/5 hover:border-indigo-500/30 text-zinc-400 hover:text-indigo-300 transition cursor-pointer"
+            class="p-1 rounded-md bg-[#101216] hover:bg-[#161920] border border-[#222630] hover:border-[#00e5ff]/30 text-zinc-400 hover:text-[#00e5ff] transition cursor-pointer"
             title="Mulai Chat Baru"
           >
             <Plus class="w-3 h-3" />
@@ -385,8 +385,8 @@
             {@const isActive = activeSessionId === sess.id}
             <div
               class="group/item flex items-center justify-between px-2 py-1.5 rounded-xl transition cursor-pointer {isActive
-                ? 'bg-indigo-600/20 border border-indigo-500/40 text-white font-medium shadow-sm'
-                : 'hover:bg-zinc-900/60 border border-transparent text-zinc-400 hover:text-zinc-200'}"
+                ? 'bg-[#00e5ff]/10 border border-[#00e5ff]/35 text-white font-medium shadow-sm'
+                : 'hover:bg-[#161920] border border-transparent text-zinc-400 hover:text-zinc-200'}"
             >
               <button
                 type="button"
@@ -399,15 +399,15 @@
               >
                 <MessageSquare
                   class="w-3 h-3 {isActive
-                    ? 'text-indigo-400'
+                    ? 'text-[#00e5ff]'
                     : 'text-zinc-500 group-hover/item:text-zinc-400'} shrink-0"
                 />
                 <span class="text-xs truncate flex-1">{sess.title}</span>
                 {#if sess.message_count && sess.message_count > 0}
                   <span
                     class="text-[9px] px-1.5 py-0.2 rounded-full font-mono {isActive
-                      ? 'bg-indigo-500/30 text-indigo-200'
-                      : 'bg-zinc-800 text-zinc-500'} shrink-0"
+                      ? 'bg-[#00e5ff]/20 text-[#00e5ff]'
+                      : 'bg-[#161920] text-zinc-500'} shrink-0"
                   >
                     {sess.message_count}
                   </span>
@@ -429,14 +429,14 @@
           {/each}
         {:else}
           <div
-            class="p-3 text-center rounded-xl bg-zinc-900/30 border border-dashed border-white/5 flex flex-col items-center gap-1.5"
+            class="p-3 text-center rounded-xl bg-[#101216]/50 border border-dashed border-[#222630] flex flex-col items-center gap-1.5"
           >
             <span class="text-[11px] text-zinc-500">Belum ada riwayat chat</span
             >
             <button
               type="button"
               onclick={() => onCreateNewSession?.()}
-              class="text-[10px] text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 cursor-pointer"
+              class="text-[10px] text-[#00e5ff] hover:text-[#38bdf8] font-medium flex items-center gap-1 cursor-pointer"
             >
               <Plus class="w-2.5 h-2.5" /> Mulai Chat Baru
             </button>
@@ -448,12 +448,12 @@
 
   <!-- Bottom: Tunnel status & Settings -->
   <div
-    class="p-3 border-t border-white/[0.08] flex items-center justify-between bg-zinc-950/70 text-xs"
+    class="p-3 border-t border-[#222630] flex items-center justify-between bg-[#0a0b0e] text-xs"
   >
     <div class="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
       <span
         class="w-2 h-2 rounded-full {tunnelStatus?.status === 'connected'
-          ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]'
+          ? 'bg-[#00e5ff] shadow-[0_0_8px_rgba(0,229,255,0.5)]'
           : 'bg-zinc-600'}"
       ></span>
       <span class="truncate max-w-[120px]">
@@ -463,7 +463,7 @@
 
     <button
       onclick={onOpenSettingsModal}
-      class="p-2 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+      class="p-2 rounded-lg hover:bg-[#161920] text-zinc-400 hover:text-white transition cursor-pointer"
       title="Pengaturan Sistem"
     >
       <SettingsIcon class="w-3.5 h-3.5" />

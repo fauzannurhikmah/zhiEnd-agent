@@ -453,7 +453,7 @@
       title: 'Review Codebase',
       desc: 'Analisis arsitektur, potensi bug, dan performa kode',
       icon: Search,
-      iconColor: 'text-indigo-400',
+      iconColor: 'text-[#00e5ff]',
       prompt: 'Lakukan code review mendalam pada project ini, temukan potensi bug, issue keamanan, atau performa.'
     },
     {
@@ -492,10 +492,10 @@
   <!-- Full-Viewport Drag & Drop Overlay -->
   {#if isDragging}
     <div 
-      class="absolute inset-0 z-50 bg-zinc-950/85 backdrop-blur-md flex flex-col items-center justify-center p-6 border-2 border-dashed border-indigo-500/80 rounded-2xl m-2 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none shadow-2xl shadow-indigo-950/60"
+      class="absolute inset-0 z-50 bg-[#08090C]/90 backdrop-blur-md flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#00e5ff] rounded-2xl m-2 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none shadow-2xl shadow-[#00e5ff]/10"
     >
       <div class="flex flex-col items-center gap-3 text-center pointer-events-none">
-        <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-lg shadow-indigo-500/20 animate-bounce">
+        <div class="w-16 h-16 rounded-2xl bg-[#00e5ff]/10 border border-[#00e5ff]/30 flex items-center justify-center text-[#00e5ff] shadow-lg shadow-[#00e5ff]/20 animate-bounce">
           <CloudUpload class="w-8 h-8" />
         </div>
         <div class="flex flex-col gap-1">
@@ -511,13 +511,13 @@
   {/if}
 
   <!-- Top Session Bar -->
-  <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2 border-b border-white/[0.06] bg-zinc-950/40 backdrop-blur-md z-10 shrink-0 select-none gap-1.5 sm:gap-2">
+  <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2 border-b border-[#222630] bg-[#0c0e12]/80 backdrop-blur-md z-10 shrink-0 select-none gap-1.5 sm:gap-2">
     <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-      <MessageSquare class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+      <MessageSquare class="w-3.5 h-3.5 text-[#00e5ff] shrink-0" />
       <span class="text-xs font-semibold text-zinc-200 truncate min-w-0 flex-1">
         {activeSession?.title || 'Diskusi Aktif'}
       </span>
-      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-900 border border-white/5 text-zinc-400 hidden md:inline shrink-0">
+      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#101216] border border-[#222630] text-zinc-400 hidden md:inline shrink-0">
         {activeSession?.workspace_id ? 'Workspace' : 'Global'}
       </span>
     </div>
@@ -527,7 +527,7 @@
       <button
         type="button"
         onclick={onOpenPersonaModal}
-        class="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-200 hover:text-indigo-300 transition cursor-pointer group shadow-sm max-w-[125px] xs:max-w-[155px] sm:max-w-[280px]"
+        class="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-xl bg-[#101216] hover:bg-[#161920] border border-[#222630] hover:border-[#00e5ff]/40 text-[11px] text-zinc-200 hover:text-[#00e5ff] transition cursor-pointer group shadow-sm max-w-[125px] xs:max-w-[155px] sm:max-w-[280px]"
         title={`Persona: ${activePersona?.name || 'Default'}${activePersona?.traits ? ` • Sifat: ${activePersona.traits}` : ''}`}
       >
         <AvatarView avatar={activePersona?.avatar} name={activePersona?.name} size="xs" className="rounded-md shrink-0" />
@@ -542,22 +542,22 @@
         {/if}
         {#if activePersona?.traits}
           <span 
-            class="text-[9px] px-1.5 py-0.2 rounded bg-indigo-500/10 text-indigo-300 font-mono hidden xl:inline truncate max-w-[110px]" 
+            class="text-[9px] px-1.5 py-0.2 rounded bg-[#161920] border border-[#222630] text-zinc-300 font-mono hidden xl:inline truncate max-w-[110px]" 
             title={activePersona.traits}
           >
             {activePersona.traits}
           </span>
         {/if}
-        <ChevronDown class="w-3 h-3 text-zinc-500 group-hover:text-indigo-400 transition-transform shrink-0" />
+        <ChevronDown class="w-3 h-3 text-zinc-500 group-hover:text-[#00e5ff] transition-transform shrink-0" />
       </button>
 
       <button
         type="button"
         onclick={onCreateNewSession}
-        class="flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-300 hover:text-indigo-300 transition cursor-pointer"
+        class="flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#101216] hover:bg-[#161920] border border-[#222630] hover:border-[#00e5ff]/40 text-[11px] text-zinc-300 hover:text-[#00e5ff] transition cursor-pointer"
         title="Mulai sesi baru"
       >
-        <Plus class="w-3 h-3 text-indigo-400" />
+        <Plus class="w-3 h-3 text-[#00e5ff]" />
         <span class="hidden sm:inline">Chat Baru</span>
       </button>
 
@@ -578,13 +578,13 @@
   <!-- Content Viewport -->
   <div bind:this={messagesContainer} class="flex-1 overflow-y-auto px-2 sm:px-4 py-4 sm:py-6">
     {#if messages.length === 0}
-      <!-- Empty State: Centered Cinematic Hero -->
+      <!-- Empty State: Precision Telemetry Hero -->
       <div class="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center gap-5 sm:gap-6 animate-in fade-in zoom-in-95 duration-300">
         <div class="flex flex-col gap-2 sm:gap-2.5 px-2">
-          <div class="inline-flex items-center justify-center gap-1.5 self-center px-3 py-1 rounded-full bg-gradient-to-r from-indigo-500/15 via-purple-500/10 to-violet-500/15 border border-indigo-500/30 text-[11px] font-mono text-indigo-300 shadow-sm shadow-indigo-500/10">
-            <Sparkles class="w-3.5 h-3.5 text-indigo-400" /> Google Antigravity Core
+          <div class="carbon-pill self-center text-[#00e5ff]">
+            <Sparkles class="w-3.5 h-3.5 text-[#00e5ff]" /> Google Antigravity Engine
           </div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
             Ada yang ingin dikerjakan hari ini?
           </h1>
           <p class="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">
@@ -592,30 +592,30 @@
           </p>
         </div>
 
-        <!-- Central Cinematic Prompt Box with Ambient Glow -->
+        <!-- Central Telemetry Prompt Box -->
         <div 
           role="region"
           aria-label="Kotak Input Prompt"
-          class="w-full bg-zinc-950/80 backdrop-blur-2xl border transition-all rounded-2xl p-3.5 shadow-2xl shadow-indigo-950/30 flex flex-col gap-2.5 {isDragging ? 'border-indigo-400 bg-indigo-950/25 ring-2 ring-indigo-500/30' : 'border-indigo-500/30 hover:border-indigo-500/50 focus-within:shadow-[0_0_35px_rgba(99,102,241,0.2)] focus-within:border-indigo-500'}"
+          class="w-full bg-[#101216] border transition-all rounded-2xl p-3.5 shadow-2xl flex flex-col gap-2.5 {isDragging ? 'border-[#00e5ff] bg-[#0c1a24] ring-1 ring-[#00e5ff]/40' : 'border-[#222630] hover:border-[#2f3544] focus-within:border-[#00e5ff]/60 focus-within:ring-1 focus-within:ring-[#00e5ff]/30'}"
           onpaste={handlePaste}
         >
           <!-- Uploaded Image Chips Preview -->
           {#if selectedImages.length > 0}
             <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-1">
               {#each selectedImages as img, idx}
-                <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
-                  <div class="relative w-7 h-7 shrink-0 rounded-lg overflow-hidden border border-white/10 bg-zinc-950">
+                <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#161920] border border-[#222630] text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
+                  <div class="relative w-7 h-7 shrink-0 rounded-lg overflow-hidden border border-[#222630] bg-[#0c0e12]">
                     <img src={img.localPreviewUrl || img.url} alt={img.name} class="w-full h-full object-cover" />
                     {#if img.isUploading}
                       <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
-                        <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                        <Loader2 class="w-3.5 h-3.5 animate-spin text-[#00e5ff]" />
                       </div>
                     {/if}
                   </div>
                   <div class="flex flex-col min-w-0 pr-1">
                     <span class="max-w-[130px] truncate text-[11px] text-zinc-200 font-medium">{img.name}</span>
                     {#if img.isUploading}
-                      <span class="text-[9px] text-indigo-400 font-mono animate-pulse leading-none">Mengunggah...</span>
+                      <span class="text-[9px] text-[#00e5ff] font-mono animate-pulse leading-none">Mengunggah...</span>
                     {/if}
                   </div>
                   <button
@@ -639,17 +639,17 @@
             class="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none resize-none leading-relaxed"
           ></textarea>
 
-          <div class="flex items-center justify-between pt-2 border-t border-white/[0.08] text-xs">
+          <div class="flex items-center justify-between pt-2 border-t border-[#222630] text-xs">
             <div class="flex items-center gap-2">
               <button
                 type="button"
                 onclick={() => fileInputRef?.click()}
                 disabled={isBusy || isUploadingImage}
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 hover:border-indigo-500/40 text-[11px] text-zinc-300 hover:text-indigo-300 transition cursor-pointer disabled:opacity-40"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#161920] hover:bg-[#1d222b] border border-[#222630] hover:border-[#00e5ff]/40 text-[11px] text-zinc-300 hover:text-[#00e5ff] transition cursor-pointer disabled:opacity-40"
                 title="Unggah Gambar atau Screenshot (atau paste langsung)"
               >
                 {#if isUploadingImage}
-                  <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400" />
+                  <Loader2 class="w-3.5 h-3.5 animate-spin text-[#00e5ff]" />
                   <span>Mengunggah...</span>
                 {:else}
                   <Paperclip class="w-3.5 h-3.5 text-zinc-400" />
@@ -657,14 +657,14 @@
                 {/if}
               </button>
               <span class="text-[11px] text-zinc-500 font-mono hidden sm:inline">
-                Tekan <kbd class="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-300">Ctrl + Enter</kbd>
+                Tekan <kbd class="px-1.5 py-0.5 rounded bg-[#161920] border border-[#222630] text-zinc-300">Ctrl + Enter</kbd>
               </span>
             </div>
 
             <button
               onclick={handleSend}
               disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
-              class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 transition cursor-pointer active:scale-95"
+              class="btn-telemetry px-4 py-2 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <span>Kirim</span>
               <ArrowUp class="w-3.5 h-3.5" />
@@ -677,7 +677,7 @@
           {#each suggestions as s}
             <button
               onclick={() => setPrompt(s.prompt)}
-              class="p-3.5 rounded-2xl bg-zinc-900/40 hover:bg-zinc-900/90 border border-white/[0.06] hover:border-indigo-500/30 flex flex-col gap-1 transition text-left cursor-pointer group hover:shadow-lg hover:shadow-indigo-950/20"
+              class="carbon-panel p-3.5 rounded-2xl bg-[#101216]/60 hover:bg-[#161920] border border-[#222630] hover:border-[#00e5ff]/35 flex flex-col gap-1 transition text-left cursor-pointer group"
             >
               <div class="flex items-center gap-2 text-xs font-semibold text-zinc-200 group-hover:text-white">
                 <s.icon class="w-4 h-4 {s.iconColor} group-hover:scale-110 transition-transform" />
@@ -700,7 +700,7 @@
               </div>
 
               <!-- User Bubble Content -->
-              <div class="max-w-[92%] sm:max-w-[85%] bg-gradient-to-r from-indigo-600 to-violet-600 text-white px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl rounded-tr-none shadow-md shadow-indigo-600/20 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-sans">
+              <div class="bubble-user max-w-[92%] sm:max-w-[85%] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl rounded-tr-none text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-sans">
                 {msg.text}
               </div>
 
@@ -711,7 +711,7 @@
                     <button
                       type="button"
                       onclick={() => zoomImageUrl = imgUrl}
-                      class="group/thumb relative rounded-xl overflow-hidden border border-white/10 hover:border-indigo-400/60 shadow-md bg-zinc-900 cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                      class="group/thumb relative rounded-xl overflow-hidden border border-[#222630] hover:border-[#00e5ff]/60 shadow-md bg-[#101216] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
                     >
                       <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
                       <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
@@ -751,7 +751,7 @@
                   avatar={activePersona?.avatar}
                   name={activePersona?.name}
                   size="md"
-                  className="rounded-2xl ring-2 ring-indigo-500/20 shadow-md shadow-indigo-950/40"
+                  className="rounded-2xl ring-1 ring-[#00e5ff]/25 shadow-md shadow-black/40"
                 />
               </div>
 
@@ -763,7 +763,7 @@
                   </span>
                   {#if activePersona?.traits}
                     <span 
-                      class="text-[9px] px-2 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 font-sans truncate max-w-[140px] sm:max-w-[280px] md:max-w-[360px]"
+                      class="text-[9px] px-2 py-0.5 rounded-md bg-[#161920] border border-[#222630] text-zinc-300 font-sans truncate max-w-[140px] sm:max-w-[280px] md:max-w-[360px]"
                       title={`Sifat & Karakteristik: ${activePersona.traits}`}
                     >
                       {activePersona.traits}
@@ -777,24 +777,24 @@
                 </div>
 
                 <!-- Agent Bubble Content -->
-                <div class="w-full bg-zinc-900/50 border border-white/[0.07] px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-zinc-200 text-xs leading-relaxed shadow-sm">
+                <div class="bubble-agent w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-zinc-200 text-xs leading-relaxed">
                   <!-- Professional Execution & Reasoning Accordion (For Agent Responses) -->
                   {#if (msg.steps && msg.steps.length > 0) || (msg.tools && msg.tools.length > 0) || msg.thought || msg.isStreaming}
                     {@const isExp = isProcessExpanded(msg.id, msg.isStreaming)}
-                    <div class="mb-3 rounded-xl border transition-all duration-200 overflow-hidden {isExp ? 'border-indigo-500/25 bg-zinc-950/70 shadow-lg shadow-indigo-950/20' : 'border-white/[0.06] bg-zinc-900/40 hover:border-white/[0.12]'}">
+                    <div class="mb-3 rounded-xl border transition-all duration-200 overflow-hidden {isExp ? 'border-[#00e5ff]/30 bg-[#0c1a24]/50' : 'border-[#222630] bg-[#101216] hover:border-[#2f3544]'}">
                       <!-- Accordion Header Button -->
                       <button
                         type="button"
                         onclick={() => toggleProcess(msg.id)}
-                        class="w-full flex items-center justify-between px-3 {isExp ? 'py-2 bg-zinc-900/70' : 'py-1.5 bg-zinc-900/35'} hover:bg-zinc-900/90 transition-all cursor-pointer text-left select-none"
+                        class="w-full flex items-center justify-between px-3 {isExp ? 'py-2 bg-[#101216]' : 'py-1.5 bg-[#101216]/50'} hover:bg-[#161920] transition-all cursor-pointer text-left select-none"
                       >
                         <div class="flex items-center gap-2 min-w-0">
                           {#if msg.isStreaming}
                             <div class="relative flex items-center justify-center w-2.5 h-2.5 shrink-0">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-60"></span>
-                              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-indigo-400"></span>
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e5ff] opacity-60"></span>
+                              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#00e5ff]"></span>
                             </div>
-                            <span class="text-xs font-medium text-indigo-300">
+                            <span class="text-xs font-medium text-[#00e5ff]">
                               Sedang Memproses...
                             </span>
                           {:else}
@@ -803,7 +803,7 @@
                               Proses & Eksekusi Selesai
                             </span>
                           {/if}
-                          <span class="text-[10px] font-mono text-zinc-400 px-1.5 py-0.2 rounded bg-zinc-800/80 border border-white/5">
+                          <span class="text-[10px] font-mono text-zinc-400 px-1.5 py-0.2 rounded bg-[#161920] border border-[#222630]">
                             {(msg.steps?.length || msg.tools?.length || 1)} aktivitas
                           </span>
                         </div>
@@ -818,13 +818,13 @@
 
                       <!-- Accordion Body -->
                       {#if isExp}
-                        <div class="p-3 border-t border-white/[0.06] flex flex-col gap-2.5 text-xs bg-zinc-950/40 animate-in fade-in duration-150">
+                        <div class="p-3 border-t border-[#222630] flex flex-col gap-2.5 text-xs bg-[#0c1a24]/30 animate-in fade-in duration-150">
                           <!-- Reasoning / Thinking Box -->
                           {#if msg.thought}
-                            <div class="p-2.5 rounded-lg bg-indigo-950/25 border border-indigo-500/25 text-zinc-300 italic text-[11px] leading-relaxed flex gap-2">
-                              <Sparkles class="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                            <div class="p-2.5 rounded-lg bg-[#0c1a24]/60 border border-[#00e5ff]/25 text-zinc-300 italic text-[11px] leading-relaxed flex gap-2">
+                              <Sparkles class="w-3.5 h-3.5 text-[#00e5ff] shrink-0 mt-0.5" />
                               <div class="flex flex-col gap-0.5">
-                                <span class="text-[10px] font-semibold text-indigo-300 not-italic font-mono uppercase tracking-wider">
+                                <span class="text-[10px] font-semibold text-[#00e5ff] not-italic font-mono uppercase tracking-wider">
                                   Reasoning & Analisis
                                 </span>
                                 <span>{msg.thought}</span>
@@ -834,18 +834,18 @@
 
                           <!-- Detailed Step Timeline -->
                           {#if msg.steps && msg.steps.length > 0}
-                            <div class="space-y-1.5 pl-1 border-l-2 border-indigo-500/20 ml-2">
+                            <div class="space-y-1.5 pl-1 border-l-2 border-[#00e5ff]/25 ml-2">
                               {#each msg.steps as st}
                                 <div class="flex items-start gap-2.5 text-zinc-300 text-xs py-0.5 pl-2">
-                                  <span class="w-1.5 h-1.5 rounded-full {st.type === 'edit' || st.type === 'write' ? 'bg-amber-400 shadow-sm shadow-amber-400/50' : st.type === 'run' ? 'bg-indigo-400' : 'bg-sky-400'} mt-1.5 shrink-0"></span>
+                                  <span class="w-1.5 h-1.5 rounded-full {st.type === 'edit' || st.type === 'write' ? 'bg-amber-400 shadow-sm shadow-amber-400/50' : st.type === 'run' ? 'bg-[#00e5ff]' : 'bg-sky-400'} mt-1.5 shrink-0"></span>
 
                                   <div class="flex-1 flex flex-col min-w-0">
                                     <div class="flex items-center gap-1.5 flex-wrap">
                                       <span class="font-semibold text-zinc-200">{st.title}</span>
 
                                       {#if st.file}
-                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-zinc-900 border border-white/10 text-[10px] font-mono text-zinc-300">
-                                          <FileCode class="w-2.5 h-2.5 text-indigo-400" /> {st.file}
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-[#101216] border border-[#222630] text-[10px] font-mono text-zinc-300">
+                                          <FileCode class="w-2.5 h-2.5 text-[#00e5ff]" /> {st.file}
                                         </span>
                                       {/if}
 
@@ -856,13 +856,13 @@
                                       {/if}
 
                                       {#if st.command}
-                                        <code class="px-1.5 py-0.2 rounded bg-zinc-900 border border-white/10 text-[10px] font-mono text-indigo-300 max-w-sm truncate">
+                                        <code class="px-1.5 py-0.2 rounded bg-[#101216] border border-[#222630] text-[10px] font-mono text-[#00e5ff] max-w-sm truncate">
                                           {st.command}
                                         </code>
                                       {/if}
 
                                       {#if st.repeatCount && st.repeatCount > 1}
-                                        <span class="inline-flex items-center px-1.5 py-0.2 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-[9px] font-mono font-bold text-indigo-300" title={`Perintah dijalankan ${st.repeatCount} kali`}>
+                                        <span class="inline-flex items-center px-1.5 py-0.2 rounded-full bg-[#00e5ff]/15 border border-[#00e5ff]/30 text-[9px] font-mono font-bold text-[#00e5ff]" title={`Perintah dijalankan ${st.repeatCount} kali`}>
                                           ×{st.repeatCount}
                                         </span>
                                       {/if}
@@ -880,7 +880,7 @@
                               <!-- Active in-progress indicator while streaming -->
                               {#if msg.isStreaming}
                                 <div class="flex items-center gap-2 text-zinc-500 text-[11px] py-0.5 pl-2">
-                                  <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shrink-0"></span>
+                                  <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-pulse shrink-0"></span>
                                   <span class="font-sans">Melanjutkan langkah berikutnya...</span>
                                 </div>
                               {/if}
@@ -888,8 +888,8 @@
                           {:else if msg.tools && msg.tools.length > 0}
                             <div class="flex flex-wrap gap-1.5">
                               {#each msg.tools as tool}
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-900 border border-indigo-500/20 text-[10px] font-mono text-indigo-300">
-                                  <Wrench class="w-2.5 h-2.5 text-indigo-400" /> {tool}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#101216] border border-[#222630] text-[10px] font-mono text-[#00e5ff]">
+                                  <Wrench class="w-2.5 h-2.5 text-[#00e5ff]" /> {tool}
                                 </span>
                               {/each}
                             </div>
@@ -897,9 +897,9 @@
                             <!-- Minimalist Loading Indicator -->
                             <div class="flex items-center gap-2.5 py-1 text-zinc-400">
                               <div class="flex gap-1 items-center">
-                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:-0.3s]"></span>
-                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:-0.15s]"></span>
-                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-bounce [animation-delay:-0.3s]"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-bounce [animation-delay:-0.15s]"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-bounce"></span>
                               </div>
                               <span class="text-[11px] text-zinc-400 font-sans">Menganalisis & merencanakan tugas...</span>
                             </div>
@@ -913,18 +913,18 @@
                   <div class="prose-chat font-sans text-[13px] leading-relaxed">
                     {@html renderMarkdown(msg.text)}
                     {#if msg.isStreaming && msg.text}
-                      <span class="inline-block w-1.5 h-3.5 bg-indigo-400 animate-pulse align-middle ml-0.5 rounded-xs"></span>
+                      <span class="inline-block w-1.5 h-3.5 bg-[#00e5ff] animate-pulse align-middle ml-0.5 rounded-xs"></span>
                     {/if}
                   </div>
 
                   <!-- Agent Attached Images Gallery (if any) -->
                   {#if msg.images && msg.images.length > 0}
-                    <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-white/[0.06]">
+                    <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-[#222630]">
                       {#each msg.images as imgUrl}
                         <button
                           type="button"
                           onclick={() => zoomImageUrl = imgUrl}
-                          class="group/thumb relative rounded-xl overflow-hidden border border-white/10 hover:border-indigo-400/60 shadow-md bg-zinc-900 cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                          class="group/thumb relative rounded-xl overflow-hidden border border-[#222630] hover:border-[#00e5ff]/60 shadow-md bg-[#101216] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
                         >
                           <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
                           <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
@@ -970,26 +970,26 @@
       <div 
         role="region"
         aria-label="Kotak Input Mengambang"
-        class="max-w-3xl mx-auto bg-zinc-950/95 backdrop-blur-2xl border transition-all rounded-2xl p-2 sm:p-2.5 shadow-2xl shadow-indigo-950/30 pointer-events-auto flex flex-col gap-2 {isDragging ? 'border-indigo-400 bg-indigo-950/25 ring-2 ring-indigo-500/30' : 'border-indigo-500/30 focus-within:border-indigo-500'}"
+        class="max-w-3xl mx-auto bg-[#101216]/95 backdrop-blur-xl border transition-all rounded-2xl p-2 sm:p-2.5 shadow-2xl pointer-events-auto flex flex-col gap-2 {isDragging ? 'border-[#00e5ff] bg-[#0c1a24] ring-1 ring-[#00e5ff]/40' : 'border-[#222630] focus-within:border-[#00e5ff]/60 focus-within:ring-1 focus-within:ring-[#00e5ff]/30'}"
         onpaste={handlePaste}
       >
         <!-- Uploaded Image Chips Preview -->
         {#if selectedImages.length > 0}
           <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-0.5">
             {#each selectedImages as img, idx}
-              <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-zinc-900 border border-white/10 text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
-                <div class="relative w-6 h-6 shrink-0 rounded-lg overflow-hidden border border-white/10 bg-zinc-950">
+              <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#161920] border border-[#222630] text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
+                <div class="relative w-6 h-6 shrink-0 rounded-lg overflow-hidden border border-[#222630] bg-[#0c0e12]">
                   <img src={img.localPreviewUrl || img.url} alt={img.name} class="w-full h-full object-cover" />
                   {#if img.isUploading}
                     <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
-                      <Loader2 class="w-3 h-3 animate-spin text-indigo-400" />
+                      <Loader2 class="w-3 h-3 animate-spin text-[#00e5ff]" />
                     </div>
                   {/if}
                 </div>
                 <div class="flex flex-col min-w-0 pr-1">
                   <span class="max-w-[120px] truncate text-[11px] text-zinc-200 font-medium">{img.name}</span>
                   {#if img.isUploading}
-                    <span class="text-[9px] text-indigo-400 font-mono animate-pulse leading-none">Mengunggah...</span>
+                    <span class="text-[9px] text-[#00e5ff] font-mono animate-pulse leading-none">Mengunggah...</span>
                   {/if}
                 </div>
                 <button
@@ -1013,8 +1013,8 @@
             <button type="button" onclick={stopVoiceInput} class="ml-auto text-xs px-2 py-0.5 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-200">Selesai</button>
           </div>
         {:else if isTranscribingVoice}
-          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-[11px] text-indigo-300 animate-in fade-in">
-            <Loader2 class="w-3.5 h-3.5 animate-spin text-indigo-400 shrink-0" />
+          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-[#0c1a24] border border-[#00e5ff]/30 text-[11px] text-[#00e5ff] animate-in fade-in">
+            <Loader2 class="w-3.5 h-3.5 animate-spin text-[#00e5ff] shrink-0" />
             <span class="font-medium">Mentranskripsi suara ke teks...</span>
           </div>
         {:else if voiceError}
@@ -1030,11 +1030,11 @@
             type="button"
             onclick={() => fileInputRef?.click()}
             disabled={isBusy || isUploadingImage || isListening}
-            class="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-indigo-300 hover:bg-zinc-900 transition cursor-pointer shrink-0 disabled:opacity-40"
+            class="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-[#00e5ff] hover:bg-[#161920] transition cursor-pointer shrink-0 disabled:opacity-40"
             title="Lampirkan Gambar (atau paste / drag & drop)"
           >
             {#if isUploadingImage}
-              <Loader2 class="w-4 h-4 animate-spin text-indigo-400" />
+              <Loader2 class="w-4 h-4 animate-spin text-[#00e5ff]" />
             {:else}
               <Paperclip class="w-4 h-4" />
             {/if}
@@ -1045,11 +1045,11 @@
             type="button"
             onclick={toggleVoiceInput}
             disabled={isBusy || isUploadingImage || isTranscribingVoice}
-            class="relative p-1.5 sm:p-2 rounded-xl transition cursor-pointer shrink-0 disabled:opacity-40 {isListening ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-[0_0_12px_#f43f5e]' : (isTranscribingVoice ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 animate-pulse' : 'text-zinc-400 hover:text-rose-400 hover:bg-zinc-900')}"
+            class="relative p-1.5 sm:p-2 rounded-xl transition cursor-pointer shrink-0 disabled:opacity-40 {isListening ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-[0_0_12px_#f43f5e]' : (isTranscribingVoice ? 'bg-[#0c1a24] text-[#00e5ff] border border-[#00e5ff]/35 animate-pulse' : 'text-zinc-400 hover:text-rose-400 hover:bg-[#161920]')}"
             title={isListening ? 'Klik untuk selesai bicara' : (isTranscribingVoice ? 'Mentranskripsi suara...' : 'Perintah Suara (Speech-to-Text)')}
           >
             {#if isTranscribingVoice}
-              <Loader2 class="w-4 h-4 animate-spin text-indigo-400" />
+              <Loader2 class="w-4 h-4 animate-spin text-[#00e5ff]" />
             {:else if isListening}
               <Mic class="w-4 h-4 text-rose-400 animate-pulse" />
               <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
@@ -1079,7 +1079,7 @@
 
             <button
               onclick={onClearMessages}
-              class="hidden sm:flex p-2 rounded-xl hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
+              class="hidden sm:flex p-2 rounded-xl hover:bg-[#161920] text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
               title="Bersihkan Percakapan"
             >
               <Trash2 class="w-4 h-4" />
@@ -1088,7 +1088,7 @@
             <button
               onclick={handleSend}
               disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
-              class="p-1.5 sm:p-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold transition cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95"
+              class="btn-telemetry p-1.5 sm:p-2 rounded-xl text-white font-bold transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ArrowUp class="w-4 h-4" />
             </button>
@@ -1120,6 +1120,7 @@
       onclick={() => zoomImageUrl = null}
       onkeydown={(e) => { if (e.key === 'Escape') zoomImageUrl = null; }}
     >
+      <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
       <div 
         role="document"
         class="relative max-w-4xl max-h-[90vh] bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
@@ -1135,7 +1136,7 @@
               download={fileName}
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs shadow-md shadow-indigo-600/30 transition cursor-pointer"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-telemetry text-white font-medium text-xs transition cursor-pointer"
               title="Download gambar ini ke perangkat Anda"
             >
               <Download class="w-3.5 h-3.5" />

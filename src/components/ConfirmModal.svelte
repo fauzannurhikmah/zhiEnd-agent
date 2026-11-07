@@ -111,7 +111,7 @@
         <button
           type="button"
           onclick={handleConfirmAction}
-          class="flex-1 py-2 px-3 rounded-xl {activeVariant === 'danger' ? 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 shadow-rose-600/25' : activeVariant === 'warning' ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-amber-600/25' : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-indigo-600/25'} text-white text-xs font-bold shadow-lg transition cursor-pointer active:scale-95"
+          class="flex-1 py-2 px-3 rounded-xl {activeVariant === 'danger' ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-600/25' : activeVariant === 'warning' ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/25' : 'btn-telemetry'} text-white text-xs font-bold shadow-lg transition cursor-pointer active:scale-95"
         >
           {activeConfirmText}
         </button>

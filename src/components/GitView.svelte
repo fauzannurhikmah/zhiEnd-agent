@@ -135,7 +135,7 @@
 
       <button
         onclick={onPush}
-        class="px-4 py-1.5 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-indigo-500/25 transition cursor-pointer active:scale-95"
+        class="btn-telemetry px-4 py-1.5 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95"
       >
         <UploadCloud class="w-3.5 h-3.5" /> Push to GitHub
       </button>
@@ -234,7 +234,7 @@
         <button
           onclick={handleCommit}
           disabled={isCommitting || !commitMessage.trim()}
-          class="w-full py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-md shadow-indigo-500/20 active:scale-95"
+          class="btn-telemetry w-full py-2 rounded-xl disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95"
         >
           {isCommitting ? 'Committing...' : 'Commit Changes'}
         </button>

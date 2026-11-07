@@ -67,10 +67,10 @@
           type="button"
           onclick={() => dialog.closeNotice()}
           class="w-full py-2.5 px-4 rounded-xl {
-            dialog.notice.type === 'success' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-emerald-600/25' :
-            dialog.notice.type === 'error' ? 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 shadow-rose-600/25' :
-            dialog.notice.type === 'warning' ? 'bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-amber-600/25' :
-            'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 shadow-indigo-600/25'
+            dialog.notice.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/25' :
+            dialog.notice.type === 'error' ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-600/25' :
+            dialog.notice.type === 'warning' ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/25' :
+            'btn-telemetry'
           } text-white text-xs font-bold shadow-lg transition cursor-pointer active:scale-95"
         >
           {dialog.notice.buttonText || 'Mengerti'}

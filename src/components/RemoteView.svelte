@@ -388,7 +388,7 @@
           <button
             onclick={handleStartWa}
             disabled={isStartingWa}
-            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 transition cursor-pointer active:scale-95 disabled:opacity-50"
+            class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 disabled:opacity-50"
           >
             {#if isStartingWa}
               <Loader2 class="w-3.5 h-3.5 animate-spin" /> Menghubungkan...
@@ -558,7 +558,7 @@
               <a
                 href="https://t.me/{telegramStatus.botInfo.username}"
                 target="_blank"
-                class="w-full py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-sky-500/20 cursor-pointer active:scale-95 transition"
+                class="w-full py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95 transition"
               >
                 Buka Chat @{telegramStatus.botInfo.username} <ExternalLink class="w-3.5 h-3.5" />
               </a>
@@ -587,7 +587,7 @@
 
           <button
             onclick={() => onStartTelegram(tgTokenInput && !tgTokenInput.includes('•') ? tgTokenInput.trim() : '')}
-            class="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-sky-500/20 transition cursor-pointer active:scale-95"
+            class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95"
           >
             Jalankan Bot Telegram
           </button>
@@ -731,7 +731,7 @@
                   isStartingTunnel = false;
                 }
               }}
-              class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white font-bold text-xs shadow-md shadow-indigo-500/20 cursor-pointer active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              class="btn-telemetry px-4 py-2 rounded-xl text-white font-bold text-xs cursor-pointer active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isStartingTunnel ? 'Membuka...' : 'Buka'}
             </button>

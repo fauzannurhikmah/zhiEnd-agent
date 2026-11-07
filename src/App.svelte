@@ -657,17 +657,13 @@
   }
 </script>
 
-<div class="relative flex h-screen w-screen overflow-hidden bg-[#07090e] text-zinc-100 antialiased font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
-  <!-- Modern Cinematic Background: Smooth Floating Blobs + Interactive Dot Grid Matrix -->
+<div class="relative flex h-screen w-screen overflow-hidden bg-[#08090C] text-[#f1f3f7] antialiased font-sans selection:bg-[#00e5ff]/20 selection:text-[#00e5ff]">
+  <!-- Cold Carbon Precision Telemetry Lighting -->
   <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-    <!-- Aurora Blob 1 (Indigo/Violet) -->
-    <div class="absolute w-[680px] h-[680px] -top-32 left-[15%] rounded-full blob-aurora-1 opacity-25 blur-[120px]"></div>
-    <!-- Aurora Blob 2 (Cyan/Sky) -->
-    <div class="absolute w-[560px] h-[560px] top-[28%] right-[8%] rounded-full blob-aurora-2 opacity-20 blur-[130px]"></div>
-    <!-- Aurora Blob 3 (Fuchsia/Violet) -->
-    <div class="absolute w-[620px] h-[620px] -bottom-28 left-[35%] rounded-full blob-aurora-3 opacity-15 blur-[140px]"></div>
-    <!-- Cinematic Matrix Dot Grid -->
-    <div class="absolute inset-0 cinematic-dot-grid opacity-70"></div>
+    <!-- Focused Overhead Telemetry Beam -->
+    <div class="absolute inset-0 telemetry-beam opacity-60"></div>
+    <!-- Precision Matrix Dot Grid -->
+    <div class="absolute inset-0 cinematic-dot-grid opacity-40"></div>
   </div>
 
   <!-- Minimalist Clean Sidebar -->
@@ -697,23 +693,24 @@
   <!-- Main Content Workspace Area -->
   <div class="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden bg-transparent">
     <!-- Top Subtle Breadcrumb Header -->
-    <header class="min-h-[50px] sm:h-11 pt-2 sm:pt-0 pb-1.5 sm:pb-0 px-3 sm:px-4 border-b border-white/[0.08] bg-zinc-950/80 backdrop-blur-md flex items-center justify-between shrink-0 select-none gap-2">
+    <header class="min-h-[50px] sm:h-11 pt-2 sm:pt-0 pb-1.5 sm:pb-0 px-3 sm:px-4 glass-header flex items-center justify-between shrink-0 select-none gap-2">
       <div class="flex items-center gap-1.5 sm:gap-2 text-xs font-mono text-zinc-400 min-w-0">
         <!-- Mobile Sidebar Hamburger Toggle -->
         <button
           type="button"
           onclick={() => isMobileSidebarOpen = true}
-          class="md:hidden p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer shrink-0"
+          class="md:hidden p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition cursor-pointer shrink-0"
           title="Buka Menu Sidebar"
+          aria-label="Buka Menu Sidebar"
         >
-          <Menu class="w-4 h-4 text-indigo-400" />
+          <Menu class="w-4 h-4 text-[#00e5ff]" />
         </button>
 
         <span class="text-zinc-500 hidden sm:inline">zhiEnd</span>
         <span class="text-zinc-600 hidden sm:inline">/</span>
         {#if !config?.activeProject || config.activeProject.replace(/\\/g, '/').toLowerCase() === 'd:/works'}
-          <span class="text-indigo-400 font-semibold flex items-center gap-1.5 truncate text-[11px] sm:text-xs">
-            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span>
+          <span class="text-[#00e5ff] font-semibold flex items-center gap-1.5 truncate text-[11px] sm:text-xs">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] shadow-[0_0_8px_rgba(0,229,255,0.7)] shrink-0"></span>
             <span class="truncate">D:\Works (Root)</span>
           </span>
         {:else}
