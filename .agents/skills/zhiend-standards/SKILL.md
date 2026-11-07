@@ -12,7 +12,7 @@ The standards are modularly split into two specialized skills:
 | Dedicated Skill | Focus & Scope | Location |
 |-----------------|---------------|----------|
 | **`zhiend-architecture`** | Backend & Frontend Architecture, Svelte 5 Runes, TypeScript strict safety, Hono API routes, PIN security, Workspace scanning (`D:\Works`), Media pipelines, and Public Tunnels | [`.agents/skills/zhiend-architecture/SKILL.md`](file:///d:/Works/zhiEnd-agent/.agents/skills/zhiend-architecture/SKILL.md) |
-| **`zhiend-ui-design`** | Teenage Engineering Industrial Field Instrument (TE-IFI): matte chalk bone chassis (#F4F3EE), putty concrete decks (#E9E7E0), pure alabaster wells (#FCFCFA), safety hazard orange triggers (#FF5500), physical mechanical buttons with inset/outset bevels, precision milled hairline seams, 0% dark mode tolerance across all modals, and anti-AI-slop instrument cockpit layouts | [`.agents/skills/zhiend-ui-design/SKILL.md`](file:///d:/Works/zhiEnd-agent/.agents/skills/zhiend-ui-design/SKILL.md) |
+| **`zhiend-ui-design`** | Cyber-Industrial Blueprint Grid (CIB-Grid): matte off-white concrete chassis (#ECEAE5), 1px architectural drafting grid seams (#D0CEC7), laser orange accents (#FF5500), corner registration dots (■), viewfinder reticle brackets (┌ ┐ └ ┘), drafting crosshairs (✕), dot matrix arrays (::), and reactive CRT robot mascot with animated pixel eyes (● ●) | [`.agents/skills/zhiend-ui-design/SKILL.md`](file:///d:/Works/zhiEnd-agent/.agents/skills/zhiend-ui-design/SKILL.md) |
 
 ---
 
@@ -30,19 +30,39 @@ The standards are modularly split into two specialized skills:
 
 ## 2. UI/UX Design Quick Reference (`zhiend-ui-design`)
 
-- **Design Philosophy**: Teenage Engineering Industrial Field Instrument (TE-IFI) — a physical precision hardware synthesizer aesthetic. 100% free of generic dark mode, zero blue/purple palettes, zero neon glows, and zero AI-slop card kits.
-- **6-Tone Industrial Hardware Palette**:
-  - `--chassis-bone`: `#F4F3EE` (Chalk Bone matte ground)
-  - `--deck-putty`: `#E9E7E0` (Putty concrete decks & sidebars)
-  - `--bed-magnesium`: `#DEDBD2` (Machined magnesium raised tabs)
-  - `--well-alabaster`: `#FCFCFA` (Sunken alabaster input wells & message bays)
-  - `--seam-milled`: `#C8C5BC` (1px mechanical precision rule)
-  - `--safety-orange`: `#FF5500` (Tactile safety hazard orange primary switches)
-  - `--hazard-mustard`: `#E5A91A` (Warning yellow caution indicators)
-  - `--ink-basalt`: `#191B1D` (Deep basalt ink high-contrast typography)
-  - `--stencil-grey`: `#5C6066` (Technical stencil data labels)
-- **Component Tokens**:
-  - `.hardware-panel`: Structural putty deck with milled hairline seam.
+- **Design Philosophy**: Retro-Futuristic Cyber-Industrial Blueprint Grid (CIB-Grid) — edge-to-edge architectural drafting grid (inspired by ChainGPT Labs & Teenage Engineering). Strictly NO isolated floating cards with massive empty margins. 100% free of generic dark mode, zero blue/purple palettes, zero neon gradients, and zero AI-slop card kits.
+- **Drafting Blueprint Palette**:
+  - `--canvas-concrete`: `#ECEAE5` (Light Drafting Concrete / Warm Off-White ground)
+  - `--grid-seam`: `#D0CEC7` (1px architectural drafting rules & continuous cell partition seams)
+  - `--grid-seam-dark`: `#A8A59C` (Active borders, focused structural joints)
+  - `--panel-alabaster`: `#FCFCFA` (Pure alabaster module interiors, message bays & input wells)
+  - `--panel-putty`: `#E5E3DD` (Machined putty decks, card beds, macro bays, bottom hardware console)
+  - `--laser-orange`: `#FF5500` (Safety Laser Orange — buttons, corner registration dots `■`, active triggers)
+  - `--glow-amber`: `#FFAA00` (Warm electric amber — robot chassis bevel glow)
+  - `--crt-void`: `#101114` (Deep charcoal CRT well for dot-matrix screens & viewfinder HUD boxes)
+  - `--ink-basalt`: `#111315` (High-contrast basalt black for headlines, labels, and primary text)
+  - `--stencil-slate`: `#60646C` (Technical stencil metadata, sub-labels, and timestamps)
+- **Retro-Futuristic Typography Scale**:
+  - `.font-display`: `Syne` 900 Black for giant modular headline letterforms (`Z H I E N D   C O R E`).
+  - `.font-tech`: `Chakra Petch` 700 Bold for industrial navigation switches and soundbank bays.
+  - `.font-pixel`: `Silkscreen` 700 for authentic 8-bit dot-matrix status pills (`:: STATUS NOMINAL`).
+  - `.font-grotesk`: `Space Grotesk` for high-legibility retro-futuristic copy.
+  - `.font-stencil`: `JetBrains Mono` for technical coordinates (`COORD: 0x3888`), terminal streams, diffs.
+- **Drafting Ornaments & Assets**:
+  - `.reg-dot`: 4x4px solid orange square registration dots (`■`) anchoring module corners.
+  - `.viewfinder-box`: Technical reticle brackets (`┌ ┐` and `└ ┘`) framing metrics and telemetry.
+  - `.crosshair-box`: Square drafting crosshair marker (`✕`) in header and breadcrumb modules.
+  - Dot-matrix array indicators (`::`) prefixing technical section titles (`:: SYS NOMINAL`).
+  - Reactive CRT Robot Mascot: Chamfered hardware body with glowing orange bevel and live animated dot-matrix pixel eyes (`● ●`).
+  - Docked Hardware Console: Prompt input is permanently anchored to the bottom grid seam with tactile parameter keys and a safety orange dispatch lever.
+- **Dashboard Layout Architecture**:
+  - 1px architectural grid matrix dividing header, main cockpit, and bottom console.
+  - 3-column hero cockpit (Mission/Headline, CRT Robot Mascot, Viewfinder HUD).
+  - 4-bay partner-style horizontal macro strip (`[01 // AUDIT]`, `[02 // RECON]`, `[03 // DEBUG]`, `[04 // SHIP]`).
+  - Permanently anchored recessed input well at the bottom.
+- **Universal Modal Consistency**:
+  - Every single modal (`ProjectModal`, `SettingsModal`, `PersonaModal`, `ConfirmModal`, `NoticeModal`, `PinModal`, `PushModal`), popover, and lightbox is 100% compliant with the `#FCFCFA` / `#ECEAE5` / `#D0CEC7` / `#FF5500` blueprint matrix.
+  - Zero tolerance for dark mode (`bg-zinc-950`, `bg-zinc-900`, `indigo`, `violet`).
   - `.hardware-well`: Recessed alabaster bay with subtle mechanical inset bevel.
   - `.btn-hardware`: Tactile mechanical push-button with 2px physical bottom bevel.
   - `.btn-safety`: Vivid safety hazard orange (`#FF5500`) tactile switch.

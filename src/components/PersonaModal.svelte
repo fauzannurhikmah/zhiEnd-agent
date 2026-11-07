@@ -233,7 +233,7 @@
         name: found?.name || modelId,
         provider: 'custom',
         label: 'Custom',
-        color: 'text-[#191B1D] bg-[#E9E7E0] border-[#C8C5BC]',
+        color: 'text-[#191B1D] bg-[#ECEAE5] border-[#D0CEC7]',
         dotColor: 'bg-[#5C6066]',
         hasKey: found?.hasKey ?? false
       };
@@ -418,11 +418,11 @@
     class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
   >
     <div
-      class="w-full max-w-2xl bg-[#FCFCFA] border border-[#C8C5BC] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] font-sans animate-in zoom-in-95 duration-200"
+      class="w-full max-w-2xl bg-[#FCFCFA] border border-[#D0CEC7] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] font-sans animate-in zoom-in-95 duration-200"
     >
       <!-- Header -->
       <div
-        class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#C8C5BC] flex items-center justify-between shrink-0 bg-[#E9E7E0]"
+        class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#D0CEC7] flex items-center justify-between shrink-0 bg-[#ECEAE5]"
       >
         <div class="flex items-center gap-2.5">
           <div
@@ -443,7 +443,7 @@
         <button
           type="button"
           onclick={onClose}
-          class="p-1.5 rounded-lg text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2] transition cursor-pointer"
+          class="p-1.5 rounded-lg text-[#5C6066] hover:text-[#191B1D] hover:bg-[#E5E3DD] transition cursor-pointer"
         >
           <X class="w-4 h-4" />
         </button>
@@ -451,7 +451,7 @@
 
       <!-- Navigation Tabs -->
       <div
-        class="flex items-center px-4 sm:px-6 pt-2.5 border-b border-[#C8C5BC] text-xs gap-3 sm:gap-4 shrink-0 bg-[#E9E7E0]"
+        class="flex items-center px-4 sm:px-6 pt-2.5 border-b border-[#D0CEC7] text-xs gap-3 sm:gap-4 shrink-0 bg-[#ECEAE5]"
       >
         <button
           type="button"
@@ -501,7 +501,7 @@
               <div
                 class="p-3 sm:p-3.5 rounded-xl border transition flex flex-col justify-between gap-3 group relative {isSelected
                   ? 'bg-orange-50/70 border-[#FF5500] shadow-xs'
-                  : 'bg-[#FCFCFA] hover:bg-[#E9E7E0]/60 border-[#C8C5BC] hover:border-[#8C9097]'}"
+                  : 'bg-[#FCFCFA] hover:bg-[#ECEAE5]/60 border-[#D0CEC7] hover:border-[#8C9097]'}"
               >
                 <div class="flex flex-col gap-2.5">
                   <div class="flex items-start justify-between gap-2">
@@ -511,7 +511,7 @@
                         avatar={p.avatar}
                         name={p.name}
                         size="md"
-                        className="rounded-xl shrink-0 ring-1 ring-[#C8C5BC]"
+                        className="rounded-xl shrink-0 ring-1 ring-[#D0CEC7]"
                       />
 
                       <div class="flex flex-col min-w-0 flex-1">
@@ -521,7 +521,7 @@
                           <span class="truncate font-bold">{p.name}</span>
                           {#if p.is_default}
                             <span
-                              class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC] shrink-0 font-bold"
+                              class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] shrink-0 font-bold"
                               >Bawaan</span
                             >
                           {/if}
@@ -562,7 +562,7 @@
                   <!-- Traits Badge if present -->
                   {#if p.traits}
                     <div
-                      class="text-[10px] text-[#5C6066] font-mono px-2 py-1 rounded-lg bg-[#E9E7E0] border border-[#C8C5BC] truncate font-bold"
+                      class="text-[10px] text-[#5C6066] font-mono px-2 py-1 rounded-lg bg-[#ECEAE5] border border-[#D0CEC7] truncate font-bold"
                     >
                       ✨ {p.traits}
                     </div>
@@ -570,7 +570,7 @@
 
                   <!-- Preview System Prompt -->
                   <p
-                    class="text-[11px] text-[#5C6066] line-clamp-2 leading-relaxed bg-[#FCFCFA] p-2 rounded-xl border border-[#C8C5BC]"
+                    class="text-[11px] text-[#5C6066] line-clamp-2 leading-relaxed bg-[#FCFCFA] p-2 rounded-xl border border-[#D0CEC7]"
                   >
                     {p.system_prompt}
                   </p>
@@ -614,7 +614,7 @@
                     <button
                       type="button"
                       onclick={() => applyTemplate(tpl)}
-                      class="p-2.5 rounded-xl bg-[#FCFCFA] hover:bg-[#E9E7E0] border border-[#C8C5BC] hover:border-[#FF5500] text-left transition cursor-pointer group flex flex-col shadow-xs"
+                      class="p-2.5 rounded-xl bg-[#FCFCFA] hover:bg-[#ECEAE5] border border-[#D0CEC7] hover:border-[#FF5500] text-left transition cursor-pointer group flex flex-col shadow-xs"
                     >
                       <span class="text-lg">{tpl.avatar}</span>
                       <div
@@ -633,7 +633,7 @@
 
             <!-- Custom Avatar Picker & Upload Section -->
             <div
-              class="p-3.5 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] flex flex-col gap-3 shadow-xs"
+              class="p-3.5 rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] flex flex-col gap-3 shadow-xs"
             >
               <div class="flex items-center justify-between">
                 <span
@@ -716,7 +716,7 @@
                         class="w-7 h-7 rounded-lg flex items-center justify-center text-sm transition cursor-pointer {avatarType ===
                           'emoji' && newAvatar === em
                           ? 'bg-[#FF5500] text-white scale-105 shadow-xs'
-                          : 'bg-[#FCFCFA] border border-[#C8C5BC] hover:bg-[#E9E7E0]'}"
+                          : 'bg-[#FCFCFA] border border-[#D0CEC7] hover:bg-[#ECEAE5]'}"
                       >
                         {em}
                       </button>
@@ -739,7 +739,7 @@
                 type="text"
                 bind:value={newName}
                 placeholder="Contoh: Senior Code Reviewer, UI Maestro, Security Audit..."
-                class="w-full bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
+                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
               />
             </div>
 
@@ -756,7 +756,7 @@
                 type="text"
                 bind:value={newTraits}
                 placeholder="Contoh: Kritis, Teliti, Perfeksionis, Santai & Ramah..."
-                class="w-full bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
+                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
               />
 
               <!-- Quick Trait Suggestion Chips -->
@@ -768,7 +768,7 @@
                   <button
                     type="button"
                     onclick={() => addTraitSuggestion(sug)}
-                    class="text-[10px] px-2 py-0.5 rounded-full bg-[#FCFCFA] hover:bg-orange-100 border border-[#C8C5BC] hover:border-[#FF5500] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer font-mono font-bold"
+                    class="text-[10px] px-2 py-0.5 rounded-full bg-[#FCFCFA] hover:bg-orange-100 border border-[#D0CEC7] hover:border-[#FF5500] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer font-mono font-bold"
                   >
                     + {sug}
                   </button>
@@ -798,7 +798,7 @@
               <button
                 type="button"
                 onclick={() => isModelDropdownOpen = !isModelDropdownOpen}
-                class="w-full bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#FF5500] rounded-xl px-3.5 py-2.5 text-xs text-[#191B1D] flex items-center justify-between transition cursor-pointer shadow-xs group"
+                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#FF5500] rounded-xl px-3.5 py-2.5 text-xs text-[#191B1D] flex items-center justify-between transition cursor-pointer shadow-xs group"
               >
                 <div class="flex items-center gap-2.5 min-w-0">
                   <span class="w-2 h-2 rounded-full {currentModelInfo.dotColor} shrink-0"></span>
@@ -829,7 +829,7 @@
               <!-- Floating Dropdown Popover -->
               {#if isModelDropdownOpen}
                 <div
-                  class="absolute left-0 right-0 top-full mt-1.5 z-50 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl shadow-2xl p-2 max-h-72 overflow-y-auto space-y-1 animate-in fade-in zoom-in-95 duration-150"
+                  class="absolute left-0 right-0 top-full mt-1.5 z-50 bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl shadow-2xl p-2 max-h-72 overflow-y-auto space-y-1 animate-in fade-in zoom-in-95 duration-150"
                 >
                   {#if availableModels.length === 0}
                     <div class="p-3 text-center text-xs text-[#5C6066] font-mono">Memuat daftar model...</div>
@@ -837,7 +837,7 @@
                     {#each ['antigravity', 'openai', 'grok', 'qwen', 'deepseek', 'gemini'] as prov}
                       {@const provModels = availableModels.filter(m => m.provider === prov)}
                       {#if provModels.length > 0}
-                        <div class="pt-2 pb-1 px-2.5 text-[10px] font-bold text-[#5C6066] font-mono uppercase tracking-wider flex items-center justify-between border-t border-[#C8C5BC] first:border-t-0">
+                        <div class="pt-2 pb-1 px-2.5 text-[10px] font-bold text-[#5C6066] font-mono uppercase tracking-wider flex items-center justify-between border-t border-[#D0CEC7] first:border-t-0">
                           <span>{prov === 'antigravity' ? '⚡ Antigravity CLI Core' : prov.toUpperCase()}</span>
                           {#if prov !== 'antigravity'}
                             <span class="text-[9px] font-normal lowercase {provModels.some(m => m.hasKey) ? 'text-emerald-700 font-bold' : 'text-[#8C9097]'}">
@@ -854,7 +854,7 @@
                               newPreferredModel = m.id;
                               isModelDropdownOpen = false;
                             }}
-                            class="w-full px-2.5 py-2 rounded-xl flex items-center justify-between gap-2 text-left transition cursor-pointer {isCur ? 'bg-orange-100 border border-[#FF5500] text-[#FF5500] font-bold' : 'hover:bg-[#E9E7E0] text-[#191B1D]'}"
+                            class="w-full px-2.5 py-2 rounded-xl flex items-center justify-between gap-2 text-left transition cursor-pointer {isCur ? 'bg-orange-100 border border-[#FF5500] text-[#FF5500] font-bold' : 'hover:bg-[#ECEAE5] text-[#191B1D]'}"
                           >
                             <div class="flex flex-col min-w-0 flex-1">
                               <div class="text-xs font-semibold flex items-center gap-1.5">
@@ -939,7 +939,7 @@
                 bind:value={newSystemPrompt}
                 rows="5"
                 placeholder="Tuliskan aturan koding & instruksi spesifik, atau klik tombol 'Generate Instruksi' di atas untuk dibuatkan secara otomatis oleh AI..."
-                class="w-full bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl p-3 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] leading-relaxed resize-none shadow-xs font-mono"
+                class="w-full bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl p-3 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] leading-relaxed resize-none shadow-xs font-mono"
               ></textarea>
             </div>
 
@@ -950,7 +950,7 @@
             {/if}
 
             <div
-              class="flex items-center justify-end gap-2 pt-2 border-t border-[#C8C5BC]"
+              class="flex items-center justify-end gap-2 pt-2 border-t border-[#D0CEC7]"
             >
               <button
                 type="button"

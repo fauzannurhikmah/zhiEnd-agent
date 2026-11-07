@@ -29,8 +29,8 @@
 
 {#if isOpen}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="w-full max-w-lg rounded-2xl flex flex-col bg-[#FCFCFA] border border-[#C8C5BC] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-[#191B1D]">
-      <div class="px-5 py-4 border-b border-[#C8C5BC] bg-[#E9E7E0] flex items-center justify-between">
+    <div class="w-full max-w-lg rounded-2xl flex flex-col bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-[#191B1D]">
+      <div class="px-5 py-4 border-b border-[#D0CEC7] bg-[#ECEAE5] flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-orange-100 text-[#FF5500] border border-orange-300 flex items-center justify-center font-bold">
             <UploadCloud class="w-4 h-4" />
@@ -40,7 +40,7 @@
             <p class="text-[11px] text-[#5C6066]">Sinkronisasi branch aktif ke remote repository</p>
           </div>
         </div>
-        <button onclick={onClose} class="text-[#8C9097] hover:text-[#191B1D] p-1 rounded-lg hover:bg-[#DEDBD2] cursor-pointer">
+        <button onclick={onClose} class="text-[#8C9097] hover:text-[#191B1D] p-1 rounded-lg hover:bg-[#E5E3DD] cursor-pointer">
           <X class="w-4 h-4" />
         </button>
       </div>
@@ -63,7 +63,7 @@
         <!-- Output logs -->
         <div class="flex flex-col gap-1">
           <span class="text-[10px] text-[#5C6066] uppercase tracking-wider font-mono font-bold">Output Console:</span>
-          <pre class="bg-[#E9E7E0] p-3 rounded-lg border border-[#C8C5BC] font-mono text-[11px] leading-relaxed text-[#191B1D] max-h-48 overflow-y-auto whitespace-pre-wrap">{outputLogs || 'Memulai proses git push...'}</pre>
+          <pre class="bg-[#ECEAE5] p-3 rounded-lg border border-[#D0CEC7] font-mono text-[11px] leading-relaxed text-[#191B1D] max-h-48 overflow-y-auto whitespace-pre-wrap">{outputLogs || 'Memulai proses git push...'}</pre>
         </div>
 
         <button

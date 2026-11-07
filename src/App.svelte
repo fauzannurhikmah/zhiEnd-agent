@@ -657,11 +657,9 @@
   }
 </script>
 
-<div class="relative flex h-screen w-screen overflow-hidden bg-[#F4F3EE] text-[#191B1D] antialiased font-sans selection:bg-[#FF5500] selection:text-white">
-  <!-- Industrial Hardware Matrix Grid -->
-  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-    <div class="absolute inset-0 hardware-grid opacity-30"></div>
-  </div>
+<div class="relative flex h-screen w-screen overflow-hidden bg-[#ECEAE5] text-[#111315] antialiased selection:bg-[#FF5500] selection:text-white">
+  <!-- Industrial Blueprint Grid Background -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 blueprint-grid opacity-70"></div>
 
   <!-- Minimalist Clean Sidebar -->
   <Sidebar
@@ -689,43 +687,54 @@
 
   <!-- Main Content Workspace Area -->
   <div class="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden bg-transparent">
-    <!-- Top Subtle Breadcrumb Header -->
-    <header class="min-h-[50px] sm:h-11 pt-2 sm:pt-0 pb-1.5 sm:pb-0 px-3 sm:px-4 glass-header flex items-center justify-between shrink-0 select-none gap-2">
-      <div class="flex items-center gap-1.5 sm:gap-2 text-xs font-mono text-[#5C6066] min-w-0">
+    <!-- Top Blueprint Drafting Header -->
+    <header class="min-h-[48px] sm:h-12 px-3 sm:px-4 bg-[#ECEAE5] border-b border-[#D0CEC7] flex items-center justify-between shrink-0 select-none gap-2 z-10 font-tech">
+      <div class="flex items-center gap-1.5 sm:gap-2.5 text-xs text-[#5C6066] min-w-0">
+        <!-- Drafting Crosshair Mark from Blueprint Reference -->
+        <div class="hidden sm:inline-flex crosshair-box w-6 h-6 shrink-0" title="Blueprint Drafting Reticle"></div>
+
         <!-- Mobile Sidebar Hamburger Toggle -->
         <button
           type="button"
           onclick={() => isMobileSidebarOpen = true}
-          class="md:hidden p-1.5 rounded-lg text-[#5C6066] hover:text-[#191B1D] hover:bg-black/[0.05] transition cursor-pointer shrink-0"
+          class="md:hidden p-1.5 rounded-lg text-[#5C6066] hover:text-[#111315] hover:bg-black/[0.05] transition cursor-pointer shrink-0"
           title="Buka Menu Sidebar"
           aria-label="Buka Menu Sidebar"
         >
           <Menu class="w-4 h-4 text-[#FF5500]" />
         </button>
 
-        <span class="text-[#8C9097] hidden sm:inline">zhiEnd</span>
-        <span class="text-[#C8C5BC] hidden sm:inline">/</span>
+        <span class="text-[#111315] font-bold tracking-wider hidden sm:inline uppercase">zhiEnd</span>
+        <span class="text-[#D0CEC7] hidden sm:inline">/</span>
         {#if !config?.activeProject || config.activeProject.replace(/\\/g, '/').toLowerCase() === 'd:/works'}
           <span class="text-[#FF5500] font-bold flex items-center gap-1.5 truncate text-[11px] sm:text-xs">
-            <span class="w-2 h-2 rounded-full bg-[#FF5500] shrink-0"></span>
+            <span class="w-2 h-2 bg-[#FF5500] shrink-0"></span>
             <span class="truncate">D:\Works (Root)</span>
           </span>
         {:else}
-          <span class="text-[#191B1D] truncate max-w-[100px] xs:max-w-[140px] sm:max-w-xs text-[11px] sm:text-xs font-semibold">{config?.activeProject?.split(/\\|\//).pop()}</span>
+          <span class="text-[#111315] truncate max-w-[100px] xs:max-w-[140px] sm:max-w-xs text-[11px] sm:text-xs font-bold">{config?.activeProject?.split(/\\|\//).pop()}</span>
           <button
             onclick={handleResetToRoot}
-            class="px-1.5 sm:px-2 py-0.5 rounded-md bg-[#DEDBD2] hover:bg-rose-100 text-[9px] sm:text-[10px] text-[#5C6066] hover:text-rose-600 border border-[#C8C5BC] transition cursor-pointer shrink-0"
+            class="px-1.5 sm:px-2 py-0.5 rounded bg-[#E5E3DD] hover:bg-rose-100 text-[9px] sm:text-[10px] text-[#5C6066] hover:text-rose-600 border border-[#D0CEC7] transition cursor-pointer shrink-0 font-stencil"
             title="Clear Workspace (Reset ke Root D:\Works)"
           >
             Clear
           </button>
         {/if}
         {#if gitStatus?.isRepo}
-          <span class="text-[#C8C5BC] hidden md:inline">/</span>
-          <span class="hidden md:flex items-center gap-1 text-[#5C6066] truncate font-medium">
-            <GitBranch class="w-3 h-3 text-[#5C6066]" /> {gitStatus.branch}
+          <span class="text-[#D0CEC7] hidden md:inline">/</span>
+          <span class="hidden md:flex items-center gap-1 text-[#60646C] truncate font-stencil text-[11px]">
+            <GitBranch class="w-3 h-3 text-[#FF5500]" /> {gitStatus.branch}
           </span>
         {/if}
+      </div>
+
+      <!-- Center Blueprint Telemetry Marker (ChainGPT Labs Style) -->
+      <div class="hidden lg:flex items-center gap-2 text-[10px] font-stencil text-[#8C9097]">
+        <span class="text-[#FF5500]">::</span>
+        <span>COORD: 0x3888</span>
+        <span class="text-[#D0CEC7]">|</span>
+        <span class="text-emerald-700 font-bold">BUS: NOMINAL</span>
       </div>
 
       <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -796,7 +805,7 @@
     </header>
 
     <!-- Main Viewport Area -->
-    <main class="flex-1 overflow-hidden p-0 sm:p-2 md:p-3 min-h-0">
+    <main class="flex-1 overflow-hidden p-0 min-h-0 flex flex-col relative blueprint-grid">
       {#if currentTab === 'chat'}
         <ChatView
           {messages}

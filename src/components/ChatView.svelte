@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { ChatMessage, AppConfig, ChatSessionItem, PersonaItem } from '../types';
   import AvatarView from './AvatarView.svelte';
+  import CrtRobotMascot from './CrtRobotMascot.svelte';
   import { renderMarkdown } from '../services/markdown';
   import { api } from '../services/api';
   import { 
@@ -510,15 +511,15 @@
     </div>
   {/if}
 
-  <!-- Top Session Bar -->
-  <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2 border-b border-[#C8C5BC] bg-[#E9E7E0] z-10 shrink-0 select-none gap-1.5 sm:gap-2">
+  <!-- Top Session Bar (Architectural Seam) -->
+  <div class="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-[#D0CEC7] bg-[#ECEAE5] z-10 shrink-0 select-none gap-1.5 sm:gap-2 font-tech">
     <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-      <MessageSquare class="w-3.5 h-3.5 text-[#FF5500] shrink-0" />
-      <span class="text-xs font-bold text-[#191B1D] truncate min-w-0 flex-1">
-        {activeSession?.title || 'Diskusi Aktif'}
+      <span class="w-2 h-2 bg-[#FF5500] shrink-0"></span>
+      <span class="text-xs font-bold text-[#111315] uppercase tracking-wider truncate min-w-0 flex-1">
+        {activeSession?.title || 'ACTIVE RUNTIME SESSION'}
       </span>
-      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] hidden md:inline shrink-0 font-semibold">
-        {activeSession?.workspace_id ? 'Workspace' : 'Global'}
+      <span class="text-[9px] font-stencil px-1.5 py-0.2 rounded bg-white border border-[#D0CEC7] text-[#60646C] hidden md:inline shrink-0 font-semibold">
+        {activeSession?.workspace_id ? 'WORKSPACE SCOPE' : 'GLOBAL SCOPE'}
       </span>
     </div>
 
@@ -527,25 +528,17 @@
       <button
         type="button"
         onclick={onOpenPersonaModal}
-        class="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-xl bg-[#FCFCFA] hover:bg-white border border-[#C8C5BC] hover:border-[#FF5500] text-[11px] text-[#191B1D] transition cursor-pointer group shadow-2xs max-w-[125px] xs:max-w-[155px] sm:max-w-[280px]"
+        class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#FF5500] text-[11px] text-[#111315] transition cursor-pointer group shadow-2xs max-w-[125px] xs:max-w-[155px] sm:max-w-[280px]"
         title={`Persona: ${activePersona?.name || 'Default'}${activePersona?.traits ? ` • Sifat: ${activePersona.traits}` : ''}`}
       >
         <AvatarView avatar={activePersona?.avatar} name={activePersona?.name} size="xs" className="rounded-md shrink-0" />
-        <span class="font-bold truncate max-w-[65px] xs:max-w-[85px] sm:max-w-[120px]">{activePersona?.name || 'Default Persona'}</span>
+        <span class="font-bold truncate max-w-[65px] xs:max-w-[85px] sm:max-w-[120px] uppercase">{activePersona?.name || 'Default'}</span>
         {#if activePersona?.preferred_model}
           <span 
-            class="text-[9px] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-mono hidden lg:inline truncate max-w-[110px]" 
+            class="text-[9px] px-1.5 py-0.2 rounded bg-[#E5E3DD] border border-[#D0CEC7] text-[#60646C] font-stencil hidden lg:inline truncate max-w-[110px]" 
             title={`Model: ${activePersona.preferred_model}`}
           >
             {activePersona.preferred_model.replace(/^(openai|grok|qwen|deepseek|gemini):/, '')}
-          </span>
-        {/if}
-        {#if activePersona?.traits}
-          <span 
-            class="text-[9px] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-sans truncate max-w-[110px]" 
-            title={activePersona.traits}
-          >
-            {activePersona.traits}
           </span>
         {/if}
         <ChevronDown class="w-3 h-3 text-[#8C9097] group-hover:text-[#FF5500] transition-transform shrink-0" />
@@ -554,11 +547,11 @@
       <button
         type="button"
         onclick={onCreateNewSession}
-        class="btn-hardware flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-[11px] text-[#191B1D] cursor-pointer"
+        class="btn-hardware flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-[11px] text-[#111315] cursor-pointer"
         title="Mulai sesi baru"
       >
         <Plus class="w-3 h-3 text-[#FF5500]" />
-        <span class="hidden sm:inline">Chat Baru</span>
+        <span class="hidden sm:inline uppercase">New Run</span>
       </button>
 
       {#if messages.length > 0}
@@ -569,86 +562,173 @@
           title="Bersihkan pesan di sesi ini"
         >
           <Trash2 class="w-3 h-3" />
-          <span class="hidden sm:inline">Bersihkan</span>
+          <span class="hidden sm:inline uppercase">Purge</span>
         </button>
       {/if}
     </div>
   </div>
 
   <!-- Content Viewport -->
-  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto px-2 sm:px-4 py-4 sm:py-6">
+  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto {messages.length === 0 ? 'p-0 flex flex-col' : 'p-4 sm:p-6 pb-28 sm:pb-32 blueprint-grid'}">
     {#if messages.length === 0}
-      <!-- Empty State: Teenage Engineering Hardware Instrument Cockpit Deck -->
-      <div class="h-full flex flex-col justify-center max-w-3xl mx-auto gap-4 sm:gap-5 animate-in fade-in zoom-in-95 duration-200 pb-20">
-        
-        <!-- Physical Machine Nameplate & Live Telemetry Plate -->
-        <div class="w-full bg-[#E9E7E0] border border-[#C8C5BC] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs font-mono">
-          <div class="flex items-center gap-2.5">
-            <span class="w-3 h-3 rounded-full bg-[#FF5500] shadow-[0_0_8px_rgba(255,85,0,0.6)] animate-pulse"></span>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs sm:text-sm font-bold text-[#191B1D] tracking-wider uppercase">zhiEnd FIELD INSTRUMENT // TX-3888</span>
-                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#FF5500] font-bold">REV 2.4</span>
-              </div>
-              <p class="text-[10px] text-[#5C6066] font-sans mt-0.5">Unit siap menerima instruksi coding, inspeksi git, dan eksekusi terminal.</p>
-            </div>
+      <!-- Cyber-Industrial Blueprint Grid (CIB-Grid) Full-Bleed Cockpit Deck -->
+      <div class="w-full flex-1 flex flex-col justify-between blueprint-grid p-4 sm:p-6 lg:p-8 relative">
+        <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
+        <span class="reg-dot reg-dot-tl"></span>
+        <span class="reg-dot reg-dot-tr"></span>
+        <span class="reg-dot reg-dot-bl"></span>
+        <span class="reg-dot reg-dot-br"></span>
+
+        <!-- Top Drafting Header Seam -->
+        <div class="flex items-center justify-between pb-3 mb-2 border-b border-[#D0CEC7] font-tech text-[11px] text-[#5C6066]">
+          <div class="flex items-center gap-2">
+            <span class="crosshair-box w-5 h-5 text-[10px] inline-flex items-center justify-center"></span>
+            <span class="font-bold tracking-wider text-[#111315]">ZHIEND // AUTONOMOUS AGENT RUNTIME</span>
+            <span class="text-[#FF5500] font-bold">■ LABS DRAFTING MATRIX</span>
           </div>
-          <div class="flex items-center gap-2 sm:gap-3 text-[10px] text-[#5C6066] border-t sm:border-t-0 border-[#C8C5BC] pt-2 sm:pt-0">
-            <span class="px-2 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] flex items-center gap-1 font-semibold text-emerald-700">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> BUS NOMINAL
-            </span>
-            <span class="px-2 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] font-semibold text-[#191B1D] truncate max-w-[140px]">
-              {activePersona?.name || 'ANTIGRAVITY'}
-            </span>
+          <div class="hidden sm:flex items-center gap-3 font-stencil text-[10px]">
+            <span class="text-[#8C9097]">:: SYS_BUS_NOMINAL</span>
+            <span class="px-2 py-0.5 rounded bg-white border border-[#D0CEC7] font-bold text-[#111315]">REV 2.4</span>
           </div>
         </div>
 
-        <!-- Hardware Macro Trigger Soundbank (EP-133 / OP-1 Parameter Matrix) -->
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center justify-between px-1">
-            <span class="text-[11px] font-mono font-bold text-[#5C6066] uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles class="w-3 h-3 text-[#FF5500]" /> MACRO SOUNDBANK KEYS // DIRECT DISPATCH
-            </span>
-            <span class="text-[10px] font-mono text-[#8C9097]">CLICK PAD TO TRIGGER</span>
+        <!-- Hero Headline Grid Row (Giant Modular Lettering) -->
+        <div class="relative py-2 sm:py-4 border-b border-[#D0CEC7] mb-4 sm:mb-6">
+          <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black tracking-tight text-[#111315] select-none uppercase leading-none">
+            Z H I E N D &nbsp; C O R E
+          </h1>
+          <div class="flex items-center gap-2 mt-2 sm:mt-3 font-tech text-xs sm:text-sm font-bold text-[#FF5500] tracking-wider uppercase">
+            <span class="w-2.5 h-2.5 bg-[#FF5500] inline-block"></span>
+            <span>BACKING AUTONOMOUS ENGINEERING</span>
+          </div>
+        </div>
+
+        <!-- Main 3-Column Cockpit Deck -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center flex-1 my-auto">
+          
+          <!-- Left Cell (Col 1-5): Mission Brief & Primary CTA -->
+          <div class="lg:col-span-5 flex flex-col justify-between h-full gap-4 py-2">
+            <div>
+              <p class="text-xs sm:text-sm text-[#444850] font-grotesk leading-relaxed">
+                Backing autonomous engineering workflows — transforming natural language prompts into production-grade codebase architecture, automated tests, and git commits.
+              </p>
+              <div class="mt-4 flex flex-col gap-1.5 font-stencil text-[11px] text-[#60646C]">
+                <div class="flex items-center gap-2">
+                  <span class="text-[#FF5500]">▹</span>
+                  <span>ACTIVE PERSONA: <strong class="text-[#111315]">{activePersona?.name || 'ANTIGRAVITY'}</strong></span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[#FF5500]">▹</span>
+                  <span>MODEL: <strong class="text-[#111315]">{activePersona?.preferred_model || 'DEFAULT RUNTIME'}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="button"
+                onclick={() => setPrompt('Jelaskan struktur arsitektur codebase ini dan status modul utamanya.')}
+                class="btn-safety px-6 py-3 rounded-full text-white text-xs sm:text-sm font-tech font-bold uppercase tracking-wider transition cursor-pointer shadow-sm hover:shadow-md flex items-center gap-2.5 w-fit active:scale-95"
+              >
+                <Sparkles class="w-4 h-4" />
+                INITIALIZE RUNTIME
+              </button>
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 w-full">
+          <!-- Center Cell (Col 6-8): Retro-Futuristic CRT Robot Mascot -->
+          <div class="lg:col-span-4 flex flex-col items-center justify-center py-2">
+            <CrtRobotMascot 
+              isBusy={isBusy} 
+              isListening={isListening} 
+              hasError={Boolean(voiceError)} 
+              size="lg" 
+            />
+            <div class="mt-4 flex items-center gap-1.5 font-pixel text-[10px] text-[#5C6066]">
+              <span class="text-[#FF5500]">::</span>
+              <span>STATUS: {isBusy ? 'EXECUTING WORKFLOW' : (isListening ? 'LISTENING AUDIO' : 'STATIONARY NOMINAL')}</span>
+            </div>
+          </div>
+
+          <!-- Right Cell (Col 9-12): Viewfinder Telemetry Box -->
+          <div class="lg:col-span-3">
+            <div class="viewfinder-box p-4 rounded-xl text-white font-stencil flex flex-col gap-3 shadow-xl">
+              <div class="flex items-center justify-between text-[10px] text-[#8C9097] border-b border-white/10 pb-2">
+                <span class="text-[#FFAA00] font-tech font-bold tracking-wider">┌ TELEMETRY ┐</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              </div>
+              
+              <div class="space-y-2 text-[11px]">
+                <div class="flex justify-between items-center text-zinc-400">
+                  <span>BUS:</span>
+                  <span class="text-emerald-400 font-bold">ONLINE</span>
+                </div>
+                <div class="flex justify-between items-center text-zinc-400">
+                  <span>BRANCH:</span>
+                  <span class="text-zinc-200 truncate max-w-[100px]">{config?.activeProject?.split(/\\|\//).pop() || 'MAIN'}</span>
+                </div>
+                <div class="flex justify-between items-center text-zinc-400">
+                  <span>SANDBOX:</span>
+                  <span class="text-[#FFAA00]">ISOLATED</span>
+                </div>
+                <div class="flex justify-between items-center text-zinc-400">
+                  <span>LATENCY:</span>
+                  <span class="text-zinc-200">24ms</span>
+                </div>
+              </div>
+
+              <div class="mt-1 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] text-zinc-500">
+                <span>NODE: TX-3888</span>
+                <span class="text-[#FF5500] font-tech">└ RETICLE ┘</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom 4-Bay Partner-Style Macro Strip (Like Chainlink, TRON, BNB, OKX in Reference) -->
+        <div class="mt-6 pt-4 border-t border-[#D0CEC7] w-full">
+          <div class="flex items-center justify-between mb-2.5 font-tech text-[10px] text-[#5C6066]">
+            <span class="font-bold tracking-wider uppercase text-[#111315]">OUR DIRECT DISPATCH BAYS // SOUNDBANK:</span>
+            <span class="hidden sm:inline text-[#8C9097]">SELECT BAY TO DISPATCH</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 border border-[#D0CEC7] bg-white rounded-xl overflow-hidden p-1 shadow-2xs">
             {#each suggestions as s, idx}
               <button
                 type="button"
                 onclick={() => setPrompt(s.prompt)}
-                class="p-3 rounded-xl bg-[#E9E7E0] hover:bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#FF5500] flex flex-col justify-between gap-3 transition text-left cursor-pointer group shadow-[inset_0_1px_2px_rgba(255,255,255,0.7),0_2px_0_#C8C5BC] active:translate-y-0.5 active:shadow-xs min-h-[105px]"
+                class="p-3 bg-[#FCFCFA] hover:bg-[#ECEAE5] border border-transparent hover:border-[#D0CEC7] rounded-lg flex flex-col justify-between gap-2.5 transition text-left cursor-pointer group"
               >
                 <div class="flex items-center justify-between w-full">
-                  <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#FCFCFA] group-hover:bg-[#FF5500] text-[#5C6066] group-hover:text-white border border-[#C8C5BC] transition">
-                    PAD 0{idx + 1}
+                  <span class="text-[9px] font-stencil font-bold px-1.5 py-0.5 rounded bg-white group-hover:bg-[#FF5500] text-[#5C6066] group-hover:text-white border border-[#D0CEC7] transition">
+                    BAY 0{idx + 1}
                   </span>
-                  <s.icon class="w-4 h-4 text-[#FF5500] group-hover:scale-110 transition-transform" />
+                  <s.icon class="w-3.5 h-3.5 text-[#FF5500] group-hover:scale-110 transition-transform" />
                 </div>
                 <div>
-                  <div class="text-xs font-bold text-[#191B1D] group-hover:text-[#FF5500] transition-colors leading-tight font-mono">
+                  <div class="text-xs font-bold text-[#111315] group-hover:text-[#FF5500] transition-colors font-tech uppercase">
                     {s.title}
                   </div>
-                  <p class="text-[10px] text-[#5C6066] leading-snug mt-1 font-sans line-clamp-2">{s.desc}</p>
+                  <p class="text-[10px] text-[#5C6066] font-grotesk line-clamp-1 mt-0.5">{s.desc}</p>
                 </div>
               </button>
             {/each}
           </div>
         </div>
 
-        <!-- System Diagnostic Strip & Shortcuts -->
-        <div class="p-3 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs text-[11px] font-mono">
-          <div class="flex items-center gap-2 text-[#5C6066]">
-            <span class="font-bold text-[#191B1D]">COMMANDS:</span>
-            <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!code</span>
-            <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!git</span>
-            <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!push</span>
-            <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!persona</span>
-          </div>
-          <div class="flex items-center gap-2 text-[#5C6066]">
+        <!-- Keyboard Shortcut Strip -->
+        <div class="mt-3 flex items-center justify-between text-[10px] font-stencil text-[#8C9097]">
+          <div class="flex items-center gap-1.5">
             <span>SHORTCUT:</span>
-            <kbd class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">Ctrl + Enter</kbd>
-            <span class="text-[#8C9097]">TO FIRE</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-white border border-[#D0CEC7] text-[#111315] font-bold">Ctrl + Enter</kbd>
+            <span>TO SEND PROMPT</span>
+          </div>
+          <div class="hidden sm:flex items-center gap-2">
+            <span>COMMANDS:</span>
+            <span class="text-[#FF5500]">!code</span>
+            <span class="text-[#FF5500]">!git</span>
+            <span class="text-[#FF5500]">!push</span>
           </div>
         </div>
 
@@ -660,12 +740,13 @@
           {#if msg.sender === 'user'}
             <div class="flex flex-col gap-1.5 items-end group">
               <!-- Header Username -->
-              <div class="flex items-center text-[10px] font-mono text-[#5C6066] px-1 font-semibold">
-                <span>Anda</span>
+              <div class="flex items-center text-[10px] font-stencil text-[#60646C] px-1 font-bold">
+                <span>■ USER TRANSMISSION</span>
               </div>
 
-              <!-- User Bubble Content -->
-              <div class="bubble-user max-w-[92%] sm:max-w-[85%] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl rounded-tr-none text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-sans text-[#191B1D]">
+              <!-- User Bubble Content (Architectural Alabaster Well) -->
+              <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-3.5 sm:p-4 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-grotesk text-[#111315] max-w-[92%] sm:max-w-[85%] shadow-2xs">
+                <span class="reg-dot reg-dot-tr"></span>
                 {msg.text}
               </div>
 
@@ -676,7 +757,7 @@
                     <button
                       type="button"
                       onclick={() => zoomImageUrl = imgUrl}
-                      class="group/thumb relative rounded-xl overflow-hidden border border-[#C8C5BC] hover:border-[#FF5500] shadow-sm bg-[#E9E7E0] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                      class="group/thumb relative rounded-lg overflow-hidden border border-[#D0CEC7] hover:border-[#FF5500] shadow-2xs bg-[#ECEAE5] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
                     >
                       <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
                       <div class="absolute inset-0 bg-black/30 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
@@ -693,22 +774,22 @@
                   <button
                     type="button"
                     onclick={() => handleCopy(msg.id, msg.text)}
-                    class="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-zinc-800/60 transition cursor-pointer"
+                    class="flex items-center gap-1 text-[11px] text-[#60646C] hover:text-[#111315] px-1.5 py-0.5 rounded hover:bg-[#E5E3DD] transition cursor-pointer font-stencil"
                     title="Salin teks"
                   >
                     {#if copiedMessageId === msg.id}
-                      <Check class="w-3 h-3 text-emerald-400" />
-                      <span class="text-emerald-400 text-[10px] font-medium">Tersalin!</span>
+                      <Check class="w-3 h-3 text-emerald-600" />
+                      <span class="text-emerald-700 text-[10px] font-bold">TERKOPY</span>
                     {:else}
-                      <Copy class="w-3 h-3 text-zinc-400 hover:text-zinc-200" />
-                      <span class="text-[10px]">Salin</span>
+                      <Copy class="w-3 h-3" />
+                      <span class="text-[10px]">SALIN</span>
                     {/if}
                   </button>
                 </div>
               {/if}
             </div>
           {:else}
-            <!-- Agent Message with Custom Avatar (Video/GIF/Image/Emoji) & Traits -->
+            <!-- Agent Message with Custom Avatar & Traits -->
             <div class="flex items-start gap-2.5 sm:gap-3 group w-full">
               <!-- Avatar Persona -->
               <div class="shrink-0 mt-0.5">
@@ -716,42 +797,43 @@
                   avatar={activePersona?.avatar}
                   name={activePersona?.name}
                   size="md"
-                  className="rounded-2xl ring-1 ring-[#FF5500]/30 shadow-xs"
+                  className="rounded-xl border border-[#D0CEC7] shadow-2xs"
                 />
               </div>
 
               <div class="flex-1 flex flex-col gap-1.5 min-w-0 max-w-[96%] sm:max-w-[92%]">
                 <!-- Header Username, Traits & Model -->
-                <div class="flex items-center gap-2 text-[10px] font-mono text-[#5C6066] px-1 min-w-0">
-                  <span class="font-bold text-[#191B1D] truncate shrink-0 max-w-[120px] sm:max-w-[200px]" title={activePersona?.name || 'zhiEnd Assistant'}>
-                    {activePersona?.name || 'zhiEnd Assistant'}
+                <div class="flex items-center gap-2 text-[10px] font-tech text-[#60646C] px-1 min-w-0">
+                  <span class="font-bold text-[#111315] uppercase tracking-wider truncate shrink-0 max-w-[120px] sm:max-w-[200px]" title={activePersona?.name || 'zhiEnd Assistant'}>
+                    :: {activePersona?.name || 'ZHIEND CORE'}
                   </span>
                   {#if activePersona?.traits}
                     <span 
-                      class="text-[9px] px-2 py-0.5 rounded-md bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-sans truncate max-w-[140px] sm:max-w-[280px] md:max-w-[360px]"
+                      class="text-[9px] px-2 py-0.5 rounded bg-[#E5E3DD] border border-[#D0CEC7] text-[#60646C] font-stencil truncate max-w-[140px] sm:max-w-[280px] md:max-w-[360px]"
                       title={`Sifat & Karakteristik: ${activePersona.traits}`}
                     >
                       {activePersona.traits}
                     </span>
                   {/if}
                   {#if activePersona?.preferred_model}
-                    <span class="text-[9px] text-[#8C9097] font-mono hidden md:inline shrink-0 font-medium">
-                      {activePersona.preferred_model}
+                    <span class="text-[9px] text-[#8C9097] font-stencil hidden md:inline shrink-0 font-medium">
+                      [{activePersona.preferred_model}]
                     </span>
                   {/if}
                 </div>
 
-                <!-- Agent Bubble Content -->
-                <div class="bubble-agent w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-[#191B1D] text-xs leading-relaxed">
-                  <!-- Professional Execution & Reasoning Accordion (For Agent Responses) -->
+                <!-- Agent Bubble Content (Architectural Blueprint Log Panel) -->
+                <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-3.5 sm:p-4 text-[#111315] text-xs leading-relaxed shadow-xs font-grotesk">
+                  <span class="reg-dot reg-dot-tl"></span>
+                  <!-- Professional Execution & Reasoning Accordion -->
                   {#if (msg.steps && msg.steps.length > 0) || (msg.tools && msg.tools.length > 0) || msg.thought || msg.isStreaming}
                     {@const isExp = isProcessExpanded(msg.id, msg.isStreaming)}
-                    <div class="mb-3 rounded-xl border transition-all duration-200 overflow-hidden {isExp ? 'border-[#C8C5BC] bg-[#FCFCFA]' : 'border-[#C8C5BC] bg-[#FCFCFA]/80 hover:border-[#A8A59C]'}">
+                    <div class="mb-3 rounded-lg border transition-all duration-200 overflow-hidden {isExp ? 'border-[#D0CEC7] bg-[#E5E3DD]/40' : 'border-[#D0CEC7] bg-[#E5E3DD]/20 hover:border-[#A8A59C]'} font-tech">
                       <!-- Accordion Header Button -->
                       <button
                         type="button"
                         onclick={() => toggleProcess(msg.id)}
-                        class="w-full flex items-center justify-between px-3 {isExp ? 'py-2 bg-[#DEDBD2]/50' : 'py-1.5 bg-[#DEDBD2]/30'} hover:bg-[#DEDBD2] transition-all cursor-pointer text-left select-none"
+                        class="w-full flex items-center justify-between px-3 {isExp ? 'py-2 bg-[#E5E3DD]' : 'py-1.5 bg-[#E5E3DD]/60'} hover:bg-[#E5E3DD] transition-all cursor-pointer text-left select-none"
                       >
                         <div class="flex items-center gap-2 min-w-0">
                           {#if msg.isStreaming}
@@ -759,31 +841,31 @@
                               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF5500] opacity-60"></span>
                               <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FF5500]"></span>
                             </div>
-                            <span class="text-xs font-bold text-[#FF5500]">
-                              Sedang Memproses...
+                            <span class="text-xs font-bold text-[#FF5500] uppercase tracking-wider">
+                              EXECUTING WORKFLOW...
                             </span>
                           {:else}
                             <CheckCircle2 class="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                            <span class="text-xs font-bold text-[#191B1D]">
-                              Proses & Eksekusi Selesai
+                            <span class="text-xs font-bold text-[#111315] uppercase tracking-wider">
+                              EXECUTION LOGS COMPLETED
                             </span>
                           {/if}
-                          <span class="text-[10px] font-mono text-[#5C6066] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] font-semibold">
-                            {(msg.steps?.length || msg.tools?.length || 1)} aktivitas
+                          <span class="text-[9px] font-stencil text-[#60646C] px-1.5 py-0.2 rounded bg-white border border-[#D0CEC7] font-bold">
+                            {(msg.steps?.length || msg.tools?.length || 1)} TRACES
                           </span>
                         </div>
 
-                        <div class="flex items-center gap-1.5 text-[#5C6066]">
-                          <span class="text-[10px] font-sans font-medium text-[#5C6066]">
-                            {isExp ? 'Sembunyikan' : 'Detail'}
+                        <div class="flex items-center gap-1.5 text-[#60646C]">
+                          <span class="text-[10px] font-stencil uppercase">
+                            {isExp ? 'HIDE' : 'DETAIL'}
                           </span>
-                          <ChevronDown class="w-3.5 h-3.5 text-[#5C6066] transition-transform duration-200 {isExp ? 'rotate-180' : ''}" />
+                          <ChevronDown class="w-3.5 h-3.5 text-[#60646C] transition-transform duration-200 {isExp ? 'rotate-180' : ''}" />
                         </div>
                       </button>
 
                       <!-- Accordion Body -->
                       {#if isExp}
-                        <div class="p-3 border-t border-[#C8C5BC] flex flex-col gap-2.5 text-xs bg-[#FCFCFA] animate-in fade-in duration-150">
+                        <div class="p-3 border-t border-[#D0CEC7] flex flex-col gap-2.5 text-xs bg-[#FCFCFA] animate-in fade-in duration-150">
                           <!-- Reasoning / Thinking Box -->
                           {#if msg.thought}
                             <div class="p-2.5 rounded-lg bg-amber-50/70 border border-amber-300 text-amber-950 italic text-[11px] leading-relaxed flex gap-2">
@@ -930,19 +1012,40 @@
   </div>
 
   <!-- Anchored Hardware Console Deck (Bottom Command Bar) -->
-  <div class="absolute bottom-2 sm:bottom-4 inset-x-0 px-2 sm:px-4 pointer-events-none z-20">
+  <div class="w-full bg-[#E5E3DD] border-t border-[#D0CEC7] p-2 sm:p-3 shrink-0 z-20 font-tech">
     <div 
       role="region"
-      aria-label="Kotak Input Mengambang"
-      class="max-w-3xl mx-auto bg-[#E9E7E0] border border-[#C8C5BC] rounded-2xl p-2 sm:p-2.5 shadow-lg pointer-events-auto flex flex-col gap-2 {isDragging ? 'border-[#FF5500] ring-2 ring-[#FF5500]/30' : ''}"
+      aria-label="Konsol Input Hardware"
+      class="max-w-4xl mx-auto flex flex-col gap-2 {isDragging ? 'ring-2 ring-[#FF5500]' : ''}"
       onpaste={handlePaste}
     >
+      <!-- Console Telemetry Status Strip -->
+      <div class="flex items-center justify-between text-[10px] font-stencil text-[#60646C] px-1">
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+          <span class="text-[#111315] font-bold uppercase tracking-wider">CONSOLE BUS [TX-3888]</span>
+          <span class="text-[#8C9097] hidden sm:inline">:: CHANNEL READY</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span>SHORTCUT:</span>
+          <kbd class="px-1 py-0.2 rounded bg-[#FCFCFA] border border-[#D0CEC7] text-[#111315] font-bold">Ctrl + Enter</kbd>
+        </div>
+      </div>
+
+      <!-- Recessed Mechanical Input Well -->
+      <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] focus-within:border-[#FF5500] rounded-xl p-2 shadow-2xs transition">
+        <!-- 4 Corner Registration Marks -->
+        <span class="reg-dot reg-dot-tl"></span>
+        <span class="reg-dot reg-dot-tr"></span>
+        <span class="reg-dot reg-dot-bl"></span>
+        <span class="reg-dot reg-dot-br"></span>
+
         <!-- Uploaded Image Chips Preview -->
         {#if selectedImages.length > 0}
-          <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-0.5">
+          <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-1.5 border-b border-[#D0CEC7]/60 mb-2">
             {#each selectedImages as img, idx}
-              <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] text-xs text-[#191B1D] shadow-2xs animate-in fade-in zoom-in-95 duration-150">
-                <div class="relative w-6 h-6 shrink-0 rounded-lg overflow-hidden border border-[#C8C5BC] bg-[#DEDBD2]">
+              <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#ECEAE5] border border-[#D0CEC7] text-xs text-[#111315] shadow-2xs animate-in fade-in zoom-in-95 duration-150">
+                <div class="relative w-6 h-6 shrink-0 rounded overflow-hidden border border-[#D0CEC7] bg-[#DEDBD2]">
                   <img src={img.localPreviewUrl || img.url} alt={img.name} class="w-full h-full object-cover" />
                   {#if img.isUploading}
                     <div class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center">
@@ -951,15 +1054,15 @@
                   {/if}
                 </div>
                 <div class="flex flex-col min-w-0 pr-1">
-                  <span class="max-w-[120px] truncate text-[11px] text-[#191B1D] font-semibold">{img.name}</span>
+                  <span class="max-w-[120px] truncate text-[11px] text-[#111315] font-bold">{img.name}</span>
                   {#if img.isUploading}
-                    <span class="text-[9px] text-[#FF5500] font-mono animate-pulse leading-none">Mengunggah...</span>
+                    <span class="text-[9px] text-[#FF5500] font-stencil animate-pulse leading-none">UPLOADING...</span>
                   {/if}
                 </div>
                 <button
                   type="button"
                   onclick={() => removeImage(idx)}
-                  class="p-0.5 rounded-full hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 transition cursor-pointer shrink-0"
+                  class="p-0.5 rounded hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 transition cursor-pointer shrink-0"
                   title="Hapus gambar"
                 >
                   <X class="w-3 h-3" />
@@ -971,30 +1074,30 @@
 
         <!-- Voice Listening / Error Banner -->
         {#if isListening}
-          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-rose-50 border border-rose-300 text-[11px] text-rose-900 animate-in fade-in">
+          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg bg-rose-50 border border-rose-300 text-[11px] text-rose-900 animate-in fade-in font-stencil">
             <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
-            <span class="font-bold truncate">Mendengarkan suara... Silakan bicara (klik ikon Mic lagi jika sudah selesai)</span>
-            <button type="button" onclick={stopVoiceInput} class="ml-auto text-xs px-2 py-0.5 rounded bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold">Selesai</button>
+            <span class="font-bold truncate">RECORDING AUDIO INTAKE... (KLIK MIC UNTUK SELESAI)</span>
+            <button type="button" onclick={stopVoiceInput} class="ml-auto text-xs px-2 py-0.5 rounded bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold">SELESAI</button>
           </div>
         {:else if isTranscribingVoice}
-          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-orange-50 border border-orange-300 text-[11px] text-[#FF5500] animate-in fade-in font-semibold">
+          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-lg bg-orange-50 border border-orange-300 text-[11px] text-[#FF5500] animate-in fade-in font-stencil font-semibold">
             <Loader2 class="w-3.5 h-3.5 animate-spin text-[#FF5500] shrink-0" />
-            <span>Mentranskripsi suara ke teks...</span>
+            <span>TRANSCRIBING AUDIO WAVEFORM...</span>
           </div>
         {:else if voiceError}
-          <div class="flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-xl bg-amber-50 border border-amber-300 text-[11px] text-amber-900 animate-in fade-in">
+          <div class="flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-lg bg-amber-50 border border-amber-300 text-[11px] text-amber-900 animate-in fade-in font-stencil">
             <span class="truncate">⚠️ {voiceError}</span>
             <button type="button" onclick={() => voiceError = null} class="p-0.5 hover:text-black shrink-0"><X class="w-3 h-3" /></button>
           </div>
         {/if}
 
-        <div class="flex items-end gap-1.5 sm:gap-2 w-full">
+        <div class="flex items-end gap-1.5 sm:gap-2 w-full pt-1">
           <!-- Attachment Button -->
           <button
             type="button"
             onclick={() => fileInputRef?.click()}
             disabled={isBusy || isUploadingImage || isListening}
-            class="p-1.5 sm:p-2 rounded-xl text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2] transition cursor-pointer shrink-0 disabled:opacity-40"
+            class="p-2 rounded-lg text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] transition cursor-pointer shrink-0 disabled:opacity-40"
             title="Lampirkan Gambar (atau paste / drag & drop)"
           >
             {#if isUploadingImage}
@@ -1009,7 +1112,7 @@
             type="button"
             onclick={toggleVoiceInput}
             disabled={isBusy || isUploadingImage || isTranscribingVoice}
-            class="relative p-1.5 sm:p-2 rounded-xl transition cursor-pointer shrink-0 disabled:opacity-40 {isListening ? 'bg-rose-100 text-rose-600 border border-rose-300' : (isTranscribingVoice ? 'bg-orange-100 text-[#FF5500] border border-orange-300 animate-pulse' : 'text-[#5C6066] hover:text-rose-600 hover:bg-[#DEDBD2]')}"
+            class="relative p-2 rounded-lg transition cursor-pointer shrink-0 disabled:opacity-40 {isListening ? 'bg-rose-100 text-rose-600 border border-rose-300' : (isTranscribingVoice ? 'bg-orange-100 text-[#FF5500] border border-orange-300 animate-pulse' : 'text-[#60646C] hover:text-rose-600 hover:bg-[#E5E3DD]')}"
             title={isListening ? 'Klik untuk selesai bicara' : (isTranscribingVoice ? 'Mentranskripsi suara...' : 'Perintah Suara (Speech-to-Text)')}
           >
             {#if isTranscribingVoice}
@@ -1025,16 +1128,16 @@
           <textarea
             bind:value={promptInput}
             onkeydown={handleKeyDown}
-            placeholder={isListening ? "Mendengarkan suara Anda..." : (isTranscribingVoice ? "Mentranskripsi suara..." : "Tulis instruksi atau perintah terminal (misal: npx prisma..., git status, !npm i)...")}
+            placeholder={isListening ? "Mendengarkan suara Anda..." : (isTranscribingVoice ? "Mentranskripsi suara..." : "Tulis instruksi coding atau perintah terminal (misal: npx prisma..., git status, !npm i)...")}
             rows="1"
-            class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl text-xs text-[#191B1D] placeholder-[#8C9097] outline-none resize-none px-2.5 py-1.5 leading-relaxed focus:border-[#FF5500]"
+            class="flex-1 bg-transparent text-xs sm:text-sm text-[#111315] placeholder-[#8C9097] outline-none resize-none px-2 py-1.5 leading-relaxed font-grotesk"
           ></textarea>
 
           <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {#if isBusy}
               <button
                 onclick={onCancelTask}
-                class="p-1.5 sm:p-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 transition cursor-pointer"
+                class="p-2 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 transition cursor-pointer"
                 title="Hentikan Task"
               >
                 <StopCircle class="w-4 h-4" />
@@ -1043,7 +1146,7 @@
 
             <button
               onclick={onClearMessages}
-              class="hidden sm:flex p-2 rounded-xl hover:bg-[#DEDBD2] text-[#8C9097] hover:text-[#191B1D] transition cursor-pointer"
+              class="hidden sm:flex p-2 rounded-lg hover:bg-[#E5E3DD] text-[#8C9097] hover:text-[#111315] transition cursor-pointer"
               title="Bersihkan Percakapan"
             >
               <Trash2 class="w-4 h-4" />
@@ -1052,14 +1155,16 @@
             <button
               onclick={handleSend}
               disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
-              class="btn-safety p-1.5 sm:p-2 rounded-xl text-white font-bold transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              class="btn-safety px-4 py-2 rounded-lg text-white font-tech font-bold uppercase tracking-wider text-xs transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
-              <ArrowUp class="w-4 h-4" />
+              <span>DISPATCH</span>
+              <ArrowUp class="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
   <!-- Hidden File Input for Image Uploads -->
   <input

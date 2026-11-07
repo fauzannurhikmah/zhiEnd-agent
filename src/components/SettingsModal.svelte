@@ -260,10 +260,10 @@
 
 {#if isOpen}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
-    <div class="w-full max-w-3xl rounded-2xl flex flex-col max-h-[92vh] sm:max-h-[85vh] bg-[#FCFCFA] border border-[#C8C5BC] shadow-2xl overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-200">
+    <div class="w-full max-w-3xl rounded-2xl flex flex-col max-h-[92vh] sm:max-h-[85vh] bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-200">
       
       <!-- Modal Header -->
-      <div class="px-4 sm:px-6 py-4 border-b border-[#C8C5BC] flex items-center justify-between shrink-0 bg-[#E9E7E0]">
+      <div class="px-4 sm:px-6 py-4 border-b border-[#D0CEC7] flex items-center justify-between shrink-0 bg-[#ECEAE5]">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-lg bg-[#FF5500] text-white flex items-center justify-center font-bold shadow-xs">
             <Sliders class="w-4 h-4" />
@@ -273,13 +273,13 @@
             <p class="text-[11px] text-[#5C6066]">Konfigurasi seluruh modul, API Keys, model AI, remote bot & keamanan</p>
           </div>
         </div>
-        <button onclick={onClose} class="text-[#5C6066] hover:text-[#191B1D] p-1.5 rounded-lg hover:bg-[#DEDBD2] transition cursor-pointer">
+        <button onclick={onClose} class="text-[#5C6066] hover:text-[#191B1D] p-1.5 rounded-lg hover:bg-[#E5E3DD] transition cursor-pointer">
           <X class="w-4 h-4" />
         </button>
       </div>
 
       <!-- Settings Navigation Tabs -->
-      <div class="flex border-b border-[#C8C5BC] px-3 sm:px-5 gap-1 sm:gap-2 text-xs font-semibold overflow-x-auto bg-[#E9E7E0] shrink-0 scrollbar-none">
+      <div class="flex border-b border-[#D0CEC7] px-3 sm:px-5 gap-1 sm:gap-2 text-xs font-semibold overflow-x-auto bg-[#ECEAE5] shrink-0 scrollbar-none">
         <button
           onclick={() => activeTab = 'general'}
           class="py-2.5 sm:py-3 px-2.5 border-b-2 flex items-center gap-1.5 cursor-pointer whitespace-nowrap transition {activeTab === 'general' ? 'border-[#FF5500] text-[#FF5500] font-bold' : 'border-transparent text-[#5C6066] hover:text-[#191B1D]'}"
@@ -333,7 +333,7 @@
         {#if activeTab === 'ai_providers'}
           <div class="flex flex-col gap-5">
             <!-- Hero Banner -->
-            <div class="p-3.5 sm:p-4 rounded-xl bg-[#E9E7E0] border border-[#C8C5BC] flex flex-col gap-2">
+            <div class="p-3.5 sm:p-4 rounded-xl bg-[#ECEAE5] border border-[#D0CEC7] flex flex-col gap-2">
               <div class="flex items-center gap-2 text-[#191B1D] font-bold text-xs sm:text-sm font-mono uppercase tracking-wider">
                 <Key class="w-4 h-4 text-[#FF5500]" />
                 <span>Konfigurasi AI Provider & API Key Eksternal</span>
@@ -344,14 +344,14 @@
             </div>
 
             <!-- Provider 1: OpenAI -->
-            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
+            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs border border-emerald-300">
                     ⚡
                   </div>
                   <span class="font-bold text-[#191B1D] text-xs sm:text-sm font-mono">OpenAI</span>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC]">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7]">
                     GPT-4o, GPT-4o Mini, o3-mini, o1
                   </span>
                 </div>
@@ -377,7 +377,7 @@
                     type={showOpenaiKey ? 'text' : 'password'}
                     bind:value={formOpenaiKey}
                     placeholder="sk-proj-..."
-                    class="w-full bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                    class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
                   />
                   <button
                     type="button"
@@ -400,7 +400,7 @@
                   <input
                     type="text"
                     bind:value={formOpenaiBaseUrl}
-                    class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 shadow-xs"
+                    class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 shadow-xs"
                   />
                 </div>
                 <button
@@ -432,14 +432,14 @@
             </div>
 
             <!-- Provider 2: xAI / Grok -->
-            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
+            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-lg bg-orange-100 text-[#FF5500] flex items-center justify-center font-bold text-xs border border-orange-200">
                     X
                   </div>
                   <span class="font-bold text-[#191B1D] text-xs sm:text-sm font-mono">Grok (xAI)</span>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC]">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7]">
                     Grok 2, Grok 2 Mini, Grok Beta
                   </span>
                 </div>
@@ -465,7 +465,7 @@
                     type={showGrokKey ? 'text' : 'password'}
                     bind:value={formGrokKey}
                     placeholder="xai-..."
-                    class="w-full bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                    class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
                   />
                   <button
                     type="button"
@@ -488,7 +488,7 @@
                   <input
                     type="text"
                     bind:value={formGrokBaseUrl}
-                    class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 shadow-xs"
+                    class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 shadow-xs"
                   />
                 </div>
                 <button
@@ -520,14 +520,14 @@
             </div>
 
             <!-- Provider 3: Qwen (Alibaba DashScope) -->
-            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
+            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs border border-amber-300">
                     Q
                   </div>
                   <span class="font-bold text-[#191B1D] text-xs sm:text-sm font-mono">Qwen (Alibaba DashScope)</span>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC]">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7]">
                     Qwen 2.5 Coder 32B, Qwen Max, Qwen Plus
                   </span>
                 </div>
@@ -553,7 +553,7 @@
                     type={showQwenKey ? 'text' : 'password'}
                     bind:value={formQwenKey}
                     placeholder="sk-..."
-                    class="w-full bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                    class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
                   />
                   <button
                     type="button"
@@ -576,7 +576,7 @@
                   <input
                     type="text"
                     bind:value={formQwenBaseUrl}
-                    class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 truncate shadow-xs"
+                    class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 truncate shadow-xs"
                   />
                 </div>
                 <button
@@ -608,14 +608,14 @@
             </div>
 
             <!-- Provider 4: DeepSeek -->
-            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
+            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center font-bold text-xs border border-sky-300">
                     🐋
                   </div>
                   <span class="font-bold text-[#191B1D] text-xs sm:text-sm font-mono">DeepSeek</span>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC]">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7]">
                     DeepSeek V3, DeepSeek R1 (Thinking)
                   </span>
                 </div>
@@ -641,7 +641,7 @@
                     type={showDeepseekKey ? 'text' : 'password'}
                     bind:value={formDeepseekKey}
                     placeholder="sk-..."
-                    class="w-full bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                    class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
                   />
                   <button
                     type="button"
@@ -664,7 +664,7 @@
                   <input
                     type="text"
                     bind:value={formDeepseekBaseUrl}
-                    class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 shadow-xs"
+                    class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 shadow-xs"
                   />
                 </div>
                 <button
@@ -696,14 +696,14 @@
             </div>
 
             <!-- Provider 5: Google Gemini Direct API -->
-            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
+            <div class="p-4 rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#8C9097] transition flex flex-col gap-3 shadow-xs">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-lg bg-orange-100 text-[#FF5500] flex items-center justify-center font-bold text-xs border border-orange-200">
                     ✨
                   </div>
                   <span class="font-bold text-[#191B1D] text-xs sm:text-sm font-mono">Google Gemini (Direct API)</span>
-                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC]">
+                  <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7]">
                     Gemini 2.0 Flash, Gemini 1.5 Pro
                   </span>
                 </div>
@@ -729,7 +729,7 @@
                     type={showGeminiKey ? 'text' : 'password'}
                     bind:value={formGeminiKey}
                     placeholder="AIzaSy..."
-                    class="w-full bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                    class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 pr-10 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
                   />
                   <button
                     type="button"
@@ -752,7 +752,7 @@
                   <input
                     type="text"
                     bind:value={formGeminiBaseUrl}
-                    class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 truncate shadow-xs"
+                    class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-lg px-2 py-1 text-[#191B1D] text-[11px] font-mono outline-none focus:border-[#FF5500] w-52 truncate shadow-xs"
                   />
                 </div>
                 <button
@@ -796,7 +796,7 @@
                 type="password"
                 bind:value={formPin}
                 placeholder="PIN 4-8 digit angka (opsional)"
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
               <span class="text-[11px] text-[#5C6066]">Kosongkan jika tidak ingin memproteksi akses Web UI dengan PIN sandi.</span>
             </div>
@@ -807,7 +807,7 @@
                 id="form-port"
                 type="number"
                 bind:value={formPort}
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
             </div>
 
@@ -817,7 +817,7 @@
                 id="form-active-project"
                 type="text"
                 bind:value={formActiveProj}
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
             </div>
 
@@ -829,7 +829,7 @@
                   type="text"
                   bind:value={newRecentProjInput}
                   placeholder="D:\Works\my-other-project"
-                  class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                  class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
                 />
                 <button
                   type="button"
@@ -842,7 +842,7 @@
 
               <div class="flex flex-col gap-1 mt-1 max-h-32 overflow-y-auto">
                 {#each formRecentProjects as proj, idx}
-                  <div class="flex items-center justify-between p-2 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] font-mono text-[11px] shadow-xs">
+                  <div class="flex items-center justify-between p-2 rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] font-mono text-[11px] shadow-xs">
                     <span class="truncate text-[#191B1D]">{proj}</span>
                     <button onclick={() => removeRecentProject(idx)} class="text-rose-600 hover:text-rose-800 p-1 cursor-pointer">
                       <Trash2 class="w-3.5 h-3.5" />
@@ -864,7 +864,7 @@
                 type="text"
                 bind:value={formCliPath}
                 placeholder="C:\Users\zhien\AppData\Local\agy\bin\agy.exe"
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
               <span class="text-[11px] text-[#5C6066]">Executable agy yang digunakan server untuk menjalankan instruksi coding dan tools core.</span>
             </div>
@@ -875,7 +875,7 @@
                 <select
                   id="form-default-model"
                   bind:value={formDefaultModel}
-                  class="w-full bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] outline-none focus:border-[#FF5500] cursor-pointer shadow-xs font-mono"
+                  class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] outline-none focus:border-[#FF5500] cursor-pointer shadow-xs font-mono"
                 >
                   {#if config?.antigravity?.availableModels}
                     {#each config.antigravity.availableModels as m}
@@ -907,7 +907,7 @@
               <select
                 id="form-tg-persona"
                 bind:value={formTgPersonaId}
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] cursor-pointer shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] cursor-pointer shadow-xs"
               >
                 {#each personas as p}
                   <option value={p.id}>{getSafeEmoji(p.avatar)} {p.name} ({p.preferred_model || 'Flash'})</option>
@@ -922,7 +922,7 @@
                 type="password"
                 bind:value={formTgToken}
                 placeholder="123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
             </div>
 
@@ -933,7 +933,7 @@
                 type="text"
                 bind:value={formTgUsers}
                 placeholder="Contoh: 12345678, @username"
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
               <span class="text-[11px] text-[#5C6066]">Jika kosong, semua pesan yang masuk ke bot akan diizinkan.</span>
             </div>
@@ -953,7 +953,7 @@
               <select
                 id="form-wa-persona"
                 bind:value={formWaPersonaId}
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] cursor-pointer shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] cursor-pointer shadow-xs"
               >
                 {#each personas as p}
                   <option value={p.id}>{getSafeEmoji(p.avatar)} {p.name} ({p.preferred_model || 'Flash'})</option>
@@ -968,7 +968,7 @@
                 type="text"
                 bind:value={formWaNumbers}
                 placeholder="Contoh: 6281234567890, 6289876543210"
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
               <span class="text-[11px] text-[#5C6066]">Hanya nomor yang terdaftar di atas yang dapat menjalankan perintah remote coding.</span>
             </div>
@@ -985,7 +985,7 @@
                 type="text"
                 bind:value={formTunnelSubdomain}
                 placeholder="Contoh: zhiend-agent"
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
               <span class="text-[11px] text-[#5C6066]">Subdomain permanen yang akan digunakan saat memulai Public Tunnel.</span>
             </div>
@@ -995,7 +995,7 @@
         <!-- VOICE / SPEECH-TO-TEXT -->
         {#if activeTab === 'voice'}
           <div class="flex flex-col gap-4">
-            <div class="p-3.5 rounded-xl bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] flex flex-col gap-1.5">
+            <div class="p-3.5 rounded-xl bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] flex flex-col gap-1.5">
               <span class="font-bold text-[#FF5500] flex items-center gap-1.5 font-mono uppercase tracking-wider">
                 <Mic class="w-4 h-4" /> Pengaturan Transkripsi Suara (Voice Command)
               </span>
@@ -1009,7 +1009,7 @@
               <select
                 id="form-voice-provider"
                 bind:value={formVoiceProvider}
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] outline-none focus:border-[#FF5500] cursor-pointer shadow-xs font-mono"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] outline-none focus:border-[#FF5500] cursor-pointer shadow-xs font-mono"
               >
                 <option value="groq">Groq Whisper (Sangat Cepat ~0.8s & Gratis - Rekomendasi)</option>
                 <option value="openai">OpenAI Whisper (whisper-1)</option>
@@ -1025,7 +1025,7 @@
                   type="password"
                   bind:value={formVoiceGroqKey}
                   placeholder="gsk_..."
-                  class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                  class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
                 />
                 <span class="text-[11px] text-[#5C6066]">
                   Dapatkan API Key gratis di <a href="https://console.groq.com/keys" target="_blank" rel="noopener noreferrer" class="text-[#FF5500] hover:underline font-bold">console.groq.com/keys</a>.
@@ -1039,7 +1039,7 @@
                   type="password"
                   bind:value={formVoiceOpenaiKey}
                   placeholder="sk-..."
-                  class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                  class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
                 />
               </div>
             {:else if formVoiceProvider === 'gemini'}
@@ -1050,7 +1050,7 @@
                   type="password"
                   bind:value={formVoiceGeminiKey}
                   placeholder="AIzaSy..."
-                  class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                  class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
                 />
               </div>
             {/if}
@@ -1060,7 +1060,7 @@
               <select
                 id="form-voice-lang"
                 bind:value={formVoiceLang}
-                class="bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl p-2.5 text-[#191B1D] outline-none focus:border-[#FF5500] cursor-pointer shadow-xs font-mono"
+                class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl p-2.5 text-[#191B1D] outline-none focus:border-[#FF5500] cursor-pointer shadow-xs font-mono"
               >
                 <option value="id">Bahasa Indonesia (id)</option>
                 <option value="en">English (en)</option>
@@ -1072,7 +1072,7 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="px-4 sm:px-6 py-3.5 border-t border-[#C8C5BC] flex items-center justify-end gap-3 bg-[#E9E7E0] shrink-0">
+      <div class="px-4 sm:px-6 py-3.5 border-t border-[#D0CEC7] flex items-center justify-end gap-3 bg-[#ECEAE5] shrink-0">
         <button
           onclick={onClose}
           class="btn-hardware px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition shadow-xs"

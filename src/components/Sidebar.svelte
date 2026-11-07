@@ -125,7 +125,7 @@
 {/if}
 
 <aside
-  class="fixed md:static inset-y-0 left-0 z-50 md:z-10 w-72 md:w-64 max-w-[85vw] bg-[#E9E7E0] border-r border-[#C8C5BC] flex flex-col justify-between shrink-0 select-none shadow-xl md:shadow-none transition-transform duration-300 ease-in-out text-[#191B1D] {isMobileOpen
+  class="fixed md:static inset-y-0 left-0 z-50 md:z-10 w-72 md:w-64 max-w-[85vw] bg-[#ECEAE5] border-r border-[#D0CEC7] flex flex-col justify-between shrink-0 select-none shadow-xl md:shadow-none transition-transform duration-300 ease-in-out text-[#111315] {isMobileOpen
     ? 'translate-x-0'
     : '-translate-x-full md:translate-x-0'}"
 >
@@ -134,19 +134,25 @@
     <!-- Brand with industrial hardware stenciling -->
     <div class="flex items-center justify-between px-2 pt-1">
       <div class="flex items-center gap-2.5">
-        <img
-          src="/img/logo.png"
-          alt="zhiEnd Agent Logo"
-          class="w-7 h-7 object-contain rounded-md"
-        />
-        <span
-          class="text-xs font-bold tracking-tight text-[#191B1D] flex items-center gap-1.5"
-        >
-          zhiEnd <span
-            class="bg-[#FF5500] text-white px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider uppercase"
-            >agent</span
+        <div class="relative">
+          <img
+            src="/img/logo.png"
+            alt="zhiEnd Agent Logo"
+            class="w-7 h-7 object-contain rounded-md border border-[#D0CEC7]"
+          />
+          <span class="absolute -top-1 -right-1 w-2 h-2 bg-[#FF5500] rounded-xs" title="Registration dot"></span>
+        </div>
+        <div class="flex flex-col">
+          <span
+            class="text-xs font-black tracking-tight text-[#111315] flex items-center gap-1 font-tech uppercase"
           >
-        </span>
+            zhiEnd <span
+              class="bg-[#FF5500] text-white px-1.5 py-0.2 rounded text-[8px] font-mono font-bold tracking-wider uppercase"
+              >LABS</span
+            >
+          </span>
+          <span class="text-[8px] font-pixel text-[#8C9097] leading-none">:: CIB-GRID v2.4</span>
+        </div>
       </div>
 
       <div class="flex items-center gap-2">
@@ -175,7 +181,7 @@
     <!-- Active Workspace Card & Create Button (Recessed Mechanical Well) -->
     <div class="flex items-center gap-1.5 w-full">
       <div
-        class="flex-1 min-w-0 flex items-center justify-between p-2 rounded-xl bg-[#FCFCFA] hover:bg-white border border-[#C8C5BC] hover:border-[#A8A59C] transition group shadow-xs"
+        class="flex-1 min-w-0 flex items-center justify-between p-2 rounded-xl bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#FF5500] transition group shadow-2xs font-tech"
       >
         <button
           onclick={onOpenProjectModal}
@@ -188,16 +194,16 @@
               : 'text-emerald-600'} group-hover:scale-105 transition-transform shrink-0"
           />
           <div class="flex flex-col min-w-0 flex-1">
-            <span class="text-xs font-bold text-[#191B1D] truncate block"
+            <span class="text-xs font-bold text-[#111315] truncate block"
               >{projectName()}</span
             >
             {#if isRootWorkspace()}
-              <span class="text-[10px] text-[#FF5500] font-mono font-semibold"
+              <span class="text-[10px] text-[#FF5500] font-stencil font-semibold"
                 >default root</span
               >
             {:else if gitStatus?.isRepo}
               <span
-                class="text-[10px] text-[#5C6066] font-mono flex items-center gap-1 truncate"
+                class="text-[10px] text-[#5C6066] font-stencil flex items-center gap-1 truncate"
               >
                 <GitBranch class="w-2.5 h-2.5 text-[#5C6066] shrink-0" />
                 {gitStatus.branch || "main"}
@@ -235,63 +241,68 @@
       </button>
     </div>
 
-    <!-- Navigation with Teenage Engineering physical active switches -->
-    <nav class="flex flex-col gap-1 pt-2">
+    <!-- Navigation with Cyber-Industrial Tactical Switches -->
+    <nav class="flex flex-col gap-1 pt-2 font-tech">
       <button
         onclick={() => handleTabClick("chat")}
-        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer {currentTab ===
         'chat'
-          ? 'carbon-tab-active font-bold'
-          : 'text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2]'}"
+          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-xs'
+          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] border border-transparent'}"
       >
         <div class="flex items-center gap-2.5">
           <Terminal
             class="w-4 h-4 {currentTab === 'chat'
               ? 'text-[#FF5500]'
-              : 'text-[#5C6066]'}"
+              : 'text-[#60646C]'}"
           />
-          <span>AI Coding Agent</span>
+          <span>[01] // CODING AGENT</span>
         </div>
+        {#if currentTab === 'chat'}
+          <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+        {/if}
       </button>
 
       <button
         onclick={() => handleTabClick("git")}
-        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer {currentTab ===
         'git'
-          ? 'carbon-tab-active font-bold'
-          : 'text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2]'}"
+          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-xs'
+          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] border border-transparent'}"
       >
         <div class="flex items-center gap-2.5">
           <GitBranch
             class="w-4 h-4 {currentTab === 'git'
               ? 'text-[#FF5500]'
-              : 'text-[#5C6066]'}"
+              : 'text-[#60646C]'}"
           />
-          <span>Source Control</span>
+          <span>[02] // SOURCE CONTROL</span>
         </div>
         {#if gitStatus?.files?.length}
           <span
-            class="px-2 py-0.5 rounded-full bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] font-mono text-[10px] font-bold"
+            class="px-2 py-0.5 rounded-full bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] font-stencil text-[10px] font-bold"
           >
             {gitStatus.files.length}
           </span>
+        {:else if currentTab === 'git'}
+          <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
         {/if}
       </button>
 
       <button
         onclick={() => handleTabClick("remote")}
-        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer {currentTab ===
         'remote'
-          ? 'carbon-tab-active font-bold'
-          : 'text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2]'}"
+          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-xs'
+          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] border border-transparent'}"
       >
         <div class="flex items-center gap-2.5">
           <TowerControl
             class="w-4 h-4 {currentTab === 'remote'
               ? 'text-[#FF5500]'
-              : 'text-[#5C6066]'}"
+              : 'text-[#60646C]'}"
           />
-          <span>Remote Hub</span>
+          <span>[03] // REMOTE HUB</span>
         </div>
         <div class="flex items-center gap-1.5">
           {#if whatsappStatus?.status === "connected"}
@@ -306,49 +317,55 @@
               title="Telegram Online"
             ></span>
           {/if}
+          {#if currentTab === 'remote'}
+            <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+          {/if}
         </div>
       </button>
 
       <button
         onclick={() => handleTabClick("files")}
-        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition cursor-pointer {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer {currentTab ===
         'files'
-          ? 'carbon-tab-active font-bold'
-          : 'text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2]'}"
+          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-xs'
+          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] border border-transparent'}"
       >
         <div class="flex items-center gap-2.5">
           <FolderTree
             class="w-4 h-4 {currentTab === 'files'
               ? 'text-[#FF5500]'
-              : 'text-[#5C6066]'}"
+              : 'text-[#60646C]'}"
           />
-          <span>Files & Logs</span>
+          <span>[04] // FILES & LOGS</span>
         </div>
+        {#if currentTab === 'files'}
+          <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+        {/if}
       </button>
     </nav>
 
-    <!-- Riwayat Chat Section -->
-    <div class="flex flex-col gap-1.5 pt-2.5 border-t border-[#C8C5BC]">
+    <!-- Riwayat Chat Section (Cartridge Reels) -->
+    <div class="flex flex-col gap-1.5 pt-2.5 border-t border-[#D0CEC7]">
       <div class="flex items-center justify-between px-1">
         <div class="flex items-center gap-1.5">
-          <MessageSquare class="w-3 h-3 text-[#FF5500]" />
-          <span class="text-[11px] font-bold text-[#191B1D]"
-            >Riwayat Chat</span
+          <span class="text-[#FF5500] font-pixel text-[10px]">::</span>
+          <span class="text-[11px] font-tech font-bold text-[#111315] uppercase tracking-wider"
+            >CARTRIDGE REELS</span
           >
         </div>
 
         <div class="flex items-center gap-1">
           <!-- Scope switcher: Project vs Global -->
           <div
-            class="flex items-center bg-[#DEDBD2] rounded-lg p-0.5 border border-[#C8C5BC] text-[9px] font-mono"
+            class="flex items-center bg-[#E5E3DD] rounded-lg p-0.5 border border-[#D0CEC7] text-[9px] font-stencil"
           >
             <button
               type="button"
               onclick={() => onToggleScope?.("workspace")}
               class="px-1.5 py-0.5 rounded transition cursor-pointer {historyScope ===
               'workspace'
-                ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#C8C5BC] font-bold shadow-xs'
-                : 'text-[#5C6066] hover:text-[#191B1D]'}"
+                ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] font-bold shadow-xs'
+                : 'text-[#5C6066] hover:text-[#111315]'}"
               title="Chat khusus project ini"
             >
               Project
@@ -358,8 +375,8 @@
               onclick={() => onToggleScope?.("global")}
               class="px-1.5 py-0.5 rounded transition cursor-pointer {historyScope ===
               'global'
-                ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#C8C5BC] font-bold shadow-xs'
-                : 'text-[#5C6066] hover:text-[#191B1D]'}"
+                ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] font-bold shadow-xs'
+                : 'text-[#5C6066] hover:text-[#111315]'}"
               title="Chat global"
             >
               Global
@@ -370,7 +387,7 @@
           <button
             type="button"
             onclick={() => onCreateNewSession?.()}
-            class="p-1 rounded-md bg-[#DEDBD2] hover:bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#FF5500] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer"
+            class="p-1 rounded-md bg-[#E5E3DD] hover:bg-[#FCFCFA] border border-[#D0CEC7] hover:border-[#FF5500] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer"
             title="Mulai Chat Baru"
           >
             <Plus class="w-3 h-3" />
@@ -379,14 +396,14 @@
       </div>
 
       <!-- Scrollable list of sessions -->
-      <div class="flex flex-col gap-1 max-h-48 overflow-y-auto pr-0.5 mt-0.5">
+      <div class="flex flex-col gap-1 max-h-48 overflow-y-auto pr-0.5 mt-0.5 font-stencil">
         {#if chatSessions && chatSessions.length > 0}
           {#each chatSessions as sess (sess.id)}
             {@const isActive = activeSessionId === sess.id}
             <div
-              class="group/item flex items-center justify-between px-2 py-1.5 rounded-xl transition cursor-pointer {isActive
-                ? 'bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-bold shadow-xs'
-                : 'hover:bg-[#DEDBD2] border border-transparent text-[#5C6066] hover:text-[#191B1D]'}"
+              class="group/item flex items-center justify-between px-2 py-1.5 rounded-lg transition cursor-pointer {isActive
+                ? 'bg-[#FCFCFA] border border-[#D0CEC7] text-[#111315] font-bold shadow-xs'
+                : 'hover:bg-[#E5E3DD] border border-transparent text-[#60646C] hover:text-[#111315]'}"
             >
               <button
                 type="button"
@@ -397,17 +414,13 @@
                 class="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
                 title={sess.title}
               >
-                <MessageSquare
-                  class="w-3 h-3 {isActive
-                    ? 'text-[#FF5500]'
-                    : 'text-[#8C9097] group-hover/item:text-[#191B1D]'} shrink-0"
-                />
+                <span class="text-[9px] font-pixel {isActive ? 'text-[#FF5500]' : 'text-[#8C9097]'}">■</span>
                 <span class="text-xs truncate flex-1">{sess.title}</span>
                 {#if sess.message_count && sess.message_count > 0}
                   <span
-                    class="text-[9px] px-1.5 py-0.2 rounded-full font-mono {isActive
+                    class="text-[9px] px-1.5 py-0.2 rounded font-mono {isActive
                       ? 'bg-[#FF5500]/15 text-[#FF5500]'
-                      : 'bg-[#DEDBD2] text-[#5C6066]'} shrink-0"
+                      : 'bg-[#E5E3DD] text-[#5C6066]'} shrink-0"
                   >
                     {sess.message_count}
                   </span>
@@ -429,14 +442,14 @@
           {/each}
         {:else}
           <div
-            class="p-3 text-center rounded-xl bg-[#FCFCFA] border border-dashed border-[#C8C5BC] flex flex-col items-center gap-1.5"
+            class="p-3 text-center rounded-xl bg-[#FCFCFA] border border-dashed border-[#D0CEC7] flex flex-col items-center gap-1.5"
           >
             <span class="text-[11px] text-[#5C6066]">Belum ada riwayat chat</span
             >
             <button
               type="button"
               onclick={() => onCreateNewSession?.()}
-              class="text-[10px] text-[#FF5500] hover:text-[#E64D00] font-bold flex items-center gap-1 cursor-pointer"
+              class="text-[10px] text-[#FF5500] hover:text-[#E64D00] font-bold flex items-center gap-1 cursor-pointer font-tech"
             >
               <Plus class="w-2.5 h-2.5" /> Mulai Chat Baru
             </button>
@@ -448,22 +461,22 @@
 
   <!-- Bottom: Tunnel status & Settings -->
   <div
-    class="p-3 border-t border-[#C8C5BC] flex items-center justify-between bg-[#DEDBD2] text-xs"
+    class="p-3 border-t border-[#D0CEC7] flex items-center justify-between bg-[#E5E3DD] text-xs font-stencil"
   >
-    <div class="flex items-center gap-1.5 text-[11px] font-mono text-[#5C6066]">
+    <div class="flex items-center gap-1.5 text-[11px] text-[#5C6066]">
       <span
         class="w-2 h-2 rounded-full {tunnelStatus?.status === 'connected'
           ? 'bg-[#FF5500]'
           : 'bg-[#8C9097]'}"
       ></span>
-      <span class="truncate max-w-[120px] font-semibold text-[#191B1D]">
+      <span class="truncate max-w-[120px] font-bold text-[#111315]">
         {tunnelStatus?.status === "connected" ? "Public Live" : "Local :3888"}
       </span>
     </div>
 
     <button
       onclick={onOpenSettingsModal}
-      class="p-2 rounded-lg hover:bg-[#C8C5BC] text-[#5C6066] hover:text-[#191B1D] transition cursor-pointer"
+      class="p-2 rounded-lg hover:bg-[#D0CEC7] text-[#5C6066] hover:text-[#111315] transition cursor-pointer"
       title="Pengaturan Sistem"
     >
       <SettingsIcon class="w-3.5 h-3.5" />

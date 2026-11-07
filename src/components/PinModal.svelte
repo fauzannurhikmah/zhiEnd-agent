@@ -38,7 +38,7 @@
 
 {#if isOpen}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div class="w-full max-w-sm rounded-2xl p-6 flex flex-col items-center gap-4 bg-[#FCFCFA] border border-[#C8C5BC] shadow-2xl text-center animate-in fade-in zoom-in-95 duration-200 text-[#191B1D]">
+    <div class="w-full max-w-sm rounded-2xl p-6 flex flex-col items-center gap-4 bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl text-center animate-in fade-in zoom-in-95 duration-200 text-[#191B1D]">
       <div class="w-14 h-14 rounded-2xl bg-orange-100 border border-orange-300 flex items-center justify-center text-[#FF5500]">
         <Shield class="w-7 h-7" />
       </div>
@@ -55,7 +55,7 @@
           onkeydown={handleKeyDown}
           placeholder="••••"
           maxlength="12"
-          class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl p-3 text-center text-lg tracking-[0.3em] text-[#191B1D] font-mono outline-none"
+          class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl p-3 text-center text-lg tracking-[0.3em] text-[#191B1D] font-mono outline-none"
         />
         <button
           onclick={handleSubmit}

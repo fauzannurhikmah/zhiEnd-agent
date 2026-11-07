@@ -236,10 +236,10 @@
 
 {#if isOpen}
   <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
-    <div class="w-full max-w-3xl h-[92vh] sm:h-[85vh] bg-[#FCFCFA] border border-[#C8C5BC] rounded-2xl flex flex-col shadow-2xl overflow-hidden font-sans">
+    <div class="w-full max-w-3xl h-[92vh] sm:h-[85vh] bg-[#FCFCFA] border border-[#D0CEC7] rounded-2xl flex flex-col shadow-2xl overflow-hidden font-sans">
       
       <!-- Modal Header with TE-IFI Industrial Accent -->
-      <div class="px-3.5 sm:px-5 py-3 sm:py-4 border-b border-[#C8C5BC] flex items-center justify-between bg-[#E9E7E0]">
+      <div class="px-3.5 sm:px-5 py-3 sm:py-4 border-b border-[#D0CEC7] flex items-center justify-between bg-[#ECEAE5]">
         <div class="flex items-center gap-2 sm:gap-2.5 min-w-0">
           <div class="w-8 h-8 rounded-lg bg-[#FF5500] text-white flex items-center justify-center font-bold shadow-xs shrink-0">
             <FolderGit class="w-4 h-4" />
@@ -247,20 +247,20 @@
           <div class="min-w-0">
             <h3 class="text-xs sm:text-sm font-bold text-[#191B1D] tracking-tight flex items-center gap-1.5 sm:gap-2 truncate uppercase font-mono">
               Workspace & Project Manager
-              <span class="text-[9px] sm:text-[10px] font-mono px-2 py-0.5 rounded bg-[#FCFCFA] text-[#FF5500] border border-[#C8C5BC] font-bold hidden xs:inline">
+              <span class="text-[9px] sm:text-[10px] font-mono px-2 py-0.5 rounded bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] font-bold hidden xs:inline">
                 D:\Works
               </span>
             </h3>
             <p class="text-[10px] sm:text-[11px] text-[#5C6066] truncate">Pilih dari folder D:\Works, buat baru, atau masukkan path manual</p>
           </div>
         </div>
-        <button onclick={onClose} class="text-[#5C6066] hover:text-[#191B1D] p-1.5 rounded-lg hover:bg-[#DEDBD2] transition cursor-pointer shrink-0">
+        <button onclick={onClose} class="text-[#5C6066] hover:text-[#191B1D] p-1.5 rounded-lg hover:bg-[#E5E3DD] transition cursor-pointer shrink-0">
           <X class="w-4 h-4" />
         </button>
       </div>
 
       <!-- Navigation Tabs -->
-      <div class="flex items-center justify-between px-3 sm:px-5 border-b border-[#C8C5BC] bg-[#E9E7E0] text-xs font-semibold overflow-x-auto gap-2 scrollbar-none">
+      <div class="flex items-center justify-between px-3 sm:px-5 border-b border-[#D0CEC7] bg-[#ECEAE5] text-xs font-semibold overflow-x-auto gap-2 scrollbar-none">
         <div class="flex gap-2 sm:gap-4 shrink-0">
           <button
             onclick={() => activeTab = 'scan'}
@@ -305,12 +305,12 @@
               type="text"
               bind:value={searchQuery}
               placeholder="Cari project di D:\Works (contoh: sehati, affiliate, image, pacar)..."
-              class="w-full bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl pl-9 pr-3 py-2 text-xs text-[#191B1D] placeholder-[#8C9097] outline-none focus:border-[#FF5500] transition shadow-xs"
+              class="w-full bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl pl-9 pr-3 py-2 text-xs text-[#191B1D] placeholder-[#8C9097] outline-none focus:border-[#FF5500] transition shadow-xs"
             />
           </div>
 
           <!-- Root Folder (D:\Works) & Clear Workspace Hero Card -->
-          <div class="rounded-xl border {isAtRoot() ? 'border-[#FF5500] bg-orange-50/70 shadow-xs' : 'border-[#C8C5BC] bg-[#FCFCFA] hover:border-[#FF5500]/60'} p-3 flex items-center justify-between gap-3 shrink-0 transition">
+          <div class="rounded-xl border {isAtRoot() ? 'border-[#FF5500] bg-orange-50/70 shadow-xs' : 'border-[#D0CEC7] bg-[#FCFCFA] hover:border-[#FF5500]/60'} p-3 flex items-center justify-between gap-3 shrink-0 transition">
             <div
               role="button"
               tabindex="0"
@@ -369,7 +369,7 @@
                 {@const hasChildren = node.children.length > 0}
                 {@const isExpanded = isNodeExpanded(node.id)}
 
-                <div class="rounded-xl border {isNodeCurrent ? 'border-[#FF5500] bg-orange-50/50 shadow-xs' : 'border-[#C8C5BC] bg-[#FCFCFA] hover:border-[#8C9097]'} shrink-0 overflow-hidden shadow-xs transition">
+                <div class="rounded-xl border {isNodeCurrent ? 'border-[#FF5500] bg-orange-50/50 shadow-xs' : 'border-[#D0CEC7] bg-[#FCFCFA] hover:border-[#8C9097]'} shrink-0 overflow-hidden shadow-xs transition">
                   <!-- PARENT FOLDER ROW (CLICKABLE AREA) -->
                   <div
                     role="button"
@@ -387,7 +387,7 @@
                         else handleSelect(node.path);
                       }
                     }}
-                    class="min-h-[52px] flex items-center justify-between p-3 bg-[#FCFCFA] hover:bg-[#E9E7E0]/60 transition gap-2 cursor-pointer group"
+                    class="min-h-[52px] flex items-center justify-between p-3 bg-[#FCFCFA] hover:bg-[#ECEAE5]/60 transition gap-2 cursor-pointer group"
                     title={hasChildren ? (isExpanded ? `Tutup folder ${node.name}` : `Buka folder ${node.name}`) : `Buka workspace: ${node.name}`}
                   >
                     <div class="flex items-center gap-2.5 min-w-0 flex-1">
@@ -398,7 +398,7 @@
                             e.stopPropagation();
                             toggleExpand(node.id);
                           }}
-                          class="p-1 rounded-md hover:bg-[#DEDBD2] text-[#5C6066] hover:text-[#191B1D] transition cursor-pointer shrink-0"
+                          class="p-1 rounded-md hover:bg-[#E5E3DD] text-[#5C6066] hover:text-[#191B1D] transition cursor-pointer shrink-0"
                           title={isExpanded ? 'Tutup turunan folder' : 'Buka turunan folder'}
                         >
                           {#if isExpanded}
@@ -411,7 +411,7 @@
                         <div class="w-6 shrink-0"></div>
                       {/if}
 
-                      <div class="w-8 h-8 rounded-lg {isNodeCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#E9E7E0] text-[#191B1D] group-hover:bg-[#DEDBD2]'} flex items-center justify-center shrink-0 transition">
+                      <div class="w-8 h-8 rounded-lg {isNodeCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#191B1D] group-hover:bg-[#E5E3DD]'} flex items-center justify-center shrink-0 transition">
                         <FolderGit class="w-4 h-4" />
                       </div>
 
@@ -421,12 +421,12 @@
                             {node.name}
                           </span>
                           {#if hasChildren}
-                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC] font-mono select-none font-bold">
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] font-mono select-none font-bold">
                               {node.children.length} sub-folder {isExpanded ? '▲' : '▼'}
                             </span>
                           {/if}
                           {#if node.isGit}
-                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#E9E7E0] text-[#5C6066] font-mono flex items-center gap-1 border border-[#C8C5BC]">
+                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#ECEAE5] text-[#5C6066] font-mono flex items-center gap-1 border border-[#D0CEC7]">
                               <GitBranch class="w-2.5 h-2.5 text-[#5C6066]" /> git
                             </span>
                           {/if}
@@ -462,8 +462,8 @@
 
                   <!-- LEVEL 2 CHILDREN (EXPANDED TREE LIST) -->
                   {#if hasChildren && isExpanded}
-                    <div class="border-t border-[#C8C5BC] bg-[#F4F3EE] p-2 pl-4 flex flex-col gap-1.5">
-                      <div class="border-l-2 border-[#C8C5BC] ml-3 pl-3 flex flex-col gap-1.5">
+                    <div class="border-t border-[#D0CEC7] bg-[#F4F3EE] p-2 pl-4 flex flex-col gap-1.5">
+                      <div class="border-l-2 border-[#D0CEC7] ml-3 pl-3 flex flex-col gap-1.5">
                         {#each node.children as child, idx}
                           {@const isChildCurrent = isCurrent(child.path)}
                           {@const hasSubChildren = child.children.length > 0}
@@ -472,7 +472,7 @@
 
                           {#if hasSubChildren}
                             <!-- SUB-FOLDER CONTAINER (e.g. CRM, Assets Management) -->
-                            <div class="rounded-xl border {isChildCurrent ? 'border-[#FF5500] bg-orange-50/50' : 'border-[#C8C5BC] bg-[#FCFCFA] hover:border-[#8C9097]'} overflow-hidden my-0.5 transition">
+                            <div class="rounded-xl border {isChildCurrent ? 'border-[#FF5500] bg-orange-50/50' : 'border-[#D0CEC7] bg-[#FCFCFA] hover:border-[#8C9097]'} overflow-hidden my-0.5 transition">
                               <div
                                 role="button"
                                 tabindex="0"
@@ -489,7 +489,7 @@
                                     else handleSelect(child.path);
                                   }
                                 }}
-                                class="min-h-[44px] px-3 py-2 flex items-center justify-between hover:bg-[#E9E7E0]/60 transition gap-2 cursor-pointer group"
+                                class="min-h-[44px] px-3 py-2 flex items-center justify-between hover:bg-[#ECEAE5]/60 transition gap-2 cursor-pointer group"
                                 title={hasSubChildren ? (isChildExpanded ? `Tutup sub-folder ${child.name}` : `Buka sub-folder ${child.name}`) : `Buka workspace: ${child.name}`}
                               >
                                 <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -499,7 +499,7 @@
                                       e.stopPropagation();
                                       toggleExpand(child.id);
                                     }}
-                                    class="p-1 rounded hover:bg-[#DEDBD2] text-[#5C6066] hover:text-[#191B1D] transition cursor-pointer shrink-0"
+                                    class="p-1 rounded hover:bg-[#E5E3DD] text-[#5C6066] hover:text-[#191B1D] transition cursor-pointer shrink-0"
                                     title={isChildExpanded ? 'Tutup sub-folder' : 'Buka sub-folder'}
                                   >
                                     {#if isChildExpanded}
@@ -509,7 +509,7 @@
                                     {/if}
                                   </button>
 
-                                  <div class="w-7 h-7 rounded-lg {isChildCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#E9E7E0] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
+                                  <div class="w-7 h-7 rounded-lg {isChildCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
                                     <FolderGit class="w-3.5 h-3.5" />
                                   </div>
 
@@ -518,11 +518,11 @@
                                       <span class="text-xs font-bold {isChildCurrent ? 'text-[#FF5500]' : 'text-[#191B1D] group-hover:text-[#FF5500]'} truncate transition-colors">
                                         {child.name}
                                       </span>
-                                      <span class="text-[9px] px-2 py-0.2 rounded-full bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC] font-mono select-none font-bold">
+                                      <span class="text-[9px] px-2 py-0.2 rounded-full bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] font-mono select-none font-bold">
                                         {child.children.length} sub-project {isChildExpanded ? '▲' : '▼'}
                                       </span>
                                       {#if child.isGit}
-                                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#E9E7E0] text-[#5C6066] font-mono flex items-center gap-1 border border-[#C8C5BC]">
+                                        <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#ECEAE5] text-[#5C6066] font-mono flex items-center gap-1 border border-[#D0CEC7]">
                                           <GitBranch class="w-2.5 h-2.5 text-[#5C6066]" /> git
                                         </span>
                                       {/if}
@@ -557,8 +557,8 @@
 
                               <!-- LEVEL 3 SUB-CHILDREN (e.g. crm-backend, crm-frontend, docker-socket, docker-waha) -->
                               {#if isChildExpanded}
-                                <div class="border-t border-[#C8C5BC] bg-[#E9E7E0]/50 p-2 pl-4 flex flex-col gap-1.5">
-                                  <div class="border-l-2 border-[#C8C5BC] ml-3 pl-3 flex flex-col gap-1.5">
+                                <div class="border-t border-[#D0CEC7] bg-[#ECEAE5]/50 p-2 pl-4 flex flex-col gap-1.5">
+                                  <div class="border-l-2 border-[#D0CEC7] ml-3 pl-3 flex flex-col gap-1.5">
                                     {#each child.children as subChild, sIdx}
                                       {@const isSubCurrent = isCurrent(subChild.path)}
                                       {@const isLastSub = sIdx === child.children.length - 1}
@@ -567,14 +567,14 @@
                                         tabindex="0"
                                         onclick={() => handleSelect(subChild.path)}
                                         onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(subChild.path); }}
-                                        class="min-h-[38px] px-3 py-1.5 rounded-lg {isSubCurrent ? 'bg-orange-50 border-[#FF5500] text-[#FF5500] font-bold' : 'bg-[#FCFCFA] hover:bg-[#E9E7E0] border-[#C8C5BC] text-[#191B1D]'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group"
+                                        class="min-h-[38px] px-3 py-1.5 rounded-lg {isSubCurrent ? 'bg-orange-50 border-[#FF5500] text-[#FF5500] font-bold' : 'bg-[#FCFCFA] hover:bg-[#ECEAE5] border-[#D0CEC7] text-[#191B1D]'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group"
                                         title={`Klik untuk buka workspace: ${subChild.name}`}
                                       >
                                         <div class="flex items-center gap-2.5 min-w-0 flex-1">
                                           <span class="text-[#5C6066] font-mono text-xs select-none shrink-0">
                                             {isLastSub ? '└──' : '├──'}
                                           </span>
-                                          <div class="w-5 h-5 rounded {isSubCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#E9E7E0] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
+                                          <div class="w-5 h-5 rounded {isSubCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
                                             <Package class="w-3 h-3" />
                                           </div>
                                           <div class="flex flex-col min-w-0 flex-1">
@@ -583,7 +583,7 @@
                                                 {subChild.name}
                                               </span>
                                               {#if subChild.isGit}
-                                                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#E9E7E0] text-[#5C6066] font-mono flex items-center gap-1 border border-[#C8C5BC]">
+                                                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#ECEAE5] text-[#5C6066] font-mono flex items-center gap-1 border border-[#D0CEC7]">
                                                   <GitBranch class="w-2.5 h-2.5 text-[#5C6066]" /> git
                                                 </span>
                                               {/if}
@@ -615,14 +615,14 @@
                               tabindex="0"
                               onclick={() => handleSelect(child.path)}
                               onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSelect(child.path); }}
-                              class="min-h-[40px] px-3 py-2 rounded-xl {isChildCurrent ? 'bg-orange-50 border-[#FF5500] text-[#FF5500] font-bold' : 'bg-[#FCFCFA] hover:bg-[#E9E7E0] border-[#C8C5BC] text-[#191B1D]'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group"
+                              class="min-h-[40px] px-3 py-2 rounded-xl {isChildCurrent ? 'bg-orange-50 border-[#FF5500] text-[#FF5500] font-bold' : 'bg-[#FCFCFA] hover:bg-[#ECEAE5] border-[#D0CEC7] text-[#191B1D]'} border flex items-center justify-between shrink-0 transition gap-2 cursor-pointer group"
                               title={`Klik untuk buka: ${child.name}`}
                             >
                               <div class="flex items-center gap-2.5 min-w-0 flex-1">
                                 <span class="text-[#5C6066] font-mono text-xs select-none shrink-0">
                                   {isLastChild ? '└──' : '├──'}
                                 </span>
-                                <div class="w-6 h-6 rounded-md {isChildCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#E9E7E0] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
+                                <div class="w-6 h-6 rounded-md {isChildCurrent ? 'bg-[#FF5500] text-white shadow-xs' : 'bg-[#ECEAE5] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
                                   <Package class="w-3.5 h-3.5" />
                                 </div>
                                 <div class="flex flex-col min-w-0 flex-1">
@@ -631,7 +631,7 @@
                                       {child.name}
                                     </span>
                                     {#if child.isGit}
-                                      <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#E9E7E0] text-[#5C6066] font-mono flex items-center gap-1 border border-[#C8C5BC]">
+                                      <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#ECEAE5] text-[#5C6066] font-mono flex items-center gap-1 border border-[#D0CEC7]">
                                         <GitBranch class="w-2.5 h-2.5 text-[#5C6066]" /> git
                                       </span>
                                     {/if}
@@ -673,7 +673,7 @@
               type="text"
               bind:value={newProjectName}
               placeholder="Contoh: my-awesome-app"
-              class="bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl p-3 text-[#191B1D] font-mono text-xs outline-none transition shadow-xs"
+              class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl p-3 text-[#191B1D] font-mono text-xs outline-none transition shadow-xs"
             />
           </div>
 
@@ -683,7 +683,7 @@
               id="new-proj-parent"
               type="text"
               bind:value={newProjectParent}
-              class="bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl p-3 text-[#191B1D] font-mono text-xs outline-none transition shadow-xs"
+              class="bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl p-3 text-[#191B1D] font-mono text-xs outline-none transition shadow-xs"
             />
             <span class="text-[11px] text-[#5C6066] font-mono">
               Lokasi tujuan: <code class="text-[#FF5500] font-bold">{newProjectParent}\{newProjectName || '&lt;nama-project&gt;'}</code>
@@ -724,7 +724,7 @@
                 type="text"
                 bind:value={manualPathInput}
                 placeholder="Contoh: C:\Users\zhien\my-project atau E:\Repos\backend"
-                class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl p-3 text-[#191B1D] font-mono text-xs outline-none transition shadow-xs"
+                class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500] rounded-xl p-3 text-[#191B1D] font-mono text-xs outline-none transition shadow-xs"
               />
               <button
                 onclick={() => handleSelect(manualPathInput)}
@@ -739,7 +739,7 @@
           </div>
 
           {#if recentProjects && recentProjects.length > 0}
-            <div class="flex flex-col gap-3 pt-4 border-t border-[#C8C5BC] flex-1 min-h-0">
+            <div class="flex flex-col gap-3 pt-4 border-t border-[#D0CEC7] flex-1 min-h-0">
               <div class="flex items-center justify-between">
                 <span class="text-xs text-[#191B1D] font-bold font-mono uppercase tracking-wider">Riwayat Workspace Terakhir ({recentProjects.length})</span>
                 <span class="text-[10px] text-[#5C6066] font-mono">Klik baris untuk langsung membuka</span>
@@ -751,11 +751,11 @@
                   <button
                     type="button"
                     onclick={() => handleSelect(r)}
-                    class="p-3 min-h-[46px] shrink-0 rounded-xl {isCurrentProj ? 'bg-orange-50 border-[#FF5500] text-[#FF5500] font-bold' : 'bg-[#FCFCFA] hover:bg-[#E9E7E0] border-[#C8C5BC] text-[#191B1D]'} border flex items-center justify-between gap-3 text-left font-mono text-xs cursor-pointer transition group shadow-xs"
+                    class="p-3 min-h-[46px] shrink-0 rounded-xl {isCurrentProj ? 'bg-orange-50 border-[#FF5500] text-[#FF5500] font-bold' : 'bg-[#FCFCFA] hover:bg-[#ECEAE5] border-[#D0CEC7] text-[#191B1D]'} border flex items-center justify-between gap-3 text-left font-mono text-xs cursor-pointer transition group shadow-xs"
                     title={`Buka: ${r}`}
                   >
                     <div class="flex items-center gap-2.5 min-w-0">
-                      <div class="w-7 h-7 rounded-lg {isCurrentProj ? 'bg-[#FF5500] text-white' : 'bg-[#E9E7E0] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
+                      <div class="w-7 h-7 rounded-lg {isCurrentProj ? 'bg-[#FF5500] text-white' : 'bg-[#ECEAE5] text-[#191B1D]'} flex items-center justify-center shrink-0 transition">
                         <FolderGit class="w-3.5 h-3.5" />
                       </div>
                       <span class="truncate">{r}</span>

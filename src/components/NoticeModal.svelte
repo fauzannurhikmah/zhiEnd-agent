@@ -25,13 +25,13 @@
     ></button>
 
     <!-- Modal Box -->
-    <div class="relative w-full max-w-sm rounded-2xl bg-[#FCFCFA] border border-[#C8C5BC] shadow-2xl p-5 flex flex-col gap-4 text-center z-10 animate-in zoom-in-95 duration-200 text-[#191B1D]">
+    <div class="relative w-full max-w-sm rounded-2xl bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl p-5 flex flex-col gap-4 text-center z-10 animate-in zoom-in-95 duration-200 text-[#191B1D]">
       
       <!-- Close icon button -->
       <button 
         type="button"
         onclick={() => dialog.closeNotice()}
-        class="absolute top-3.5 right-3.5 p-1 rounded-lg text-[#8C9097] hover:text-[#191B1D] hover:bg-[#E9E7E0] transition cursor-pointer"
+        class="absolute top-3.5 right-3.5 p-1 rounded-lg text-[#8C9097] hover:text-[#191B1D] hover:bg-[#ECEAE5] transition cursor-pointer"
         title="Tutup"
       >
         <X class="w-4 h-4" />
@@ -62,7 +62,7 @@
       </div>
 
       <!-- Single Action Button (OK / Mengerti) -->
-      <div class="pt-2 border-t border-[#C8C5BC]">
+      <div class="pt-2 border-t border-[#D0CEC7]">
         <button
           type="button"
           onclick={() => dialog.closeNotice()}

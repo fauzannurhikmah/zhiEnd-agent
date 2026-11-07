@@ -228,9 +228,9 @@
     <!-- ========================================== -->
     <!-- CARD 1: WhatsApp Remote -->
     <!-- ========================================== -->
-    <div class="bg-[#E9E7E0] border border-[#C8C5BC] rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all relative text-[#191B1D]">
+    <div class="bg-[#ECEAE5] border border-[#D0CEC7] rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all relative text-[#191B1D]">
       <!-- Card Header -->
-      <div class="flex items-center justify-between border-b border-[#C8C5BC] pb-3">
+      <div class="flex items-center justify-between border-b border-[#D0CEC7] pb-3">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 flex items-center justify-center font-bold shadow-2xs">
             <MessageSquare class="w-4 h-4" />
@@ -264,16 +264,16 @@
         <button
           type="button"
           onclick={() => { isWaPersonaOpen = !isWaPersonaOpen; isTgPersonaOpen = false; }}
-          class="w-full text-left bg-[#FCFCFA] hover:bg-white border border-[#C8C5BC] hover:border-[#FF5500] rounded-xl p-2.5 flex items-center justify-between gap-2.5 transition cursor-pointer group shadow-2xs"
+          class="w-full text-left bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#FF5500] rounded-xl p-2.5 flex items-center justify-between gap-2.5 transition cursor-pointer group shadow-2xs"
         >
           <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-[#C8C5BC] bg-[#DEDBD2] flex items-center justify-center">
+            <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-[#D0CEC7] bg-[#E5E3DD] flex items-center justify-center">
               <AvatarView avatar={waPersona?.avatar} name={waPersona?.name} size="sm" />
             </div>
             <div class="flex flex-col min-w-0">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-bold text-[#191B1D] truncate">{waPersona?.name || 'Standard Agent'}</span>
-                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-mono shrink-0 font-semibold">
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#E5E3DD] border border-[#D0CEC7] text-[#5C6066] font-mono shrink-0 font-semibold">
                   {waPersona?.preferred_model?.replace('gemini-', '') || 'Flash'}
                 </span>
               </div>
@@ -287,18 +287,18 @@
 
         <!-- Dropdown Popover Menu -->
         {#if isWaPersonaOpen}
-          <div class="absolute top-full left-0 right-0 mt-1.5 z-30 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl shadow-xl p-1.5 flex flex-col gap-1 max-h-60 overflow-y-auto custom-scrollbar">
-            <div class="px-2 py-1 text-[10px] font-mono text-[#5C6066] border-b border-[#C8C5BC] mb-0.5 font-bold">
+          <div class="absolute top-full left-0 right-0 mt-1.5 z-30 bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl shadow-xl p-1.5 flex flex-col gap-1 max-h-60 overflow-y-auto custom-scrollbar">
+            <div class="px-2 py-1 text-[10px] font-mono text-[#5C6066] border-b border-[#D0CEC7] mb-0.5 font-bold">
               Pilih Persona AI untuk WhatsApp:
             </div>
             {#each personas as p}
               <button
                 type="button"
                 onclick={() => selectPersona('whatsapp', p.id)}
-                class="w-full text-left px-2.5 py-2 rounded-lg flex items-center justify-between gap-2 transition cursor-pointer {p.id === waActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#E9E7E0] text-[#191B1D]'}"
+                class="w-full text-left px-2.5 py-2 rounded-lg flex items-center justify-between gap-2 transition cursor-pointer {p.id === waActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#ECEAE5] text-[#191B1D]'}"
               >
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-[#C8C5BC] bg-[#DEDBD2] flex items-center justify-center">
+                  <div class="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-[#D0CEC7] bg-[#E5E3DD] flex items-center justify-center">
                     <AvatarView avatar={p.avatar} name={p.name} size="xs" />
                   </div>
                   <div class="flex flex-col min-w-0">
@@ -356,7 +356,7 @@
                 <img src={currentQr} alt="WhatsApp QR Code" class="w-44 h-44 object-contain" />
               </div>
             {:else}
-              <div class="w-44 h-44 bg-[#E9E7E0] rounded-2xl flex flex-col items-center justify-center gap-2 text-[#5C6066] border border-[#C8C5BC]">
+              <div class="w-44 h-44 bg-[#ECEAE5] rounded-2xl flex flex-col items-center justify-center gap-2 text-[#5C6066] border border-[#D0CEC7]">
                 <Loader2 class="w-6 h-6 animate-spin text-[#FF5500]" />
                 <span class="text-[11px] font-mono">Memuat kode QR...</span>
                 <button
@@ -369,7 +369,7 @@
               </div>
             {/if}
 
-            <div class="text-[10px] text-[#5C6066] text-left bg-[#E9E7E0] p-2.5 rounded-lg border border-[#C8C5BC] w-full flex flex-col gap-0.5 font-mono">
+            <div class="text-[10px] text-[#5C6066] text-left bg-[#ECEAE5] p-2.5 rounded-lg border border-[#D0CEC7] w-full flex flex-col gap-0.5 font-mono">
               <span class="text-[#191B1D] font-bold mb-0.5">Langkah Menghubungkan:</span>
               <div>1. Buka aplikasi WhatsApp di HP Anda</div>
               <div>2. Menu Titik Tiga / Pengaturan > <span class="text-[#191B1D] font-bold">Perangkat Tertaut</span></div>
@@ -378,7 +378,7 @@
           </div>
         {:else if whatsappStatus?.status === 'connecting'}
           <!-- Connecting State -->
-          <div class="p-5 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] flex flex-col items-center justify-center gap-2 text-center text-xs text-[#191B1D] shadow-xs">
+          <div class="p-5 rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] flex flex-col items-center justify-center gap-2 text-center text-xs text-[#191B1D] shadow-xs">
             <Loader2 class="w-6 h-6 animate-spin text-[#FF5500]" />
             <span class="font-bold">Memulai Baileys & menyiapkan koneksi...</span>
             <span class="text-[10px] text-[#5C6066] font-mono">Mohon tunggu sebentar</span>
@@ -400,7 +400,7 @@
       </div>
 
       <!-- Collapsible Access Whitelist Settings -->
-      <div class="border-t border-[#C8C5BC] pt-2 flex flex-col">
+      <div class="border-t border-[#D0CEC7] pt-2 flex flex-col">
         <button
           type="button"
           onclick={() => showWaSettings = !showWaSettings}
@@ -427,7 +427,7 @@
                 type="text"
                 bind:value={waAllowedInput}
                 placeholder="628123456789, 628987654321"
-                class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-lg px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
+                class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-lg px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
               <button
                 onclick={handleSaveWaNumbers}
@@ -442,21 +442,21 @@
       </div>
 
       <!-- Command Quick Reference -->
-      <div class="border-t border-[#C8C5BC] pt-2 text-[10px] text-[#5C6066] font-mono flex flex-wrap gap-1">
-        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!code</span>
-        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!persona</span>
-        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!git</span>
-        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!commit</span>
-        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!push</span>
+      <div class="border-t border-[#D0CEC7] pt-2 text-[10px] text-[#5C6066] font-mono flex flex-wrap gap-1">
+        <span class="px-1.5 py-0.5 rounded bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!code</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!persona</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!git</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!commit</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!push</span>
       </div>
     </div>
 
     <!-- ========================================== -->
     <!-- CARD 2: Telegram Remote -->
     <!-- ========================================== -->
-    <div class="bg-[#E9E7E0] border border-[#C8C5BC] rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all relative text-[#191B1D]">
+    <div class="bg-[#ECEAE5] border border-[#D0CEC7] rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all relative text-[#191B1D]">
       <!-- Card Header -->
-      <div class="flex items-center justify-between border-b border-[#C8C5BC] pb-3">
+      <div class="flex items-center justify-between border-b border-[#D0CEC7] pb-3">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-sky-100 border border-sky-300 text-sky-800 flex items-center justify-center font-bold shadow-2xs">
             <Send class="w-4 h-4" />
@@ -485,16 +485,16 @@
         <button
           type="button"
           onclick={() => { isTgPersonaOpen = !isTgPersonaOpen; isWaPersonaOpen = false; }}
-          class="w-full text-left bg-[#FCFCFA] hover:bg-white border border-[#C8C5BC] hover:border-[#FF5500] rounded-xl p-2.5 flex items-center justify-between gap-2.5 transition cursor-pointer group shadow-2xs"
+          class="w-full text-left bg-[#FCFCFA] hover:bg-white border border-[#D0CEC7] hover:border-[#FF5500] rounded-xl p-2.5 flex items-center justify-between gap-2.5 transition cursor-pointer group shadow-2xs"
         >
           <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-[#C8C5BC] bg-[#DEDBD2] flex items-center justify-center">
+            <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-[#D0CEC7] bg-[#E5E3DD] flex items-center justify-center">
               <AvatarView avatar={tgPersona?.avatar} name={tgPersona?.name} size="sm" />
             </div>
             <div class="flex flex-col min-w-0">
               <div class="flex items-center gap-1.5">
                 <span class="text-xs font-bold text-[#191B1D] truncate">{tgPersona?.name || 'Standard Agent'}</span>
-                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-mono shrink-0 font-semibold">
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#E5E3DD] border border-[#D0CEC7] text-[#5C6066] font-mono shrink-0 font-semibold">
                   {tgPersona?.preferred_model?.replace('gemini-', '') || 'Flash'}
                 </span>
               </div>
@@ -508,18 +508,18 @@
 
         <!-- Dropdown Popover Menu -->
         {#if isTgPersonaOpen}
-          <div class="absolute top-full left-0 right-0 mt-1.5 z-30 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl shadow-xl p-1.5 flex flex-col gap-1 max-h-60 overflow-y-auto custom-scrollbar">
-            <div class="px-2 py-1 text-[10px] font-mono text-[#5C6066] border-b border-[#C8C5BC] mb-0.5 font-bold">
+          <div class="absolute top-full left-0 right-0 mt-1.5 z-30 bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl shadow-xl p-1.5 flex flex-col gap-1 max-h-60 overflow-y-auto custom-scrollbar">
+            <div class="px-2 py-1 text-[10px] font-mono text-[#5C6066] border-b border-[#D0CEC7] mb-0.5 font-bold">
               Pilih Persona AI untuk Telegram:
             </div>
             {#each personas as p}
               <button
                 type="button"
                 onclick={() => selectPersona('telegram', p.id)}
-                class="w-full text-left px-2.5 py-2 rounded-lg flex items-center justify-between gap-2 transition cursor-pointer {p.id === tgActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#E9E7E0] text-[#191B1D]'}"
+                class="w-full text-left px-2.5 py-2 rounded-lg flex items-center justify-between gap-2 transition cursor-pointer {p.id === tgActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#ECEAE5] text-[#191B1D]'}"
               >
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-[#C8C5BC] bg-[#DEDBD2] flex items-center justify-center">
+                  <div class="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-[#D0CEC7] bg-[#E5E3DD] flex items-center justify-center">
                     <AvatarView avatar={p.avatar} name={p.name} size="xs" />
                   </div>
                   <div class="flex flex-col min-w-0">
@@ -574,7 +574,7 @@
                 type="password"
                 bind:value={tgTokenInput}
                 placeholder="123456789:ABCdefGhIJK..."
-                class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
+                class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
               />
               <button
                 onclick={handleSaveTgConfig}
@@ -595,7 +595,7 @@
       </div>
 
       <!-- Collapsible Access Whitelist Settings -->
-      <div class="border-t border-[#C8C5BC] pt-2 flex flex-col">
+      <div class="border-t border-[#D0CEC7] pt-2 flex flex-col">
         <button
           type="button"
           onclick={() => showTgSettings = !showTgSettings}
@@ -622,7 +622,7 @@
                 type="text"
                 bind:value={tgAllowedInput}
                 placeholder="12345678, @username"
-                class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-lg px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
+                class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-lg px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
               />
               <button
                 onclick={handleSaveTgConfig}
@@ -637,21 +637,21 @@
       </div>
 
       <!-- Command Quick Reference -->
-      <div class="border-t border-[#C8C5BC] pt-2 text-[10px] text-[#5C6066] font-mono flex flex-wrap gap-1">
-        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/code</span>
-        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/persona</span>
-        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/git</span>
-        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/commit</span>
-        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/push</span>
+      <div class="border-t border-[#D0CEC7] pt-2 text-[10px] text-[#5C6066] font-mono flex flex-wrap gap-1">
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/code</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/persona</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/git</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/commit</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/push</span>
       </div>
     </div>
 
     <!-- ========================================== -->
     <!-- CARD 3: Public Tunnel & LAN -->
     <!-- ========================================== -->
-    <div class="bg-[#E9E7E0] border border-[#C8C5BC] rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all text-[#191B1D]">
+    <div class="bg-[#ECEAE5] border border-[#D0CEC7] rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all text-[#191B1D]">
       <!-- Card Header -->
-      <div class="flex items-center justify-between border-b border-[#C8C5BC] pb-3">
+      <div class="flex items-center justify-between border-b border-[#D0CEC7] pb-3">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-orange-100 border border-orange-300 text-[#FF5500] flex items-center justify-center font-bold shadow-2xs">
             <Globe class="w-4 h-4" />
@@ -672,7 +672,7 @@
         <span class="text-[11px] text-[#191B1D] font-bold flex items-center gap-1.5">
           <span>1. Akses Wi-Fi Lokal (HP & Laptop):</span>
         </span>
-        <div class="flex items-center justify-between bg-[#FCFCFA] p-2.5 rounded-xl border border-[#C8C5BC] text-xs font-mono text-[#191B1D]">
+        <div class="flex items-center justify-between bg-[#FCFCFA] p-2.5 rounded-xl border border-[#D0CEC7] text-xs font-mono text-[#191B1D]">
           <span class="truncate">{tunnelStatus?.localUrl || 'http://localhost:3888'}</span>
           <button
             onclick={() => copyText(tunnelStatus?.localUrl || '', 'local')}
@@ -719,7 +719,7 @@
               type="text"
               bind:value={customSubdomain}
               placeholder="zhiend-agent"
-              class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
+              class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
             />
             <button
               disabled={isStartingTunnel}
@@ -740,7 +740,7 @@
       </div>
 
       <!-- 3. Security PIN Input -->
-      <div class="flex flex-col gap-1.5 pt-2 border-t border-[#C8C5BC]">
+      <div class="flex flex-col gap-1.5 pt-2 border-t border-[#D0CEC7]">
         <div class="flex items-center justify-between">
           <span class="text-[11px] text-[#191B1D] font-bold flex items-center gap-1.5">
             <Shield class="w-3.5 h-3.5 text-[#FF5500]" /> Security PIN Akses Web:
@@ -748,7 +748,7 @@
           {#if config?.securityPin}
             <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono font-bold">PIN Aktif</span>
           {:else}
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-mono">Belum Ada PIN</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#E5E3DD] border border-[#D0CEC7] text-[#5C6066] font-mono">Belum Ada PIN</span>
           {/if}
         </div>
         <div class="flex gap-2">
@@ -756,7 +756,7 @@
             type="password"
             bind:value={securityPinInput}
             placeholder="Ketik PIN (misal: 1234)"
-            class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
+            class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
           />
           <button
             onclick={handleSavePin}

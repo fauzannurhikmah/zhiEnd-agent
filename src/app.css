@@ -2,18 +2,19 @@
 
 @layer base {
   :root {
-    --chassis-bone: #F4F3EE;
-    --deck-putty: #E9E7E0;
+    --chassis-bone: #ECEAE5;
+    --deck-putty: #E5E3DD;
     --bed-magnesium: #DEDBD2;
     --well-alabaster: #FCFCFA;
-    --seam-milled: #C8C5BC;
+    --seam-milled: #D0CEC7;
     --seam-dark: #A8A59C;
     --safety-orange: #FF5500;
     --safety-orange-hover: #E64D00;
-    --hazard-mustard: #E5A91A;
-    --ink-basalt: #191B1D;
-    --stencil-grey: #5C6066;
+    --hazard-mustard: #FFAA00;
+    --ink-basalt: #111315;
+    --stencil-grey: #60646C;
     --stencil-light: #8C9097;
+    --crt-void: #101114;
   }
 
   body {
@@ -25,9 +26,40 @@
     overflow: hidden;
   }
 
-  code, pre, kbd {
+  code,
+  pre,
+  kbd {
     font-family: 'JetBrains Mono', monospace;
   }
+}
+
+/* ------------------------------------------------------------- */
+/* RETRO-FUTURISTIC & INDUSTRIAL TYPOGRAPHY SCALES               */
+/* ------------------------------------------------------------- */
+.font-display {
+  font-family: 'Syne', sans-serif;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+
+.font-tech {
+  font-family: 'Chakra Petch', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.font-pixel {
+  font-family: 'Silkscreen', monospace;
+  letter-spacing: 0.05em;
+}
+
+.font-grotesk {
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.015em;
+}
+
+.font-stencil {
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.03em;
 }
 
 /* ------------------------------------------------------------- */
@@ -37,13 +69,16 @@
   width: 5px;
   height: 5px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--deck-putty);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--seam-dark);
   border-radius: 2px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--safety-orange);
 }
@@ -71,7 +106,10 @@ a:focus:not(:focus-visible),
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, ::before, ::after {
+
+  *,
+  ::before,
+  ::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -232,35 +270,35 @@ a:focus:not(:focus-visible),
 .bubble-user-hardware,
 .glass-bubble-user {
   background: #FCFCFA;
-  border: 1px solid #C8C5BC;
+  border: 1px solid #D0CEC7;
   border-right: 3px solid #FF5500;
-  color: #191B1D;
+  color: #111315;
   box-shadow: 0 1px 3px rgba(25, 27, 29, 0.05);
 }
 
 .bubble-agent,
 .bubble-agent-hardware,
 .glass-bubble-agent {
-  background: #E9E7E0;
-  border: 1px solid #C8C5BC;
-  color: #191B1D;
+  background: #FCFCFA;
+  border: 1px solid #D0CEC7;
+  color: #111315;
   box-shadow: 0 1px 2px rgba(25, 27, 29, 0.03);
 }
 
 /* 11. Headers & Sidebars */
 .glass-header {
-  background: #E9E7E0;
-  border-bottom: 1px solid #C8C5BC;
+  background: #ECEAE5;
+  border-bottom: 1px solid #D0CEC7;
 }
 
 .glass-sidebar {
-  background: #E9E7E0;
-  border-right: 1px solid #C8C5BC;
+  background: #ECEAE5;
+  border-right: 1px solid #D0CEC7;
 }
 
 .glass-nav-mobile {
-  background: #E9E7E0;
-  border-top: 1px solid #C8C5BC;
+  background: #ECEAE5;
+  border-top: 1px solid #D0CEC7;
 }
 
 /* 12. Industrial Matrix Dot Grid */
@@ -293,6 +331,155 @@ a:focus:not(:focus-visible),
 }
 
 .cinematic-card {
-  background: #E9E7E0;
-  border: 1px solid #C8C5BC;
+  background: #E5E3DD;
+  border: 1px solid #D0CEC7;
+}
+
+/* ------------------------------------------------------------- */
+/* CYBER-INDUSTRIAL BLUEPRINT GRID & DRAFTING ORNAMENTS          */
+/* ------------------------------------------------------------- */
+
+/* Architectural Blueprint Grid Background */
+.blueprint-grid {
+  background-image:
+    linear-gradient(to right, #D0CEC7 1px, transparent 1px),
+    linear-gradient(to bottom, #D0CEC7 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Corner Registration Square Dots */
+.reg-dot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background-color: #FF5500;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.reg-dot-tl {
+  top: 4px;
+  left: 4px;
+}
+
+.reg-dot-tr {
+  top: 4px;
+  right: 4px;
+}
+
+.reg-dot-bl {
+  bottom: 4px;
+  left: 4px;
+}
+
+.reg-dot-br {
+  bottom: 4px;
+  right: 4px;
+}
+
+/* Drafting Crosshair Box */
+.crosshair-box {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #D0CEC7;
+  background: #FCFCFA;
+}
+
+.crosshair-box::before,
+.crosshair-box::after {
+  content: "";
+  position: absolute;
+  background: #D0CEC7;
+}
+
+.crosshair-box::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+}
+
+.crosshair-box::after {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+}
+
+/* Technical Viewfinder Brackets */
+.viewfinder-box {
+  position: relative;
+  background: #101114;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.viewfinder-box::before {
+  content: "";
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid #FF5500;
+  border-left: 2px solid #FF5500;
+  pointer-events: none;
+}
+
+.viewfinder-box::after {
+  content: "";
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 12px;
+  height: 12px;
+  border-bottom: 2px solid #FF5500;
+  border-right: 2px solid #FF5500;
+  pointer-events: none;
+}
+
+/* Retro-Futuristic CRT Monitor Mascot */
+.crt-shell {
+  background: #FCFCFA;
+  border: 2px solid #E5E3DD;
+  box-shadow:
+    0 16px 36px -8px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.crt-glow-bevel {
+  border: 4px solid #FFAA00;
+  box-shadow:
+    0 0 16px rgba(255, 170, 0, 0.35),
+    inset 0 0 12px rgba(255, 85, 0, 0.25);
+}
+
+.crt-screen {
+  background: #101114;
+  background-image:
+    radial-gradient(circle at 50% 50%, #1c1e24 0%, #101114 100%),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0px, rgba(0, 0, 0, 0.2) 1px, transparent 1px, transparent 2px);
+}
+
+/* Dot-Matrix Pixel Eye Animation */
+@keyframes crtBlink {
+
+  0%,
+  90%,
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+
+  95% {
+    transform: scaleY(0.1);
+    opacity: 0.8;
+  }
+}
+
+.crt-eye {
+  animation: crtBlink 4s infinite ease-in-out;
+  transform-origin: center;
 }
