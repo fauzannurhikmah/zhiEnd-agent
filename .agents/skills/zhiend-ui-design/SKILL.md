@@ -17,20 +17,41 @@ description: "Distinctive UI/UX Design System for zhiEnd Agent. Opinionated 'Cyb
 > 2. **Neutral Input Focus Policy (Zero Ring / Zero Orange Halo)**:
 >    - When any input, textarea, or mechanical well is focused or active, there must be NO ring, NO outline, and NO border color change to orange (`#FF5500`).
 >    - The border strictly remains neutral `#D0CEC7` (`outline: none !important; box-shadow: none !important; border-color: #D0CEC7 !important; --tw-ring-color: transparent !important`).
-> 3. **CAD Dot Grid & Subtle Background HUD Matrix ("Random Grid tapi Ada Keteraturan")**:
+> 3. **Clean CAD Dot Grid & Pinned Subtle Background HUD Matrix**:
 >    - Clean architectural concrete chassis (`#ECEAE5`) with a subtle 32px CAD dot matrix grid (`radial-gradient`), layered with sparse asymmetrical drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), dedicated technical left rail (`✕`) and right rail (`◎`).
->    - Subtle futuristic retro-HUD background text: random technical specs, drafting notes, and telemetry registers placed horizontally and vertically (`writing-mode:vertical-lr`) at very low opacity (`text-[#8C9097]/25`, `pointer-events-none`) for atmospheric depth without distracting from chat content.
+>    - **Pinned Viewport-Anchored HUD Matrix (Zero White Cards / Zero Essay Clutter)**:
+>      - Raw technical coordinates (`[042, 180]`, `[SYS_LAT: 38.88°N // LONG: 121.04°E]`), vertical drafting ribbons (`:: SEC_04 // CAD_MATRIX_STREAM :: REV_2.4.1`, `:: DRAFTING GRID SEAMS NOMINAL`), corner brackets (`┌ ┐`, `└ ┘`), and drafting crosshairs (`✕`, `+`, `■`).
+>      - Stamped directly onto the canvas with crisp subtle contrast (`text-[#7A7E85]`, `text-[#9A9EA6]`, `#FF5500` square markers).
+>      - Strictly NO white background panels/cards (`bg-[#FCFCFA]`) and NO long essay paragraphs.
+>      - Pinned to the non-scrolling viewport layer (`absolute inset-x-0 top-10 bottom-0 pointer-events-none`) so scrolling down through long chat history never leaves the telemetry behind ("tidak nyangkut di atas").
+>    - **Per-Message Persona History Persistence**:
+>      - Switching persona mid-session updates future responses only. All historical messages in the chat stream retain the exact avatar, name, and traits of the persona active at the time they were generated.
 > 4. **Mini Pixel Robot Avatar Companion (`PixelRobotAvatarBuddy`)**:
->    - Chunky mini CRT monitor (36px x 28px) mounted right under each persona chat avatar.
->    - **Super-Expressive & Reactive States**:
->      - **Natural Blink**: Periodic eye-blink every 3.5–5s (`● ●` -> `─ ─` -> `● ●`).
->      - **Typing Reaction**: When user types in chat input, eyes look down towards the chat box (`▼ ▼`).
->      - **Loading / Thinking Reaction**: Confused expression (`? ~` / brain churning) while generating.
->      - **Hover Reaction**: Warm happy smile (`^ ^` with mini smile arc `⌣`).
->      - **Content & Mood Detection**: Dynamically reflects the tone of the message (playful/flirty `★ <`, hacker coding `■ ■`, success `★ ★`, error `✕ ✕`, curious `• ?`).
+>    - Sleek mini CRT monitor (36px x 26px) mounted right under each persona chat avatar.
+>    - **Harmonized, Non-Distracting Colors**: Muted putty chassis (`#E5E3DD`), subtle border (`#C8C5BC`), soft neutral bezel, and matte CRT screen with soft phosphor eyes (`#DCDAD4` / `#86efac`) so the persona photo remains the focal star.
+>    - **Super-Expressive & Autonomous Reactive States (Never Static)**:
+>      - **Rich Emotional Palette**:
+>        - Love / Cinta: Soft pulsing pink hearts (`♥ ♥`)
+>        - Happy / Senang: Bouncing lime eyes (`^ ^`)
+>        - Smile / Tersenyum: Gentle arc eyes (`˘ ˘`)
+>        - Angry / Marah: Fiery orange angled eyes (`\ /`) with micro wobble
+>        - Sad / Sedih: Cyan tear eyes (`T T`)
+>        - Shy / Malu: Blushing eyes (`> <` with rosy cheek dots `· ·`)
+>        - Surprised / Kaget: Wide yellow eyes (`O O`)
+>        - Wink / Centil: Star wink (`★ <`)
+>        - Sleepy / Mengantuk: Droopy eyelids (`- -`)
+>        - Curious / Penasaran: Inquisitive question eye (`• ?`)
+>      - **Autonomous Looking Around (Idle Glances every 2–4.5s)**: Glances left (`◄ ◄`), right (`► ►`), up (`▲ ▲`), down (`▼ ▼`), natural blink (`─ ─`), and double blink.
+>      - **Typing Reaction**: When user types in chat input, eyes dart down towards the chat box (`▼ ▼`).
+>      - **Loading / Thinking Reaction**: Calculating expression (`? ~`) while generating response.
+>      - **Hover Reaction**: Responsive love reaction (`♥ ♥`).
 > 5. **Chat Box UX & Last User Prompt Editing**:
 >    - The delete/purge button must NEVER be placed in the bottom chat input box next to DISPATCH (it belongs safely in the sub-header).
 >    - The latest user message bubble features an inline `[EDIT PROMPT]` trigger allowing the user to edit their last prompt in-place and resubmit, which automatically clears the old response and regenerates an updated AI response.
+> 6. **Terminal, Bash, Code, & Diff Deep Black CRT Palette Policy**:
+>    - All terminal outputs, bash command badges, markdown code blocks, diff telemetry (Source Control / Git diff), and stream logs MUST use a deep obsidian CRT black background (`bg-[#101114]` / `bg-[#18191D]`, `border border-[#2A2B30]`, `.crt-screen`) identical to the `LIVE TELEMETRY & PACKET STREAM` screen.
+>    - Strictly PROHIBITED to render code blocks, diffs, bash commands, or telemetry logs on white/light backgrounds (`bg-white` / `bg-[#FCFCFA]`).
+>    - Diff syntax coloration: additions `text-emerald-400 bg-emerald-950/30`, deletions `text-rose-400 bg-rose-950/30`, hunk headers `text-sky-400 bg-sky-950/25`, git info `text-[#8C9097]`.
 > 3. **Technical Drafting Ornaments**:
 >    - Orange solid corner registration squares (`■`) anchoring major module bays.
 >    - Corner viewfinder reticle brackets (`┌ ┐` and `└ ┘`) framing telemetry and visualizer boxes.

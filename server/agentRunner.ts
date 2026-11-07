@@ -205,6 +205,7 @@ ${options.prompt}`;
       conversationId: effectiveConversationId || null,
       toolsExecuted: [],
       sessionId: options.sessionId,
+      personaId: targetPersonaId,
       images: options.images || []
     };
 
@@ -214,6 +215,7 @@ ${options.prompt}`;
       project: workingDir,
       model: selectedModel,
       sessionId: options.sessionId,
+      personaId: targetPersonaId,
       images: options.images || []
     });
 
@@ -346,6 +348,7 @@ ${options.prompt}`;
             steps: finishedTask.steps || [],
             thought: finishedTask.thought || '',
             sessionId: finishedTask.sessionId,
+            personaId: finishedTask.personaId,
             images: options.images || [], // Hanya gambar yang diunggah oleh pengguna
             generatedImages: genImages
           });
@@ -669,6 +672,7 @@ ${options.prompt}`;
           }],
           thought: `Mengeksekusi perintah terminal langsung tanpa loop AI untuk efisiensi maksimum.`,
           sessionId: finishedTask.sessionId,
+          personaId: finishedTask.personaId,
           images: finishedTask.images || []
         });
 
@@ -716,6 +720,7 @@ ${options.prompt}`;
       conversationId: options.conversationId || null,
       toolsExecuted: [],
       sessionId: options.sessionId,
+      personaId: targetPersonaId,
       images: options.images || []
     };
 
@@ -725,6 +730,7 @@ ${options.prompt}`;
       project: workingDir,
       model: selectedModel,
       sessionId: options.sessionId,
+      personaId: targetPersonaId,
       images: options.images || []
     });
 
@@ -838,6 +844,7 @@ ${options.prompt}`;
         steps: [],
         thought: finishedTask.thought || '',
         sessionId: finishedTask.sessionId,
+        personaId: finishedTask.personaId,
         images: options.images || [],
         generatedImages: genImages
       });

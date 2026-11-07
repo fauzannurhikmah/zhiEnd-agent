@@ -116,6 +116,7 @@ export interface AgentTask {
   steps?: ProcessStep[];
   thought?: string;
   sessionId?: string;
+  personaId?: string | null;
   images?: string[];
   generatedImages?: string[];
 }
@@ -214,6 +215,7 @@ export interface ChatMessageRecord {
   images?: string[];
   model_used?: string;
   tokens_used?: number;
+  persona_id?: string | null;
   created_at: string;
 }
 

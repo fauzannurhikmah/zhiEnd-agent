@@ -45,6 +45,7 @@
     config,
     activeSession = null,
     activePersona = null,
+    personas = [],
     onSendMessage,
     onEditLastMessage,
     onCancelTask,
@@ -57,6 +58,7 @@
     config: AppConfig | null;
     activeSession?: ChatSessionItem | null;
     activePersona?: PersonaItem | null;
+    personas?: PersonaItem[];
     onSendMessage: (text: string, images?: string[]) => void;
     onEditLastMessage?: (newText: string) => void;
     onCancelTask: () => void;
@@ -503,7 +505,7 @@
 <div 
   role="region"
   aria-label="Tampilan Percakapan dan Zona Unggah Berkas"
-  class="h-full flex flex-col justify-between overflow-hidden relative"
+  class="h-full flex flex-col justify-between overflow-hidden relative blueprint-cad-ground bg-[#ECEAE5]"
   ondragenter={handleRootDragEnter}
   ondragover={handleRootDragOver}
   ondragleave={handleRootDragLeave}
@@ -531,7 +533,7 @@
   {/if}
 
   <!-- Top Session Bar (Architectural Seam) -->
-  <div class="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-[#D0CEC7] bg-[#ECEAE5] z-10 shrink-0 select-none gap-1.5 sm:gap-2 font-tech">
+  <div class="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-[#D0CEC7] bg-[#ECEAE5] z-20 shrink-0 select-none gap-1.5 sm:gap-2 font-tech relative">
     <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
       <span class="w-2 h-2 bg-[#FF5500] shrink-0"></span>
       <span class="text-xs font-bold text-[#111315] uppercase tracking-wider truncate min-w-0 flex-1">
@@ -587,58 +589,77 @@
     </div>
   </div>
 
-  <!-- Content Viewport -->
-  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto relative {messages.length === 0 ? 'p-0 flex flex-col' : 'p-4 sm:p-6 pb-28 sm:pb-32'} blueprint-cad-ground">
-    
-    <!-- Subtle Futuristic Retro-HUD Background Matrix (Minimalist & Non-Distracting) -->
-    <div class="absolute inset-0 pointer-events-none select-none overflow-hidden z-0 font-stencil text-[#8C9097]/25">
-      <!-- Top-Right Coordinates & System Spec -->
-      <div class="absolute top-8 right-8 text-[9px] tracking-widest text-right hidden sm:block">
-        <div>[SYS_LAT: 38.88°N // LONG: 121.04°E]</div>
-        <div class="text-[8px] text-[#A8A59C]/20">REF_CAD_MATRIX :: REV-2.4.1</div>
-      </div>
-
-      <!-- Vertical Drafting Spec Left -->
-      <div class="absolute top-28 left-4 text-[9px] [writing-mode:vertical-lr] tracking-widest uppercase hidden md:block text-[#8C9097]/20">
-        <span>CHASSIS_SPEC // AL-6061 // TOLERANCE ±0.002</span>
-      </div>
-
-      <!-- Mid-Screen Floating Architectural Notes -->
-      <div class="absolute top-[42%] left-8 text-[8px] tracking-wider hidden lg:block text-[#A8A59C]/18 max-w-[200px] leading-relaxed">
-        SECTION_03 // CAD_GROUND_STABILITY: NOMINAL.<br />
-        BUFFER_STREAM_ISOLATION: 100% OK.
-      </div>
-
-      <!-- Vertical Telemetry Right -->
-      <div class="absolute top-52 right-5 text-[8px] [writing-mode:vertical-lr] tracking-widest uppercase hidden md:block text-[#8C9097]/20">
-        <span>FREQ: 144.00MHZ :: TX/RX CHANNEL NOMINAL</span>
-      </div>
-
-      <!-- Bottom Left System Spec -->
-      <div class="absolute bottom-24 left-8 text-[9px] tracking-wider hidden sm:block text-[#8C9097]/20">
-        <div>:: AUTONOMOUS AGENT RUNTIME PROTOCOL</div>
-        <div class="text-[8px] text-[#A8A59C]/18">BUS_ID: TX-3888 // ENCRYPT: PASS_THROUGH</div>
-      </div>
-
-      <!-- Bottom Right Telemetry Memory Register -->
-      <div class="absolute bottom-28 right-10 text-[8px] tracking-widest text-right hidden lg:block text-[#A8A59C]/18">
-        <div>REG_ADDR: 0x7FFE_4A2B_0019</div>
-        <div>HEAP: 42.8MB // LEAK: 0.000%</div>
-      </div>
-
-      <!-- Subtle Corner Drafting Crosshairs -->
-      <div class="absolute top-20 left-[20%] text-[10px] text-[#A8A59C]/18">✕</div>
-      <div class="absolute top-[55%] right-[18%] text-[10px] text-[#A8A59C]/18">✕</div>
-      <div class="absolute bottom-[35%] left-[26%] text-[10px] text-[#A8A59C]/18">+</div>
+  <!-- Pinned Subtle Retro-Futuristic Background HUD Matrix (Zero white cards, zero essay clutter, anchored to viewport) -->
+  <div class="absolute inset-x-0 top-10 bottom-0 pointer-events-none select-none overflow-hidden z-0 font-stencil text-[#7A7E85]">
+    <!-- Top Left Coordinates & Registration -->
+    <div class="absolute top-6 left-6 flex items-center gap-2 text-[10px] tracking-wider hidden sm:flex">
+      <span class="w-1.5 h-1.5 bg-[#FF5500] inline-block"></span>
+      <span class="text-[#60646C] font-bold">CAD_MATRIX // SECTOR_01</span>
+      <span class="text-[#8C9097]">[042, 180]</span>
     </div>
 
+    <!-- Top Right Telemetry & Coordinates -->
+    <div class="absolute top-6 right-8 text-right text-[9px] tracking-widest hidden sm:block">
+      <div class="text-[#60646C] font-mono font-bold">[SYS_LAT: 38.88°N // LONG: 121.04°E]</div>
+      <div class="text-[#8C9097] text-[8px]">FREQ: 144.00MHZ :: CH_01A</div>
+    </div>
+
+    <!-- Left Gutter Vertical Drafting Ribbon -->
+    <div class="absolute top-28 left-4 text-[9px] [writing-mode:vertical-lr] tracking-widest uppercase hidden md:flex items-center gap-3 text-[#7A7E85]">
+      <span class="text-[#FF5500]">■</span>
+      <span class="font-bold">:: SEC_04 // CAD_MATRIX_STREAM :: REV_2.4.1</span>
+      <span class="text-[#9A9EA6]">CHASSIS // AL-6061 // TOL ±0.002</span>
+    </div>
+
+    <!-- Right Gutter Vertical System Ribbon -->
+    <div class="absolute top-28 right-5 text-[9px] [writing-mode:vertical-lr] tracking-widest uppercase hidden md:flex items-center gap-3 text-[#7A7E85]">
+      <span class="font-bold">:: DRAFTING GRID SEAMS NOMINAL :: BUFFER 100% OK</span>
+      <span class="text-[#FF5500]">✕</span>
+      <span class="text-[#9A9EA6]">TEL_BUS // TX-3888 // PASS_THROUGH</span>
+    </div>
+
+    <!-- Mid-Screen Left Framing Viewfinder Reticle -->
+    <div class="absolute top-1/2 -translate-y-1/2 left-8 hidden lg:block text-[#9A9EA6]/75">
+      <div class="text-[10px] font-mono">┌ RETICLE ┐</div>
+      <div class="text-[8px] pl-2 text-[#7A7E85]">REF: TX-3888</div>
+      <div class="text-[10px] font-mono">└ 0x3888 ┘</div>
+    </div>
+
+    <!-- Mid-Screen Right Framing Viewfinder Reticle -->
+    <div class="absolute top-1/2 -translate-y-1/2 right-10 hidden lg:block text-right text-[#9A9EA6]/75">
+      <div class="text-[10px] font-mono">┌ AL-6061 ┐</div>
+      <div class="text-[8px] pr-2 text-[#7A7E85]">STATUS: NOMINAL</div>
+      <div class="text-[10px] font-mono">└ 100% OK ┘</div>
+    </div>
+
+    <!-- Bottom Left System Bus Tag -->
+    <div class="absolute bottom-20 left-6 text-[9px] tracking-wider hidden sm:flex items-center gap-2 text-[#7A7E85]">
+      <span class="w-1.5 h-1.5 bg-[#FF5500] inline-block"></span>
+      <span class="font-bold">AUTONOMOUS AGENT RUNTIME PROTOCOL // BUS: TX-3888</span>
+    </div>
+
+    <!-- Bottom Right Memory & Register Tag -->
+    <div class="absolute bottom-20 right-8 text-[8px] tracking-widest text-right hidden sm:block text-[#7A7E85]">
+      <div class="font-mono">REG_ADDR: 0x7FFE_4A2B_0019</div>
+      <div class="text-[#9A9EA6]">HEAP: 42.8MB // LEAK: 0.000%</div>
+    </div>
+
+    <!-- Subtle Drafting Crosshairs scattered across canvas -->
+    <div class="absolute top-24 left-[24%] text-[11px] text-[#8C9097]/40 select-none">✕</div>
+    <div class="absolute top-[62%] left-[28%] text-[11px] text-[#8C9097]/40 select-none">+</div>
+    <div class="absolute top-[32%] right-[22%] text-[11px] text-[#8C9097]/40 select-none">✕</div>
+    <div class="absolute bottom-[28%] right-[26%] text-[11px] text-[#8C9097]/40 select-none">+</div>
+  </div>
+
+  <!-- Content Viewport -->
+  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto relative z-10 bg-transparent {messages.length === 0 ? 'p-0 flex flex-col' : 'p-4 sm:p-6 pb-28 sm:pb-32'}">
     {#if messages.length === 0}
       <!-- Cyber-Industrial Blueprint Grid (CIB-Grid) Full-Bleed Cockpit Deck -->
       <div 
         role="region"
         aria-label="Blueprint Cockpit Deck"
         onmousemove={handleDeckMouseMove}
-        class="w-full flex-1 flex relative z-10 min-h-0"
+        class="w-full flex-1 flex min-h-0"
       >
         <!-- Left Technical Drafting Rail (Exact ChainGPT Labs ✕ Gutter) -->
         <div class="hidden md:flex w-11 border-r border-[#D0CEC7] bg-[#ECEAE5] flex-col items-center justify-between py-4 shrink-0 select-none">
@@ -959,13 +980,14 @@
               {/if}
             </div>
           {:else}
-            <!-- Agent Message with Custom Avatar & Traits -->
+            <!-- Agent Message with Custom Avatar & Traits (Persisted per message history) -->
+            {@const msgPersona = (msg.persona_id && personas?.find(p => p.id === msg.persona_id)) || (msg.persona_name ? { id: msg.persona_id, name: msg.persona_name, avatar: msg.persona_avatar, traits: msg.persona_traits, preferred_model: msg.model_used } : activePersona)}
             <div class="flex items-start gap-2.5 sm:gap-3 group w-full">
               <!-- Avatar Persona with Attached Mini Pixel Robot Companion -->
               <div class="shrink-0 mt-0.5 flex flex-col items-center gap-1">
                 <AvatarView
-                  avatar={activePersona?.avatar}
-                  name={activePersona?.name}
+                  avatar={msgPersona?.avatar}
+                  name={msgPersona?.name}
                   size="md"
                   className="rounded-none border border-[#D0CEC7] shadow-2xs"
                 />
@@ -973,27 +995,27 @@
                   isBusy={msg.isStreaming}
                   isUserTyping={promptInput.trim().length > 0}
                   messageText={msg.text}
-                  personaTraits={activePersona?.traits}
+                  personaTraits={msgPersona?.traits}
                 />
               </div>
 
               <div class="flex-1 flex flex-col gap-1.5 min-w-0 max-w-[96%] sm:max-w-[92%]">
                 <!-- Header Username, Traits & Model -->
                 <div class="flex items-center gap-2 text-[10px] font-tech text-[#60646C] px-1 min-w-0">
-                  <span class="font-bold text-[#111315] uppercase tracking-wider truncate shrink-0 max-w-[120px] sm:max-w-[200px]" title={activePersona?.name || 'zhiEnd Assistant'}>
-                    :: {activePersona?.name || 'ZHIEND CORE'}
+                  <span class="font-bold text-[#111315] uppercase tracking-wider truncate shrink-0 max-w-[120px] sm:max-w-[200px]" title={msgPersona?.name || 'zhiEnd Assistant'}>
+                    :: {msgPersona?.name || 'ZHIEND CORE'}
                   </span>
-                  {#if activePersona?.traits}
+                  {#if msgPersona?.traits}
                     <span 
                       class="text-[9px] px-2 py-0.5 rounded-none bg-[#E5E3DD] border border-[#D0CEC7] text-[#60646C] font-stencil truncate max-w-[140px] sm:max-w-[280px] md:max-w-[360px]"
-                      title={`Sifat & Karakteristik: ${activePersona.traits}`}
+                      title={`Sifat & Karakteristik: ${msgPersona.traits}`}
                     >
-                      {activePersona.traits}
+                      {msgPersona.traits}
                     </span>
                   {/if}
-                  {#if activePersona?.preferred_model}
+                  {#if msg.model_used || msgPersona?.preferred_model}
                     <span class="text-[9px] text-[#8C9097] font-stencil hidden md:inline shrink-0 font-medium">
-                      [{activePersona.preferred_model}]
+                      [{msg.model_used || msgPersona?.preferred_model}]
                     </span>
                   {/if}
                 </div>
@@ -1079,7 +1101,7 @@
                                       {/if}
 
                                       {#if st.command}
-                                        <code class="px-1.5 py-0.2 rounded-none bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] max-w-sm truncate font-semibold">
+                                        <code class="px-1.5 py-0.2 rounded-none bg-[#101114] border border-[#2A2B30] text-[10px] font-mono text-[#86efac] max-w-sm truncate font-semibold shadow-2xs">
                                           {st.command}
                                         </code>
                                       {/if}

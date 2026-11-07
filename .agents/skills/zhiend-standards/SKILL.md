@@ -48,11 +48,19 @@ The standards are modularly split into two specialized skills:
   - `--crt-void`: `#101114` (Deep charcoal CRT well for dot-matrix screens & viewfinder HUD boxes)
   - `--ink-basalt`: `#111315` (High-contrast basalt black for headlines, labels, and primary text)
   - `--stencil-slate`: `#60646C` (Technical stencil metadata, sub-labels, and timestamps)
-- **CAD Dot Grid & Subtle Background HUD Matrix ("Random Grid tapi Ada Keteraturan")**:
+- **Clean CAD Dot Grid & Pinned Subtle Background HUD Matrix**:
   - Warm off-white concrete chassis (`#ECEAE5`) with subtle 32px CAD dot matrix grid, sparse asymmetrical drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), left rail (`✕`), and right rail (`◎`).
-  - Subtle futuristic retro-HUD background text (coordinates, drafting notes, telemetry registers) placed horizontally and vertically (`writing-mode:vertical-lr`) at very low opacity (`text-[#8C9097]/25`, `pointer-events-none`) for atmospheric depth without user distraction.
+  - Viewport-anchored subtle HUD telemetry matrix: raw coordinates (`[042, 180]`, `[SYS_LAT: 38.88°N // LONG: 121.04°E]`), vertical ribbons (`:: SEC_04 // CAD_MATRIX_STREAM :: REV_2.4.1`), corner brackets (`┌ ┐`, `└ ┘`), and drafting crosshairs (`✕`, `+`, `■`).
+  - Strictly NO white background panels/cards (`bg-[#FCFCFA]`) and NO long essay paragraphs in the background.
+  - Pinned to the non-scrolling viewport layer so scrolling through long chat history never leaves telemetry behind.
+  - **Per-Message Persona History Persistence**: Mid-session persona switches apply to future responses only; all historical messages preserve the exact avatar, name, and traits active when they were generated.
 - **Mini Pixel Robot Avatar Companion (`PixelRobotAvatarBuddy`)**:
-  - Mounted directly under the persona avatar in chat. Super-expressive states: natural blink, looking down at chat box when typing, confused expression (`? ~`) during loading, smiling on hover (`^ ^`), and content mood matching (playful `★ <`, coding `■ ■`, success `★ ★`, error `✕ ✕`, curious `• ?`).
+  - Mounted directly under the persona avatar in chat. Soft harmonized colors (`#E5E3DD` putty chassis, neutral bezel, matte CRT) so the persona photo remains the focal star.
+  - **Super-Expressive & Animated (Never Static)**: Autonomously cycles through rich emotional states: love/hearts (`♥ ♥`), happy (`^ ^`), gentle smile (`˘ ˘`), angry (`\ /`), sad/tears (`T T`), blushing shy (`> <` with `· ·`), surprised (`O O`), wink (`★ <`), sleepy (`- -`), and curious (`• ?`).
+  - **Dynamic Gaze Kinetics**: Autonomous looking around every 2–4.5s (left `◄ ◄`, right `► ►`, up `▲ ▲`, down `▼ ▼`, blinks `─ ─`), looking down at chat box during user typing (`▼ ▼`), calculating (`? ~`) during loading, and love (`♥ ♥`) on hover.
+- **Terminal, Bash, Code, & Diff Deep Black CRT Palette**:
+  - All terminal outputs, bash badges, markdown code blocks, and source control file diffs strictly use deep obsidian CRT black (`bg-[#101114] border border-[#2A2B30] text-[#DCDAD4] crt-screen`) matching `LIVE TELEMETRY & PACKET STREAM`. Strictly zero white backgrounds for code or diffs.
+  - Syntax highlighted diffs: additions `text-emerald-400 bg-emerald-950/30`, deletions `text-rose-400 bg-rose-950/30`, headers `text-sky-400 bg-sky-950/25`.
 - **Chat UX & Prompt Revision**:
   - The delete/purge button must NEVER be in the bottom input bar next to DISPATCH (it is safely kept in the sub-header).
   - The last user chat bubble features an inline `[EDIT PROMPT]` mode, enabling prompt updates and automated AI response regeneration.

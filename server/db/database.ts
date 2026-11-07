@@ -138,6 +138,10 @@ function initTables(db: Database.Database): void {
     db.prepare('ALTER TABLE chat_sessions ADD COLUMN conversation_id TEXT').run();
   } catch {}
 
+  try {
+    db.prepare('ALTER TABLE messages ADD COLUMN persona_id TEXT').run();
+  } catch {}
+
   // Update default persona traits if missing
   try {
     db.prepare("UPDATE personas SET traits = 'Solutif, Teliti, & Adaptif' WHERE id = 'persona-default' AND (traits IS NULL OR traits = '')").run();
@@ -1259,6 +1263,7 @@ export function getSessionMessages(sessionId: string): ChatMessageRecord[] {
       images,
       model_used: r.model_used,
       tokens_used: r.tokens_used,
+      persona_id: r.persona_id || null,
       created_at: r.created_at
     };
   });
@@ -1290,6 +1295,7 @@ export function saveMessageToDb(msg: {
   images?: string[];
   model_used?: string;
   tokens_used?: number;
+  persona_id?: string | null;
 }): ChatMessageRecord {
   const db = getDb();
   const id = msg.id || 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
@@ -1307,8 +1313,8 @@ export function saveMessageToDb(msg: {
   const textContent = msg.text !== undefined && msg.text !== null ? msg.text : '';
 
   db.prepare(`
-    INSERT OR REPLACE INTO messages (id, session_id, sender, text, thought, steps_json, images_json, model_used, tokens_used)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT OR REPLACE INTO messages (id, session_id, sender, text, thought, steps_json, images_json, model_used, tokens_used, persona_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     sessId,
@@ -1318,7 +1324,8 @@ export function saveMessageToDb(msg: {
     stepsJson,
     imagesJson,
     msg.model_used || null,
-    msg.tokens_used || 0
+    msg.tokens_used || 0,
+    msg.persona_id || null
   );
 
   // Auto-update generic title to the user prompt snippet

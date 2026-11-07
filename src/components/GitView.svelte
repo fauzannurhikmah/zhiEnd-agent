@@ -242,20 +242,43 @@
       </div>
     </div>
 
-    <!-- Right: Diff Viewer -->
-    <div class="relative flex flex-col min-h-0 bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-4 overflow-hidden shadow-2xs">
+    <!-- Right: Diff Viewer (Deep Black CRT Terminal Styling) -->
+    <div class="relative flex flex-col min-h-0 bg-[#101114] border border-[#2A2B30] rounded-none p-4 overflow-hidden shadow-2xs crt-screen">
       <span class="reg-dot reg-dot-tr"></span>
-      <div class="flex items-center justify-between pb-2.5 border-b border-[#D0CEC7] text-xs font-stencil">
-        <span class="text-[#111315] font-bold truncate">
-          {selectedFile ? selectedFile : 'Pilih file untuk diff'}
+      <!-- Scanline Texture Overlay -->
+      <div class="absolute inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.35)_50%)] bg-[length:100%_3px]"></div>
+
+      <div class="flex items-center justify-between pb-2.5 border-b border-[#2A2B30] text-xs font-stencil relative z-10">
+        <span class="text-[#D0D4DC] font-bold truncate flex items-center gap-2">
+          <span class="w-1.5 h-1.5 bg-[#FF5500] inline-block"></span>
+          {selectedFile ? selectedFile : 'PILIH FILE UNTUK INSPEKSI DIFF'}
         </span>
-        <span class="text-[10px] uppercase px-2 py-0.5 rounded-none bg-[#E5E3DD] text-[#60646C] border border-[#D0CEC7] font-bold">
-          Diff Viewer
+        <span class="text-[10px] uppercase px-2 py-0.5 rounded-none bg-[#18191D] text-[#8C9097] border border-[#2A2B30] font-bold">
+          DIFF TELEMETRY
         </span>
       </div>
 
-      <div class="flex-1 overflow-y-auto pt-3 font-stencil text-xs leading-relaxed text-[#111315] whitespace-pre overflow-x-auto">
-        {activeDiff || 'Tidak ada perubahan yang dipilih.'}
+      <div class="flex-1 overflow-y-auto pt-3 font-mono text-xs leading-relaxed text-[#D0D4DC] whitespace-pre overflow-x-auto custom-scrollbar select-text relative z-10">
+        {#if activeDiff}
+          {#each activeDiff.split('\n') as diffLine}
+            {#if diffLine.startsWith('+') && !diffLine.startsWith('+++')}
+              <div class="text-emerald-400 bg-emerald-950/30 px-1">{diffLine}</div>
+            {:else if diffLine.startsWith('-') && !diffLine.startsWith('---')}
+              <div class="text-rose-400 bg-rose-950/30 px-1">{diffLine}</div>
+            {:else if diffLine.startsWith('@@')}
+              <div class="text-sky-400 bg-sky-950/25 px-1 font-bold">{diffLine}</div>
+            {:else if diffLine.startsWith('diff --git') || diffLine.startsWith('index ')}
+              <div class="text-[#8C9097] px-1 font-bold">{diffLine}</div>
+            {:else}
+              <div class="text-[#A8A59C] px-1">{diffLine}</div>
+            {/if}
+          {/each}
+        {:else}
+          <div class="text-[#666] italic flex items-center gap-2 py-4 px-1">
+            <span class="inline-block w-2 h-3 bg-[#33FF33] animate-retro-cursor"></span>
+            <span>Standby. Pilih file yang dimodifikasi di sebelah kiri untuk melihat diff perubahan kode.</span>
+          </div>
+        {/if}
       </div>
     </div>
   </div>

@@ -350,17 +350,25 @@
     try {
       const res = await api.getChatMessages(sessionId);
       if (res.messages && res.messages.length > 0) {
-        messages = res.messages.map((m: any) => ({
-          id: m.id,
-          sender: m.sender,
-          text: m.text,
-          timestamp: new Date(m.created_at).getTime(),
-          tools: [],
-          steps: m.steps || [],
-          thought: m.thought || "",
-          images: m.images || [],
-          isStreaming: false,
-        }));
+        messages = res.messages.map((m: any) => {
+          const matchedPersona = m.persona_id ? personas.find((p) => p.id === m.persona_id) : null;
+          return {
+            id: m.id,
+            sender: m.sender,
+            text: m.text,
+            timestamp: new Date(m.created_at).getTime(),
+            tools: [],
+            steps: m.steps || [],
+            thought: m.thought || "",
+            images: m.images || [],
+            isStreaming: false,
+            persona_id: m.persona_id || null,
+            persona_name: matchedPersona?.name || null,
+            persona_avatar: matchedPersona?.avatar || null,
+            persona_traits: matchedPersona?.traits || null,
+            model_used: m.model_used || null,
+          };
+        });
       } else if (forceReset) {
         messages = [];
       }
@@ -488,6 +496,9 @@
     socket.on("agent_task_start", (data) => {
       isAgentBusy = true;
       addLog(`[Task Started] ${data.prompt.slice(0, 60)}...`);
+      const currentPersona = data.personaId 
+        ? personas.find((p) => p.id === data.personaId) 
+        : activePersona;
       messages = [
         ...messages,
         {
@@ -499,6 +510,11 @@
           steps: [],
           thought: "",
           isStreaming: true,
+          persona_id: currentPersona?.id || null,
+          persona_name: currentPersona?.name || null,
+          persona_avatar: currentPersona?.avatar || null,
+          persona_traits: currentPersona?.traits || null,
+          model_used: data.model || currentPersona?.preferred_model || null,
         },
       ];
     });
@@ -583,6 +599,18 @@
           }
           if (data.thought) {
             last.thought = data.thought;
+          }
+          if (data.personaId) {
+            last.persona_id = data.personaId;
+            const matched = personas.find((p) => p.id === data.personaId);
+            if (matched) {
+              last.persona_name = matched.name;
+              last.persona_avatar = matched.avatar;
+              last.persona_traits = matched.traits;
+            }
+          }
+          if (data.model) {
+            last.model_used = data.model;
           }
           last.isStreaming = false;
           messages = [...messages];
@@ -1015,6 +1043,7 @@
           {config}
           {activeSession}
           {activePersona}
+          {personas}
           onSendMessage={handleSendMessage}
           onEditLastMessage={handleEditLastMessage}
           onCancelTask={async () => {

@@ -133,6 +133,11 @@ export interface ChatMessage {
   thought?: string;
   images?: string[];
   isStreaming?: boolean;
+  persona_id?: string | null;
+  persona_name?: string | null;
+  persona_avatar?: string | null;
+  persona_traits?: string | null;
+  model_used?: string | null;
 }
 
 export interface FileItem {

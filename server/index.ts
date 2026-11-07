@@ -1510,7 +1510,8 @@ try {
         text: data.response,
         thought: data.thought,
         steps: data.steps,
-        model_used: data.model
+        model_used: data.model,
+        persona_id: data.personaId || (targetSessionId ? getChatSessionById(targetSessionId)?.persona_id : null)
       });
       if (data.conversationId) {
         updateChatSessionConversationId(targetSessionId, data.conversationId);
