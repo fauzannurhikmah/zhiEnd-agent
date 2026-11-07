@@ -108,12 +108,14 @@
 
   // HUD Cockpit Live Coordinate Tracking
   let hudCoord = $state({ x: 420, y: 180 });
+  let deckMousePos = $state<{ x: number; y: number } | null>(null);
   function handleDeckMouseMove(e: MouseEvent) {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     hudCoord = {
       x: Math.max(0, Math.round(e.clientX - rect.left)),
       y: Math.max(0, Math.round(e.clientY - rect.top))
     };
+    deckMousePos = { x: e.clientX, y: e.clientY };
   }
 
   function toggleVoiceInput() {
@@ -689,6 +691,7 @@
               isListening={isListening} 
               hasError={Boolean(voiceError)} 
               size="lg" 
+              mousePos={deckMousePos}
             />
             <div class="mt-4 flex items-center gap-1.5 font-pixel text-[10px] text-[#5C6066]">
               <span class="text-[#FF5500]">::</span>
