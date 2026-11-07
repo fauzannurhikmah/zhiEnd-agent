@@ -94,9 +94,9 @@ export function renderImageCard(alt: string, rawUrl: string): string {
   const displayTitle = (alt && alt.trim()) ? alt.trim() : fileName;
 
   return `
-    <div class="my-3 rounded-xl overflow-hidden border border-[#C8C5BC] bg-[#FCFCFA] shadow-sm max-w-[540px] group/imgcard animate-in fade-in duration-200">
+    <div class="my-3 rounded-xl overflow-hidden border border-[#D0CEC7] bg-[#FCFCFA] shadow-sm max-w-[540px] group/imgcard animate-in fade-in duration-200">
       <div 
-        class="relative bg-[#E9E7E0] overflow-hidden flex items-center justify-center max-h-[500px] cursor-zoom-in" 
+        class="relative bg-[#ECEAE5] overflow-hidden flex items-center justify-center max-h-[500px] cursor-zoom-in" 
         onclick="window.__zhiEndZoomImage && window.__zhiEndZoomImage('${escapeHtml(webUrl)}')"
         title="Klik gambar untuk perbesar & unduh"
       >
@@ -107,7 +107,7 @@ export function renderImageCard(alt: string, rawUrl: string): string {
           class="w-full h-auto max-h-[500px] object-contain transition-transform duration-300 group-hover/imgcard:scale-[1.01]"
         />
         <div class="absolute inset-0 bg-black/20 opacity-0 group-hover/imgcard:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-          <span class="px-3.5 py-1.5 rounded-lg bg-[#FCFCFA] text-[11px] font-bold text-[#191B1D] border border-[#C8C5BC] flex items-center gap-1.5 shadow-md">
+          <span class="px-3.5 py-1.5 rounded-lg bg-[#FCFCFA] text-[11px] font-bold text-[#111315] border border-[#D0CEC7] flex items-center gap-1.5 shadow-md">
             <svg class="w-3.5 h-3.5 text-[#FF5500]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
             </svg>
@@ -132,8 +132,8 @@ export function renderMarkdown(markdown: string): string {
     const escaped = escapeHtml(cleanCode);
 
     const html = `
-      <div class="my-3 rounded-xl border border-[#C8C5BC] bg-[#FCFCFA] overflow-hidden shadow-xs">
-        <div class="flex items-center justify-between px-3.5 py-1.5 bg-[#E9E7E0] border-b border-[#C8C5BC] text-[11px] font-mono text-[#5C6066] select-none">
+      <div class="my-3 rounded-xl border border-[#D0CEC7] bg-[#FCFCFA] overflow-hidden shadow-xs">
+        <div class="flex items-center justify-between px-3.5 py-1.5 bg-[#ECEAE5] border-b border-[#D0CEC7] text-[11px] font-mono text-[#5C6066] select-none">
           <span class="text-[#FF5500] font-bold tracking-wider uppercase text-[10px] flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500]"></span>
             ${cleanLang}
@@ -141,12 +141,12 @@ export function renderMarkdown(markdown: string): string {
           <button
             type="button"
             onclick="navigator.clipboard.writeText(decodeURIComponent('${encoded}')).then(() => { const el = this; el.innerText = '✓ Tersalin!'; setTimeout(() => { el.innerText = 'Salin'; }, 2000); })"
-            class="px-2 py-0.5 rounded bg-[#FCFCFA] hover:bg-[#FF5500] hover:text-white border border-[#C8C5BC] text-[#191B1D] font-mono transition text-[10px] cursor-pointer"
+            class="px-2 py-0.5 rounded bg-[#FCFCFA] hover:bg-[#FF5500] hover:text-white border border-[#D0CEC7] text-[#111315] font-mono transition text-[10px] cursor-pointer"
           >
             Salin
           </button>
         </div>
-        <pre class="p-3 text-[12px] font-mono text-[#191B1D] overflow-x-auto leading-relaxed select-text bg-[#FCFCFA]"><code>${escaped}</code></pre>
+        <pre class="p-3 text-[12px] font-mono text-[#111315] overflow-x-auto leading-relaxed select-text bg-[#FCFCFA]"><code>${escaped}</code></pre>
       </div>
     `.trim();
 
@@ -214,20 +214,20 @@ export function renderMarkdown(markdown: string): string {
         rows.push(parseTableRow(lines[i]));
       }
 
-      let tableHtml = `< div class="my-3 overflow-x-auto rounded-xl border border-[#C8C5BC] bg-[#FCFCFA] shadow-xs" >
-        <table class="w-full border-collapse text-[12px] text-[#191B1D]" >
+      let tableHtml = `<div class="my-3 overflow-x-auto rounded-xl border border-[#D0CEC7] bg-[#FCFCFA] shadow-xs">
+        <table class="w-full border-collapse text-[12px] text-[#111315]">
           <thead>
-            <tr class="bg-[#E9E7E0] border-b border-[#C8C5BC] text-[11px] font-bold text-[#191B1D] uppercase tracking-wider select-none">`;
+            <tr class="bg-[#ECEAE5] border-b border-[#D0CEC7] text-[11px] font-bold text-[#111315] uppercase tracking-wider select-none font-mono">`;
 
       headerCells.forEach((th, idx) => {
         const align = alignments[idx] || 'text-left';
         tableHtml += `<th class="px-3.5 py-2.5 whitespace-nowrap ${align}">${parseInline(th)}</th>`;
       });
 
-      tableHtml += `</tr></thead><tbody class="divide-y divide-[#C8C5BC]/60 font-sans">`;
+      tableHtml += `</tr></thead><tbody class="divide-y divide-[#D0CEC7]/60 font-sans">`;
 
       rows.forEach(row => {
-        tableHtml += `<tr class="hover:bg-[#E9E7E0]/50 transition-colors">`;
+        tableHtml += `<tr class="hover:bg-[#ECEAE5]/50 transition-colors">`;
         headerCells.forEach((_, idx) => {
           const td = row[idx] !== undefined ? row[idx] : '';
           const align = alignments[idx] || 'text-left';
@@ -246,7 +246,7 @@ export function renderMarkdown(markdown: string): string {
     if (h1Match) {
       if (inUl) { outputLines.push('</ul>'); inUl = false; }
       if (inOl) { outputLines.push('</ol>'); inOl = false; }
-      outputLines.push(`<h1 class="text-lg font-bold text-[#191B1D] mt-4 mb-2 pb-1 border-b border-[#C8C5BC] tracking-tight">${parseInline(h1Match[1])}</h1>`);
+      outputLines.push(`<h1 class="text-lg font-bold text-[#111315] mt-4 mb-2 pb-1 border-b border-[#D0CEC7] tracking-tight">${parseInline(h1Match[1])}</h1>`);
       continue;
     }
 
@@ -254,7 +254,7 @@ export function renderMarkdown(markdown: string): string {
     if (h2Match) {
       if (inUl) { outputLines.push('</ul>'); inUl = false; }
       if (inOl) { outputLines.push('</ol>'); inOl = false; }
-      outputLines.push(`<h2 class="text-base font-bold text-[#191B1D] mt-3.5 mb-1.5 tracking-tight flex items-center gap-1.5">${parseInline(h2Match[1])}</h2>`);
+      outputLines.push(`<h2 class="text-base font-bold text-[#111315] mt-3.5 mb-1.5 tracking-tight flex items-center gap-1.5">${parseInline(h2Match[1])}</h2>`);
       continue;
     }
 
@@ -279,7 +279,7 @@ export function renderMarkdown(markdown: string): string {
     if (quoteMatch) {
       if (inUl) { outputLines.push('</ul>'); inUl = false; }
       if (inOl) { outputLines.push('</ol>'); inOl = false; }
-      outputLines.push(`<blockquote class="border-l-2 border-[#FF5500] pl-3.5 py-1.5 my-2 bg-[#E9E7E0]/70 text-[#191B1D] text-xs italic rounded-r-lg border border-l-2 border-[#C8C5BC]">${parseInline(quoteMatch[1])}</blockquote>`);
+      outputLines.push(`<blockquote class="border-l-2 border-[#FF5500] pl-3.5 py-1.5 my-2 bg-[#ECEAE5]/70 text-[#111315] text-xs italic rounded-r-lg border border-l-2 border-[#D0CEC7]">${parseInline(quoteMatch[1])}</blockquote>`);
       continue;
     }
 
@@ -289,7 +289,7 @@ export function renderMarkdown(markdown: string): string {
       if (inOl) { outputLines.push('</ol>'); inOl = false; }
       if (!inUl) { outputLines.push('<ul class="my-1.5 space-y-1">'); inUl = true; }
       outputLines.push(`
-        <li class="flex items-start gap-2.5 text-[#191B1D] text-xs leading-relaxed">
+        <li class="flex items-start gap-2.5 text-[#111315] text-xs leading-relaxed">
           <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] mt-1.5 shrink-0"></span>
           <span class="flex-1">${parseInline(ulMatch[2])}</span>
         </li>
@@ -303,8 +303,8 @@ export function renderMarkdown(markdown: string): string {
       if (inUl) { outputLines.push('</ul>'); inUl = false; }
       if (!inOl) { outputLines.push('<ol class="my-1.5 space-y-1">'); inOl = true; }
       outputLines.push(`
-        <li class="flex items-start gap-2 text-[#191B1D] text-xs leading-relaxed">
-          <span class="px-1.5 py-0.2 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#FF5500] font-bold mt-0.5 shrink-0">${olMatch[1]}</span>
+        <li class="flex items-start gap-2 text-[#111315] text-xs leading-relaxed">
+          <span class="px-1.5 py-0.2 rounded bg-[#ECEAE5] border border-[#D0CEC7] text-[10px] font-mono text-[#FF5500] font-bold mt-0.5 shrink-0">${olMatch[1]}</span>
           <span class="flex-1">${parseInline(olMatch[2])}</span>
         </li>
       `.trim());
@@ -341,7 +341,7 @@ export function renderMarkdown(markdown: string): string {
     // Normal paragraph
     if (inUl) { outputLines.push('</ul>'); inUl = false; }
     if (inOl) { outputLines.push('</ol>'); inOl = false; }
-    outputLines.push(`<p class="leading-relaxed text-xs text-[#191B1D]">${inlineContent}</p>`);
+    outputLines.push(`<p class="leading-relaxed text-xs text-[#111315]">${inlineContent}</p>`);
   }
 
   if (inUl) outputLines.push('</ul>');
@@ -360,7 +360,7 @@ function parseInline(text: string): string {
   const inlineCodes: string[] = [];
   let s = text.replace(/`([^`]+)`/g, (_, code) => {
     const idx = inlineCodes.length;
-    inlineCodes.push(`<code class="px-1.5 py-0.5 rounded-md bg-[#E9E7E0] border border-[#C8C5BC] text-[#FF5500] font-mono text-[11px] font-bold shadow-xs">${escapeHtml(code)}</code>`);
+    inlineCodes.push(`<code class="px-1.5 py-0.5 rounded-md bg-[#ECEAE5] border border-[#D0CEC7] text-[#FF5500] font-mono text-[11px] font-bold shadow-xs">${escapeHtml(code)}</code>`);
     return `\uE000INLINECODE${idx}\uE000`;
   });
 
@@ -387,18 +387,12 @@ function parseInline(text: string): string {
     if (cleanUrl.startsWith('file:///')) {
       const cleanPath = cleanUrl.replace(/^file:\/\/\//, '');
       const isImg = isImageExtension(cleanPath);
-      const { downloadUrl, fileName } = resolveMediaUrl(cleanUrl);
 
       if (isImg) {
         return '';
       }
 
-      const html = `< span class="inline-flex items-center gap-1 px-1.5 py-0.5 mx-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-mono text-[11px]" title = "${escapeHtml(cleanPath)}" >
-        <svg class="w-3 h-3 text-[#FF5500] shrink-0" fill = "none" viewBox = "0 0 24 24" stroke = "currentColor" >
-          <path stroke - linecap="round" stroke - linejoin="round" stroke - width="2" d = "M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            < span class="truncate max-w-[220px]" > ${ renderedLabel } </span>
-              </span>`;
+      const html = `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 mx-0.5 rounded bg-[#ECEAE5] border border-[#D0CEC7] text-[#111315] font-mono text-[11px]" title="${escapeHtml(cleanPath)}"><svg class="w-3 h-3 text-[#FF5500] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><span class="truncate max-w-[220px]">${renderedLabel}</span></span>`;
       linkTokens.push(html);
       return `\uE001LINK${tokenIdx}\uE001`;
     }
@@ -407,28 +401,12 @@ function parseInline(text: string): string {
       // If external link points directly to image and label is filename, allow download
       if (isImageExtension(cleanUrl)) {
         const { downloadUrl, fileName } = resolveMediaUrl(cleanUrl);
-        const html = `< span class="inline-flex items-center gap-1.5 px-2 py-0.5 mx-0.5 rounded-lg bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-mono text-[11px]" >
-          <svg class="w-3.5 h-3.5 text-[#FF5500] shrink-0" fill = "none" viewBox = "0 0 24 24" stroke = "currentColor" >
-            <path stroke - linecap="round" stroke - linejoin="round" stroke - width="2" d = "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-                  <a href="${escapeHtml(cleanUrl)}" target = "_blank" rel = "noopener noreferrer" class="truncate max-w-[200px] text-[#FF5500] hover:underline" > ${ renderedLabel } </a>
-                    < a href = "${escapeHtml(downloadUrl)}" download = "${escapeHtml(fileName)}" target = "_blank" rel = "noopener noreferrer" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 hover:bg-orange-200 text-[#FF5500] transition cursor-pointer text-[10px] font-bold" title = "Download ${escapeHtml(fileName)}" >
-                      <svg class="w-3 h-3" fill = "none" viewBox = "0 0 24 24" stroke = "currentColor" >
-                        <path stroke - linecap="round" stroke - linejoin="round" stroke - width="2" d = "M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                          </svg>
-                          < span > Unduh </span>
-                          </a>
-                          </span>`;
+        const html = `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 mx-0.5 rounded-lg bg-[#ECEAE5] border border-[#D0CEC7] text-[#111315] font-mono text-[11px]"><svg class="w-3.5 h-3.5 text-[#FF5500] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg><a href="${escapeHtml(cleanUrl)}" target="_blank" rel="noopener noreferrer" class="truncate max-w-[200px] text-[#FF5500] hover:underline">${renderedLabel}</a><a href="${escapeHtml(downloadUrl)}" download="${escapeHtml(fileName)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-orange-100 hover:bg-orange-200 text-[#FF5500] transition cursor-pointer text-[10px] font-bold" title="Download ${escapeHtml(fileName)}"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg><span>Unduh</span></a></span>`;
         linkTokens.push(html);
         return `\uE001LINK${tokenIdx}\uE001`;
       }
 
-      const html = `< a href = "${escapeHtml(cleanUrl)}" target = "_blank" rel = "noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 rounded-lg bg-orange-50 hover:bg-orange-100 border border-orange-200 text-[#FF5500] font-medium transition cursor-pointer group shadow-xs" >
-        <span class="underline decoration-orange-300 underline-offset-2" > ${ renderedLabel } </span>
-          < svg class="w-3 h-3 text-[#FF5500] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill = "none" viewBox = "0 0 24 24" stroke = "currentColor" >
-            <path stroke - linecap="round" stroke - linejoin="round" stroke - width="2" d = "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-              </a>`;
+      const html = `<a href="${escapeHtml(cleanUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 rounded-lg bg-orange-50 hover:bg-orange-100 border border-orange-200 text-[#FF5500] font-medium transition cursor-pointer group shadow-2xs"><span class="underline decoration-orange-300 underline-offset-2">${renderedLabel}</span><svg class="w-3 h-3 text-[#FF5500] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>`;
       linkTokens.push(html);
       return `\uE001LINK${tokenIdx}\uE001`;
     }
@@ -448,19 +426,14 @@ function parseInline(text: string): string {
       cleanUrl = cleanUrl.slice(0, -trailingPunct.length);
     }
     const tokenIdx = linkTokens.length;
-    const html = `< a href = "${escapeHtml(cleanUrl)}" target = "_blank" rel = "noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 rounded-lg bg-orange-50 hover:bg-orange-100 border border-orange-200 text-[#FF5500] font-medium transition cursor-pointer group shadow-xs" >
-      <span class="underline decoration-orange-300 underline-offset-2" > ${ escapeHtml(cleanUrl) } </span>
-        < svg class="w-3 h-3 text-[#FF5500] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill = "none" viewBox = "0 0 24 24" stroke = "currentColor" >
-          <path stroke - linecap="round" stroke - linejoin="round" stroke - width="2" d = "M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            </a>`;
+    const html = `<a href="${escapeHtml(cleanUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 mx-0.5 rounded-lg bg-orange-50 hover:bg-orange-100 border border-orange-200 text-[#FF5500] font-medium transition cursor-pointer group shadow-2xs"><span class="underline decoration-orange-300 underline-offset-2">${escapeHtml(cleanUrl)}</span><svg class="w-3 h-3 text-[#FF5500] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg></a>`;
     linkTokens.push(html);
     return `\uE001LINK${tokenIdx}\uE001${trailingPunct}`;
   });
 
   // 4. Bold (**text** or __text__)
-  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong class="font-bold text-[#191B1D]">$1</strong>');
-  s = s.replace(/(?<=^|[\s(])__([^\n_]+)__(?=$|[\s).,!?])/g, '<strong class="font-bold text-[#191B1D]">$1</strong>');
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, '<strong class="font-bold text-[#111315]">$1</strong>');
+  s = s.replace(/(?<=^|[\s(])__([^\n_]+)__(?=$|[\s).,!?])/g, '<strong class="font-bold text-[#111315]">$1</strong>');
 
   // 5. Italic (*text* or _text_)
   s = s.replace(/(?<=^|[\s(])\*([^*\n]+)\*(?=$|[\s).,!?])/g, '<em class="italic text-[#5C6066]">$1</em>');

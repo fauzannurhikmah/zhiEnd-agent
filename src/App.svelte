@@ -1,27 +1,50 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { io, Socket } from 'socket.io-client';
-  import type { AppConfig, GitStatus, CommitInfo, TunnelStatus, TelegramStatus, WhatsAppStatus, ChatMessage, FileItem, ChatSessionItem, PersonaItem } from './types';
-  import { api, PIN_STORAGE_KEY } from './services/api';
+  import { onMount } from "svelte";
+  import { io, Socket } from "socket.io-client";
+  import type {
+    AppConfig,
+    GitStatus,
+    CommitInfo,
+    TunnelStatus,
+    TelegramStatus,
+    WhatsAppStatus,
+    ChatMessage,
+    FileItem,
+    ChatSessionItem,
+    PersonaItem,
+  } from "./types";
+  import { api, PIN_STORAGE_KEY } from "./services/api";
 
-  import Sidebar from './components/Sidebar.svelte';
-  import ChatView from './components/ChatView.svelte';
-  import GitView from './components/GitView.svelte';
-  import RemoteView from './components/RemoteView.svelte';
-  import FileLogsView from './components/FileLogsView.svelte';
-  import SettingsModal from './components/SettingsModal.svelte';
-  import ProjectModal from './components/ProjectModal.svelte';
-  import PushModal from './components/PushModal.svelte';
-  import PinModal from './components/PinModal.svelte';
-  import ConfirmModal from './components/ConfirmModal.svelte';
-  import NoticeModal from './components/NoticeModal.svelte';
-  import PersonaModal from './components/PersonaModal.svelte';
-  import { dialog } from './services/dialog.svelte';
+  import Sidebar from "./components/Sidebar.svelte";
+  import ChatView from "./components/ChatView.svelte";
+  import GitView from "./components/GitView.svelte";
+  import RemoteView from "./components/RemoteView.svelte";
+  import FileLogsView from "./components/FileLogsView.svelte";
+  import SettingsModal from "./components/SettingsModal.svelte";
+  import ProjectModal from "./components/ProjectModal.svelte";
+  import PushModal from "./components/PushModal.svelte";
+  import PinModal from "./components/PinModal.svelte";
+  import ConfirmModal from "./components/ConfirmModal.svelte";
+  import NoticeModal from "./components/NoticeModal.svelte";
+  import PersonaModal from "./components/PersonaModal.svelte";
+  import { dialog } from "./services/dialog.svelte";
 
-  import { UploadCloud, GitBranch, Play, Square, ExternalLink, MessageSquare, Send, Menu, Terminal, TowerControl, FolderTree } from 'lucide-svelte';
+  import {
+    UploadCloud,
+    GitBranch,
+    Play,
+    Square,
+    ExternalLink,
+    MessageSquare,
+    Send,
+    Menu,
+    Terminal,
+    TowerControl,
+    FolderTree,
+  } from "lucide-svelte";
 
   // Navigation tab
-  let currentTab = $state<'chat' | 'git' | 'remote' | 'files'>('chat');
+  let currentTab = $state<"chat" | "git" | "remote" | "files">("chat");
   let isMobileSidebarOpen = $state(false);
 
   // Application Data States
@@ -32,10 +55,13 @@
   let telegramStatus = $state<TelegramStatus | null>(null);
   let whatsappStatus = $state<WhatsAppStatus | null>(null);
   let projectFiles = $state<FileItem[]>([]);
-  let systemLogs = $state<string[]>(['[System] zhiEnd Agent ready.']);
+  let systemLogs = $state<string[]>(["[System] zhiEnd Agent ready."]);
 
   // Dev Server Quick State
-  let devServer = $state<{ isRunning: boolean; activePorts: { port: number; url: string }[] }>({ isRunning: false, activePorts: [] });
+  let devServer = $state<{
+    isRunning: boolean;
+    activePorts: { port: number; url: string }[];
+  }>({ isRunning: false, activePorts: [] });
   let isStartingDev = $state(false);
 
   // Chat States & Database Sessions
@@ -43,32 +69,40 @@
   let isAgentBusy = $state(false);
   let chatSessions = $state<ChatSessionItem[]>([]);
   let activeSessionId = $state<string | null>(null);
-  let historyScope = $state<'workspace' | 'global'>('workspace');
+  let historyScope = $state<"workspace" | "global">("workspace");
 
   // Personas
   let personas = $state<PersonaItem[]>([]);
   let isPersonaModalOpen = $state(false);
 
   let activeSession = $derived.by(() => {
-    return chatSessions.find(s => s.id === activeSessionId) || null;
+    return chatSessions.find((s) => s.id === activeSessionId) || null;
   });
 
   let activePersona = $derived.by(() => {
-    const curr = chatSessions.find(s => s.id === activeSessionId);
+    const curr = chatSessions.find((s) => s.id === activeSessionId);
     if (curr?.persona_id) {
-      return personas.find(p => p.id === curr.persona_id) || null;
+      return personas.find((p) => p.id === curr.persona_id) || null;
     }
-    return personas.find(p => p.is_default) || personas[0] || null;
+    return personas.find((p) => p.is_default) || personas[0] || null;
   });
 
   // Modals
   let isSettingsOpen = $state(false);
-  let settingsInitialTab = $state<'general' | 'antigravity' | 'ai_providers' | 'telegram' | 'whatsapp' | 'tunnel' | 'voice'>('general');
+  let settingsInitialTab = $state<
+    | "general"
+    | "antigravity"
+    | "ai_providers"
+    | "telegram"
+    | "whatsapp"
+    | "tunnel"
+    | "voice"
+  >("general");
   let isProjectModalOpen = $state(false);
   let isPinModalOpen = $state(false);
   let isPushModalOpen = $state(false);
-  let pushStatus = $state<'idle' | 'running' | 'success' | 'error'>('idle');
-  let pushLogs = $state('');
+  let pushStatus = $state<"idle" | "running" | "success" | "error">("idle");
+  let pushLogs = $state("");
 
   // Reusable Confirmation Modal State
   let confirmDialog = $state<{
@@ -77,16 +111,16 @@
     message: string;
     confirmText?: string;
     cancelText?: string;
-    variant?: 'danger' | 'warning' | 'primary';
+    variant?: "danger" | "warning" | "primary";
     action: () => void | Promise<void>;
   }>({
     isOpen: false,
-    title: '',
-    message: '',
-    confirmText: 'Lanjutkan',
-    cancelText: 'Batal',
-    variant: 'danger',
-    action: () => {}
+    title: "",
+    message: "",
+    confirmText: "Lanjutkan",
+    cancelText: "Batal",
+    variant: "danger",
+    action: () => {},
   });
 
   function showConfirm(options: {
@@ -94,17 +128,17 @@
     message: string;
     confirmText?: string;
     cancelText?: string;
-    variant?: 'danger' | 'warning' | 'primary';
+    variant?: "danger" | "warning" | "primary";
     action: () => void | Promise<void>;
   }) {
     confirmDialog = {
       isOpen: true,
       title: options.title,
       message: options.message,
-      confirmText: options.confirmText || 'Lanjutkan',
-      cancelText: options.cancelText || 'Batal',
-      variant: options.variant || 'danger',
-      action: options.action
+      confirmText: options.confirmText || "Lanjutkan",
+      cancelText: options.cancelText || "Batal",
+      variant: options.variant || "danger",
+      action: options.action,
     };
   }
 
@@ -134,7 +168,7 @@
         }
       }
     } catch (e) {
-      console.warn('Auth check error:', e);
+      console.warn("Auth check error:", e);
     }
 
     // 2. Fetch Initial State only if authorized
@@ -170,7 +204,7 @@
       personas = pRes.personas || [];
       await loadSessions(false);
     } catch (e) {
-      console.error('Error refreshing state:', e);
+      console.error("Error refreshing state:", e);
     }
   }
 
@@ -178,14 +212,22 @@
     if (!activeSessionId) return;
     try {
       await api.updateChatSessionPersona(activeSessionId, persona.id);
-      chatSessions = chatSessions.map(s => s.id === activeSessionId ? { ...s, persona_id: persona.id } : s);
+      chatSessions = chatSessions.map((s) =>
+        s.id === activeSessionId ? { ...s, persona_id: persona.id } : s,
+      );
       addLog(`[Persona Aktif] ${persona.avatar} ${persona.name} diterapkan.`);
     } catch (e) {
-      console.error('Failed to update session persona:', e);
+      console.error("Failed to update session persona:", e);
     }
   }
 
-  async function handleCreatePersona(data: { name: string; avatar: string; traits?: string; system_prompt: string; preferred_model?: string }) {
+  async function handleCreatePersona(data: {
+    name: string;
+    avatar: string;
+    traits?: string;
+    system_prompt: string;
+    preferred_model?: string;
+  }) {
     const res = await api.createPersona(data);
     if (res.persona) {
       personas = [...personas, res.persona];
@@ -201,66 +243,80 @@
       const res = await api.updatePersona(id, data);
       if (res?.success) {
         if (res.persona) {
-          personas = personas.map(p => p.id === id ? res.persona : p);
+          personas = personas.map((p) => (p.id === id ? res.persona : p));
         } else {
           const pRes = await api.getPersonas();
           if (pRes?.personas) {
             personas = pRes.personas;
           } else {
-            personas = personas.map(p => p.id === id ? { ...p, ...data } : p);
+            personas = personas.map((p) =>
+              p.id === id ? { ...p, ...data } : p,
+            );
           }
         }
-        addLog(`[Persona Diperbarui] ${data.name || 'Persona'}`);
+        addLog(`[Persona Diperbarui] ${data.name || "Persona"}`);
       }
     } catch (e) {
-      console.error('Failed to update persona:', e);
+      console.error("Failed to update persona:", e);
     }
   }
 
-  async function handleUpdateBotPersona(platform: 'telegram' | 'whatsapp', personaId: string) {
+  async function handleUpdateBotPersona(
+    platform: "telegram" | "whatsapp",
+    personaId: string,
+  ) {
     try {
       await api.setBotPersona(platform, personaId);
       if (config) {
-        if (platform === 'whatsapp') {
-          if (!config.whatsapp) config.whatsapp = { enabled: false, allowedNumbers: [], personaId };
+        if (platform === "whatsapp") {
+          if (!config.whatsapp)
+            config.whatsapp = { enabled: false, allowedNumbers: [], personaId };
           config.whatsapp.personaId = personaId;
         } else {
-          if (!config.telegram) config.telegram = { enabled: false, botToken: '', allowedUsers: [], personaId };
+          if (!config.telegram)
+            config.telegram = {
+              enabled: false,
+              botToken: "",
+              allowedUsers: [],
+              personaId,
+            };
           config.telegram.personaId = personaId;
         }
       }
-      const p = personas.find(item => item.id === personaId);
-      addLog(`[Remote ${platform.toUpperCase()}] Persona diubah ke ${p?.avatar || '⚡'} ${p?.name || personaId}`);
+      const p = personas.find((item) => item.id === personaId);
+      addLog(
+        `[Remote ${platform.toUpperCase()}] Persona diubah ke ${p?.avatar || "⚡"} ${p?.name || personaId}`,
+      );
     } catch (e: any) {
-      dialog.showError('Gagal mengubah persona bot: ' + (e.message || 'Error'));
+      dialog.showError("Gagal mengubah persona bot: " + (e.message || "Error"));
     }
   }
 
   async function handleDeletePersona(id: string) {
     showConfirm({
-      title: 'Hapus Persona Ini?',
-      message: 'Persona custom ini akan dihapus permanen dari sistem.',
-      confirmText: 'Hapus',
-      variant: 'danger',
+      title: "Hapus Persona Ini?",
+      message: "Persona custom ini akan dihapus permanen dari sistem.",
+      confirmText: "Hapus",
+      variant: "danger",
       action: async () => {
         try {
           await api.deletePersona(id);
-          personas = personas.filter(p => p.id !== id);
+          personas = personas.filter((p) => p.id !== id);
           if (activeSession?.persona_id === id) {
-            const def = personas.find(p => p.is_default) || personas[0];
+            const def = personas.find((p) => p.is_default) || personas[0];
             if (def && activeSessionId) await handleSelectPersona(def);
           }
-          addLog('[Persona Dihapus]');
+          addLog("[Persona Dihapus]");
         } catch (e) {
-          console.error('Failed to delete persona:', e);
+          console.error("Failed to delete persona:", e);
         }
-      }
+      },
     });
   }
 
   async function loadSessions(selectFirst = false) {
     try {
-      const isGlobal = historyScope === 'global';
+      const isGlobal = historyScope === "global";
       const wsParam = isGlobal ? undefined : config?.activeProject;
       const res = await api.getChatSessions(wsParam, isGlobal);
       chatSessions = res.sessions || [];
@@ -281,7 +337,7 @@
         await loadSessionMessages(activeSessionId);
       }
     } catch (e) {
-      console.error('Failed to load chat sessions:', e);
+      console.error("Failed to load chat sessions:", e);
     }
   }
 
@@ -301,48 +357,51 @@
           timestamp: new Date(m.created_at).getTime(),
           tools: [],
           steps: m.steps || [],
-          thought: m.thought || '',
+          thought: m.thought || "",
           images: m.images || [],
-          isStreaming: false
+          isStreaming: false,
         }));
       } else if (forceReset) {
         messages = [];
       }
     } catch (e) {
-      console.error('Failed to load session messages:', e);
+      console.error("Failed to load session messages:", e);
     }
   }
 
   async function handleCreateNewSession(switchTab = true) {
     try {
-      const isGlobal = historyScope === 'global';
-      const projName = config?.activeProject ? (config.activeProject.split(/[\\/]/).pop() || 'Project') : 'Diskusi Baru';
-      const title = isGlobal ? 'Diskusi Global' : `Sesi ${projName}`;
+      const isGlobal = historyScope === "global";
+      const projName = config?.activeProject
+        ? config.activeProject.split(/[\\/]/).pop() || "Project"
+        : "Diskusi Baru";
+      const title = isGlobal ? "Diskusi Global" : `Sesi ${projName}`;
       const res = await api.createChatSession({
         title,
-        workspace_id: isGlobal ? null : config?.activeProject
+        workspace_id: isGlobal ? null : config?.activeProject,
       });
       if (res.session) {
         chatSessions = [res.session, ...chatSessions];
         activeSessionId = res.session.id;
         messages = [];
-        if (switchTab) currentTab = 'chat';
+        if (switchTab) currentTab = "chat";
       }
     } catch (e) {
-      console.error('Failed to create new session:', e);
+      console.error("Failed to create new session:", e);
     }
   }
 
   function handleDeleteSession(id: string) {
     showConfirm({
-      title: 'Hapus Sesi Diskusi?',
-      message: 'Sesi ini dan semua pesannya akan dihapus secara permanen dari database.',
-      confirmText: 'Hapus Sesi',
-      variant: 'danger',
+      title: "Hapus Sesi Diskusi?",
+      message:
+        "Sesi ini dan semua pesannya akan dihapus secara permanen dari database.",
+      confirmText: "Hapus Sesi",
+      variant: "danger",
       action: async () => {
         try {
           await api.deleteChatSession(id);
-          chatSessions = chatSessions.filter(s => s.id !== id);
+          chatSessions = chatSessions.filter((s) => s.id !== id);
           if (activeSessionId === id) {
             if (chatSessions.length > 0) {
               await handleSelectSession(chatSessions[0]);
@@ -351,33 +410,34 @@
             }
           }
         } catch (e) {
-          console.error('Failed to delete chat session:', e);
+          console.error("Failed to delete chat session:", e);
         }
-      }
+      },
     });
   }
 
   function handleClearCurrentSessionMessages() {
     if (!activeSessionId) return;
     showConfirm({
-      title: 'Bersihkan Percakapan?',
-      message: 'Semua pesan dan riwayat aktivitas dalam sesi ini akan dibersihkan. Tindakan ini tidak dapat dibatalkan.',
-      confirmText: 'Ya, Bersihkan',
-      variant: 'danger',
+      title: "Bersihkan Percakapan?",
+      message:
+        "Semua pesan dan riwayat aktivitas dalam sesi ini akan dibersihkan. Tindakan ini tidak dapat dibatalkan.",
+      confirmText: "Ya, Bersihkan",
+      variant: "danger",
       action: async () => {
         try {
           await api.clearChatMessages(activeSessionId);
           messages = [];
           await loadSessions(false);
-          addLog('[Chat Cleared] Pesan dalam sesi dibersihkan.');
+          addLog("[Chat Cleared] Pesan dalam sesi dibersihkan.");
         } catch (e) {
-          console.error('Failed to clear session messages:', e);
+          console.error("Failed to clear session messages:", e);
         }
-      }
+      },
     });
   }
 
-  async function handleToggleScope(scope: 'workspace' | 'global') {
+  async function handleToggleScope(scope: "workspace" | "global") {
     historyScope = scope;
     await loadSessions(true);
   }
@@ -391,12 +451,12 @@
   async function handleToggleDevServer() {
     if (devServer.isRunning) {
       await api.stopDevServer();
-      addLog('[Dev Server] Dihentikan.');
+      addLog("[Dev Server] Dihentikan.");
       setTimeout(checkDevServer, 1000);
     } else {
       isStartingDev = true;
       const res = await api.startDevServer();
-      addLog(`[Dev Server] ${res.message || 'Memulai dev server...'}`);
+      addLog(`[Dev Server] ${res.message || "Memulai dev server..."}`);
       let attempts = 0;
       const pollTimer = setInterval(async () => {
         attempts++;
@@ -417,57 +477,67 @@
   function initSocket() {
     socket = io();
 
-    socket.on('connect', () => {
-      addLog('Socket connected to backend.');
+    socket.on("connect", () => {
+      addLog("Socket connected to backend.");
     });
 
-    socket.on('disconnect', () => {
-      addLog('Socket disconnected.');
+    socket.on("disconnect", () => {
+      addLog("Socket disconnected.");
     });
 
-    socket.on('agent_task_start', (data) => {
+    socket.on("agent_task_start", (data) => {
       isAgentBusy = true;
       addLog(`[Task Started] ${data.prompt.slice(0, 60)}...`);
-      messages = [...messages, {
-        id: data.taskId,
-        sender: 'agent',
-        text: '',
-        timestamp: Date.now(),
-        tools: [],
-        steps: [],
-        thought: '',
-        isStreaming: true
-      }];
+      messages = [
+        ...messages,
+        {
+          id: data.taskId,
+          sender: "agent",
+          text: "",
+          timestamp: Date.now(),
+          tools: [],
+          steps: [],
+          thought: "",
+          isStreaming: true,
+        },
+      ];
     });
 
-    socket.on('agent_delta', (data) => {
+    socket.on("agent_delta", (data) => {
       if (!messages.length) return;
       const last = messages[messages.length - 1];
-      if (last.sender === 'agent') {
-        last.text = data.accumulated || (last.text + data.delta);
+      if (last.sender === "agent") {
+        last.text = data.accumulated || last.text + data.delta;
         messages = [...messages];
       }
     });
 
-    socket.on('agent_step', (data) => {
+    socket.on("agent_step", (data) => {
       const toolLabel = data.toolDesc || data.toolName;
       if (messages.length) {
         const last = messages[messages.length - 1];
-        if (last.sender === 'agent') {
+        if (last.sender === "agent") {
           if (toolLabel && !last.tools?.includes(toolLabel)) {
             last.tools = [...(last.tools || []), toolLabel];
           }
           if (data.processStep) {
             last.steps = last.steps || [];
-            const existingIdx = last.steps.findIndex(s => s.id === data.processStep.id);
+            const existingIdx = last.steps.findIndex(
+              (s) => s.id === data.processStep.id,
+            );
             if (existingIdx !== -1) {
-              last.steps[existingIdx] = { ...last.steps[existingIdx], ...data.processStep };
+              last.steps[existingIdx] = {
+                ...last.steps[existingIdx],
+                ...data.processStep,
+              };
             } else {
               // Consecutive duplicate check (e.g. repeated polling manage_task or identical commands)
               const prevStep = last.steps[last.steps.length - 1];
-              const isConsecutiveDuplicate = prevStep &&
+              const isConsecutiveDuplicate =
+                prevStep &&
                 prevStep.title === data.processStep.title &&
-                (prevStep.command === data.processStep.command || prevStep.detail === data.processStep.detail);
+                (prevStep.command === data.processStep.command ||
+                  prevStep.detail === data.processStep.detail);
 
               if (isConsecutiveDuplicate) {
                 prevStep.repeatCount = (prevStep.repeatCount || 1) + 1;
@@ -484,27 +554,27 @@
           messages = [...messages];
         }
         if (toolLabel) {
-          addLog(`[Tool] ${toolLabel} (${data.state || 'RUN'})`);
+          addLog(`[Tool] ${toolLabel} (${data.state || "RUN"})`);
         }
       }
     });
 
-    socket.on('agent_raw', (data) => {
+    socket.on("agent_raw", (data) => {
       if (messages.length && data.text) {
         const last = messages[messages.length - 1];
-        if (last.sender === 'agent' && !last.text) {
+        if (last.sender === "agent" && !last.text) {
           last.text = data.text;
           messages = [...messages];
         }
       }
     });
 
-    socket.on('agent_task_end', (data) => {
+    socket.on("agent_task_end", (data) => {
       isAgentBusy = false;
       if (messages.length) {
         const last = messages[messages.length - 1];
-        if (last.sender === 'agent') {
-          last.text = data.response || last.text || 'Tugas selesai dijalankan.';
+        if (last.sender === "agent") {
+          last.text = data.response || last.text || "Tugas selesai dijalankan.";
           if (data.toolsExecuted && data.toolsExecuted.length > 0) {
             last.tools = data.toolsExecuted;
           }
@@ -519,64 +589,80 @@
         }
       }
       addLog(`[Task Completed] Status: ${data.status} in ${data.duration}`);
-      api.getGitStatus().then(st => gitStatus = st);
+      api.getGitStatus().then((st) => (gitStatus = st));
       setTimeout(() => loadSessions(false), 500);
     });
 
-    socket.on('agent_task_cancelled', () => {
+    socket.on("agent_task_cancelled", () => {
       isAgentBusy = false;
-      addLog('[Task Cancelled]');
+      addLog("[Task Cancelled]");
       if (messages.length) {
         const last = messages[messages.length - 1];
-        if (last.sender === 'agent') {
-          last.text += '\n🛑 Tugas dibatalkan oleh pengguna.';
+        if (last.sender === "agent") {
+          last.text += "\n🛑 Tugas dibatalkan oleh pengguna.";
           last.isStreaming = false;
           messages = [...messages];
         }
       }
     });
 
-    socket.on('whatsapp_qr', (data) => {
+    socket.on("whatsapp_qr", (data) => {
       const url = data.qrCodeDataUrl || data.qrDataUrl;
       whatsappStatus = {
-        ...(whatsappStatus || { status: 'qr_ready', user: null, error: null }),
-        status: 'qr_ready',
-        qrCodeDataUrl: url
+        ...(whatsappStatus || { status: "qr_ready", user: null, error: null }),
+        status: "qr_ready",
+        qrCodeDataUrl: url,
       };
     });
 
-    socket.on('whatsapp_status', (data) => {
+    socket.on("whatsapp_status", (data) => {
       whatsappStatus = {
         ...data,
-        qrCodeDataUrl: data.qrCodeDataUrl || data.qrDataUrl || (data.status === 'qr_ready' ? whatsappStatus?.qrCodeDataUrl : null) || null
+        qrCodeDataUrl:
+          data.qrCodeDataUrl ||
+          data.qrDataUrl ||
+          (data.status === "qr_ready" ? whatsappStatus?.qrCodeDataUrl : null) ||
+          null,
       };
     });
 
-    socket.on('telegram_status', (data) => {
+    socket.on("telegram_status", (data) => {
       telegramStatus = data;
     });
 
-    socket.on('bot_log', (data: { platform: string; type: string; sender?: string; text?: string }) => {
-      const icon = data.type === 'inbound' ? '📩' : '📤';
-      const dir = data.type === 'inbound' ? 'Dari' : 'Kirim ke';
-      const senderPreview = data.sender ? String(data.sender).replace(/@.*$/, '') : '';
-      addLog(`[${data.platform?.toUpperCase() || 'BOT'} ${icon}] ${dir} ${senderPreview}: "${data.text?.slice(0, 120) || ''}"`);
-    });
+    socket.on(
+      "bot_log",
+      (data: {
+        platform: string;
+        type: string;
+        sender?: string;
+        text?: string;
+      }) => {
+        const icon = data.type === "inbound" ? "📩" : "📤";
+        const dir = data.type === "inbound" ? "Dari" : "Kirim ke";
+        const senderPreview = data.sender
+          ? String(data.sender).replace(/@.*$/, "")
+          : "";
+        addLog(
+          `[${data.platform?.toUpperCase() || "BOT"} ${icon}] ${dir} ${senderPreview}: "${data.text?.slice(0, 120) || ""}"`,
+        );
+      },
+    );
 
-    socket.on('tunnel_status', (data) => {
+    socket.on("tunnel_status", (data) => {
       if (tunnelStatus) {
         tunnelStatus.status = data.status;
         if (data.url) tunnelStatus.publicUrl = data.url;
       }
     });
 
-    socket.on('dev_server_status', (data) => {
-      if (data && typeof data.isRunning === 'boolean') {
+    socket.on("dev_server_status", (data) => {
+      if (data && typeof data.isRunning === "boolean") {
         devServer = data;
       }
     });
 
-    socket.on('project_changed', async (data) => {
+    socket.on("project_changed", async (data) => {
       if (config) config.activeProject = data.activeProject;
       addLog(`[Project Switched] ${data.activeProject}`);
       gitStatus = await api.getGitStatus();
@@ -594,55 +680,76 @@
       await handleCreateNewSession(false);
     }
 
-    const displayText = hasText ? text : (hasImages ? 'Tolong analisis gambar terlampir ini.' : '');
+    const displayText = hasText
+      ? text
+      : hasImages
+        ? "Tolong analisis gambar terlampir ini."
+        : "";
 
-    messages = [...messages, {
-      id: 'usr_' + Date.now(),
-      sender: 'user',
-      text: displayText,
-      images: images && images.length > 0 ? images : undefined,
-      timestamp: Date.now()
-    }];
+    messages = [
+      ...messages,
+      {
+        id: "usr_" + Date.now(),
+        sender: "user",
+        text: displayText,
+        images: images && images.length > 0 ? images : undefined,
+        timestamp: Date.now(),
+      },
+    ];
 
     isAgentBusy = true;
     try {
-      await api.sendChat(displayText, config?.antigravity?.defaultModel, undefined, activeSessionId || undefined, images);
+      await api.sendChat(
+        displayText,
+        config?.antigravity?.defaultModel,
+        undefined,
+        activeSessionId || undefined,
+        images,
+      );
     } catch (e: any) {
       isAgentBusy = false;
-      messages = [...messages, {
-        id: 'err_' + Date.now(),
-        sender: 'agent',
-        text: `⚠️ Gagal: ${e.message}`,
-        timestamp: Date.now()
-      }];
+      messages = [
+        ...messages,
+        {
+          id: "err_" + Date.now(),
+          sender: "agent",
+          text: `⚠️ Gagal: ${e.message}`,
+          timestamp: Date.now(),
+        },
+      ];
     }
   }
 
   async function handleExecutePush() {
     isPushModalOpen = true;
-    pushStatus = 'running';
-    pushLogs = 'Menjalankan: git push origin...\n';
+    pushStatus = "running";
+    pushLogs = "Menjalankan: git push origin...\n";
 
     try {
       const res = await api.push();
-      pushLogs += (res.stdout || '') + '\n' + (res.stderr || '') + '\n' + (res.error || '');
+      pushLogs +=
+        (res.stdout || "") +
+        "\n" +
+        (res.stderr || "") +
+        "\n" +
+        (res.error || "");
       if (res.success) {
-        pushStatus = 'success';
+        pushStatus = "success";
         gitStatus = await api.getGitStatus();
         commits = (await api.getRecentCommits()).commits || [];
       } else {
-        pushStatus = 'error';
+        pushStatus = "error";
       }
     } catch (e: any) {
-      pushStatus = 'error';
-      pushLogs += '\nError: ' + e.message;
+      pushStatus = "error";
+      pushLogs += "\nError: " + e.message;
     }
   }
 
   async function handleResetToRoot() {
     await api.resetToRoot();
     await refreshAll();
-    addLog('[Workspace Reset] Kembali ke Root D:\\Works.');
+    addLog("[Workspace Reset] Kembali ke Root D:\\Works.");
   }
 
   async function handlePinSubmit(pin: string): Promise<boolean> {
@@ -657,9 +764,13 @@
   }
 </script>
 
-<div class="relative flex h-screen w-screen overflow-hidden bg-[#ECEAE5] text-[#111315] antialiased selection:bg-[#FF5500] selection:text-white">
+<div
+  class="relative flex h-screen w-screen overflow-hidden bg-[#ECEAE5] text-[#111315] antialiased selection:bg-[#FF5500] selection:text-white"
+>
   <!-- Industrial Blueprint Grid Background -->
-  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 blueprint-grid opacity-70"></div>
+  <div
+    class="fixed inset-0 pointer-events-none overflow-hidden z-0 blueprint-grid opacity-70"
+  ></div>
 
   <!-- Minimalist Clean Sidebar -->
   <Sidebar
@@ -670,14 +781,24 @@
     {whatsappStatus}
     {tunnelStatus}
     {isAgentBusy}
-    chatSessions={chatSessions}
-    activeSessionId={activeSessionId}
-    historyScope={historyScope}
+    {chatSessions}
+    {activeSessionId}
+    {historyScope}
     isMobileOpen={isMobileSidebarOpen}
-    onCloseMobile={() => isMobileSidebarOpen = false}
-    onSelectTab={(tab) => { currentTab = tab; isMobileSidebarOpen = false; }}
-    onOpenProjectModal={() => { isProjectModalOpen = true; isMobileSidebarOpen = false; }}
-    onOpenSettingsModal={() => { settingsInitialTab = 'general'; isSettingsOpen = true; isMobileSidebarOpen = false; }}
+    onCloseMobile={() => (isMobileSidebarOpen = false)}
+    onSelectTab={(tab) => {
+      currentTab = tab;
+      isMobileSidebarOpen = false;
+    }}
+    onOpenProjectModal={() => {
+      isProjectModalOpen = true;
+      isMobileSidebarOpen = false;
+    }}
+    onOpenSettingsModal={() => {
+      settingsInitialTab = "general";
+      isSettingsOpen = true;
+      isMobileSidebarOpen = false;
+    }}
     onResetToRoot={handleResetToRoot}
     onSelectSession={handleSelectSession}
     onCreateNewSession={() => handleCreateNewSession(true)}
@@ -686,17 +807,26 @@
   />
 
   <!-- Main Content Workspace Area -->
-  <div class="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden bg-transparent">
+  <div
+    class="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden bg-transparent"
+  >
     <!-- Top Blueprint Drafting Header -->
-    <header class="min-h-[48px] sm:h-12 px-3 sm:px-4 bg-[#ECEAE5] border-b border-[#D0CEC7] flex items-center justify-between shrink-0 select-none gap-2 z-10 font-tech">
-      <div class="flex items-center gap-1.5 sm:gap-2.5 text-xs text-[#5C6066] min-w-0">
+    <header
+      class="min-h-[48px] sm:h-12 px-3 sm:px-4 bg-[#ECEAE5] border-b border-[#D0CEC7] flex items-center justify-between shrink-0 select-none gap-2 z-10 font-tech"
+    >
+      <div
+        class="flex items-center gap-1.5 sm:gap-2.5 text-xs text-[#5C6066] min-w-0"
+      >
         <!-- Drafting Crosshair Mark from Blueprint Reference -->
-        <div class="hidden sm:inline-flex crosshair-box w-6 h-6 shrink-0" title="Blueprint Drafting Reticle"></div>
+        <div
+          class="hidden sm:inline-flex crosshair-box w-6 h-6 shrink-0"
+          title="Blueprint Drafting Reticle"
+        ></div>
 
         <!-- Mobile Sidebar Hamburger Toggle -->
         <button
           type="button"
-          onclick={() => isMobileSidebarOpen = true}
+          onclick={() => (isMobileSidebarOpen = true)}
           class="md:hidden p-1.5 rounded-lg text-[#5C6066] hover:text-[#111315] hover:bg-black/[0.05] transition cursor-pointer shrink-0"
           title="Buka Menu Sidebar"
           aria-label="Buka Menu Sidebar"
@@ -704,15 +834,25 @@
           <Menu class="w-4 h-4 text-[#FF5500]" />
         </button>
 
-        <span class="text-[#111315] font-bold tracking-wider hidden sm:inline uppercase">zhiEnd</span>
+        <span
+          class="text-[#111315] font-bold tracking-wider hidden sm:inline uppercase"
+          >zhiEnd</span
+        >
         <span class="text-[#D0CEC7] hidden sm:inline">/</span>
-        {#if !config?.activeProject || config.activeProject.replace(/\\/g, '/').toLowerCase() === 'd:/works'}
-          <span class="text-[#FF5500] font-bold flex items-center gap-1.5 truncate text-[11px] sm:text-xs">
+        {#if !config?.activeProject || config.activeProject
+            .replace(/\\/g, "/")
+            .toLowerCase() === "d:/works"}
+          <span
+            class="text-[#FF5500] font-bold flex items-center gap-1.5 truncate text-[11px] sm:text-xs"
+          >
             <span class="w-2 h-2 bg-[#FF5500] shrink-0"></span>
             <span class="truncate">D:\Works (Root)</span>
           </span>
         {:else}
-          <span class="text-[#111315] truncate max-w-[100px] xs:max-w-[140px] sm:max-w-xs text-[11px] sm:text-xs font-bold">{config?.activeProject?.split(/\\|\//).pop()}</span>
+          <span
+            class="text-[#111315] truncate max-w-[100px] xs:max-w-[140px] sm:max-w-xs text-[11px] sm:text-xs font-bold"
+            >{config?.activeProject?.split(/\\|\//).pop()}</span
+          >
           <button
             onclick={handleResetToRoot}
             class="px-1.5 sm:px-2 py-0.5 rounded bg-[#E5E3DD] hover:bg-rose-100 text-[9px] sm:text-[10px] text-[#5C6066] hover:text-rose-600 border border-[#D0CEC7] transition cursor-pointer shrink-0 font-stencil"
@@ -723,14 +863,19 @@
         {/if}
         {#if gitStatus?.isRepo}
           <span class="text-[#D0CEC7] hidden md:inline">/</span>
-          <span class="hidden md:flex items-center gap-1 text-[#60646C] truncate font-stencil text-[11px]">
-            <GitBranch class="w-3 h-3 text-[#FF5500]" /> {gitStatus.branch}
+          <span
+            class="hidden md:flex items-center gap-1 text-[#60646C] truncate font-stencil text-[11px]"
+          >
+            <GitBranch class="w-3 h-3 text-[#FF5500]" />
+            {gitStatus.branch}
           </span>
         {/if}
       </div>
 
       <!-- Center Blueprint Telemetry Marker (ChainGPT Labs Style) -->
-      <div class="hidden lg:flex items-center gap-2 text-[10px] font-stencil text-[#8C9097]">
+      <div
+        class="hidden lg:flex items-center gap-2 text-[10px] font-stencil text-[#8C9097]"
+      >
         <span class="text-[#FF5500]">::</span>
         <span>COORD: 0x3888</span>
         <span class="text-[#D0CEC7]">|</span>
@@ -740,31 +885,56 @@
       <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
         <!-- Quick Remote Indicators -->
         <button
-          onclick={() => currentTab = 'remote'}
-          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer active:scale-95 {whatsappStatus?.status === 'connected' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-50 border-amber-300 text-amber-800 animate-pulse' : 'bg-[#E9E7E0] border-[#C8C5BC] text-[#5C6066]')}"
-          title="WhatsApp Remote: {whatsappStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
+          onclick={() => (currentTab = "remote")}
+          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer active:scale-95 {whatsappStatus?.status ===
+          'connected'
+            ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+            : whatsappStatus?.status === 'qr_ready'
+              ? 'bg-amber-50 border-amber-300 text-amber-800 animate-pulse'
+              : 'bg-[#E9E7E0] border-[#C8C5BC] text-[#5C6066]'}"
+          title="WhatsApp Remote: {whatsappStatus?.status ||
+            'stopped'} (Klik untuk buka Remote Hub)"
         >
           <MessageSquare class="w-3 h-3 text-emerald-600" />
           <span class="hidden sm:inline">WA</span>
-          <span class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status === 'connected' ? 'bg-emerald-500' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-500' : 'bg-[#8C9097]')}"></span>
+          <span
+            class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status ===
+            'connected'
+              ? 'bg-emerald-500'
+              : whatsappStatus?.status === 'qr_ready'
+                ? 'bg-amber-500'
+                : 'bg-[#8C9097]'}"
+          ></span>
         </button>
 
         <button
-          onclick={() => currentTab = 'remote'}
-          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer active:scale-95 {telegramStatus?.status === 'running' ? 'bg-sky-50 border-sky-300 text-sky-800' : 'bg-[#E9E7E0] border-[#C8C5BC] text-[#5C6066]'}"
-          title="Telegram Remote: {telegramStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
+          onclick={() => (currentTab = "remote")}
+          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer active:scale-95 {telegramStatus?.status ===
+          'running'
+            ? 'bg-sky-50 border-sky-300 text-sky-800'
+            : 'bg-[#E9E7E0] border-[#C8C5BC] text-[#5C6066]'}"
+          title="Telegram Remote: {telegramStatus?.status ||
+            'stopped'} (Klik untuk buka Remote Hub)"
         >
           <Send class="w-3 h-3 text-sky-600" />
           <span class="hidden sm:inline">TG</span>
-          <span class="w-1.5 h-1.5 rounded-full {telegramStatus?.status === 'running' ? 'bg-sky-500' : 'bg-[#8C9097]'}"></span>
+          <span
+            class="w-1.5 h-1.5 rounded-full {telegramStatus?.status ===
+            'running'
+              ? 'bg-sky-500'
+              : 'bg-[#8C9097]'}"
+          ></span>
         </button>
 
         <!-- Quick Dev Server Widget -->
         {#if devServer.isRunning}
-          <div class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-300">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div
+            class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-300"
+          >
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+            ></span>
             <a
-              href={devServer.activePorts[0]?.url || 'http://localhost:3000'}
+              href={devServer.activePorts[0]?.url || "http://localhost:3000"}
               target="_blank"
               class="text-xs font-mono text-emerald-800 hover:text-emerald-950 flex items-center gap-1 font-semibold"
               title="Buka Aplikasi di Browser"
@@ -788,8 +958,10 @@
             title="Jalankan Dev Server Project Aktif"
           >
             <Play class="w-3 h-3 text-emerald-600 fill-emerald-600" />
-            <span class="hidden sm:inline">{isStartingDev ? 'Memulai...' : 'Jalankan Dev'}</span>
-            <span class="sm:hidden">{isStartingDev ? '...' : 'Dev'}</span>
+            <span class="hidden sm:inline"
+              >{isStartingDev ? "Memulai..." : "Jalankan Dev"}</span
+            >
+            <span class="sm:hidden">{isStartingDev ? "..." : "Dev"}</span>
           </button>
         {/if}
 
@@ -805,27 +977,29 @@
     </header>
 
     <!-- Main Viewport Area -->
-    <main class="flex-1 overflow-hidden p-0 min-h-0 flex flex-col relative blueprint-grid">
-      {#if currentTab === 'chat'}
+    <main
+      class="flex-1 overflow-hidden p-0 min-h-0 flex flex-col relative blueprint-grid"
+    >
+      {#if currentTab === "chat"}
         <ChatView
           {messages}
           isBusy={isAgentBusy}
           {config}
-          activeSession={activeSession}
-          activePersona={activePersona}
+          {activeSession}
+          {activePersona}
           onSendMessage={handleSendMessage}
           onCancelTask={async () => {
             await api.cancelTask();
           }}
           onClearMessages={handleClearCurrentSessionMessages}
           onCreateNewSession={() => handleCreateNewSession(true)}
-          onOpenPersonaModal={() => isPersonaModalOpen = true}
+          onOpenPersonaModal={() => (isPersonaModalOpen = true)}
         />
-      {:else if currentTab === 'git'}
+      {:else if currentTab === "git"}
         <GitView
           {gitStatus}
           {commits}
-          onRefresh={async () => gitStatus = await api.getGitStatus()}
+          onRefresh={async () => (gitStatus = await api.getGitStatus())}
           onStageFiles={async (files) => {
             await api.stageFiles(files);
             gitStatus = await api.getGitStatus();
@@ -839,10 +1013,12 @@
             if (res.success) {
               gitStatus = await api.getGitStatus();
               commits = (await api.getRecentCommits()).commits || [];
-              dialog.showSuccess('Perubahan berhasil di-commit.');
+              dialog.showSuccess("Perubahan berhasil di-commit.");
               return true;
             } else {
-              dialog.showError('Commit gagal: ' + (res.error || 'Unknown error'));
+              dialog.showError(
+                "Commit gagal: " + (res.error || "Unknown error"),
+              );
               return false;
             }
           }}
@@ -850,9 +1026,11 @@
           onPull={async () => {
             const res = await api.pull();
             if (res.success) {
-              dialog.showSuccess('Git Pull Sukses:\n' + (res.stdout || 'Up to date'));
+              dialog.showSuccess(
+                "Git Pull Sukses:\n" + (res.stdout || "Up to date"),
+              );
             } else {
-              dialog.showError('Git Pull Gagal:\n' + (res.error || res.stderr));
+              dialog.showError("Git Pull Gagal:\n" + (res.error || res.stderr));
             }
             gitStatus = await api.getGitStatus();
           }}
@@ -865,7 +1043,7 @@
             return res.diff;
           }}
         />
-      {:else if currentTab === 'remote'}
+      {:else if currentTab === "remote"}
         <RemoteView
           {whatsappStatus}
           {telegramStatus}
@@ -879,23 +1057,32 @@
           }}
           onLogoutWhatsApp={() => {
             showConfirm({
-              title: 'Putuskan WhatsApp?',
-              message: 'Sesi bot WhatsApp akan diputuskan. Anda perlu scan ulang kode QR untuk menghubungkan kembali.',
-              confirmText: 'Putuskan',
-              variant: 'danger',
+              title: "Putuskan WhatsApp?",
+              message:
+                "Sesi bot WhatsApp akan diputuskan. Anda perlu scan ulang kode QR untuk menghubungkan kembali.",
+              confirmText: "Putuskan",
+              variant: "danger",
               action: async () => {
                 await api.logoutWhatsApp();
                 whatsappStatus = await api.getWhatsAppStatus();
-              }
+              },
             });
           }}
           onSaveWhatsAppNumbers={async (numbers) => {
-            await api.updateConfig({ whatsapp: { allowedNumbers: numbers } } as any);
-            dialog.showSuccess('Nomor WhatsApp yang diizinkan berhasil disimpan.');
+            await api.updateConfig({
+              whatsapp: { allowedNumbers: numbers },
+            } as any);
+            dialog.showSuccess(
+              "Nomor WhatsApp yang diizinkan berhasil disimpan.",
+            );
           }}
           onStartTelegram={async (token) => {
             const res = await api.startTelegram(token);
-            if (!res.success) dialog.showError('Gagal menghubungkan Telegram: ' + (res.error || 'Token tidak valid'));
+            if (!res.success)
+              dialog.showError(
+                "Gagal menghubungkan Telegram: " +
+                  (res.error || "Token tidak valid"),
+              );
             telegramStatus = await api.getTelegramStatus();
           }}
           onStopTelegram={async () => {
@@ -903,12 +1090,15 @@
             telegramStatus = await api.getTelegramStatus();
           }}
           onSaveTelegramToken={async (token, allowedUsers) => {
-            await api.updateConfig({ telegram: { botToken: token, allowedUsers } } as any);
-            dialog.showSuccess('Pengaturan Telegram berhasil disimpan.');
+            await api.updateConfig({
+              telegram: { botToken: token, allowedUsers },
+            } as any);
+            dialog.showSuccess("Pengaturan Telegram berhasil disimpan.");
           }}
           onStartTunnel={async (subdomain) => {
             const res = await api.startTunnel(subdomain);
-            if (!res.success) dialog.showError('Gagal memulai tunnel: ' + res.error);
+            if (!res.success)
+              dialog.showError("Gagal memulai tunnel: " + res.error);
             tunnelStatus = await api.getNetworkInfo();
           }}
           onStopTunnel={async () => {
@@ -918,56 +1108,91 @@
           onSaveSecurityPin={async (pin) => {
             await api.updateConfig({ securityPin: pin });
             localStorage.setItem(PIN_STORAGE_KEY, pin);
-            dialog.showSuccess('Security PIN berhasil disimpan.');
+            dialog.showSuccess("Security PIN berhasil disimpan.");
           }}
         />
-      {:else if currentTab === 'files'}
+      {:else if currentTab === "files"}
         <FileLogsView
           files={projectFiles}
           logs={systemLogs}
-          onRefreshFiles={async () => projectFiles = (await api.getProjectFiles()).files || []}
-          onClearLogs={() => systemLogs = []}
+          onRefreshFiles={async () =>
+            (projectFiles = (await api.getProjectFiles()).files || [])}
+          onClearLogs={() => (systemLogs = [])}
         />
       {/if}
     </main>
 
     <!-- Bottom Navigation Bar for Mobile (< md) -->
-    <nav class="md:hidden h-14 bg-[#E9E7E0] border-t border-[#C8C5BC] flex items-center justify-around px-2 z-20 shrink-0 select-none">
+    <nav
+      class="md:hidden h-14 bg-[#E9E7E0] border-t border-[#C8C5BC] flex items-center justify-around px-2 z-20 shrink-0 select-none"
+    >
       <button
-        onclick={() => currentTab = 'chat'}
-        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer {currentTab === 'chat' ? 'text-[#FF5500] font-bold' : 'text-[#5C6066] hover:text-[#191B1D]'}"
+        onclick={() => (currentTab = "chat")}
+        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer {currentTab ===
+        'chat'
+          ? 'text-[#FF5500] font-bold'
+          : 'text-[#5C6066] hover:text-[#191B1D]'}"
       >
-        <Terminal class="w-4 h-4 {currentTab === 'chat' ? 'text-[#FF5500]' : 'text-[#5C6066]'}" />
+        <Terminal
+          class="w-4 h-4 {currentTab === 'chat'
+            ? 'text-[#FF5500]'
+            : 'text-[#5C6066]'}"
+        />
         <span class="text-[10px]">Coding</span>
       </button>
 
       <button
-        onclick={() => currentTab = 'git'}
-        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer relative {currentTab === 'git' ? 'text-[#FF5500] font-bold' : 'text-[#5C6066] hover:text-[#191B1D]'}"
+        onclick={() => (currentTab = "git")}
+        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer relative {currentTab ===
+        'git'
+          ? 'text-[#FF5500] font-bold'
+          : 'text-[#5C6066] hover:text-[#191B1D]'}"
       >
-        <GitBranch class="w-4 h-4 {currentTab === 'git' ? 'text-[#FF5500]' : 'text-[#5C6066]'}" />
+        <GitBranch
+          class="w-4 h-4 {currentTab === 'git'
+            ? 'text-[#FF5500]'
+            : 'text-[#5C6066]'}"
+        />
         <span class="text-[10px]">Source</span>
         {#if gitStatus?.files?.length}
-          <span class="absolute top-1.5 right-[30%] w-2 h-2 rounded-full bg-[#FF5500]"></span>
+          <span
+            class="absolute top-1.5 right-[30%] w-2 h-2 rounded-full bg-[#FF5500]"
+          ></span>
         {/if}
       </button>
 
       <button
-        onclick={() => currentTab = 'remote'}
-        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer relative {currentTab === 'remote' ? 'text-[#FF5500] font-bold' : 'text-[#5C6066] hover:text-[#191B1D]'}"
+        onclick={() => (currentTab = "remote")}
+        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer relative {currentTab ===
+        'remote'
+          ? 'text-[#FF5500] font-bold'
+          : 'text-[#5C6066] hover:text-[#191B1D]'}"
       >
-        <TowerControl class="w-4 h-4 {currentTab === 'remote' ? 'text-[#FF5500]' : 'text-[#5C6066]'}" />
+        <TowerControl
+          class="w-4 h-4 {currentTab === 'remote'
+            ? 'text-[#FF5500]'
+            : 'text-[#5C6066]'}"
+        />
         <span class="text-[10px]">Remote</span>
-        {#if whatsappStatus?.status === 'connected' || telegramStatus?.status === 'running'}
-          <span class="absolute top-1.5 right-[30%] w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        {#if whatsappStatus?.status === "connected" || telegramStatus?.status === "running"}
+          <span
+            class="absolute top-1.5 right-[30%] w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"
+          ></span>
         {/if}
       </button>
 
       <button
-        onclick={() => currentTab = 'files'}
-        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer {currentTab === 'files' ? 'text-[#FF5500] font-bold' : 'text-[#5C6066] hover:text-[#191B1D]'}"
+        onclick={() => (currentTab = "files")}
+        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer {currentTab ===
+        'files'
+          ? 'text-[#FF5500] font-bold'
+          : 'text-[#5C6066] hover:text-[#191B1D]'}"
       >
-        <FolderTree class="w-4 h-4 {currentTab === 'files' ? 'text-[#FF5500]' : 'text-[#5C6066]'}" />
+        <FolderTree
+          class="w-4 h-4 {currentTab === 'files'
+            ? 'text-[#FF5500]'
+            : 'text-[#5C6066]'}"
+        />
         <span class="text-[10px]">Files</span>
       </button>
     </nav>
@@ -979,12 +1204,12 @@
     {personas}
     isOpen={isSettingsOpen}
     initialTab={settingsInitialTab}
-    onClose={() => isSettingsOpen = false}
+    onClose={() => (isSettingsOpen = false)}
     onSave={async (updates) => {
       const res = await api.updateConfig(updates);
       if (res.success) {
         config = res.config;
-        addLog('Pengaturan berhasil diperbarui.');
+        addLog("Pengaturan berhasil diperbarui.");
         return true;
       }
       return false;
@@ -995,14 +1220,16 @@
     isOpen={isProjectModalOpen}
     recentProjects={config?.recentProjects || []}
     activeProjectPath={config?.activeProject}
-    onClose={() => isProjectModalOpen = false}
+    onClose={() => (isProjectModalOpen = false)}
     onSelectProject={async (path) => {
       const res = await api.selectProject(path);
       if (res.success) {
         await refreshAll();
         return true;
       } else {
-        dialog.showError('Gagal membuka project: ' + (res.error || 'Path tidak valid'));
+        dialog.showError(
+          "Gagal membuka project: " + (res.error || "Path tidak valid"),
+        );
         return false;
       }
     }}
@@ -1010,16 +1237,13 @@
 
   <PushModal
     isOpen={isPushModalOpen}
-    isPushing={pushStatus === 'running'}
+    isPushing={pushStatus === "running"}
     status={pushStatus}
     outputLogs={pushLogs}
-    onClose={() => isPushModalOpen = false}
+    onClose={() => (isPushModalOpen = false)}
   />
 
-  <PinModal
-    isOpen={isPinModalOpen}
-    onSubmit={handlePinSubmit}
-  />
+  <PinModal isOpen={isPinModalOpen} onSubmit={handlePinSubmit} />
 
   <PersonaModal
     isOpen={isPersonaModalOpen}
@@ -1029,10 +1253,10 @@
     onCreatePersona={handleCreatePersona}
     onUpdatePersona={handleUpdatePersona}
     onDeletePersona={handleDeletePersona}
-    onClose={() => isPersonaModalOpen = false}
+    onClose={() => (isPersonaModalOpen = false)}
     onOpenSettings={(tab) => {
       isPersonaModalOpen = false;
-      settingsInitialTab = (tab as any) || 'ai_providers';
+      settingsInitialTab = (tab as any) || "ai_providers";
       isSettingsOpen = true;
     }}
   />
@@ -1045,7 +1269,7 @@
     cancelText={confirmDialog.cancelText}
     variant={confirmDialog.variant}
     onConfirm={handleConfirmDialog}
-    onCancel={() => confirmDialog.isOpen = false}
+    onCancel={() => (confirmDialog.isOpen = false)}
   />
 
   <NoticeModal />

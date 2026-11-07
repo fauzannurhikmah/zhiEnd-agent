@@ -1,21 +1,25 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>zhiEnd Agent — Autonomous AI Coding & Remote Hub</title>
-  
+
   <!-- Modern Typography (Inter & JetBrains Mono) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+
   <!-- FontAwesome & Highlight.js for rich styling -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body class="dark-theme">
   <!-- Security PIN Modal Overlay (if PIN is enabled) -->
   <div id="pinOverlay" class="pin-overlay hidden">
@@ -51,7 +55,8 @@
             <span class="workspace-label">ACTIVE WORKSPACE</span>
             <span class="workspace-path" id="activeProjectPath">Loading...</span>
           </div>
-          <span class="branch-badge" id="headerGitBadge"><i class="fa-solid fa-code-branch"></i> <span id="headerBranchName">main</span></span>
+          <span class="branch-badge" id="headerGitBadge"><i class="fa-solid fa-code-branch"></i> <span
+              id="headerBranchName">main</span></span>
           <i class="fa-solid fa-chevron-down arrow-icon"></i>
         </div>
       </div>
@@ -134,7 +139,9 @@
                 <div class="agent-avatar"><i class="fa-solid fa-robot"></i></div>
                 <div>
                   <h2>Halo, Saya zhiEnd Agent!</h2>
-                  <p>Asisten AI coding autonomous berbasis <strong>Antigravity Core</strong>. Saya dapat membaca kode, membuat file, memperbaiki bug, menjalankan perintah terminal, dan melakukan commit serta push ke GitHub.</p>
+                  <p>Asisten AI coding autonomous berbasis <strong>Antigravity Core</strong>. Saya dapat membaca kode,
+                    membuat file, memperbaiki bug, menjalankan perintah terminal, dan melakukan commit serta push ke
+                    GitHub.</p>
                 </div>
               </div>
               <div class="welcome-actions">
@@ -153,25 +160,32 @@
           <div class="prompt-container glass-panel">
             <!-- Quick Action Chips -->
             <div class="quick-chips">
-              <button class="chip" data-prompt="Lakukan code review mendalam pada project ini, temukan potensi bug, issue keamanan, atau performa.">
+              <button class="chip"
+                data-prompt="Lakukan code review mendalam pada project ini, temukan potensi bug, issue keamanan, atau performa.">
                 <i class="fa-solid fa-magnifying-glass-chart"></i> Review Code
               </button>
-              <button class="chip" data-prompt="Jelaskan struktur project ini, fungsi utama dari tiap file, dan arsitekturnya.">
+              <button class="chip"
+                data-prompt="Jelaskan struktur project ini, fungsi utama dari tiap file, dan arsitekturnya.">
                 <i class="fa-solid fa-compass-drafting"></i> Jelaskan Project
               </button>
-              <button class="chip" data-prompt="Cari file yang ada error atau warning, lalu perbaiki bug tersebut dan buat kode lebih clean.">
+              <button class="chip"
+                data-prompt="Cari file yang ada error atau warning, lalu perbaiki bug tersebut dan buat kode lebih clean.">
                 <i class="fa-solid fa-bug"></i> Cari & Fix Bug
               </button>
-              <button class="chip" data-prompt="Buatkan unit test atau testing script yang relevan untuk file utama pada project ini.">
+              <button class="chip"
+                data-prompt="Buatkan unit test atau testing script yang relevan untuk file utama pada project ini.">
                 <i class="fa-solid fa-flask"></i> Buat Tests
               </button>
-              <button class="chip" data-prompt="Periksa git status, buat commit pesan yang rapi dan deskriptif, lalu push ke origin GitHub.">
+              <button class="chip"
+                data-prompt="Periksa git status, buat commit pesan yang rapi dan deskriptif, lalu push ke origin GitHub.">
                 <i class="fa-brands fa-github"></i> Commit & Push GitHub
               </button>
             </div>
 
             <div class="prompt-input-bar">
-              <textarea id="promptTextarea" placeholder="Tulis instruksi coding Anda (misal: 'Tambahkan validasi email di auth.js', 'Perbaiki UI navbar', 'Push perubahan ke repo')..." rows="2"></textarea>
+              <textarea id="promptTextarea"
+                placeholder="Tulis instruksi coding Anda (misal: 'Tambahkan validasi email di auth.js', 'Perbaiki UI navbar', 'Push perubahan ke repo')..."
+                rows="2"></textarea>
               <div class="prompt-buttons">
                 <button id="cancelAgentBtn" class="btn btn-icon btn-danger hidden" title="Hentikan Proses Agent">
                   <i class="fa-solid fa-stop"></i>
@@ -185,7 +199,7 @@
                 </button>
               </div>
             </div>
-            
+
             <div class="prompt-footer">
               <span id="agentActiveStatus"><i class="fa-solid fa-circle-check text-success"></i> Standby & Ready</span>
               <span class="shortcut-tip"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> untuk kirim cepat</span>
@@ -209,12 +223,16 @@
             </div>
             <div class="stat-item">
               <span class="stat-label"><i class="fa-solid fa-arrow-up-right-dots"></i> Sync Status</span>
-              <span class="stat-value" id="gitSyncStatus"><span class="badge badge-neutral">0 ahead</span> <span class="badge badge-neutral">0 behind</span></span>
+              <span class="stat-value" id="gitSyncStatus"><span class="badge badge-neutral">0 ahead</span> <span
+                  class="badge badge-neutral">0 behind</span></span>
             </div>
             <div class="git-quick-actions">
-              <button id="gitPullBtn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-down"></i> Pull</button>
-              <button id="gitRefreshBtn" class="btn btn-secondary btn-sm" title="Refresh Git Status"><i class="fa-solid fa-rotate"></i> Refresh</button>
-              <button id="gitPushBigBtn" class="btn btn-primary btn-sm btn-gradient-emerald"><i class="fa-solid fa-arrow-up-from-bracket"></i> Push to GitHub</button>
+              <button id="gitPullBtn" class="btn btn-secondary btn-sm"><i class="fa-solid fa-arrow-down"></i>
+                Pull</button>
+              <button id="gitRefreshBtn" class="btn btn-secondary btn-sm" title="Refresh Git Status"><i
+                  class="fa-solid fa-rotate"></i> Refresh</button>
+              <button id="gitPushBigBtn" class="btn btn-primary btn-sm btn-gradient-emerald"><i
+                  class="fa-solid fa-arrow-up-from-bracket"></i> Push to GitHub</button>
             </div>
           </div>
 
@@ -245,7 +263,8 @@
                     <i class="fa-solid fa-wand-magic-sparkles"></i> AI Generate Message
                   </button>
                 </div>
-                <textarea id="commitMessageInput" placeholder="Contoh: feat: update responsive layout navbar" rows="2"></textarea>
+                <textarea id="commitMessageInput" placeholder="Contoh: feat: update responsive layout navbar"
+                  rows="2"></textarea>
                 <button id="commitBtn" class="btn btn-primary w-100">
                   <i class="fa-solid fa-check"></i> Commit Changes
                 </button>
@@ -278,7 +297,7 @@
       <!-- TAB 3: REMOTE & MOBILE HUB -->
       <section id="tab-remote" class="tab-pane">
         <div class="remote-grid">
-          
+
           <!-- CARD 1: WhatsApp Bot Remote Control -->
           <div class="remote-card glass-panel">
             <div class="card-header">
@@ -294,7 +313,8 @@
 
             <div class="card-body">
               <div id="waQrContainer" class="qr-box hidden">
-                <p class="qr-instructions">Buka WhatsApp di HP Anda > Perangkat Tertaut (Linked Devices) > Tautkan Perangkat > Pindai kode QR ini:</p>
+                <p class="qr-instructions">Buka WhatsApp di HP Anda > Perangkat Tertaut (Linked Devices) > Tautkan
+                  Perangkat > Pindai kode QR ini:</p>
                 <div class="qr-image-wrapper">
                   <img id="waQrImage" src="" alt="WhatsApp QR Code">
                 </div>
@@ -309,11 +329,13 @@
                     <span id="waUserNumber" class="text-muted">Nomor WhatsApp</span>
                   </div>
                 </div>
-                <button id="waLogoutBtn" class="btn btn-danger btn-sm"><i class="fa-solid fa-power-off"></i> Putuskan Hubungan (Logout)</button>
+                <button id="waLogoutBtn" class="btn btn-danger btn-sm"><i class="fa-solid fa-power-off"></i> Putuskan
+                  Hubungan (Logout)</button>
               </div>
 
               <div id="waStartBox" class="start-box">
-                <button id="waConnectBtn" class="btn btn-primary w-100"><i class="fa-solid fa-link"></i> Hubungkan WhatsApp</button>
+                <button id="waConnectBtn" class="btn btn-primary w-100"><i class="fa-solid fa-link"></i> Hubungkan
+                  WhatsApp</button>
               </div>
 
               <div class="cheatsheet-box">
@@ -360,8 +382,10 @@
 
               <div class="tg-actions">
                 <button id="tgStartBtn" class="btn btn-primary"><i class="fa-solid fa-play"></i> Jalankan Bot</button>
-                <button id="tgStopBtn" class="btn btn-danger hidden"><i class="fa-solid fa-stop"></i> Hentikan Bot</button>
-                <a id="tgOpenLink" href="#" target="_blank" class="btn btn-secondary hidden"><i class="fa-solid fa-paper-plane"></i> Buka Chat Bot</a>
+                <button id="tgStopBtn" class="btn btn-danger hidden"><i class="fa-solid fa-stop"></i> Hentikan
+                  Bot</button>
+                <a id="tgOpenLink" href="#" target="_blank" class="btn btn-secondary hidden"><i
+                    class="fa-solid fa-paper-plane"></i> Buka Chat Bot</a>
               </div>
 
               <div class="cheatsheet-box">
@@ -397,7 +421,8 @@
                 <h4><i class="fa-solid fa-wifi"></i> 1. Akses Lokal (Satu Wi-Fi):</h4>
                 <div class="url-copy-box">
                   <span id="localUrlText" class="url-text">http://localhost:3888</span>
-                  <button id="copyLocalUrlBtn" class="btn btn-sm btn-secondary"><i class="fa-regular fa-copy"></i> Salin</button>
+                  <button id="copyLocalUrlBtn" class="btn btn-sm btn-secondary"><i class="fa-regular fa-copy"></i>
+                    Salin</button>
                 </div>
                 <div class="mini-qr" id="localQrWrapper">
                   <img id="localQrImg" src="" alt="Local Access QR">
@@ -412,15 +437,18 @@
                   <label for="tunnelSubdomain">Custom Subdomain (Opsional):</label>
                   <input type="text" id="tunnelSubdomain" placeholder="contoh: zhiend-agent">
                 </div>
-                
+
                 <div id="tunnelActionBox">
-                  <button id="startTunnelBtn" class="btn btn-primary w-100"><i class="fa-solid fa-cloud-arrow-up"></i> Buka Akses Publik (Start Tunnel)</button>
-                  <button id="stopTunnelBtn" class="btn btn-danger w-100 hidden"><i class="fa-solid fa-ban"></i> Tutup Akses Publik (Stop Tunnel)</button>
+                  <button id="startTunnelBtn" class="btn btn-primary w-100"><i class="fa-solid fa-cloud-arrow-up"></i>
+                    Buka Akses Publik (Start Tunnel)</button>
+                  <button id="stopTunnelBtn" class="btn btn-danger w-100 hidden"><i class="fa-solid fa-ban"></i> Tutup
+                    Akses Publik (Stop Tunnel)</button>
                 </div>
 
                 <div id="publicUrlBox" class="url-copy-box hidden">
                   <span id="publicUrlText" class="url-text">https://...</span>
-                  <button id="copyPublicUrlBtn" class="btn btn-sm btn-secondary"><i class="fa-regular fa-copy"></i> Salin</button>
+                  <button id="copyPublicUrlBtn" class="btn btn-sm btn-secondary"><i class="fa-regular fa-copy"></i>
+                    Salin</button>
                 </div>
 
                 <div class="mini-qr hidden" id="publicQrWrapper">
@@ -488,7 +516,8 @@
         <div class="form-group">
           <label for="newProjectPathInput">Path Direktori Project di Komputer Anda:</label>
           <div class="input-with-btn">
-            <input type="text" id="newProjectPathInput" placeholder="Contoh: D:\Works\my-project atau D:/Works/zhiEnd-agent">
+            <input type="text" id="newProjectPathInput"
+              placeholder="Contoh: D:\Works\my-project atau D:/Works/zhiEnd-agent">
             <button id="selectCustomPathBtn" class="btn btn-primary">Buka</button>
           </div>
         </div>
@@ -533,4 +562,5 @@
   <script src="js/bots.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>
