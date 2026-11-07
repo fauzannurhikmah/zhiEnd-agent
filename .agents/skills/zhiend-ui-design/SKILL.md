@@ -18,7 +18,12 @@ description: "Distinctive UI/UX Design System for zhiEnd Agent. Opinionated 'Cyb
 >    - When any input, textarea, or mechanical well is focused or active, there must be NO ring, NO outline, and NO border color change to orange (`#FF5500`).
 >    - The border strictly remains neutral `#D0CEC7` (`outline: none !important; box-shadow: none !important; border-color: #D0CEC7 !important; --tw-ring-color: transparent !important`).
 > 3. **Asymmetric CAD Blueprint Ground ("Random Grid tapi Ada Keteraturan")**:
->    - Large architectural drafting bands (navbar row, headline row, partner strip row, asymmetric column partitions) overlaid on a fine 24px dot-matrix CAD sub-grid (`.blueprint-cad-ground`) with 120px drafting seams and solid orange square intersection marks (`■`).
+>    - Large architectural drafting bands (navbar row, headline row, partner strip row, asymmetric column partitions) on authentic matte off-white concrete chassis (`#ECEAE5`).
+>    - NO dense repetitive 24px polka-dot wallpaper or 120px graph paper tiles!
+>    - Features sparse asymmetrical architectural drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), dedicated technical left rail (`✕`) and right rail (`◎`), and solid orange square intersection marks (`■`).
+> 4. **Chat Box UX & Last User Prompt Editing**:
+>    - The delete/purge button must NEVER be placed in the bottom chat input box next to DISPATCH (it belongs safely in the sub-header).
+>    - The latest user message bubble features an inline `[EDIT PROMPT]` trigger allowing the user to edit their last prompt in-place and resubmit, which automatically clears the old response and regenerates an updated AI response.
 > 3. **Technical Drafting Ornaments**:
 >    - Orange solid corner registration squares (`■`) anchoring major module bays.
 >    - Corner viewfinder reticle brackets (`┌ ┐` and `└ ┘`) framing telemetry and visualizer boxes.

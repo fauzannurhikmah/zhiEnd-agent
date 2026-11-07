@@ -720,6 +720,22 @@
     }
   }
 
+  async function handleEditLastMessage(newText: string) {
+    if (isAgentBusy || !newText.trim()) return;
+
+    // Cari index pesan user terakhir
+    const lastUserIdx = messages.map(m => m.sender).lastIndexOf('user');
+    if (lastUserIdx === -1) return;
+
+    const originalImages = messages[lastUserIdx].images;
+
+    // Hapus pesan user terakhir dan pesan agen setelahnya agar respons AI diperbarui
+    messages = messages.slice(0, lastUserIdx);
+
+    // Kirim ulang dengan prompt yang baru
+    await handleSendMessage(newText, originalImages);
+  }
+
   async function handleExecutePush() {
     isPushModalOpen = true;
     pushStatus = "running";
@@ -1000,6 +1016,7 @@
           {activeSession}
           {activePersona}
           onSendMessage={handleSendMessage}
+          onEditLastMessage={handleEditLastMessage}
           onCancelTask={async () => {
             await api.cancelTask();
           }}

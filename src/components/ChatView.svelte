@@ -45,6 +45,7 @@
     activeSession = null,
     activePersona = null,
     onSendMessage,
+    onEditLastMessage,
     onCancelTask,
     onClearMessages,
     onCreateNewSession,
@@ -56,6 +57,7 @@
     activeSession?: ChatSessionItem | null;
     activePersona?: PersonaItem | null;
     onSendMessage: (text: string, images?: string[]) => void;
+    onEditLastMessage?: (newText: string) => void;
     onCancelTask: () => void;
     onClearMessages: () => void;
     onCreateNewSession?: () => void;
@@ -77,6 +79,12 @@
   let copiedMessageId = $state<string | null>(null);
   let expandedProcesses = $state<Record<string, boolean>>({});
   let prevStreamingStatus = $state<Record<string, boolean>>({});
+
+  // Last User Message & Inline Edit State
+  let editingMessageId = $state<string | null>(null);
+  let editingMessageText = $state('');
+  let lastUserMessage = $derived([...messages].reverse().find(m => m.sender === 'user'));
+  let lastUserMessageId = $derived(lastUserMessage?.id);
 
   // Image Upload & Lightbox state
   let selectedImages = $state<AttachedImage[]>([]);
@@ -586,40 +594,56 @@
         role="region"
         aria-label="Blueprint Cockpit Deck"
         onmousemove={handleDeckMouseMove}
-        class="w-full flex-1 flex flex-col justify-between blueprint-cad-ground p-4 sm:p-6 lg:p-8 relative"
+        class="w-full flex-1 flex blueprint-cad-ground relative min-h-0"
       >
-        <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
-        <span class="reg-dot reg-dot-tl"></span>
-        <span class="reg-dot reg-dot-tr"></span>
-        <span class="reg-dot reg-dot-bl"></span>
-        <span class="reg-dot reg-dot-br"></span>
-
-        <!-- Top Drafting Header Seam -->
-        <div class="flex items-center justify-between pb-3 mb-2 border-b border-[#D0CEC7] font-tech text-[11px] text-[#5C6066]">
-          <div class="flex items-center gap-2">
-            <span class="crosshair-box w-5 h-5 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair rounded-none"></span>
-            <span class="font-bold tracking-wider text-[#111315]">ZHIEND // AUTONOMOUS AGENT RUNTIME</span>
-            <span class="text-[#FF5500] font-bold">■ LABS DRAFTING MATRIX</span>
+        <!-- Left Technical Drafting Rail (Exact ChainGPT Labs ✕ Gutter) -->
+        <div class="hidden md:flex w-11 border-r border-[#D0CEC7] bg-[#ECEAE5] flex-col items-center justify-between py-4 shrink-0 select-none">
+          <div class="crosshair-box w-7 h-7 text-xs inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair rounded-none border border-[#D0CEC7] bg-[#FCFCFA] font-mono text-[#111315]">
+            ✕
           </div>
-          <div class="hidden sm:flex items-center gap-3 font-stencil text-[10px]">
-            <span class="text-[#8C9097]">:: SYS_BUS_NOMINAL</span>
-            <span class="px-2 py-0.5 rounded-none bg-white border border-[#D0CEC7] font-bold text-[#111315]">REV 2.4</span>
+          <div class="font-stencil text-[9px] text-[#8C9097] [writing-mode:vertical-lr] tracking-widest uppercase">
+            BUS // 0x3888
           </div>
+          <span class="w-2 h-2 bg-[#FF5500]"></span>
         </div>
 
-        <!-- Hero Headline Grid Row (Giant Modular Lettering) -->
-        <div class="relative py-2 sm:py-4 border-b border-[#D0CEC7] mb-4 sm:mb-6">
-          <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black tracking-tight text-[#111315] select-none uppercase leading-none">
-            Z H I E N D &nbsp; C O R E
-          </h1>
-          <div class="flex items-center gap-2 mt-2 sm:mt-3 font-tech text-xs sm:text-sm font-bold text-[#FF5500] tracking-wider uppercase">
-            <span class="w-2.5 h-2.5 bg-[#FF5500] inline-block"></span>
-            <span>BACKING AUTONOMOUS ENGINEERING</span>
-          </div>
-        </div>
+        <!-- Center Architectural Blueprint Stage -->
+        <div class="flex-1 flex flex-col justify-between p-4 sm:p-6 lg:p-7 min-w-0 relative">
+          <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
+          <span class="reg-dot reg-dot-tl"></span>
+          <span class="reg-dot reg-dot-tr"></span>
+          <span class="reg-dot reg-dot-bl"></span>
+          <span class="reg-dot reg-dot-br"></span>
 
-        <!-- Main 3-Column Cockpit Deck -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center flex-1 my-auto">
+          <!-- Top Drafting Header Seam -->
+          <div class="flex items-center justify-between pb-3 mb-2 border-b border-[#D0CEC7] font-tech text-[11px] text-[#5C6066]">
+            <div class="flex items-center gap-2">
+              <span class="font-bold tracking-wider text-[#111315]">ZHIEND // AUTONOMOUS AGENT RUNTIME</span>
+              <span class="text-[#FF5500] font-bold">■ LABS DRAFTING MATRIX</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-3 font-stencil text-[10px]">
+              <span class="text-[#8C9097]">:: SYS_BUS_NOMINAL</span>
+              <span class="px-2 py-0.5 rounded-none bg-white border border-[#D0CEC7] font-bold text-[#111315]">REV 2.4</span>
+            </div>
+          </div>
+
+          <!-- Hero Headline Grid Row (Giant Modular Lettering) -->
+          <div class="relative py-2 sm:py-4 border-b border-[#D0CEC7] mb-4 sm:mb-6">
+            <span class="reg-dot reg-dot-tl"></span>
+            <span class="reg-dot reg-dot-tr"></span>
+            <span class="reg-dot reg-dot-bl"></span>
+            <span class="reg-dot reg-dot-br"></span>
+            <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-black tracking-tight text-[#111315] select-none uppercase leading-none">
+              Z H I E N D &nbsp; C O R E
+            </h1>
+            <div class="flex items-center gap-2 mt-2 sm:mt-3 font-tech text-xs sm:text-sm font-bold text-[#FF5500] tracking-wider uppercase">
+              <span class="w-2.5 h-2.5 bg-[#FF5500] inline-block"></span>
+              <span>BACKING AUTONOMOUS ENGINEERING</span>
+            </div>
+          </div>
+
+          <!-- Main 3-Column Cockpit Deck -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center flex-1 my-auto">
           
           <!-- Left Cell (Col 1-5): Mission Brief & Primary CTA (ChainGPT Labs Style: Flat Orange Capsule) -->
           <div class="lg:col-span-5 flex flex-col justify-between h-full gap-4 py-2">
@@ -750,22 +774,91 @@
           </div>
         </div>
 
+        </div>
+
+        <!-- Right Technical Drafting Rail (Exact ChainGPT Labs ◎ Target & Status Gutter) -->
+        <div class="hidden md:flex w-11 border-l border-[#D0CEC7] bg-[#ECEAE5] flex-col items-center justify-between py-4 shrink-0 select-none">
+          <div class="w-7 h-7 text-xs inline-flex items-center justify-center rounded-none border border-[#D0CEC7] bg-[#FCFCFA] font-stencil text-[#111315]">
+            ◎
+          </div>
+          <div class="font-stencil text-[9px] text-[#8C9097] [writing-mode:vertical-lr] tracking-widest uppercase">
+            STATUS // NOMINAL
+          </div>
+          <span class="w-2 h-2 bg-emerald-500 animate-pulse"></span>
+        </div>
+
       </div>
     {:else}
       <!-- Active Messages Stream -->
       <div class="max-w-3xl mx-auto flex flex-col gap-5 sm:gap-6 pb-20 sm:pb-24">
         {#each messages as msg (msg.id)}
           {#if msg.sender === 'user'}
-            <div class="flex flex-col gap-1.5 items-end group">
+            {@const isLastUser = msg.id === lastUserMessageId}
+            {@const isEditing = editingMessageId === msg.id}
+            <div class="flex flex-col gap-1.5 items-end group w-full">
               <!-- Header Username -->
               <div class="flex items-center text-[10px] font-stencil text-[#60646C] px-1 font-bold">
                 <span>■ USER TRANSMISSION</span>
+                {#if isLastUser}
+                  <span class="ml-2 px-1.5 py-0.2 rounded-none bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] text-[9px] font-bold">
+                    LATEST PROMPT
+                  </span>
+                {/if}
               </div>
 
               <!-- User Bubble Content (Architectural Alabaster Well) -->
-              <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-3.5 sm:p-4 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-grotesk text-[#111315] max-w-[92%] sm:max-w-[85%] shadow-2xs">
+              <div class="relative bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-3.5 sm:p-4 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-grotesk text-[#111315] max-w-[92%] sm:max-w-[85%] shadow-2xs w-full">
                 <span class="reg-dot reg-dot-tr"></span>
-                {msg.text}
+                {#if isEditing}
+                  <!-- Inline Edit Mode for Last User Message -->
+                  <div class="flex flex-col gap-2.5 w-full">
+                    <div class="flex items-center justify-between text-[10px] font-stencil text-[#FF5500] font-bold border-b border-[#D0CEC7] pb-1">
+                      <span>:: EDIT PROMPT // RESUBMIT TO AI</span>
+                      <span class="text-[#8C9097] font-normal">Perbarui prompt untuk mengubah respons AI</span>
+                    </div>
+                    <textarea
+                      bind:value={editingMessageText}
+                      rows="3"
+                      class="w-full bg-[#ECEAE5] border border-[#D0CEC7] p-2.5 text-xs text-[#111315] font-grotesk outline-none resize-y leading-relaxed"
+                      placeholder="Ketik instruksi baru..."
+                      onkeydown={(e) => {
+                        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                          e.preventDefault();
+                          if (editingMessageText.trim() && !isBusy && onEditLastMessage) {
+                            onEditLastMessage(editingMessageText.trim());
+                            editingMessageId = null;
+                          }
+                        } else if (e.key === 'Escape') {
+                          editingMessageId = null;
+                        }
+                      }}
+                    ></textarea>
+                    <div class="flex items-center justify-end gap-2 font-tech">
+                      <button
+                        type="button"
+                        onclick={() => editingMessageId = null}
+                        class="btn-hardware px-3 py-1.5 rounded-none text-xs text-[#5C6066] hover:text-[#111315] cursor-pointer"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isBusy || !editingMessageText.trim()}
+                        onclick={() => {
+                          if (editingMessageText.trim() && !isBusy && onEditLastMessage) {
+                            onEditLastMessage(editingMessageText.trim());
+                            editingMessageId = null;
+                          }
+                        }}
+                        class="btn-safety px-4 py-1.5 rounded-none text-white text-xs font-bold uppercase tracking-wider cursor-pointer active:scale-95 disabled:opacity-40"
+                      >
+                        Perbarui & Kirim
+                      </button>
+                    </div>
+                  </div>
+                {:else}
+                  {msg.text}
+                {/if}
               </div>
 
               <!-- User Attached Images Gallery -->
@@ -787,8 +880,23 @@
               {/if}
 
               <!-- Action Toolbar for User Bubble -->
-              {#if msg.text && !msg.isStreaming}
-                <div class="flex items-center gap-1 px-1 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 justify-end">
+              {#if msg.text && !msg.isStreaming && !isEditing}
+                <div class="flex items-center gap-1.5 px-1 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 justify-end">
+                  {#if isLastUser && !isBusy && onEditLastMessage}
+                    <button
+                      type="button"
+                      onclick={() => {
+                        editingMessageId = msg.id;
+                        editingMessageText = msg.text;
+                      }}
+                      class="flex items-center gap-1 text-[11px] text-[#FF5500] hover:text-white px-2 py-0.5 rounded-none bg-[#FF5500]/10 hover:bg-[#FF5500] border border-[#FF5500]/30 transition cursor-pointer font-stencil font-bold"
+                      title="Edit pesan ini dan perbarui respons AI"
+                    >
+                      <FileEdit class="w-3 h-3" />
+                      <span>EDIT PROMPT</span>
+                    </button>
+                  {/if}
+
                   <button
                     type="button"
                     onclick={() => handleCopy(msg.id, msg.text)}
@@ -1167,14 +1275,6 @@
                 <StopCircle class="w-4 h-4" />
               </button>
             {/if}
-
-            <button
-              onclick={onClearMessages}
-              class="hidden sm:flex p-2 rounded-none hover:bg-[#E5E3DD] text-[#8C9097] hover:text-[#111315] transition cursor-pointer"
-              title="Bersihkan Percakapan"
-            >
-              <Trash2 class="w-4 h-4" />
-            </button>
 
             <button
               onclick={handleSend}

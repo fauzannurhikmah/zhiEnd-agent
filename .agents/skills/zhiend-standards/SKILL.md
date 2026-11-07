@@ -49,7 +49,12 @@ The standards are modularly split into two specialized skills:
   - `--ink-basalt`: `#111315` (High-contrast basalt black for headlines, labels, and primary text)
   - `--stencil-slate`: `#60646C` (Technical stencil metadata, sub-labels, and timestamps)
 - **Asymmetric CAD Ground ("Random Grid tapi Ada Keteraturan")**:
-  - Large architectural layout bands (navbar row, hero headline row, partner strip row, asymmetric columns) overlaid on a fine 24px dot-matrix CAD sub-grid (`.blueprint-cad-ground`) with 120px drafting seams and solid orange square intersection marks (`■`).
+  - Large architectural layout bands (navbar row, hero headline row, partner strip row, asymmetric columns) on warm off-white concrete chassis (`#ECEAE5`).
+  - Prohibits dense repetitive 24px polka-dot wallpaper or 120px graph paper tiles.
+  - Employs sparse asymmetrical drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), dedicated left technical rail (`✕`), right rail (`◎`), and corner square marks (`■`).
+- **Chat UX & Prompt Revision**:
+  - The delete/purge button must NEVER be in the bottom input bar next to DISPATCH (it is safely kept in the sub-header).
+  - The last user chat bubble features an inline `[EDIT PROMPT]` mode, enabling prompt updates and automated AI response regeneration.
 - **Retro-Futuristic Typography Scale**:
   - `.font-display`: `Syne` 900 Black for giant modular headline letterforms (`Z H I E N D   C O R E`).
   - `.font-tech`: `Chakra Petch` 700 Bold for industrial navigation switches and soundbank bays.
