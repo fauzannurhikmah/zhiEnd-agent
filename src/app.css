@@ -2,22 +2,25 @@
 
 @layer base {
   :root {
-    --canvas-carbon: #08090c;
-    --deck-surface: #101216;
-    --raised-bed: #161920;
-    --hairline-rule: #222630;
-    --signal-cyan: #00e5ff;
-    --signal-amber: #f59e0b;
-    --signal-emerald: #10b981;
-    --signal-rose: #f43f5e;
-    --signal-sky: #38bdf8;
+    --chassis-bone: #F4F3EE;
+    --deck-putty: #E9E7E0;
+    --bed-magnesium: #DEDBD2;
+    --well-alabaster: #FCFCFA;
+    --seam-milled: #C8C5BC;
+    --seam-dark: #A8A59C;
+    --safety-orange: #FF5500;
+    --safety-orange-hover: #E64D00;
+    --hazard-mustard: #E5A91A;
+    --ink-basalt: #191B1D;
+    --stencil-grey: #5C6066;
+    --stencil-light: #8C9097;
   }
 
   body {
-    background-color: var(--canvas-carbon);
-    color: #f1f3f7;
+    background-color: var(--chassis-bone);
+    color: var(--ink-basalt);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.012em;
     min-height: 100vh;
     overflow: hidden;
   }
@@ -28,28 +31,28 @@
 }
 
 /* ------------------------------------------------------------- */
-/* MINIMALIST PRECISION SCROLLBARS                               */
+/* INDUSTRIAL HARDWARE TACTILE SCROLLBARS                        */
 /* ------------------------------------------------------------- */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--deck-putty);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  background: var(--seam-dark);
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 229, 255, 0.4);
+  background: var(--safety-orange);
 }
 
 /* ------------------------------------------------------------- */
-/* ACCESSIBILITY: Focus Rings & Reduced Motion                   */
+/* ACCESSIBILITY: Safety Orange Focus Rings                      */
 /* ------------------------------------------------------------- */
 :focus-visible {
-  outline: 2px solid var(--signal-cyan);
+  outline: 2px solid var(--safety-orange);
   outline-offset: 2px;
 }
 
@@ -57,7 +60,7 @@ button:focus-visible,
 a:focus-visible,
 [role="button"]:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--signal-cyan);
+  outline: 2px solid var(--safety-orange);
   outline-offset: 2px;
 }
 
@@ -76,193 +79,220 @@ a:focus:not(:focus-visible),
 }
 
 /* ------------------------------------------------------------- */
-/* COLD CARBON PRECISION: Core Surfaces & Component Tokens       */
+/* TE-IFI: TEENAGE ENGINEERING INDUSTRIAL FIELD INSTRUMENT TOKENS */
 /* ------------------------------------------------------------- */
 
-/* 1. Milled Graphite Deck / Panel */
+/* 1. Structural Putty Deck / Panel */
+.hardware-panel,
 .carbon-panel,
 .glass-panel {
-  background: #101216;
-  border: 1px solid #222630;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.55);
+  background: #E9E7E0;
+  border: 1px solid #C8C5BC;
+  box-shadow: 0 1px 3px rgba(25, 27, 29, 0.04);
 }
 
+.hardware-panel:hover,
 .carbon-panel:hover,
 .glass-panel:hover {
-  border-color: #2e3444;
+  border-color: #A8A59C;
 }
 
-/* 2. Elevated Floating Console (Modals, Popovers, Docks) */
+/* 2. Elevated Floating Console (Modals, Overlays, Floating Docks) */
+.hardware-panel-raised,
 .carbon-panel-raised,
 .glass-panel-elevated {
-  background: #13151b;
-  border: 1px solid #282e3d;
+  background: #FCFCFA;
+  border: 1px solid #C8C5BC;
   box-shadow:
-    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
-    0 24px 48px -12px rgba(0, 0, 0, 0.85);
+    0 12px 32px -4px rgba(25, 27, 29, 0.16),
+    0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
-/* 3. Recessed Bed / Inner Sub-Cards */
-.carbon-subtle,
-.glass-panel-subtle {
-  background: #0b0d11;
-  border: 1px solid #1c202a;
-}
-
-/* 4. Interactive Card (Tactile hover elevation) */
-.carbon-card,
-.glass-card {
-  background: #101216;
-  border: 1px solid #222630;
-  transition: all 0.15s ease-out;
-}
-
-.carbon-card:hover,
-.glass-card:hover {
-  background: #14171e;
-  border-color: rgba(0, 229, 255, 0.35);
-  transform: translateY(-1px);
-}
-
-/* 5. Terminal Input & Textarea Dock */
+/* 3. Recessed Machine Well (Inputs, Terminal, Code Bins) */
+.hardware-well,
 .carbon-input,
 .glass-input {
-  background: #0b0d11;
-  border: 1px solid #222630;
-  color: #f1f3f7;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  background: #FCFCFA;
+  border: 1px solid #C8C5BC;
+  color: #191B1D;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
 }
 
+.hardware-well:focus,
+.hardware-well:focus-within,
 .carbon-input:focus,
 .carbon-input:focus-within,
 .glass-input:focus,
 .glass-input:focus-within {
-  border-color: var(--signal-cyan);
-  box-shadow: 0 0 0 1px var(--signal-cyan), 0 0 16px -2px rgba(0, 229, 255, 0.2);
+  border-color: #FF5500;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04), 0 0 0 1px #FF5500;
 }
 
-/* 6. Buttons: Primary Telemetry Signal & Tool Controls */
+/* 4. Sub-cards & Recessed Beds */
+.carbon-subtle,
+.glass-panel-subtle {
+  background: #DEDBD2;
+  border: 1px solid #C8C5BC;
+}
+
+/* 5. Interactive Hardware Card */
+.carbon-card,
+.glass-card {
+  background: #E9E7E0;
+  border: 1px solid #C8C5BC;
+  border-bottom: 2px solid #A8A59C;
+  transition: all 0.1s ease;
+}
+
+.carbon-card:hover,
+.glass-card:hover {
+  background: #FCFCFA;
+  border-color: #A8A59C;
+  transform: translateY(-1px);
+}
+
+/* 6. Primary Safety Hazard Orange Action Switch */
+.btn-safety,
 .btn-telemetry,
 .glass-btn-primary {
-  background: #00e5ff;
-  color: #04060a;
-  font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 2px 10px rgba(0, 229, 255, 0.35);
-  transition: all 0.15s ease;
+  background: #FF5500;
+  color: #FFFFFF;
+  font-weight: 700;
+  border: 1px solid #E04B00;
+  border-bottom: 2px solid #B33C00;
+  box-shadow: 0 2px 4px rgba(255, 85, 0, 0.2);
+  transition: all 0.08s ease;
 }
 
+.btn-safety:hover,
 .btn-telemetry:hover,
 .glass-btn-primary:hover {
-  background: #33ebff;
-  box-shadow: 0 4px 16px rgba(0, 229, 255, 0.5);
+  background: #E64D00;
 }
 
+.btn-safety:active,
 .btn-telemetry:active,
 .glass-btn-primary:active {
-  transform: scale(0.97);
+  transform: translateY(1px);
+  border-bottom-width: 1px;
+  box-shadow: none;
 }
 
+/* 7. Tactile Mechanical Tool Button */
+.btn-hardware,
 .btn-tool,
 .glass-btn-secondary {
-  background: #161920;
-  border: 1px solid #222630;
-  color: #d1d5db;
-  transition: all 0.15s ease;
+  background: #E9E7E0;
+  border: 1px solid #C8C5BC;
+  border-bottom: 2px solid #A8A59C;
+  color: #191B1D;
+  font-weight: 600;
+  transition: all 0.08s ease;
 }
 
+.btn-hardware:hover,
 .btn-tool:hover,
 .glass-btn-secondary:hover {
-  background: #1c202a;
-  border-color: #323846;
-  color: #ffffff;
+  background: #DEDBD2;
+  color: #000000;
 }
 
+.btn-hardware:active,
 .btn-tool:active,
 .glass-btn-secondary:active {
-  transform: scale(0.97);
+  transform: translateY(1px);
+  border-bottom-width: 1px;
 }
 
-/* 7. Pills & Status Badges */
+/* 8. Hardware Pill & Stenciled Status Badges */
 .carbon-pill,
+.hardware-badge,
 .glass-pill {
-  background: #13151b;
-  border: 1px solid #222630;
-  color: #9ca3af;
+  background: #DEDBD2;
+  border: 1px solid #C8C5BC;
+  color: #5C6066;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
 }
 
-/* 8. Active Tab / Navigation State */
+/* 9. Active Tab / Navigation State */
 .carbon-tab-active,
 .glass-tab-active {
-  background: #161a22;
-  border: 1px solid rgba(0, 229, 255, 0.45);
-  color: #ffffff;
+  background: #FCFCFA;
+  border: 1px solid #C8C5BC;
+  border-left: 3px solid #FF5500;
+  color: #191B1D;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(25, 27, 29, 0.05);
 }
 
-/* 9. Chat Message Bubbles: No generic purple gradients! */
+/* 10. Message Bays (No AI Slop / No Neon Gradients) */
 .bubble-user,
+.bubble-user-hardware,
 .glass-bubble-user {
-  background: #0c1a24;
-  border: 1px solid rgba(0, 229, 255, 0.35);
-  color: #f1f5f9;
+  background: #FCFCFA;
+  border: 1px solid #C8C5BC;
+  border-right: 3px solid #FF5500;
+  color: #191B1D;
+  box-shadow: 0 1px 3px rgba(25, 27, 29, 0.05);
 }
 
 .bubble-agent,
+.bubble-agent-hardware,
 .glass-bubble-agent {
-  background: #101216;
-  border: 1px solid #222630;
-  color: #e2e8f0;
+  background: #E9E7E0;
+  border: 1px solid #C8C5BC;
+  color: #191B1D;
+  box-shadow: 0 1px 2px rgba(25, 27, 29, 0.03);
 }
 
-/* 10. Headers & Shell Railings */
+/* 11. Headers & Sidebars */
 .glass-header {
-  background: #0d0e12;
-  border-bottom: 1px solid #222630;
+  background: #E9E7E0;
+  border-bottom: 1px solid #C8C5BC;
 }
 
 .glass-sidebar {
-  background: #0d0e12;
-  border-right: 1px solid #222630;
+  background: #E9E7E0;
+  border-right: 1px solid #C8C5BC;
 }
 
 .glass-nav-mobile {
-  background: #0d0e12;
-  border-top: 1px solid #222630;
+  background: #E9E7E0;
+  border-top: 1px solid #C8C5BC;
 }
 
-/* ------------------------------------------------------------- */
-/* SUBTLE DISCIPLINED TELEMETRY LIGHTING                         */
-/* ------------------------------------------------------------- */
+/* 12. Industrial Matrix Dot Grid */
+.hardware-grid {
+  background-image: radial-gradient(#C8C5BC 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
 .telemetry-beam {
-  background: radial-gradient(ellipse 70% 45% at 50% 0%, rgba(0, 229, 255, 0.07) 0%, transparent 70%);
-  pointer-events: none;
+  display: none;
 }
 
 .cinematic-dot-grid {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-image: radial-gradient(#C8C5BC 1px, transparent 1px);
   background-size: 24px 24px;
-  mask-image: radial-gradient(ellipse 90% 75% at 50% 30%, #000 35%, transparent 85%);
-  -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 30%, #000 35%, transparent 85%);
 }
 
 /* Legacy compatibility classes */
-.text-gradient {
-  color: #f1f3f7;
-}
-
+.text-gradient,
 .text-gradient-hero {
-  color: #ffffff;
+  color: #191B1D;
 }
 
 .text-gradient-brand {
-  color: var(--signal-cyan);
+  color: #FF5500;
 }
 
 .text-gradient-subtle {
-  color: #9ca3af;
+  color: #5C6066;
 }
 
 .cinematic-card {
-  background: #101216;
-  border: 1px solid #222630;
+  background: #E9E7E0;
+  border: 1px solid #C8C5BC;
 }

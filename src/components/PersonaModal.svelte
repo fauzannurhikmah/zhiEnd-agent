@@ -169,8 +169,8 @@
         name: 'Gemini 3.8 Flash (High Reasoning)',
         provider: 'antigravity',
         label: 'Antigravity Core',
-        color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/25',
-        dotColor: 'bg-indigo-400',
+        color: 'text-[#FF5500] bg-orange-100 border-[#FF5500]/40',
+        dotColor: 'bg-[#FF5500]',
         hasKey: true
       };
     }
@@ -183,8 +183,8 @@
         name: found?.name || modelId.replace('openai:', ''),
         provider: 'openai',
         label: 'OpenAI',
-        color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25',
-        dotColor: 'bg-emerald-400',
+        color: 'text-emerald-800 bg-emerald-100 border-emerald-300',
+        dotColor: 'bg-emerald-600',
         hasKey: found?.hasKey ?? false
       };
     }
@@ -193,8 +193,8 @@
         name: found?.name || modelId.replace(/^(grok|xai):/, ''),
         provider: 'grok',
         label: 'xAI Grok',
-        color: 'text-violet-400 bg-violet-500/10 border-violet-500/25',
-        dotColor: 'bg-violet-400',
+        color: 'text-[#FF5500] bg-orange-50 border-orange-200',
+        dotColor: 'bg-[#FF5500]',
         hasKey: found?.hasKey ?? false
       };
     }
@@ -203,8 +203,8 @@
         name: found?.name || modelId.replace('qwen:', ''),
         provider: 'qwen',
         label: 'Qwen',
-        color: 'text-amber-400 bg-amber-500/10 border-amber-500/25',
-        dotColor: 'bg-amber-400',
+        color: 'text-amber-800 bg-amber-100 border-amber-300',
+        dotColor: 'bg-amber-600',
         hasKey: found?.hasKey ?? false
       };
     }
@@ -213,8 +213,8 @@
         name: found?.name || modelId.replace('deepseek:', ''),
         provider: 'deepseek',
         label: 'DeepSeek',
-        color: 'text-sky-400 bg-sky-500/10 border-sky-500/25',
-        dotColor: 'bg-sky-400',
+        color: 'text-sky-800 bg-sky-100 border-sky-300',
+        dotColor: 'bg-sky-600',
         hasKey: found?.hasKey ?? false
       };
     }
@@ -223,8 +223,8 @@
         name: found?.name || modelId.replace('gemini:', ''),
         provider: 'gemini',
         label: 'Gemini Direct',
-        color: 'text-blue-400 bg-blue-500/10 border-blue-500/25',
-        dotColor: 'bg-blue-400',
+        color: 'text-[#FF5500] bg-orange-100 border-[#FF5500]/40',
+        dotColor: 'bg-[#FF5500]',
         hasKey: found?.hasKey ?? false
       };
     }
@@ -233,8 +233,8 @@
         name: found?.name || modelId,
         provider: 'custom',
         label: 'Custom',
-        color: 'text-purple-400 bg-purple-500/10 border-purple-500/25',
-        dotColor: 'bg-purple-400',
+        color: 'text-[#191B1D] bg-[#E9E7E0] border-[#C8C5BC]',
+        dotColor: 'bg-[#5C6066]',
         hasKey: found?.hasKey ?? false
       };
     }
@@ -243,8 +243,8 @@
       name: found?.name || modelId,
       provider: 'antigravity',
       label: 'Antigravity Core',
-      color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/25',
-      dotColor: 'bg-indigo-400',
+      color: 'text-[#FF5500] bg-orange-100 border-[#FF5500]/40',
+      dotColor: 'bg-[#FF5500]',
       hasKey: true
     };
   }
@@ -415,26 +415,26 @@
 
 {#if isOpen}
   <div
-    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
+    class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
   >
     <div
-      class="w-full max-w-2xl bg-zinc-950/95 border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] animate-in zoom-in-95 duration-200"
+      class="w-full max-w-2xl bg-[#FCFCFA] border border-[#C8C5BC] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] font-sans animate-in zoom-in-95 duration-200"
     >
       <!-- Header -->
       <div
-        class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-white/[0.08] flex items-center justify-between shrink-0 bg-zinc-900/60"
+        class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#C8C5BC] flex items-center justify-between shrink-0 bg-[#E9E7E0]"
       >
         <div class="flex items-center gap-2.5">
           <div
-            class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shadow-sm"
+            class="w-8 h-8 rounded-lg bg-[#FF5500] text-white flex items-center justify-center font-bold shadow-xs"
           >
             <Bot class="w-4 h-4" />
           </div>
           <div>
-            <h3 class="text-sm sm:text-base font-bold text-white tracking-tight">
+            <h3 class="text-sm sm:text-base font-bold text-[#191B1D] tracking-tight uppercase font-mono">
               Karakter & Persona AI
             </h3>
-            <p class="text-[11px] text-zinc-400">
+            <p class="text-[11px] text-[#5C6066]">
               Pilih karakter atau tautkan model AI (OpenAI, Grok, Qwen, DeepSeek, Gemini)
             </p>
           </div>
@@ -443,7 +443,7 @@
         <button
           type="button"
           onclick={onClose}
-          class="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition cursor-pointer"
+          class="p-1.5 rounded-lg text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2] transition cursor-pointer"
         >
           <X class="w-4 h-4" />
         </button>
@@ -451,17 +451,17 @@
 
       <!-- Navigation Tabs -->
       <div
-        class="flex items-center px-4 sm:px-6 pt-2.5 border-b border-white/[0.08] text-xs gap-3 sm:gap-4 shrink-0 bg-zinc-900/30"
+        class="flex items-center px-4 sm:px-6 pt-2.5 border-b border-[#C8C5BC] text-xs gap-3 sm:gap-4 shrink-0 bg-[#E9E7E0]"
       >
         <button
           type="button"
           onclick={() => {
             activeTab = "list";
           }}
-          class="pb-2 sm:pb-2.5 px-2.5 sm:px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
+          class="pb-2.5 sm:pb-3 px-2.5 sm:px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
           'list'
-            ? 'border-indigo-500 text-indigo-300 font-bold'
-            : 'border-transparent text-zinc-400 hover:text-zinc-200'}"
+            ? 'border-[#FF5500] text-[#FF5500] font-bold'
+            : 'border-transparent text-[#5C6066] hover:text-[#191B1D]'}"
         >
           <Bot class="w-3.5 h-3.5" />
           <span>Daftar Persona ({personas.length})</span>
@@ -475,13 +475,13 @@
             }
             activeTab = "create";
           }}
-          class="pb-2 sm:pb-2.5 px-2.5 sm:px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
+          class="pb-2.5 sm:pb-3 px-2.5 sm:px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
           'create'
-            ? 'border-indigo-500 text-indigo-300 font-bold'
-            : 'border-transparent text-zinc-400 hover:text-zinc-200'}"
+            ? 'border-[#FF5500] text-[#FF5500] font-bold'
+            : 'border-transparent text-[#5C6066] hover:text-[#191B1D]'}"
         >
           {#if editingPersonaId}
-            <Pencil class="w-3.5 h-3.5 text-indigo-400" />
+            <Pencil class="w-3.5 h-3.5 text-[#FF5500]" />
             <span>Edit Persona</span>
           {:else}
             <Plus class="w-3.5 h-3.5" />
@@ -491,7 +491,7 @@
       </div>
 
       <!-- Content Area -->
-      <div class="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-3 sm:space-y-4">
+      <div class="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-3 sm:space-y-4 bg-[#F4F3EE]">
         {#if activeTab === "list"}
           <!-- Personas Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -499,9 +499,9 @@
               {@const isSelected = activePersonaId === p.id}
               {@const modelInfo = getModelDetails(p.preferred_model)}
               <div
-                class="p-3 sm:p-3.5 rounded-2xl border transition flex flex-col justify-between gap-3 group relative {isSelected
-                  ? 'bg-indigo-950/30 border-indigo-500 shadow-md shadow-indigo-950/30'
-                  : 'bg-zinc-900/40 hover:bg-zinc-900/70 border-white/[0.06] hover:border-white/[0.14]'}"
+                class="p-3 sm:p-3.5 rounded-xl border transition flex flex-col justify-between gap-3 group relative {isSelected
+                  ? 'bg-orange-50/70 border-[#FF5500] shadow-xs'
+                  : 'bg-[#FCFCFA] hover:bg-[#E9E7E0]/60 border-[#C8C5BC] hover:border-[#8C9097]'}"
               >
                 <div class="flex flex-col gap-2.5">
                   <div class="flex items-start justify-between gap-2">
@@ -511,24 +511,24 @@
                         avatar={p.avatar}
                         name={p.name}
                         size="md"
-                        className="rounded-2xl shrink-0 ring-1 ring-white/10"
+                        className="rounded-xl shrink-0 ring-1 ring-[#C8C5BC]"
                       />
 
                       <div class="flex flex-col min-w-0 flex-1">
                         <h4
-                          class="text-xs font-bold text-zinc-100 flex items-center gap-1.5 min-w-0"
+                          class="text-xs font-bold text-[#191B1D] flex items-center gap-1.5 min-w-0"
                         >
-                          <span class="truncate font-semibold">{p.name}</span>
+                          <span class="truncate font-bold">{p.name}</span>
                           {#if p.is_default}
                             <span
-                              class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 shrink-0"
+                              class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC] shrink-0 font-bold"
                               >Bawaan</span
                             >
                           {/if}
                         </h4>
 
                         <!-- Model AI Badge with Provider color -->
-                        <div class="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono border {modelInfo.color} w-fit max-w-full">
+                        <div class="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono border {modelInfo.color} w-fit max-w-full font-bold">
                           <span class="w-1.5 h-1.5 rounded-full {modelInfo.dotColor} shrink-0"></span>
                           <span class="truncate">{modelInfo.label}: {modelInfo.name}</span>
                         </div>
@@ -540,7 +540,7 @@
                       <button
                         type="button"
                         onclick={() => startEditPersona(p)}
-                        class="p-1 rounded-lg text-zinc-400 hover:text-indigo-300 hover:bg-indigo-500/10 transition cursor-pointer"
+                        class="p-1 rounded-lg text-[#5C6066] hover:text-[#FF5500] hover:bg-orange-100 transition cursor-pointer"
                         title="Edit persona ini"
                       >
                         <Pencil class="w-3.5 h-3.5" />
@@ -550,7 +550,7 @@
                         <button
                           type="button"
                           onclick={() => onDeletePersona(p.id)}
-                          class="p-1 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+                          class="p-1 rounded-lg text-[#5C6066] hover:text-rose-600 hover:bg-rose-100 transition cursor-pointer"
                           title="Hapus persona custom ini"
                         >
                           <Trash2 class="w-3.5 h-3.5" />
@@ -562,7 +562,7 @@
                   <!-- Traits Badge if present -->
                   {#if p.traits}
                     <div
-                      class="text-[10px] text-zinc-400 font-mono px-2 py-1 rounded-lg bg-zinc-900/80 border border-white/5 truncate"
+                      class="text-[10px] text-[#5C6066] font-mono px-2 py-1 rounded-lg bg-[#E9E7E0] border border-[#C8C5BC] truncate font-bold"
                     >
                       ✨ {p.traits}
                     </div>
@@ -570,7 +570,7 @@
 
                   <!-- Preview System Prompt -->
                   <p
-                    class="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed bg-black/20 p-2 rounded-xl"
+                    class="text-[11px] text-[#5C6066] line-clamp-2 leading-relaxed bg-[#FCFCFA] p-2 rounded-xl border border-[#C8C5BC]"
                   >
                     {p.system_prompt}
                   </p>
@@ -583,12 +583,12 @@
                     onSelectPersona(p);
                     onClose();
                   }}
-                  class="w-full py-1.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer {isSelected
-                    ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/40'
-                    : 'bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-white/5'}"
+                  class="w-full py-1.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer {isSelected
+                    ? 'bg-orange-100 text-[#FF5500] border border-[#FF5500]'
+                    : 'btn-hardware'}"
                 >
                   {#if isSelected}
-                    <Check class="w-3 h-3 text-indigo-400" />
+                    <Check class="w-3 h-3 text-[#FF5500]" />
                     <span>Aktif Digunakan</span>
                   {:else}
                     <span>Gunakan Persona Ini</span>
@@ -604,9 +604,9 @@
             {#if !editingPersonaId}
               <div class="space-y-1.5">
                 <span
-                  class="text-xs font-semibold text-zinc-300 flex items-center gap-1.5"
+                  class="text-xs font-bold text-[#191B1D] font-mono uppercase tracking-wider flex items-center gap-1.5"
                 >
-                  <Sparkles class="w-3.5 h-3.5 text-indigo-400" />
+                  <Sparkles class="w-3.5 h-3.5 text-[#FF5500]" />
                   Gunakan Template Praktis:
                 </span>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -614,15 +614,15 @@
                     <button
                       type="button"
                       onclick={() => applyTemplate(tpl)}
-                      class="p-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 border border-white/5 hover:border-indigo-500/40 text-left transition cursor-pointer group flex flex-col"
+                      class="p-2.5 rounded-xl bg-[#FCFCFA] hover:bg-[#E9E7E0] border border-[#C8C5BC] hover:border-[#FF5500] text-left transition cursor-pointer group flex flex-col shadow-xs"
                     >
                       <span class="text-lg">{tpl.avatar}</span>
                       <div
-                        class="text-[11px] font-semibold text-zinc-200 mt-1 truncate group-hover:text-indigo-300"
+                        class="text-[11px] font-bold text-[#191B1D] mt-1 truncate group-hover:text-[#FF5500]"
                       >
                         {tpl.title}
                       </div>
-                      <div class="text-[9px] text-zinc-500 font-mono truncate">
+                      <div class="text-[9px] text-[#5C6066] font-mono truncate">
                         {tpl.traits}
                       </div>
                     </button>
@@ -633,16 +633,16 @@
 
             <!-- Custom Avatar Picker & Upload Section -->
             <div
-              class="p-3.5 rounded-2xl bg-zinc-900/50 border border-white/[0.08] flex flex-col gap-3"
+              class="p-3.5 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] flex flex-col gap-3 shadow-xs"
             >
               <div class="flex items-center justify-between">
                 <span
-                  class="text-xs font-semibold text-zinc-200 flex items-center gap-1.5"
+                  class="text-xs font-bold text-[#191B1D] font-mono uppercase tracking-wider flex items-center gap-1.5"
                 >
-                  <Smile class="w-3.5 h-3.5 text-indigo-400" />
+                  <Smile class="w-3.5 h-3.5 text-[#FF5500]" />
                   Icon & Avatar Persona:
                 </span>
-                <span class="text-[10px] text-zinc-400 font-mono"
+                <span class="text-[10px] text-[#5C6066] font-mono"
                   >Dukungan: Emoji, Foto, GIF, atau Video Singkat</span
                 >
               </div>
@@ -654,13 +654,13 @@
                     avatar={newAvatar}
                     name={newName || "Avatar"}
                     size="xl"
-                    className="shadow-lg shadow-indigo-950/40 ring-2 ring-indigo-500/40"
+                    className="shadow-xs ring-2 ring-[#FF5500]/40 rounded-xl"
                   />
                   {#if avatarType === "custom"}
                     <button
                       type="button"
                       onclick={() => resetAvatarToEmoji("🤖")}
-                      class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs hover:bg-rose-500 shadow-md cursor-pointer"
+                      class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs hover:bg-rose-500 shadow-xs cursor-pointer"
                       title="Reset ke emoji"
                     >
                       <X class="w-3 h-3" />
@@ -684,13 +684,13 @@
                       type="button"
                       disabled={isUploadingAvatar}
                       onclick={() => fileInputRef?.click()}
-                      class="px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+                      class="btn-hardware px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 shadow-xs"
                     >
                       {#if isUploadingAvatar}
-                        <Loader2 class="w-3.5 h-3.5 animate-spin" />
+                        <Loader2 class="w-3.5 h-3.5 animate-spin text-[#FF5500]" />
                         <span>Mengunggah Avatar...</span>
                       {:else}
-                        <Upload class="w-3.5 h-3.5" />
+                        <Upload class="w-3.5 h-3.5 text-[#FF5500]" />
                         <span>Upload Avatar (Gambar/GIF/Video)</span>
                       {/if}
                     </button>
@@ -699,9 +699,9 @@
                       <button
                         type="button"
                         onclick={() => resetAvatarToEmoji("🤖")}
-                        class="px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-zinc-200 text-xs transition cursor-pointer flex items-center gap-1"
+                        class="btn-hardware px-2.5 py-1.5 rounded-xl text-[#5C6066] hover:text-[#191B1D] text-xs transition cursor-pointer flex items-center gap-1 shadow-xs font-bold"
                       >
-                        <RefreshCw class="w-3 h-3" />
+                        <RefreshCw class="w-3 h-3 text-[#FF5500]" />
                         <span>Gunakan Emoji</span>
                       </button>
                     {/if}
@@ -715,8 +715,8 @@
                         onclick={() => resetAvatarToEmoji(em)}
                         class="w-7 h-7 rounded-lg flex items-center justify-center text-sm transition cursor-pointer {avatarType ===
                           'emoji' && newAvatar === em
-                          ? 'bg-indigo-600 border border-indigo-400 scale-105'
-                          : 'bg-zinc-900 border border-white/5 hover:bg-zinc-800'}"
+                          ? 'bg-[#FF5500] text-white scale-105 shadow-xs'
+                          : 'bg-[#FCFCFA] border border-[#C8C5BC] hover:bg-[#E9E7E0]'}"
                       >
                         {em}
                       </button>
@@ -729,7 +729,7 @@
             <!-- Name Input -->
             <div class="space-y-1.5">
               <label
-                class="text-xs font-semibold text-zinc-300"
+                class="text-xs font-bold text-[#191B1D] font-mono uppercase tracking-wider"
                 for="persona-name"
               >
                 Nama Persona:
@@ -739,14 +739,14 @@
                 type="text"
                 bind:value={newName}
                 placeholder="Contoh: Senior Code Reviewer, UI Maestro, Security Audit..."
-                class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-zinc-100 outline-none placeholder-zinc-500"
+                class="w-full bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
               />
             </div>
 
             <!-- Traits Input -->
             <div class="space-y-1.5">
               <label
-                class="text-xs font-semibold text-zinc-300"
+                class="text-xs font-bold text-[#191B1D] font-mono uppercase tracking-wider"
                 for="persona-traits"
               >
                 Sifat & Karakteristik AI:
@@ -756,19 +756,19 @@
                 type="text"
                 bind:value={newTraits}
                 placeholder="Contoh: Kritis, Teliti, Perfeksionis, Santai & Ramah..."
-                class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl px-3 py-2 text-xs text-zinc-100 outline-none placeholder-zinc-500"
+                class="w-full bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl px-3 py-2 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] shadow-xs font-mono"
               />
 
               <!-- Quick Trait Suggestion Chips -->
               <div class="flex items-center gap-1.5 flex-wrap pt-1">
-                <span class="text-[10px] text-zinc-500 font-mono"
+                <span class="text-[10px] text-[#5C6066] font-mono"
                   >Saran cepat:</span
                 >
                 {#each traitSuggestions as sug}
                   <button
                     type="button"
                     onclick={() => addTraitSuggestion(sug)}
-                    class="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-white/5 hover:border-indigo-500/30 text-zinc-400 hover:text-indigo-300 transition cursor-pointer"
+                    class="text-[10px] px-2 py-0.5 rounded-full bg-[#FCFCFA] hover:bg-orange-100 border border-[#C8C5BC] hover:border-[#FF5500] text-[#5C6066] hover:text-[#FF5500] transition cursor-pointer font-mono font-bold"
                   >
                     + {sug}
                   </button>
@@ -776,20 +776,20 @@
               </div>
             </div>
 
-            <!-- Preferred AI Model Selector (NEW & EXTENSIBLE) -->
+            <!-- Preferred AI Model Selector (EXTENSIBLE) -->
             <div class="space-y-1.5 relative">
               <div class="flex items-center justify-between">
-                <label class="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                  <Cpu class="w-3.5 h-3.5 text-indigo-400" />
+                <label class="text-xs font-bold text-[#191B1D] font-mono uppercase tracking-wider flex items-center gap-1.5">
+                  <Cpu class="w-3.5 h-3.5 text-[#FF5500]" />
                   <span>Model AI Tertaut:</span>
                 </label>
                 {#if onOpenSettings}
                   <button
                     type="button"
                     onclick={() => onOpenSettings?.('ai_providers')}
-                    class="text-[10px] text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1 font-mono cursor-pointer"
+                    class="text-[10px] text-[#FF5500] hover:underline flex items-center gap-1 font-mono font-bold cursor-pointer"
                   >
-                    <Key class="w-3 h-3 text-amber-400" /> Atur API Keys di Pengaturan
+                    <Key class="w-3 h-3 text-[#FF5500]" /> Atur API Keys di Pengaturan
                   </button>
                 {/if}
               </div>
@@ -798,15 +798,15 @@
               <button
                 type="button"
                 onclick={() => isModelDropdownOpen = !isModelDropdownOpen}
-                class="w-full bg-zinc-900 border border-zinc-800 hover:border-indigo-500/60 rounded-xl px-3.5 py-2.5 text-xs text-zinc-100 flex items-center justify-between transition cursor-pointer shadow-sm group"
+                class="w-full bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#FF5500] rounded-xl px-3.5 py-2.5 text-xs text-[#191B1D] flex items-center justify-between transition cursor-pointer shadow-xs group"
               >
                 <div class="flex items-center gap-2.5 min-w-0">
                   <span class="w-2 h-2 rounded-full {currentModelInfo.dotColor} shrink-0"></span>
                   <div class="flex flex-col text-left min-w-0">
-                    <span class="font-bold text-zinc-100 truncate group-hover:text-indigo-300">
+                    <span class="font-bold text-[#191B1D] truncate group-hover:text-[#FF5500]">
                       {currentModelInfo.name}
                     </span>
-                    <span class="text-[10px] text-zinc-500 font-mono">
+                    <span class="text-[10px] text-[#5C6066] font-mono">
                       Provider: {currentModelInfo.label}
                     </span>
                   </div>
@@ -814,33 +814,33 @@
 
                 <div class="flex items-center gap-2 shrink-0">
                   {#if currentModelInfo.hasKey}
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono flex items-center gap-1">
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono font-bold flex items-center gap-1">
                       <CheckCircle2 class="w-2.5 h-2.5" /> Siap
                     </span>
                   {:else}
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-mono flex items-center gap-1">
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-mono font-bold flex items-center gap-1">
                       <AlertTriangle class="w-2.5 h-2.5" /> Butuh API Key
                     </span>
                   {/if}
-                  <ChevronDown class="w-4 h-4 text-zinc-400 group-hover:text-zinc-200 transition-transform {isModelDropdownOpen ? 'rotate-180' : ''}" />
+                  <ChevronDown class="w-4 h-4 text-[#5C6066] group-hover:text-[#191B1D] transition-transform {isModelDropdownOpen ? 'rotate-180' : ''}" />
                 </div>
               </button>
 
               <!-- Floating Dropdown Popover -->
               {#if isModelDropdownOpen}
                 <div
-                  class="absolute left-0 right-0 top-full mt-1.5 z-50 bg-zinc-900/95 backdrop-blur-2xl border border-white/[0.12] rounded-2xl shadow-2xl p-2 max-h-72 overflow-y-auto space-y-1 animate-in fade-in zoom-in-95 duration-150"
+                  class="absolute left-0 right-0 top-full mt-1.5 z-50 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl shadow-2xl p-2 max-h-72 overflow-y-auto space-y-1 animate-in fade-in zoom-in-95 duration-150"
                 >
                   {#if availableModels.length === 0}
-                    <div class="p-3 text-center text-xs text-zinc-500">Memuat daftar model...</div>
+                    <div class="p-3 text-center text-xs text-[#5C6066] font-mono">Memuat daftar model...</div>
                   {:else}
                     {#each ['antigravity', 'openai', 'grok', 'qwen', 'deepseek', 'gemini'] as prov}
                       {@const provModels = availableModels.filter(m => m.provider === prov)}
                       {#if provModels.length > 0}
-                        <div class="pt-2 pb-1 px-2.5 text-[10px] font-bold text-zinc-400 font-mono uppercase tracking-wider flex items-center justify-between border-t border-white/5 first:border-t-0">
+                        <div class="pt-2 pb-1 px-2.5 text-[10px] font-bold text-[#5C6066] font-mono uppercase tracking-wider flex items-center justify-between border-t border-[#C8C5BC] first:border-t-0">
                           <span>{prov === 'antigravity' ? '⚡ Antigravity CLI Core' : prov.toUpperCase()}</span>
                           {#if prov !== 'antigravity'}
-                            <span class="text-[9px] font-normal lowercase {provModels.some(m => m.hasKey) ? 'text-emerald-400' : 'text-zinc-500'}">
+                            <span class="text-[9px] font-normal lowercase {provModels.some(m => m.hasKey) ? 'text-emerald-700 font-bold' : 'text-[#8C9097]'}">
                               {provModels.some(m => m.hasKey) ? '● key aktif' : '○ belum ada key'}
                             </span>
                           {/if}
@@ -854,25 +854,25 @@
                               newPreferredModel = m.id;
                               isModelDropdownOpen = false;
                             }}
-                            class="w-full px-2.5 py-2 rounded-xl flex items-center justify-between gap-2 text-left transition cursor-pointer {isCur ? 'bg-indigo-600/20 border border-indigo-500/40 text-indigo-200' : 'hover:bg-zinc-800 text-zinc-300'}"
+                            class="w-full px-2.5 py-2 rounded-xl flex items-center justify-between gap-2 text-left transition cursor-pointer {isCur ? 'bg-orange-100 border border-[#FF5500] text-[#FF5500] font-bold' : 'hover:bg-[#E9E7E0] text-[#191B1D]'}"
                           >
                             <div class="flex flex-col min-w-0 flex-1">
                               <div class="text-xs font-semibold flex items-center gap-1.5">
                                 <span class="truncate">{m.name}</span>
                                 {#if isCur}
-                                  <Check class="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                                  <Check class="w-3.5 h-3.5 text-[#FF5500] shrink-0" />
                                 {/if}
                               </div>
                               {#if m.description}
-                                <span class="text-[10px] text-zinc-500 truncate">{m.description}</span>
+                                <span class="text-[10px] text-[#5C6066] truncate">{m.description}</span>
                               {/if}
                             </div>
 
                             <div class="shrink-0 flex items-center gap-1 text-[9px] font-mono">
                               {#if m.hasKey}
-                                <span class="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Siap</span>
+                                <span class="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">Siap</span>
                               {:else}
-                                <span class="px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">No Key</span>
+                                <span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-300 font-bold">No Key</span>
                               {/if}
                             </div>
                           </button>
@@ -885,16 +885,16 @@
 
               <!-- Warning if model doesn't have an API Key configured -->
               {#if !currentModelInfo.hasKey}
-                <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] flex items-center justify-between gap-2">
+                <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-[11px] flex items-center justify-between gap-2">
                   <div class="flex items-center gap-1.5 min-w-0">
-                    <AlertTriangle class="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                    <span class="truncate">API Key untuk {currentModelInfo.label} belum diatur di Pengaturan.</span>
+                    <AlertTriangle class="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span class="truncate font-medium">API Key untuk {currentModelInfo.label} belum diatur di Pengaturan.</span>
                   </div>
                   {#if onOpenSettings}
                     <button
                       type="button"
                       onclick={() => onOpenSettings?.('ai_providers')}
-                      class="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-[10px] font-bold transition shrink-0 cursor-pointer"
+                      class="btn-hardware px-2 py-1 rounded-lg text-amber-900 text-[10px] font-bold transition shrink-0 cursor-pointer shadow-xs"
                     >
                       Isi Sekarang
                     </button>
@@ -907,7 +907,7 @@
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label
-                  class="text-xs font-semibold text-zinc-300"
+                  class="text-xs font-bold text-[#191B1D] font-mono uppercase tracking-wider"
                   for="persona-prompt"
                 >
                   Instruksi Peran & Sistem (System Prompt):
@@ -919,20 +919,17 @@
                   onclick={handleGeneratePrompt}
                   disabled={isGeneratingPrompt ||
                     (!newTraits.trim() && !newName.trim())}
-                  class="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-indigo-500/20 via-violet-500/20 to-purple-500/20 hover:from-indigo-500/30 hover:to-violet-500/30 border border-indigo-500/30 hover:border-indigo-500/60 text-[11px] font-semibold text-indigo-300 hover:text-white transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group shadow-sm active:scale-95"
+                  class="btn-safety flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold text-white transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed group shadow-xs active:scale-95"
                   title="Generate teks instruksi otomatis berbasis nama & sifat AI yang diisi di atas"
                 >
                   {#if isGeneratingPrompt}
-                    <Loader2 class="w-3.5 h-3.5 text-indigo-400 animate-spin" />
+                    <Loader2 class="w-3.5 h-3.5 text-white animate-spin" />
                     <span>Men-generate Instruksi...</span>
                   {:else}
                     <Sparkles
-                      class="w-3.5 h-3.5 text-indigo-400 group-hover:scale-110 group-hover:text-amber-300 transition-transform"
+                      class="w-3.5 h-3.5 text-white group-hover:scale-110 transition-transform"
                     />
-                    <span
-                      class="bg-gradient-to-r from-indigo-200 to-violet-200 bg-clip-text text-transparent group-hover:text-white font-semibold"
-                      >Generate</span
-                    >
+                    <span>Generate Instruksi</span>
                   {/if}
                 </button>
               </div>
@@ -941,24 +938,24 @@
                 id="persona-prompt"
                 bind:value={newSystemPrompt}
                 rows="5"
-                placeholder="Tuliskan aturan koding & instruksi spesifik, atau klik tombol 'Generate dari Sifat' di atas untuk dibuatkan secara otomatis oleh AI..."
-                class="w-full bg-zinc-900 border border-zinc-800 focus:border-indigo-500 rounded-xl p-3 text-xs text-zinc-100 outline-none placeholder-zinc-500 leading-relaxed resize-none"
+                placeholder="Tuliskan aturan koding & instruksi spesifik, atau klik tombol 'Generate Instruksi' di atas untuk dibuatkan secara otomatis oleh AI..."
+                class="w-full bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl p-3 text-xs text-[#191B1D] outline-none placeholder-[#8C9097] leading-relaxed resize-none shadow-xs font-mono"
               ></textarea>
             </div>
 
             {#if formError}
-              <span class="text-xs text-rose-400 font-semibold"
+              <span class="text-xs text-rose-600 font-bold"
                 >{formError}</span
               >
             {/if}
 
             <div
-              class="flex items-center justify-end gap-2 pt-2 border-t border-white/[0.06]"
+              class="flex items-center justify-end gap-2 pt-2 border-t border-[#C8C5BC]"
             >
               <button
                 type="button"
                 onclick={cancelForm}
-                class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold transition cursor-pointer"
+                class="btn-hardware px-4 py-2 rounded-xl text-[#191B1D] text-xs font-bold transition cursor-pointer shadow-xs"
               >
                 Batal
               </button>
@@ -969,7 +966,7 @@
                 disabled={isSubmitting ||
                   !newName.trim() ||
                   !newSystemPrompt.trim()}
-                class="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 disabled:opacity-40 text-white text-xs font-bold shadow-lg shadow-indigo-500/25 transition cursor-pointer active:scale-95 flex items-center gap-1.5"
+                class="btn-safety px-4 py-2 rounded-xl disabled:opacity-40 text-white text-xs font-bold shadow-xs transition cursor-pointer active:scale-95 flex items-center gap-1.5"
               >
                 {#if editingPersonaId}
                   <Save class="w-3.5 h-3.5" />

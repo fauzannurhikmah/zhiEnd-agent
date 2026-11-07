@@ -215,7 +215,7 @@
   <div class="max-w-6xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
     <div>
       <h1 class="text-lg font-bold text-white flex items-center gap-2">
-        <Bot class="w-5 h-5 text-indigo-400" /> Remote Controller & Hub Integrasi
+        <Bot class="w-5 h-5 text-[#FF5500]" /> Remote Controller & Hub Integrasi
       </h1>
       <p class="text-xs text-zinc-400 mt-0.5">
         Koneksikan bot WhatsApp, Telegram, dan Public Tunnel dengan Persona AI pilihan Anda untuk coding remote dari HP kapan pun.
@@ -228,24 +228,24 @@
     <!-- ========================================== -->
     <!-- CARD 1: WhatsApp Remote -->
     <!-- ========================================== -->
-    <div class="bg-zinc-950/80 border border-white/[0.08] hover:border-emerald-500/30 rounded-2xl p-5 flex flex-col gap-4 shadow-xl transition-all relative">
+    <div class="bg-[#E9E7E0] border border-[#C8C5BC] rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all relative text-[#191B1D]">
       <!-- Card Header -->
-      <div class="flex items-center justify-between border-b border-white/[0.06] pb-3">
+      <div class="flex items-center justify-between border-b border-[#C8C5BC] pb-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold shadow-sm shadow-emerald-500/20">
+          <div class="w-9 h-9 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 flex items-center justify-center font-bold shadow-2xs">
             <MessageSquare class="w-4 h-4" />
           </div>
           <div>
-            <span class="text-xs font-bold text-white block">WhatsApp Remote</span>
-            <span class="text-[10px] text-zinc-500 font-mono">Baileys Multi-Device</span>
+            <span class="text-xs font-bold text-[#191B1D] block">WhatsApp Remote</span>
+            <span class="text-[10px] text-[#5C6066] font-mono">Baileys Multi-Device</span>
           </div>
         </div>
 
-        <span class="flex items-center gap-1.5 text-[11px] font-mono font-bold {whatsappStatus?.status === 'connected' ? 'text-emerald-400' : (whatsappStatus?.status === 'qr_ready' ? 'text-amber-400' : (whatsappStatus?.status === 'connecting' ? 'text-sky-400' : 'text-zinc-500'))}">
+        <span class="flex items-center gap-1.5 text-[11px] font-mono font-bold {whatsappStatus?.status === 'connected' ? 'text-emerald-700' : (whatsappStatus?.status === 'qr_ready' ? 'text-amber-700' : (whatsappStatus?.status === 'connecting' ? 'text-[#FF5500]' : 'text-[#8C9097]'))}">
           {#if whatsappStatus?.status === 'connecting'}
-            <Loader2 class="w-3 h-3 animate-spin text-sky-400" /> Menghubungkan...
+            <Loader2 class="w-3 h-3 animate-spin text-[#FF5500]" /> Menghubungkan...
           {:else}
-            <span class="w-2 h-2 rounded-full {whatsappStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-400 shadow-[0_0_8px_#fbbf24] animate-pulse' : 'bg-zinc-600')}"></span>
+            <span class="w-2 h-2 rounded-full {whatsappStatus?.status === 'connected' ? 'bg-emerald-500' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-500 animate-pulse' : 'bg-[#8C9097]')}"></span>
             {whatsappStatus?.status === 'connected' ? 'Online' : (whatsappStatus?.status === 'qr_ready' ? 'Scan QR' : 'Offline')}
           {/if}
         </span>
@@ -254,60 +254,60 @@
       <!-- Persona Selector (Custom Component) -->
       <div class="flex flex-col gap-1.5 relative">
         <div class="flex items-center justify-between text-[11px]">
-          <span class="font-semibold text-zinc-300 flex items-center gap-1.5">
-            <Sparkles class="w-3.5 h-3.5 text-emerald-400" /> Persona AI WhatsApp:
+          <span class="font-bold text-[#191B1D] flex items-center gap-1.5">
+            <Sparkles class="w-3.5 h-3.5 text-[#FF5500]" /> Persona AI WhatsApp:
           </span>
-          <span class="text-[10px] text-zinc-500 font-mono">Klik kartu untuk ganti</span>
+          <span class="text-[10px] text-[#5C6066] font-mono">Klik kartu untuk ganti</span>
         </div>
 
         <!-- Selected Persona Trigger Card -->
         <button
           type="button"
           onclick={() => { isWaPersonaOpen = !isWaPersonaOpen; isTgPersonaOpen = false; }}
-          class="w-full text-left bg-zinc-900/90 hover:bg-zinc-900 border border-white/[0.08] hover:border-emerald-500/40 rounded-xl p-2.5 flex items-center justify-between gap-2.5 transition cursor-pointer group shadow-sm"
+          class="w-full text-left bg-[#FCFCFA] hover:bg-white border border-[#C8C5BC] hover:border-[#FF5500] rounded-xl p-2.5 flex items-center justify-between gap-2.5 transition cursor-pointer group shadow-2xs"
         >
           <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-white/[0.1] bg-zinc-950 flex items-center justify-center">
+            <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-[#C8C5BC] bg-[#DEDBD2] flex items-center justify-center">
               <AvatarView avatar={waPersona?.avatar} name={waPersona?.name} size="sm" />
             </div>
             <div class="flex flex-col min-w-0">
               <div class="flex items-center gap-1.5">
-                <span class="text-xs font-bold text-white truncate">{waPersona?.name || 'Standard Agent'}</span>
-                <span class="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono shrink-0">
+                <span class="text-xs font-bold text-[#191B1D] truncate">{waPersona?.name || 'Standard Agent'}</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-mono shrink-0 font-semibold">
                   {waPersona?.preferred_model?.replace('gemini-', '') || 'Flash'}
                 </span>
               </div>
-              <span class="text-[10px] text-zinc-400 truncate max-w-[200px]" title={waPersona?.traits || ''}>
+              <span class="text-[10px] text-[#5C6066] truncate max-w-[200px]" title={waPersona?.traits || ''}>
                 {waPersona?.traits || 'Solutif, Teliti, & Cepat'}
               </span>
             </div>
           </div>
-          <ChevronDown class="w-4 h-4 text-zinc-400 group-hover:text-white transition-transform {isWaPersonaOpen ? 'rotate-180' : ''} shrink-0" />
+          <ChevronDown class="w-4 h-4 text-[#8C9097] group-hover:text-[#191B1D] transition-transform {isWaPersonaOpen ? 'rotate-180' : ''} shrink-0" />
         </button>
 
         <!-- Dropdown Popover Menu -->
         {#if isWaPersonaOpen}
-          <div class="absolute top-full left-0 right-0 mt-1.5 z-30 bg-zinc-900 border border-white/[0.12] rounded-xl shadow-2xl p-1.5 flex flex-col gap-1 max-h-60 overflow-y-auto custom-scrollbar backdrop-blur-xl">
-            <div class="px-2 py-1 text-[10px] font-mono text-zinc-400 border-b border-white/[0.06] mb-0.5">
+          <div class="absolute top-full left-0 right-0 mt-1.5 z-30 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl shadow-xl p-1.5 flex flex-col gap-1 max-h-60 overflow-y-auto custom-scrollbar">
+            <div class="px-2 py-1 text-[10px] font-mono text-[#5C6066] border-b border-[#C8C5BC] mb-0.5 font-bold">
               Pilih Persona AI untuk WhatsApp:
             </div>
             {#each personas as p}
               <button
                 type="button"
                 onclick={() => selectPersona('whatsapp', p.id)}
-                class="w-full text-left px-2.5 py-2 rounded-lg flex items-center justify-between gap-2 transition cursor-pointer {p.id === waActivePersonaId ? 'bg-emerald-500/20 text-white border border-emerald-500/30 font-semibold' : 'hover:bg-zinc-800 text-zinc-300'}"
+                class="w-full text-left px-2.5 py-2 rounded-lg flex items-center justify-between gap-2 transition cursor-pointer {p.id === waActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#E9E7E0] text-[#191B1D]'}"
               >
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-white/[0.1] bg-zinc-950 flex items-center justify-center">
+                  <div class="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-[#C8C5BC] bg-[#DEDBD2] flex items-center justify-center">
                     <AvatarView avatar={p.avatar} name={p.name} size="xs" />
                   </div>
                   <div class="flex flex-col min-w-0">
                     <span class="text-xs truncate">{p.name}</span>
-                    <span class="text-[10px] text-zinc-500 truncate">{p.preferred_model || 'Flash'}</span>
+                    <span class="text-[10px] text-[#5C6066] truncate">{p.preferred_model || 'Flash'}</span>
                   </div>
                 </div>
                 {#if p.id === waActivePersonaId}
-                  <CheckCircle2 class="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <CheckCircle2 class="w-3.5 h-3.5 text-[#FF5500] shrink-0" />
                 {/if}
               </button>
             {/each}
@@ -329,22 +329,22 @@
             </div>
             <button
               onclick={onLogoutWhatsApp}
-              class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 border border-zinc-700 hover:border-rose-500/30 text-xs font-semibold cursor-pointer transition active:scale-95"
+              class="btn-hardware px-3 py-1.5 rounded-lg text-[#191B1D] hover:text-rose-600 hover:border-rose-400 text-xs font-bold cursor-pointer transition shadow-xs"
             >
               Putuskan
             </button>
           </div>
         {:else if whatsappStatus?.status === 'qr_ready'}
           <!-- QR Ready State -->
-          <div class="flex flex-col items-center bg-zinc-900/90 p-4 rounded-xl border border-amber-500/30 text-center gap-3 shadow-lg">
+          <div class="flex flex-col items-center bg-[#FCFCFA] p-4 rounded-xl border border-amber-500/50 text-center gap-3 shadow-xs">
             <div class="flex items-center justify-between w-full px-1">
-              <span class="text-xs text-amber-300 font-bold flex items-center gap-1.5">
-                <QrCode class="w-3.5 h-3.5" /> Pindai Kode QR WhatsApp:
+              <span class="text-xs text-amber-800 font-bold flex items-center gap-1.5 font-mono">
+                <QrCode class="w-3.5 h-3.5 text-[#FF5500]" /> Pindai Kode QR WhatsApp:
               </span>
               <button
                 onclick={handleRefreshWa}
                 disabled={isStartingWa}
-                class="flex items-center gap-1 text-[10px] text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-700 px-2 py-0.5 rounded cursor-pointer transition"
+                class="btn-hardware flex items-center gap-1 text-[10px] text-[#5C6066] hover:text-[#191B1D] px-2 py-0.5 rounded cursor-pointer transition font-bold font-mono"
                 title="Muat ulang QR code"
               >
                 <RefreshCw class="w-3 h-3 {isStartingWa ? 'animate-spin' : ''}" /> Refresh
@@ -352,43 +352,43 @@
             </div>
 
             {#if currentQr}
-              <div class="p-3 bg-white rounded-2xl shadow-xl border-2 border-amber-400/50">
+              <div class="p-3 bg-white rounded-2xl shadow-md border-2 border-amber-500">
                 <img src={currentQr} alt="WhatsApp QR Code" class="w-44 h-44 object-contain" />
               </div>
             {:else}
-              <div class="w-44 h-44 bg-zinc-950 rounded-2xl flex flex-col items-center justify-center gap-2 text-zinc-400 border border-white/[0.08]">
-                <Loader2 class="w-6 h-6 animate-spin text-amber-400" />
-                <span class="text-[11px]">Memuat kode QR...</span>
+              <div class="w-44 h-44 bg-[#E9E7E0] rounded-2xl flex flex-col items-center justify-center gap-2 text-[#5C6066] border border-[#C8C5BC]">
+                <Loader2 class="w-6 h-6 animate-spin text-[#FF5500]" />
+                <span class="text-[11px] font-mono">Memuat kode QR...</span>
                 <button
                   type="button"
                   onclick={handleRefreshWa}
-                  class="mt-1 text-[10px] text-amber-400 hover:text-amber-300 underline cursor-pointer"
+                  class="mt-1 text-[10px] text-[#FF5500] hover:underline cursor-pointer font-bold font-mono"
                 >
                   Muat Ulang
                 </button>
               </div>
             {/if}
 
-            <div class="text-[10px] text-zinc-400 text-left bg-zinc-950/60 p-2.5 rounded-lg border border-white/[0.04] w-full flex flex-col gap-0.5">
-              <span class="text-zinc-300 font-semibold mb-0.5">Langkah Menghubungkan:</span>
+            <div class="text-[10px] text-[#5C6066] text-left bg-[#E9E7E0] p-2.5 rounded-lg border border-[#C8C5BC] w-full flex flex-col gap-0.5 font-mono">
+              <span class="text-[#191B1D] font-bold mb-0.5">Langkah Menghubungkan:</span>
               <div>1. Buka aplikasi WhatsApp di HP Anda</div>
-              <div>2. Menu Titik Tiga / Pengaturan > <span class="text-zinc-200 font-medium">Perangkat Tertaut</span></div>
-              <div>3. Klik <span class="text-emerald-400 font-medium">Tautkan Perangkat</span> dan arahkan kamera ke sini</div>
+              <div>2. Menu Titik Tiga / Pengaturan > <span class="text-[#191B1D] font-bold">Perangkat Tertaut</span></div>
+              <div>3. Klik <span class="text-emerald-700 font-bold">Tautkan Perangkat</span> dan arahkan kamera ke sini</div>
             </div>
           </div>
         {:else if whatsappStatus?.status === 'connecting'}
           <!-- Connecting State -->
-          <div class="p-5 rounded-xl bg-zinc-900/60 border border-white/[0.06] flex flex-col items-center justify-center gap-2 text-center text-xs text-zinc-300">
-            <Loader2 class="w-6 h-6 animate-spin text-emerald-400" />
-            <span class="font-medium">Memulai Baileys & menyiapkan koneksi...</span>
-            <span class="text-[10px] text-zinc-500 font-mono">Mohon tunggu sebentar</span>
+          <div class="p-5 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] flex flex-col items-center justify-center gap-2 text-center text-xs text-[#191B1D] shadow-xs">
+            <Loader2 class="w-6 h-6 animate-spin text-[#FF5500]" />
+            <span class="font-bold">Memulai Baileys & menyiapkan koneksi...</span>
+            <span class="text-[10px] text-[#5C6066] font-mono">Mohon tunggu sebentar</span>
           </div>
         {:else}
           <!-- Stopped / Offline State -->
           <button
             onclick={handleStartWa}
             disabled={isStartingWa}
-            class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 disabled:opacity-50"
+            class="btn-safety w-full py-2.5 rounded-xl text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 disabled:opacity-50 shadow-xs"
           >
             {#if isStartingWa}
               <Loader2 class="w-3.5 h-3.5 animate-spin" /> Menghubungkan...
@@ -400,26 +400,26 @@
       </div>
 
       <!-- Collapsible Access Whitelist Settings -->
-      <div class="border-t border-white/[0.06] pt-2 flex flex-col">
+      <div class="border-t border-[#C8C5BC] pt-2 flex flex-col">
         <button
           type="button"
           onclick={() => showWaSettings = !showWaSettings}
-          class="flex items-center justify-between text-[11px] text-zinc-400 hover:text-zinc-200 py-1 cursor-pointer transition"
+          class="flex items-center justify-between text-[11px] text-[#5C6066] hover:text-[#191B1D] py-1 cursor-pointer transition font-mono"
         >
-          <span class="flex items-center gap-1.5 font-medium">
-            <SlidersHorizontal class="w-3 h-3 text-zinc-400" /> Pengaturan Akses & Nomor HP
+          <span class="flex items-center gap-1.5 font-bold">
+            <SlidersHorizontal class="w-3 h-3 text-[#5C6066]" /> Pengaturan Akses & Nomor HP
           </span>
           {#if showWaSettings}
-            <ChevronUp class="w-3.5 h-3.5 text-zinc-500" />
+            <ChevronUp class="w-3.5 h-3.5 text-[#5C6066]" />
           {:else}
-            <ChevronDown class="w-3.5 h-3.5 text-zinc-500" />
+            <ChevronDown class="w-3.5 h-3.5 text-[#5C6066]" />
           {/if}
         </button>
 
         {#if showWaSettings}
           <div class="flex flex-col gap-2 pt-2 pb-1">
-            <label for="wa-whitelist-input-clean" class="text-[10px] text-zinc-400">
-              Nomor WhatsApp Diizinkan: <span class="text-zinc-500 font-mono">(pisahkan koma)</span>
+            <label for="wa-whitelist-input-clean" class="text-[10px] text-[#191B1D] font-mono font-bold">
+              Nomor WhatsApp Diizinkan: <span class="text-[#5C6066] font-normal">(pisahkan koma)</span>
             </label>
             <div class="flex gap-2">
               <input
@@ -427,47 +427,47 @@
                 type="text"
                 bind:value={waAllowedInput}
                 placeholder="628123456789, 628987654321"
-                class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 font-mono outline-none focus:border-emerald-500"
+                class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-lg px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500] shadow-xs"
               />
               <button
                 onclick={handleSaveWaNumbers}
-                class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-200 cursor-pointer active:scale-95"
+                class="btn-hardware px-3 py-1.5 rounded-lg text-xs font-bold text-[#191B1D] cursor-pointer active:scale-95 shadow-xs"
               >
                 Simpan
               </button>
             </div>
-            <span class="text-[9px] text-zinc-500 font-mono">Kosongkan untuk mengizinkan semua pesan.</span>
+            <span class="text-[9px] text-[#5C6066] font-mono">Kosongkan untuk mengizinkan semua pesan.</span>
           </div>
         {/if}
       </div>
 
       <!-- Command Quick Reference -->
-      <div class="border-t border-white/[0.06] pt-2 text-[10px] text-zinc-400 font-mono flex flex-wrap gap-1">
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">!code</span>
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">!persona</span>
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">!git</span>
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">!commit</span>
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">!push</span>
+      <div class="border-t border-[#C8C5BC] pt-2 text-[10px] text-[#5C6066] font-mono flex flex-wrap gap-1">
+        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!code</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!persona</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!git</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!commit</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!push</span>
       </div>
     </div>
 
     <!-- ========================================== -->
     <!-- CARD 2: Telegram Remote -->
     <!-- ========================================== -->
-    <div class="bg-zinc-950/80 border border-white/[0.08] hover:border-sky-500/30 rounded-2xl p-5 flex flex-col gap-4 shadow-xl transition-all relative">
+    <div class="bg-[#E9E7E0] border border-[#C8C5BC] rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all relative text-[#191B1D]">
       <!-- Card Header -->
-      <div class="flex items-center justify-between border-b border-white/[0.06] pb-3">
+      <div class="flex items-center justify-between border-b border-[#C8C5BC] pb-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center font-bold shadow-sm shadow-sky-500/20">
+          <div class="w-9 h-9 rounded-xl bg-sky-100 border border-sky-300 text-sky-800 flex items-center justify-center font-bold shadow-2xs">
             <Send class="w-4 h-4" />
           </div>
           <div>
-            <span class="text-xs font-bold text-white block">Telegram Bot</span>
-            <span class="text-[10px] text-zinc-500 font-mono">Telegraf Polling</span>
+            <span class="text-xs font-bold text-[#191B1D] block">Telegram Bot</span>
+            <span class="text-[10px] text-[#5C6066] font-mono">Telegraf Polling</span>
           </div>
         </div>
-        <span class="flex items-center gap-1.5 text-[11px] font-mono font-bold {telegramStatus?.status === 'running' ? 'text-sky-400' : 'text-zinc-500'}">
-          <span class="w-2 h-2 rounded-full {telegramStatus?.status === 'running' ? 'bg-sky-400 shadow-[0_0_8px_#38bdf8]' : 'bg-zinc-600'}"></span>
+        <span class="flex items-center gap-1.5 text-[11px] font-mono font-bold {telegramStatus?.status === 'running' ? 'text-sky-800' : 'text-[#8C9097]'}">
+          <span class="w-2 h-2 rounded-full {telegramStatus?.status === 'running' ? 'bg-sky-500' : 'bg-[#8C9097]'}"></span>
           {telegramStatus?.status === 'running' ? 'Online' : 'Offline'}
         </span>
       </div>
@@ -475,60 +475,60 @@
       <!-- Persona Selector (Custom Component) -->
       <div class="flex flex-col gap-1.5 relative">
         <div class="flex items-center justify-between text-[11px]">
-          <span class="font-semibold text-zinc-300 flex items-center gap-1.5">
-            <Sparkles class="w-3.5 h-3.5 text-sky-400" /> Persona AI Telegram:
+          <span class="font-bold text-[#191B1D] flex items-center gap-1.5">
+            <Sparkles class="w-3.5 h-3.5 text-[#FF5500]" /> Persona AI Telegram:
           </span>
-          <span class="text-[10px] text-zinc-500 font-mono">Klik kartu untuk ganti</span>
+          <span class="text-[10px] text-[#5C6066] font-mono">Klik kartu untuk ganti</span>
         </div>
 
         <!-- Selected Persona Trigger Card -->
         <button
           type="button"
           onclick={() => { isTgPersonaOpen = !isTgPersonaOpen; isWaPersonaOpen = false; }}
-          class="w-full text-left bg-zinc-900/90 hover:bg-zinc-900 border border-white/[0.08] hover:border-sky-500/40 rounded-xl p-2.5 flex items-center justify-between gap-2.5 transition cursor-pointer group shadow-sm"
+          class="w-full text-left bg-[#FCFCFA] hover:bg-white border border-[#C8C5BC] hover:border-[#FF5500] rounded-xl p-2.5 flex items-center justify-between gap-2.5 transition cursor-pointer group shadow-2xs"
         >
           <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-white/[0.1] bg-zinc-950 flex items-center justify-center">
+            <div class="w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-[#C8C5BC] bg-[#DEDBD2] flex items-center justify-center">
               <AvatarView avatar={tgPersona?.avatar} name={tgPersona?.name} size="sm" />
             </div>
             <div class="flex flex-col min-w-0">
               <div class="flex items-center gap-1.5">
-                <span class="text-xs font-bold text-white truncate">{tgPersona?.name || 'Standard Agent'}</span>
-                <span class="text-[9px] px-1.5 py-0.2 rounded bg-sky-500/15 border border-sky-500/30 text-sky-300 font-mono shrink-0">
+                <span class="text-xs font-bold text-[#191B1D] truncate">{tgPersona?.name || 'Standard Agent'}</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-mono shrink-0 font-semibold">
                   {tgPersona?.preferred_model?.replace('gemini-', '') || 'Flash'}
                 </span>
               </div>
-              <span class="text-[10px] text-zinc-400 truncate max-w-[200px]" title={tgPersona?.traits || ''}>
+              <span class="text-[10px] text-[#5C6066] truncate max-w-[200px]" title={tgPersona?.traits || ''}>
                 {tgPersona?.traits || 'Solutif, Teliti, & Cepat'}
               </span>
             </div>
           </div>
-          <ChevronDown class="w-4 h-4 text-zinc-400 group-hover:text-white transition-transform {isTgPersonaOpen ? 'rotate-180' : ''} shrink-0" />
+          <ChevronDown class="w-4 h-4 text-[#8C9097] group-hover:text-[#191B1D] transition-transform {isTgPersonaOpen ? 'rotate-180' : ''} shrink-0" />
         </button>
 
         <!-- Dropdown Popover Menu -->
         {#if isTgPersonaOpen}
-          <div class="absolute top-full left-0 right-0 mt-1.5 z-30 bg-zinc-900 border border-white/[0.12] rounded-xl shadow-2xl p-1.5 flex flex-col gap-1 max-h-60 overflow-y-auto custom-scrollbar backdrop-blur-xl">
-            <div class="px-2 py-1 text-[10px] font-mono text-zinc-400 border-b border-white/[0.06] mb-0.5">
+          <div class="absolute top-full left-0 right-0 mt-1.5 z-30 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl shadow-xl p-1.5 flex flex-col gap-1 max-h-60 overflow-y-auto custom-scrollbar">
+            <div class="px-2 py-1 text-[10px] font-mono text-[#5C6066] border-b border-[#C8C5BC] mb-0.5 font-bold">
               Pilih Persona AI untuk Telegram:
             </div>
             {#each personas as p}
               <button
                 type="button"
                 onclick={() => selectPersona('telegram', p.id)}
-                class="w-full text-left px-2.5 py-2 rounded-lg flex items-center justify-between gap-2 transition cursor-pointer {p.id === tgActivePersonaId ? 'bg-sky-500/20 text-white border border-sky-500/30 font-semibold' : 'hover:bg-zinc-800 text-zinc-300'}"
+                class="w-full text-left px-2.5 py-2 rounded-lg flex items-center justify-between gap-2 transition cursor-pointer {p.id === tgActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#E9E7E0] text-[#191B1D]'}"
               >
                 <div class="flex items-center gap-2 min-w-0">
-                  <div class="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-white/[0.1] bg-zinc-950 flex items-center justify-center">
+                  <div class="w-6 h-6 rounded-md overflow-hidden shrink-0 border border-[#C8C5BC] bg-[#DEDBD2] flex items-center justify-center">
                     <AvatarView avatar={p.avatar} name={p.name} size="xs" />
                   </div>
                   <div class="flex flex-col min-w-0">
                     <span class="text-xs truncate">{p.name}</span>
-                    <span class="text-[10px] text-zinc-500 truncate">{p.preferred_model || 'Flash'}</span>
+                    <span class="text-[10px] text-[#5C6066] truncate">{p.preferred_model || 'Flash'}</span>
                   </div>
                 </div>
                 {#if p.id === tgActivePersonaId}
-                  <CheckCircle2 class="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                  <CheckCircle2 class="w-3.5 h-3.5 text-[#FF5500] shrink-0" />
                 {/if}
               </button>
             {/each}
@@ -540,15 +540,15 @@
       <div class="flex flex-col gap-2.5 pt-1">
         {#if telegramStatus?.status === 'running'}
           <!-- Running State -->
-          <div class="p-3 rounded-xl bg-sky-500/10 border border-sky-500/20 flex flex-col gap-2.5">
+          <div class="p-3 rounded-xl bg-sky-50 border border-sky-300 flex flex-col gap-2.5">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-sky-400 shadow-[0_0_8px_#38bdf8] animate-pulse"></span>
-                <span class="text-xs font-bold text-sky-300">Bot Aktif Berjalan</span>
+                <span class="w-2.5 h-2.5 rounded-full bg-sky-500 animate-pulse"></span>
+                <span class="text-xs font-bold text-sky-950">Bot Aktif Berjalan</span>
               </div>
               <button
                 onclick={onStopTelegram}
-                class="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 border border-zinc-700 hover:border-rose-500/30 text-xs font-semibold cursor-pointer transition active:scale-95"
+                class="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-xs font-bold cursor-pointer transition active:scale-95"
               >
                 Hentikan
               </button>
@@ -567,18 +567,18 @@
         {:else}
           <!-- Stopped State -->
           <div class="flex flex-col gap-1.5">
-            <label for="tg-token-input-clean" class="text-[11px] text-zinc-400 font-medium">Bot Token:</label>
+            <label for="tg-token-input-clean" class="text-[11px] text-[#5C6066] font-bold">Bot Token:</label>
             <div class="flex gap-2">
               <input
                 id="tg-token-input-clean"
                 type="password"
                 bind:value={tgTokenInput}
                 placeholder="123456789:ABCdefGhIJK..."
-                class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 font-mono outline-none focus:border-sky-500"
+                class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
               />
               <button
                 onclick={handleSaveTgConfig}
-                class="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-200 cursor-pointer active:scale-95"
+                class="btn-hardware px-3 py-2 rounded-xl text-xs font-bold cursor-pointer active:scale-95"
               >
                 Simpan
               </button>
@@ -587,7 +587,7 @@
 
           <button
             onclick={() => onStartTelegram(tgTokenInput && !tgTokenInput.includes('•') ? tgTokenInput.trim() : '')}
-            class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95"
+            class="btn-safety w-full py-2.5 rounded-xl text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95"
           >
             Jalankan Bot Telegram
           </button>
@@ -595,26 +595,26 @@
       </div>
 
       <!-- Collapsible Access Whitelist Settings -->
-      <div class="border-t border-white/[0.06] pt-2 flex flex-col">
+      <div class="border-t border-[#C8C5BC] pt-2 flex flex-col">
         <button
           type="button"
           onclick={() => showTgSettings = !showTgSettings}
-          class="flex items-center justify-between text-[11px] text-zinc-400 hover:text-zinc-200 py-1 cursor-pointer transition"
+          class="flex items-center justify-between text-[11px] text-[#5C6066] hover:text-[#191B1D] py-1 cursor-pointer transition font-bold"
         >
-          <span class="flex items-center gap-1.5 font-medium">
-            <SlidersHorizontal class="w-3 h-3 text-zinc-400" /> Pengaturan User ID Izin
+          <span class="flex items-center gap-1.5">
+            <SlidersHorizontal class="w-3 h-3 text-[#5C6066]" /> Pengaturan User ID Izin
           </span>
           {#if showTgSettings}
-            <ChevronUp class="w-3.5 h-3.5 text-zinc-500" />
+            <ChevronUp class="w-3.5 h-3.5 text-[#5C6066]" />
           {:else}
-            <ChevronDown class="w-3.5 h-3.5 text-zinc-500" />
+            <ChevronDown class="w-3.5 h-3.5 text-[#5C6066]" />
           {/if}
         </button>
 
         {#if showTgSettings}
           <div class="flex flex-col gap-2 pt-2 pb-1">
-            <label for="tg-whitelist-input-clean" class="text-[10px] text-zinc-400">
-              Allowed Telegram User IDs: <span class="text-zinc-500 font-mono">(pisahkan koma)</span>
+            <label for="tg-whitelist-input-clean" class="text-[10px] text-[#5C6066] font-semibold">
+              Allowed Telegram User IDs: <span class="text-[#8C9097] font-mono">(pisahkan koma)</span>
             </label>
             <div class="flex gap-2">
               <input
@@ -622,81 +622,81 @@
                 type="text"
                 bind:value={tgAllowedInput}
                 placeholder="12345678, @username"
-                class="flex-1 bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-zinc-100 font-mono outline-none focus:border-sky-500"
+                class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-lg px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
               />
               <button
                 onclick={handleSaveTgConfig}
-                class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-xs font-semibold text-zinc-200 cursor-pointer active:scale-95"
+                class="btn-hardware px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer active:scale-95"
               >
                 Simpan
               </button>
             </div>
-            <span class="text-[9px] text-zinc-500 font-mono">Ketik /id di bot untuk mengetahui Telegram ID Anda.</span>
+            <span class="text-[9px] text-[#8C9097] font-mono">Ketik /id di bot untuk mengetahui Telegram ID Anda.</span>
           </div>
         {/if}
       </div>
 
       <!-- Command Quick Reference -->
-      <div class="border-t border-white/[0.06] pt-2 text-[10px] text-zinc-400 font-mono flex flex-wrap gap-1">
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">/code</span>
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">/persona</span>
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">/git</span>
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">/commit</span>
-        <span class="px-1.5 py-0.5 rounded bg-zinc-900 border border-white/[0.06] text-zinc-300">/push</span>
+      <div class="border-t border-[#C8C5BC] pt-2 text-[10px] text-[#5C6066] font-mono flex flex-wrap gap-1">
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/code</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/persona</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/git</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/commit</span>
+        <span class="px-1.5 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-semibold">/push</span>
       </div>
     </div>
 
     <!-- ========================================== -->
     <!-- CARD 3: Public Tunnel & LAN -->
     <!-- ========================================== -->
-    <div class="bg-zinc-950/80 border border-white/[0.08] hover:border-violet-500/30 rounded-2xl p-5 flex flex-col gap-4 shadow-xl transition-all">
+    <div class="bg-[#E9E7E0] border border-[#C8C5BC] rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all text-[#191B1D]">
       <!-- Card Header -->
-      <div class="flex items-center justify-between border-b border-white/[0.06] pb-3">
+      <div class="flex items-center justify-between border-b border-[#C8C5BC] pb-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-violet-500/15 border border-violet-500/30 text-violet-400 flex items-center justify-center font-bold shadow-sm shadow-violet-500/20">
+          <div class="w-9 h-9 rounded-xl bg-orange-100 border border-orange-300 text-[#FF5500] flex items-center justify-center font-bold shadow-2xs">
             <Globe class="w-4 h-4" />
           </div>
           <div>
-            <span class="text-xs font-bold text-white block">Akses Jaringan</span>
-            <span class="text-[10px] text-zinc-500 font-mono">Local LAN & Cloud Tunnel</span>
+            <span class="text-xs font-bold text-[#191B1D] block">Akses Jaringan</span>
+            <span class="text-[10px] text-[#5C6066] font-mono">Local LAN & Cloud Tunnel</span>
           </div>
         </div>
-        <span class="flex items-center gap-1.5 text-[11px] font-mono font-bold {tunnelStatus?.status === 'connected' ? 'text-violet-400' : 'text-zinc-500'}">
-          <span class="w-2 h-2 rounded-full {tunnelStatus?.status === 'connected' ? 'bg-violet-400 shadow-[0_0_8px_#a78bfa]' : 'bg-zinc-600'}"></span>
+        <span class="flex items-center gap-1.5 text-[11px] font-mono font-bold {tunnelStatus?.status === 'connected' ? 'text-[#FF5500]' : 'text-[#8C9097]'}">
+          <span class="w-2 h-2 rounded-full {tunnelStatus?.status === 'connected' ? 'bg-[#FF5500]' : 'bg-[#8C9097]'}"></span>
           {tunnelStatus?.status === 'connected' ? 'Live' : 'Local'}
         </span>
       </div>
 
       <!-- 1. Local Wi-Fi -->
       <div class="flex flex-col gap-1.5">
-        <span class="text-[11px] text-zinc-300 font-semibold flex items-center gap-1.5">
+        <span class="text-[11px] text-[#191B1D] font-bold flex items-center gap-1.5">
           <span>1. Akses Wi-Fi Lokal (HP & Laptop):</span>
         </span>
-        <div class="flex items-center justify-between bg-zinc-900/90 p-2.5 rounded-xl border border-white/[0.06] text-xs font-mono text-zinc-200">
+        <div class="flex items-center justify-between bg-[#FCFCFA] p-2.5 rounded-xl border border-[#C8C5BC] text-xs font-mono text-[#191B1D]">
           <span class="truncate">{tunnelStatus?.localUrl || 'http://localhost:3888'}</span>
           <button
             onclick={() => copyText(tunnelStatus?.localUrl || '', 'local')}
-            class="p-1 text-zinc-400 hover:text-white cursor-pointer transition"
+            class="p-1 text-[#5C6066] hover:text-[#191B1D] cursor-pointer transition"
             title="Salin URL"
           >
-            {#if isCopiedLocal}<Check class="w-3.5 h-3.5 text-emerald-400" />{:else}<Copy class="w-3.5 h-3.5" />{/if}
+            {#if isCopiedLocal}<Check class="w-3.5 h-3.5 text-emerald-600" />{:else}<Copy class="w-3.5 h-3.5" />{/if}
           </button>
         </div>
-        <span class="text-[10px] text-zinc-500">Bisa dibuka dari HP yang terhubung ke satu Wi-Fi yang sama.</span>
+        <span class="text-[10px] text-[#5C6066]">Bisa dibuka dari HP yang terhubung ke satu Wi-Fi yang sama.</span>
       </div>
 
       <!-- 2. Public Internet Tunnel -->
       <div class="flex flex-col gap-1.5 pt-1">
-        <span class="text-[11px] text-zinc-300 font-semibold">2. Akses Luar Internet (Public Tunnel):</span>
+        <span class="text-[11px] text-[#191B1D] font-bold">2. Akses Luar Internet (Public Tunnel):</span>
         {#if tunnelStatus?.status === 'connected' && tunnelStatus.publicUrl}
-          <div class="flex items-center justify-between bg-zinc-900/90 p-2.5 rounded-xl border border-violet-500/30 text-xs font-mono text-violet-300">
+          <div class="flex items-center justify-between bg-[#FCFCFA] p-2.5 rounded-xl border border-[#FF5500]/40 text-xs font-mono text-[#FF5500] font-bold">
             <span class="truncate">{tunnelStatus.publicUrl}</span>
             <button
               onclick={() => copyText(tunnelStatus?.publicUrl || '', 'public')}
-              class="p-1 text-zinc-400 hover:text-white cursor-pointer transition"
+              class="p-1 text-[#5C6066] hover:text-[#191B1D] cursor-pointer transition"
               title="Salin URL"
             >
-              {#if isCopiedPublic}<Check class="w-3.5 h-3.5 text-emerald-400" />{:else}<Copy class="w-3.5 h-3.5" />{/if}
+              {#if isCopiedPublic}<Check class="w-3.5 h-3.5 text-emerald-600" />{:else}<Copy class="w-3.5 h-3.5" />{/if}
             </button>
           </div>
           <button
@@ -709,7 +709,7 @@
                 isStoppingTunnel = false;
               }
             }}
-            class="w-full py-2 rounded-xl bg-zinc-900 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-300 border border-zinc-800 text-xs font-semibold cursor-pointer active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-800 border border-rose-300 text-xs font-bold cursor-pointer active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isStoppingTunnel ? 'Menutup Akses...' : 'Tutup Akses Publik (Stop Tunnel)'}
           </button>
@@ -719,7 +719,7 @@
               type="text"
               bind:value={customSubdomain}
               placeholder="zhiend-agent"
-              class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 font-mono outline-none focus:border-violet-500"
+              class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
             />
             <button
               disabled={isStartingTunnel}
@@ -731,7 +731,7 @@
                   isStartingTunnel = false;
                 }
               }}
-              class="btn-telemetry px-4 py-2 rounded-xl text-white font-bold text-xs cursor-pointer active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              class="btn-safety px-4 py-2 rounded-xl text-white font-bold text-xs cursor-pointer active:scale-95 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isStartingTunnel ? 'Membuka...' : 'Buka'}
             </button>
@@ -740,15 +740,15 @@
       </div>
 
       <!-- 3. Security PIN Input -->
-      <div class="flex flex-col gap-1.5 pt-2 border-t border-white/[0.06]">
+      <div class="flex flex-col gap-1.5 pt-2 border-t border-[#C8C5BC]">
         <div class="flex items-center justify-between">
-          <span class="text-[11px] text-zinc-300 font-semibold flex items-center gap-1.5">
-            <Shield class="w-3.5 h-3.5 text-amber-400" /> Security PIN Akses Web:
+          <span class="text-[11px] text-[#191B1D] font-bold flex items-center gap-1.5">
+            <Shield class="w-3.5 h-3.5 text-[#FF5500]" /> Security PIN Akses Web:
           </span>
           {#if config?.securityPin}
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono">PIN Aktif</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono font-bold">PIN Aktif</span>
           {:else}
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 border border-white/[0.08] text-zinc-400 font-mono">Belum Ada PIN</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-mono">Belum Ada PIN</span>
           {/if}
         </div>
         <div class="flex gap-2">
@@ -756,17 +756,17 @@
             type="password"
             bind:value={securityPinInput}
             placeholder="Ketik PIN (misal: 1234)"
-            class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-zinc-100 font-mono outline-none focus:border-amber-500"
+            class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#FF5500]"
           />
           <button
             onclick={handleSavePin}
             disabled={isSavingPin}
-            class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold cursor-pointer active:scale-95 transition"
+            class="btn-safety px-3 py-2 rounded-xl text-white text-xs font-bold cursor-pointer active:scale-95 transition"
           >
             {isSavingPin ? 'Menyimpan...' : 'Simpan PIN'}
           </button>
         </div>
-        <span class="text-[10px] text-zinc-500 font-mono">Siapapun yang membuka link publik wajib memasukkan PIN ini.</span>
+        <span class="text-[10px] text-[#5C6066] font-mono">Siapapun yang membuka link publik wajib memasukkan PIN ini.</span>
       </div>
     </div>
 

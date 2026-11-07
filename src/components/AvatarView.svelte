@@ -69,7 +69,7 @@
 </script>
 
 <div 
-  class="relative inline-flex items-center justify-center shrink-0 overflow-hidden bg-zinc-900 border border-white/10 shadow-sm {sizeClasses[size] || sizeClasses.md} {className}"
+  class="relative inline-flex items-center justify-center shrink-0 overflow-hidden bg-[#E9E7E0] border border-[#C8C5BC] shadow-xs {sizeClasses[size] || sizeClasses.md} {className}"
   title={name}
 >
   {#if isVideo()}

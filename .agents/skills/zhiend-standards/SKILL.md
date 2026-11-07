@@ -12,7 +12,7 @@ The standards are modularly split into two specialized skills:
 | Dedicated Skill | Focus & Scope | Location |
 |-----------------|---------------|----------|
 | **`zhiend-architecture`** | Backend & Frontend Architecture, Svelte 5 Runes, TypeScript strict safety, Hono API routes, PIN security, Workspace scanning (`D:\Works`), Media pipelines, and Public Tunnels | [`.agents/skills/zhiend-architecture/SKILL.md`](file:///d:/Works/zhiEnd-agent/.agents/skills/zhiend-architecture/SKILL.md) |
-| **`zhiend-ui-design`** | Cold Carbon Precision Design System: carbon obsidian chassis (#08090C), razor-sharp electric cyan telemetry (#00E5FF), hairline structural partitions, disciplined Inter & JetBrains Mono typography, and mobile-first ergonomics | [`.agents/skills/zhiend-ui-design/SKILL.md`](file:///d:/Works/zhiEnd-agent/.agents/skills/zhiend-ui-design/SKILL.md) |
+| **`zhiend-ui-design`** | Teenage Engineering Industrial Field Instrument (TE-IFI): matte chalk bone chassis (#F4F3EE), putty concrete decks (#E9E7E0), pure alabaster wells (#FCFCFA), safety hazard orange triggers (#FF5500), physical mechanical buttons with inset/outset bevels, precision milled hairline seams, 0% dark mode tolerance across all modals, and anti-AI-slop instrument cockpit layouts | [`.agents/skills/zhiend-ui-design/SKILL.md`](file:///d:/Works/zhiEnd-agent/.agents/skills/zhiend-ui-design/SKILL.md) |
 
 ---
 
@@ -30,19 +30,30 @@ The standards are modularly split into two specialized skills:
 
 ## 2. UI/UX Design Quick Reference (`zhiend-ui-design`)
 
-- **Design Philosophy**: Cold Carbon Precision — an authentic mission-grade engineering instrument. Zero generic purple SaaS gradients, zero decorative rainbow disco blobs, and zero single-word gradient text tells.
-- **5-Tone Carbon Palette**:
-  - `--canvas-carbon`: `#08090C` (Cold graphite carbon base)
-  - `--deck-surface`: `#101216` (Structural deck and panels)
-  - `--raised-bed`: `#161920` (Tactile controls and inputs)
-  - `--hairline-rule`: `#222630` (1px precision partition rule)
-  - `--signal-cyan`: `#00E5FF` (Laser-cut electric cyan telemetry signal)
+- **Design Philosophy**: Teenage Engineering Industrial Field Instrument (TE-IFI) — a physical precision hardware synthesizer aesthetic. 100% free of generic dark mode, zero blue/purple palettes, zero neon glows, and zero AI-slop card kits.
+- **6-Tone Industrial Hardware Palette**:
+  - `--chassis-bone`: `#F4F3EE` (Chalk Bone matte ground)
+  - `--deck-putty`: `#E9E7E0` (Putty concrete decks & sidebars)
+  - `--bed-magnesium`: `#DEDBD2` (Machined magnesium raised tabs)
+  - `--well-alabaster`: `#FCFCFA` (Sunken alabaster input wells & message bays)
+  - `--seam-milled`: `#C8C5BC` (1px mechanical precision rule)
+  - `--safety-orange`: `#FF5500` (Tactile safety hazard orange primary switches)
+  - `--hazard-mustard`: `#E5A91A` (Warning yellow caution indicators)
+  - `--ink-basalt`: `#191B1D` (Deep basalt ink high-contrast typography)
+  - `--stencil-grey`: `#5C6066` (Technical stencil data labels)
 - **Component Tokens**:
-  - `.carbon-panel`: Structural milled graphite surface with hairline border.
-  - `.carbon-input`: Recessed tactile input dock with cold cyan focus indicator.
-  - `.btn-telemetry`: High-contrast electric cyan action trigger with tactile press feedback.
-  - `.btn-tool`: Subdued secondary tactile button.
-  - `.bubble-user`: Deep cyan-tinted carbon card (`#0c1a24` with hairline border), eliminating generic purple gradient bubbles.
-  - `.bubble-agent`: Milled graphite deck card (`#101216`).
-- **Typography & Voice**: Sentence case throughout (no ALL-CAPS eyebrows), line lengths < 75 characters, active verbs ("Kirim", "Simpan"), plain functional signposting.
-- **Accessibility & Quality**: Visible `:focus-visible` rings, reduced motion support, zero emoji icons (100% Lucide SVG), and touch targets ≥ 44×44px.
+  - `.hardware-panel`: Structural putty deck with milled hairline seam.
+  - `.hardware-well`: Recessed alabaster bay with subtle mechanical inset bevel.
+  - `.btn-hardware`: Tactile mechanical push-button with 2px physical bottom bevel.
+  - `.btn-safety`: Vivid safety hazard orange (`#FF5500`) tactile switch.
+  - `.bubble-user-hardware`: Alabaster bay with safety orange micro-tab.
+  - `.bubble-agent-hardware`: Engineered putty deck with mechanical telemetry logger.
+- **Universal Modal Consistency (0% Dark Mode Tolerance)**:
+  - Every single modal (`ProjectModal`, `SettingsModal`, `PersonaModal`, `ConfirmModal`, `NoticeModal`, `PinModal`, `PushModal`), popover, and lightbox is 100% TE-IFI.
+  - Zero tolerance for `bg-zinc-950`, `bg-zinc-900`, `border-indigo`, or `text-indigo`.
+  - Structured as alabaster chassis (`#FCFCFA`) with putty concrete headers (`#E9E7E0`), safety orange stencils (`#FF5500`), and tactile action keys.
+- **Instrument Cockpit Layout Architecture (Anti-AI-Slop Formations)**:
+  - Ban on generic 2x2 SaaS card kits, centered hero clichés, and duplicate center prompt boxes.
+  - Required Layout: Machined machine nameplate (`TX-3888`), EP-133 style 4-pad hardware macro soundbank matrix, real-time telemetry registers, and a permanently anchored bottom hardware control deck (`hardware-well`).
+- **Typography & Voice**: Technical grotesque + monospace (DIN/Space Grotesk), pure sentence case, line lengths < 75 characters, authentic hardware labels (`Bay 01`, `Port :3888`).
+- **Accessibility & Quality**: High WCAG AAA contrast (basalt on chalk bone), tactile `:active` press mechanics, zero emoji icons (100% Lucide SVG), and touch targets ≥ 44×44px.

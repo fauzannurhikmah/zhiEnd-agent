@@ -37,15 +37,15 @@
 </script>
 
 {#if isOpen}
-  <div class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl flex items-center justify-center z-50 p-4">
-    <div class="glass-panel w-full max-w-sm rounded-2xl p-6 flex flex-col items-center gap-4 border border-slate-700/80 shadow-2xl text-center animate-in fade-in zoom-in-95 duration-200">
-      <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+  <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="w-full max-w-sm rounded-2xl p-6 flex flex-col items-center gap-4 bg-[#FCFCFA] border border-[#C8C5BC] shadow-2xl text-center animate-in fade-in zoom-in-95 duration-200 text-[#191B1D]">
+      <div class="w-14 h-14 rounded-2xl bg-orange-100 border border-orange-300 flex items-center justify-center text-[#FF5500]">
         <Shield class="w-7 h-7" />
       </div>
 
       <div>
-        <h2 class="text-base font-bold text-white">zhiEnd Agent Security</h2>
-        <p class="text-xs text-slate-400 mt-1">Masukkan Security PIN untuk membuka akses workspace dan remote kontrol.</p>
+        <h2 class="text-base font-bold text-[#191B1D]">zhiEnd Agent Security</h2>
+        <p class="text-xs text-[#5C6066] mt-1">Masukkan Security PIN untuk membuka akses workspace dan remote kontrol.</p>
       </div>
 
       <div class="w-full flex gap-2">
@@ -55,19 +55,19 @@
           onkeydown={handleKeyDown}
           placeholder="••••"
           maxlength="12"
-          class="flex-1 bg-slate-900 border border-slate-800 focus:border-indigo-500 rounded-xl p-3 text-center text-lg tracking-[0.3em] text-white font-mono outline-none"
+          class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl p-3 text-center text-lg tracking-[0.3em] text-[#191B1D] font-mono outline-none"
         />
         <button
           onclick={handleSubmit}
           disabled={isChecking || !pinValue.trim()}
-          class="px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold cursor-pointer"
+          class="btn-safety px-4 py-3 rounded-xl text-white font-bold cursor-pointer disabled:opacity-40"
         >
           <ArrowRight class="w-4 h-4" />
         </button>
       </div>
 
       {#if errorMsg}
-        <span class="text-xs text-rose-400 font-semibold">{errorMsg}</span>
+        <span class="text-xs text-rose-600 font-bold">{errorMsg}</span>
       {/if}
     </div>
   </div>

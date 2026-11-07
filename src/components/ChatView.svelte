@@ -453,7 +453,7 @@
       title: 'Review Codebase',
       desc: 'Analisis arsitektur, potensi bug, dan performa kode',
       icon: Search,
-      iconColor: 'text-[#00e5ff]',
+      iconColor: 'text-[#FF5500]',
       prompt: 'Lakukan code review mendalam pada project ini, temukan potensi bug, issue keamanan, atau performa.'
     },
     {
@@ -492,17 +492,17 @@
   <!-- Full-Viewport Drag & Drop Overlay -->
   {#if isDragging}
     <div 
-      class="absolute inset-0 z-50 bg-[#08090C]/90 backdrop-blur-md flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#00e5ff] rounded-2xl m-2 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none shadow-2xl shadow-[#00e5ff]/10"
+      class="absolute inset-0 z-50 bg-[#F4F3EE]/95 backdrop-blur-md flex flex-col items-center justify-center p-6 border-2 border-dashed border-[#FF5500] rounded-2xl m-2 animate-in fade-in zoom-in-95 duration-150 pointer-events-none select-none shadow-xl"
     >
       <div class="flex flex-col items-center gap-3 text-center pointer-events-none">
-        <div class="w-16 h-16 rounded-2xl bg-[#00e5ff]/10 border border-[#00e5ff]/30 flex items-center justify-center text-[#00e5ff] shadow-lg shadow-[#00e5ff]/20 animate-bounce">
+        <div class="w-16 h-16 rounded-2xl bg-[#FF5500]/10 border border-[#FF5500]/30 flex items-center justify-center text-[#FF5500] shadow-md animate-bounce">
           <CloudUpload class="w-8 h-8" />
         </div>
         <div class="flex flex-col gap-1">
-          <p class="text-base sm:text-lg font-bold text-white tracking-tight">
+          <p class="text-base sm:text-lg font-bold text-[#191B1D] tracking-tight">
             Lepaskan gambar di sini
           </p>
-          <p class="text-xs text-zinc-400 max-w-xs">
+          <p class="text-xs text-[#5C6066] max-w-xs">
             Lampirkan screenshot atau gambar rancangan (PNG, JPG, WebP, GIF, SVG)
           </p>
         </div>
@@ -511,13 +511,13 @@
   {/if}
 
   <!-- Top Session Bar -->
-  <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2 border-b border-[#222630] bg-[#0c0e12]/80 backdrop-blur-md z-10 shrink-0 select-none gap-1.5 sm:gap-2">
+  <div class="flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2 border-b border-[#C8C5BC] bg-[#E9E7E0] z-10 shrink-0 select-none gap-1.5 sm:gap-2">
     <div class="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-1">
-      <MessageSquare class="w-3.5 h-3.5 text-[#00e5ff] shrink-0" />
-      <span class="text-xs font-semibold text-zinc-200 truncate min-w-0 flex-1">
+      <MessageSquare class="w-3.5 h-3.5 text-[#FF5500] shrink-0" />
+      <span class="text-xs font-bold text-[#191B1D] truncate min-w-0 flex-1">
         {activeSession?.title || 'Diskusi Aktif'}
       </span>
-      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#101216] border border-[#222630] text-zinc-400 hidden md:inline shrink-0">
+      <span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] hidden md:inline shrink-0 font-semibold">
         {activeSession?.workspace_id ? 'Workspace' : 'Global'}
       </span>
     </div>
@@ -527,14 +527,14 @@
       <button
         type="button"
         onclick={onOpenPersonaModal}
-        class="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-xl bg-[#101216] hover:bg-[#161920] border border-[#222630] hover:border-[#00e5ff]/40 text-[11px] text-zinc-200 hover:text-[#00e5ff] transition cursor-pointer group shadow-sm max-w-[125px] xs:max-w-[155px] sm:max-w-[280px]"
+        class="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2.5 py-1 rounded-xl bg-[#FCFCFA] hover:bg-white border border-[#C8C5BC] hover:border-[#FF5500] text-[11px] text-[#191B1D] transition cursor-pointer group shadow-2xs max-w-[125px] xs:max-w-[155px] sm:max-w-[280px]"
         title={`Persona: ${activePersona?.name || 'Default'}${activePersona?.traits ? ` • Sifat: ${activePersona.traits}` : ''}`}
       >
         <AvatarView avatar={activePersona?.avatar} name={activePersona?.name} size="xs" className="rounded-md shrink-0" />
-        <span class="font-medium truncate max-w-[65px] xs:max-w-[85px] sm:max-w-[120px]">{activePersona?.name || 'Default Persona'}</span>
+        <span class="font-bold truncate max-w-[65px] xs:max-w-[85px] sm:max-w-[120px]">{activePersona?.name || 'Default Persona'}</span>
         {#if activePersona?.preferred_model}
           <span 
-            class="text-[9px] px-1.5 py-0.2 rounded bg-zinc-800/80 border border-white/5 text-zinc-400 font-mono hidden lg:inline truncate max-w-[110px]" 
+            class="text-[9px] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-mono hidden lg:inline truncate max-w-[110px]" 
             title={`Model: ${activePersona.preferred_model}`}
           >
             {activePersona.preferred_model.replace(/^(openai|grok|qwen|deepseek|gemini):/, '')}
@@ -542,22 +542,22 @@
         {/if}
         {#if activePersona?.traits}
           <span 
-            class="text-[9px] px-1.5 py-0.2 rounded bg-[#161920] border border-[#222630] text-zinc-300 font-mono hidden xl:inline truncate max-w-[110px]" 
+            class="text-[9px] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-sans truncate max-w-[110px]" 
             title={activePersona.traits}
           >
             {activePersona.traits}
           </span>
         {/if}
-        <ChevronDown class="w-3 h-3 text-zinc-500 group-hover:text-[#00e5ff] transition-transform shrink-0" />
+        <ChevronDown class="w-3 h-3 text-[#8C9097] group-hover:text-[#FF5500] transition-transform shrink-0" />
       </button>
 
       <button
         type="button"
         onclick={onCreateNewSession}
-        class="flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-lg bg-[#101216] hover:bg-[#161920] border border-[#222630] hover:border-[#00e5ff]/40 text-[11px] text-zinc-300 hover:text-[#00e5ff] transition cursor-pointer"
+        class="btn-hardware flex items-center gap-1 p-1.5 sm:px-2.5 sm:py-1 rounded-lg text-[11px] text-[#191B1D] cursor-pointer"
         title="Mulai sesi baru"
       >
-        <Plus class="w-3 h-3 text-[#00e5ff]" />
+        <Plus class="w-3 h-3 text-[#FF5500]" />
         <span class="hidden sm:inline">Chat Baru</span>
       </button>
 
@@ -565,7 +565,7 @@
         <button
           type="button"
           onclick={onClearMessages}
-          class="flex items-center gap-1 p-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-rose-500/20 text-zinc-500 hover:text-rose-400 text-[11px] transition cursor-pointer"
+          class="flex items-center gap-1 p-1.5 sm:px-2 sm:py-1 rounded-lg hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 text-[11px] transition cursor-pointer"
           title="Bersihkan pesan di sesi ini"
         >
           <Trash2 class="w-3 h-3" />
@@ -578,115 +578,80 @@
   <!-- Content Viewport -->
   <div bind:this={messagesContainer} class="flex-1 overflow-y-auto px-2 sm:px-4 py-4 sm:py-6">
     {#if messages.length === 0}
-      <!-- Empty State: Precision Telemetry Hero -->
-      <div class="h-full flex flex-col items-center justify-center max-w-2xl mx-auto text-center gap-5 sm:gap-6 animate-in fade-in zoom-in-95 duration-300">
-        <div class="flex flex-col gap-2 sm:gap-2.5 px-2">
-          <div class="carbon-pill self-center text-[#00e5ff]">
-            <Sparkles class="w-3.5 h-3.5 text-[#00e5ff]" /> Google Antigravity Engine
+      <!-- Empty State: Teenage Engineering Hardware Instrument Cockpit Deck -->
+      <div class="h-full flex flex-col justify-center max-w-3xl mx-auto gap-4 sm:gap-5 animate-in fade-in zoom-in-95 duration-200 pb-20">
+        
+        <!-- Physical Machine Nameplate & Live Telemetry Plate -->
+        <div class="w-full bg-[#E9E7E0] border border-[#C8C5BC] rounded-xl p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs font-mono">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-[#FF5500] shadow-[0_0_8px_rgba(255,85,0,0.6)] animate-pulse"></span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs sm:text-sm font-bold text-[#191B1D] tracking-wider uppercase">zhiEnd FIELD INSTRUMENT // TX-3888</span>
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-[#FCFCFA] border border-[#C8C5BC] text-[#FF5500] font-bold">REV 2.4</span>
+              </div>
+              <p class="text-[10px] text-[#5C6066] font-sans mt-0.5">Unit siap menerima instruksi coding, inspeksi git, dan eksekusi terminal.</p>
+            </div>
           </div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            Ada yang ingin dikerjakan hari ini?
-          </h1>
-          <p class="text-xs text-zinc-400 max-w-md mx-auto leading-relaxed">
-            zhiEnd Agent siap membaca, mengedit file, memperbaiki bug, dan melakukan sinkronisasi GitHub di workspace lokal Anda.
-          </p>
+          <div class="flex items-center gap-2 sm:gap-3 text-[10px] text-[#5C6066] border-t sm:border-t-0 border-[#C8C5BC] pt-2 sm:pt-0">
+            <span class="px-2 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] flex items-center gap-1 font-semibold text-emerald-700">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> BUS NOMINAL
+            </span>
+            <span class="px-2 py-0.5 rounded bg-[#FCFCFA] border border-[#C8C5BC] font-semibold text-[#191B1D] truncate max-w-[140px]">
+              {activePersona?.name || 'ANTIGRAVITY'}
+            </span>
+          </div>
         </div>
 
-        <!-- Central Telemetry Prompt Box -->
-        <div 
-          role="region"
-          aria-label="Kotak Input Prompt"
-          class="w-full bg-[#101216] border transition-all rounded-2xl p-3.5 shadow-2xl flex flex-col gap-2.5 {isDragging ? 'border-[#00e5ff] bg-[#0c1a24] ring-1 ring-[#00e5ff]/40' : 'border-[#222630] hover:border-[#2f3544] focus-within:border-[#00e5ff]/60 focus-within:ring-1 focus-within:ring-[#00e5ff]/30'}"
-          onpaste={handlePaste}
-        >
-          <!-- Uploaded Image Chips Preview -->
-          {#if selectedImages.length > 0}
-            <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-1">
-              {#each selectedImages as img, idx}
-                <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#161920] border border-[#222630] text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
-                  <div class="relative w-7 h-7 shrink-0 rounded-lg overflow-hidden border border-[#222630] bg-[#0c0e12]">
-                    <img src={img.localPreviewUrl || img.url} alt={img.name} class="w-full h-full object-cover" />
-                    {#if img.isUploading}
-                      <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
-                        <Loader2 class="w-3.5 h-3.5 animate-spin text-[#00e5ff]" />
-                      </div>
-                    {/if}
-                  </div>
-                  <div class="flex flex-col min-w-0 pr-1">
-                    <span class="max-w-[130px] truncate text-[11px] text-zinc-200 font-medium">{img.name}</span>
-                    {#if img.isUploading}
-                      <span class="text-[9px] text-[#00e5ff] font-mono animate-pulse leading-none">Mengunggah...</span>
-                    {/if}
-                  </div>
-                  <button
-                    type="button"
-                    onclick={() => removeImage(idx)}
-                    class="p-0.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer shrink-0"
-                    title="Hapus gambar"
-                  >
-                    <X class="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              {/each}
-            </div>
-          {/if}
+        <!-- Hardware Macro Trigger Soundbank (EP-133 / OP-1 Parameter Matrix) -->
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-mono font-bold text-[#5C6066] uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles class="w-3 h-3 text-[#FF5500]" /> MACRO SOUNDBANK KEYS // DIRECT DISPATCH
+            </span>
+            <span class="text-[10px] font-mono text-[#8C9097]">CLICK PAD TO TRIGGER</span>
+          </div>
 
-          <textarea
-            bind:value={promptInput}
-            onkeydown={handleKeyDown}
-            placeholder="Tulis instruksi coding Anda (atau paste screenshot gambar langsung dengan Ctrl+V)..."
-            rows="3"
-            class="w-full bg-transparent text-sm text-zinc-100 placeholder-zinc-500 outline-none resize-none leading-relaxed"
-          ></textarea>
-
-          <div class="flex items-center justify-between pt-2 border-t border-[#222630] text-xs">
-            <div class="flex items-center gap-2">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 w-full">
+            {#each suggestions as s, idx}
               <button
                 type="button"
-                onclick={() => fileInputRef?.click()}
-                disabled={isBusy || isUploadingImage}
-                class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#161920] hover:bg-[#1d222b] border border-[#222630] hover:border-[#00e5ff]/40 text-[11px] text-zinc-300 hover:text-[#00e5ff] transition cursor-pointer disabled:opacity-40"
-                title="Unggah Gambar atau Screenshot (atau paste langsung)"
+                onclick={() => setPrompt(s.prompt)}
+                class="p-3 rounded-xl bg-[#E9E7E0] hover:bg-[#FCFCFA] border border-[#C8C5BC] hover:border-[#FF5500] flex flex-col justify-between gap-3 transition text-left cursor-pointer group shadow-[inset_0_1px_2px_rgba(255,255,255,0.7),0_2px_0_#C8C5BC] active:translate-y-0.5 active:shadow-xs min-h-[105px]"
               >
-                {#if isUploadingImage}
-                  <Loader2 class="w-3.5 h-3.5 animate-spin text-[#00e5ff]" />
-                  <span>Mengunggah...</span>
-                {:else}
-                  <Paperclip class="w-3.5 h-3.5 text-zinc-400" />
-                  <span>Lampirkan Gambar</span>
-                {/if}
+                <div class="flex items-center justify-between w-full">
+                  <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#FCFCFA] group-hover:bg-[#FF5500] text-[#5C6066] group-hover:text-white border border-[#C8C5BC] transition">
+                    PAD 0{idx + 1}
+                  </span>
+                  <s.icon class="w-4 h-4 text-[#FF5500] group-hover:scale-110 transition-transform" />
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-[#191B1D] group-hover:text-[#FF5500] transition-colors leading-tight font-mono">
+                    {s.title}
+                  </div>
+                  <p class="text-[10px] text-[#5C6066] leading-snug mt-1 font-sans line-clamp-2">{s.desc}</p>
+                </div>
               </button>
-              <span class="text-[11px] text-zinc-500 font-mono hidden sm:inline">
-                Tekan <kbd class="px-1.5 py-0.5 rounded bg-[#161920] border border-[#222630] text-zinc-300">Ctrl + Enter</kbd>
-              </span>
-            </div>
-
-            <button
-              onclick={handleSend}
-              disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
-              class="btn-telemetry px-4 py-2 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <span>Kirim</span>
-              <ArrowUp class="w-3.5 h-3.5" />
-            </button>
+            {/each}
           </div>
         </div>
 
-        <!-- Suggestion Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left pt-1">
-          {#each suggestions as s}
-            <button
-              onclick={() => setPrompt(s.prompt)}
-              class="carbon-panel p-3.5 rounded-2xl bg-[#101216]/60 hover:bg-[#161920] border border-[#222630] hover:border-[#00e5ff]/35 flex flex-col gap-1 transition text-left cursor-pointer group"
-            >
-              <div class="flex items-center gap-2 text-xs font-semibold text-zinc-200 group-hover:text-white">
-                <s.icon class="w-4 h-4 {s.iconColor} group-hover:scale-110 transition-transform" />
-                <span>{s.title}</span>
-              </div>
-              <p class="text-[11px] text-zinc-500 leading-snug">{s.desc}</p>
-            </button>
-          {/each}
+        <!-- System Diagnostic Strip & Shortcuts -->
+        <div class="p-3 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs text-[11px] font-mono">
+          <div class="flex items-center gap-2 text-[#5C6066]">
+            <span class="font-bold text-[#191B1D]">COMMANDS:</span>
+            <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!code</span>
+            <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!git</span>
+            <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!push</span>
+            <span class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">!persona</span>
+          </div>
+          <div class="flex items-center gap-2 text-[#5C6066]">
+            <span>SHORTCUT:</span>
+            <kbd class="px-1.5 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[#191B1D] font-bold">Ctrl + Enter</kbd>
+            <span class="text-[#8C9097]">TO FIRE</span>
+          </div>
         </div>
+
       </div>
     {:else}
       <!-- Active Messages Stream -->
@@ -695,12 +660,12 @@
           {#if msg.sender === 'user'}
             <div class="flex flex-col gap-1.5 items-end group">
               <!-- Header Username -->
-              <div class="flex items-center text-[10px] font-mono text-zinc-500 px-1">
+              <div class="flex items-center text-[10px] font-mono text-[#5C6066] px-1 font-semibold">
                 <span>Anda</span>
               </div>
 
               <!-- User Bubble Content -->
-              <div class="bubble-user max-w-[92%] sm:max-w-[85%] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl rounded-tr-none text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-sans">
+              <div class="bubble-user max-w-[92%] sm:max-w-[85%] px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl rounded-tr-none text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-sans text-[#191B1D]">
                 {msg.text}
               </div>
 
@@ -711,10 +676,10 @@
                     <button
                       type="button"
                       onclick={() => zoomImageUrl = imgUrl}
-                      class="group/thumb relative rounded-xl overflow-hidden border border-[#222630] hover:border-[#00e5ff]/60 shadow-md bg-[#101216] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                      class="group/thumb relative rounded-xl overflow-hidden border border-[#C8C5BC] hover:border-[#FF5500] shadow-sm bg-[#E9E7E0] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
                     >
                       <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
-                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
+                      <div class="absolute inset-0 bg-black/30 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
                         <Maximize2 class="w-4 h-4 text-white drop-shadow" />
                       </div>
                     </button>
@@ -751,80 +716,80 @@
                   avatar={activePersona?.avatar}
                   name={activePersona?.name}
                   size="md"
-                  className="rounded-2xl ring-1 ring-[#00e5ff]/25 shadow-md shadow-black/40"
+                  className="rounded-2xl ring-1 ring-[#FF5500]/30 shadow-xs"
                 />
               </div>
 
               <div class="flex-1 flex flex-col gap-1.5 min-w-0 max-w-[96%] sm:max-w-[92%]">
                 <!-- Header Username, Traits & Model -->
-                <div class="flex items-center gap-2 text-[10px] font-mono text-zinc-400 px-1 min-w-0">
-                  <span class="font-bold text-zinc-200 truncate shrink-0 max-w-[120px] sm:max-w-[200px]" title={activePersona?.name || 'zhiEnd Assistant'}>
+                <div class="flex items-center gap-2 text-[10px] font-mono text-[#5C6066] px-1 min-w-0">
+                  <span class="font-bold text-[#191B1D] truncate shrink-0 max-w-[120px] sm:max-w-[200px]" title={activePersona?.name || 'zhiEnd Assistant'}>
                     {activePersona?.name || 'zhiEnd Assistant'}
                   </span>
                   {#if activePersona?.traits}
                     <span 
-                      class="text-[9px] px-2 py-0.5 rounded-md bg-[#161920] border border-[#222630] text-zinc-300 font-sans truncate max-w-[140px] sm:max-w-[280px] md:max-w-[360px]"
+                      class="text-[9px] px-2 py-0.5 rounded-md bg-[#DEDBD2] border border-[#C8C5BC] text-[#5C6066] font-sans truncate max-w-[140px] sm:max-w-[280px] md:max-w-[360px]"
                       title={`Sifat & Karakteristik: ${activePersona.traits}`}
                     >
                       {activePersona.traits}
                     </span>
                   {/if}
                   {#if activePersona?.preferred_model}
-                    <span class="text-[9px] text-zinc-500 font-mono hidden md:inline shrink-0">
+                    <span class="text-[9px] text-[#8C9097] font-mono hidden md:inline shrink-0 font-medium">
                       {activePersona.preferred_model}
                     </span>
                   {/if}
                 </div>
 
                 <!-- Agent Bubble Content -->
-                <div class="bubble-agent w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-zinc-200 text-xs leading-relaxed">
+                <div class="bubble-agent w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-2xl text-[#191B1D] text-xs leading-relaxed">
                   <!-- Professional Execution & Reasoning Accordion (For Agent Responses) -->
                   {#if (msg.steps && msg.steps.length > 0) || (msg.tools && msg.tools.length > 0) || msg.thought || msg.isStreaming}
                     {@const isExp = isProcessExpanded(msg.id, msg.isStreaming)}
-                    <div class="mb-3 rounded-xl border transition-all duration-200 overflow-hidden {isExp ? 'border-[#00e5ff]/30 bg-[#0c1a24]/50' : 'border-[#222630] bg-[#101216] hover:border-[#2f3544]'}">
+                    <div class="mb-3 rounded-xl border transition-all duration-200 overflow-hidden {isExp ? 'border-[#C8C5BC] bg-[#FCFCFA]' : 'border-[#C8C5BC] bg-[#FCFCFA]/80 hover:border-[#A8A59C]'}">
                       <!-- Accordion Header Button -->
                       <button
                         type="button"
                         onclick={() => toggleProcess(msg.id)}
-                        class="w-full flex items-center justify-between px-3 {isExp ? 'py-2 bg-[#101216]' : 'py-1.5 bg-[#101216]/50'} hover:bg-[#161920] transition-all cursor-pointer text-left select-none"
+                        class="w-full flex items-center justify-between px-3 {isExp ? 'py-2 bg-[#DEDBD2]/50' : 'py-1.5 bg-[#DEDBD2]/30'} hover:bg-[#DEDBD2] transition-all cursor-pointer text-left select-none"
                       >
                         <div class="flex items-center gap-2 min-w-0">
                           {#if msg.isStreaming}
                             <div class="relative flex items-center justify-center w-2.5 h-2.5 shrink-0">
-                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e5ff] opacity-60"></span>
-                              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#00e5ff]"></span>
+                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FF5500] opacity-60"></span>
+                              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FF5500]"></span>
                             </div>
-                            <span class="text-xs font-medium text-[#00e5ff]">
+                            <span class="text-xs font-bold text-[#FF5500]">
                               Sedang Memproses...
                             </span>
                           {:else}
-                            <CheckCircle2 class="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                            <span class="text-xs font-medium text-zinc-300">
+                            <CheckCircle2 class="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                            <span class="text-xs font-bold text-[#191B1D]">
                               Proses & Eksekusi Selesai
                             </span>
                           {/if}
-                          <span class="text-[10px] font-mono text-zinc-400 px-1.5 py-0.2 rounded bg-[#161920] border border-[#222630]">
+                          <span class="text-[10px] font-mono text-[#5C6066] px-1.5 py-0.2 rounded bg-[#DEDBD2] border border-[#C8C5BC] font-semibold">
                             {(msg.steps?.length || msg.tools?.length || 1)} aktivitas
                           </span>
                         </div>
 
-                        <div class="flex items-center gap-1.5 text-zinc-400">
-                          <span class="text-[10px] font-sans text-zinc-500">
+                        <div class="flex items-center gap-1.5 text-[#5C6066]">
+                          <span class="text-[10px] font-sans font-medium text-[#5C6066]">
                             {isExp ? 'Sembunyikan' : 'Detail'}
                           </span>
-                          <ChevronDown class="w-3.5 h-3.5 text-zinc-400 transition-transform duration-200 {isExp ? 'rotate-180' : ''}" />
+                          <ChevronDown class="w-3.5 h-3.5 text-[#5C6066] transition-transform duration-200 {isExp ? 'rotate-180' : ''}" />
                         </div>
                       </button>
 
                       <!-- Accordion Body -->
                       {#if isExp}
-                        <div class="p-3 border-t border-[#222630] flex flex-col gap-2.5 text-xs bg-[#0c1a24]/30 animate-in fade-in duration-150">
+                        <div class="p-3 border-t border-[#C8C5BC] flex flex-col gap-2.5 text-xs bg-[#FCFCFA] animate-in fade-in duration-150">
                           <!-- Reasoning / Thinking Box -->
                           {#if msg.thought}
-                            <div class="p-2.5 rounded-lg bg-[#0c1a24]/60 border border-[#00e5ff]/25 text-zinc-300 italic text-[11px] leading-relaxed flex gap-2">
-                              <Sparkles class="w-3.5 h-3.5 text-[#00e5ff] shrink-0 mt-0.5" />
+                            <div class="p-2.5 rounded-lg bg-amber-50/70 border border-amber-300 text-amber-950 italic text-[11px] leading-relaxed flex gap-2">
+                              <Sparkles class="w-3.5 h-3.5 text-[#FF5500] shrink-0 mt-0.5" />
                               <div class="flex flex-col gap-0.5">
-                                <span class="text-[10px] font-semibold text-[#00e5ff] not-italic font-mono uppercase tracking-wider">
+                                <span class="text-[10px] font-bold text-[#C26D2B] not-italic font-mono uppercase tracking-wider">
                                   Reasoning & Analisis
                                 </span>
                                 <span>{msg.thought}</span>
@@ -834,44 +799,44 @@
 
                           <!-- Detailed Step Timeline -->
                           {#if msg.steps && msg.steps.length > 0}
-                            <div class="space-y-1.5 pl-1 border-l-2 border-[#00e5ff]/25 ml-2">
+                            <div class="space-y-1.5 pl-1 border-l-2 border-[#FF5500]/30 ml-2">
                               {#each msg.steps as st}
-                                <div class="flex items-start gap-2.5 text-zinc-300 text-xs py-0.5 pl-2">
-                                  <span class="w-1.5 h-1.5 rounded-full {st.type === 'edit' || st.type === 'write' ? 'bg-amber-400 shadow-sm shadow-amber-400/50' : st.type === 'run' ? 'bg-[#00e5ff]' : 'bg-sky-400'} mt-1.5 shrink-0"></span>
+                                <div class="flex items-start gap-2.5 text-[#191B1D] text-xs py-0.5 pl-2">
+                                  <span class="w-1.5 h-1.5 rounded-full {st.type === 'edit' || st.type === 'write' ? 'bg-[#FF5500]' : 'bg-[#E5A91A]'} mt-1.5 shrink-0"></span>
 
                                   <div class="flex-1 flex flex-col min-w-0">
                                     <div class="flex items-center gap-1.5 flex-wrap">
-                                      <span class="font-semibold text-zinc-200">{st.title}</span>
+                                      <span class="font-bold text-[#191B1D]">{st.title}</span>
 
                                       {#if st.file}
-                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-[#101216] border border-[#222630] text-[10px] font-mono text-zinc-300">
-                                          <FileCode class="w-2.5 h-2.5 text-[#00e5ff]" /> {st.file}
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] font-semibold">
+                                          <FileCode class="w-2.5 h-2.5 text-[#FF5500]" /> {st.file}
                                         </span>
                                       {/if}
 
                                       {#if st.lines}
-                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-amber-500/10 border border-amber-500/25 text-[10px] font-mono text-amber-300 font-semibold">
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded bg-amber-100 border border-amber-300 text-[10px] font-mono text-amber-900 font-bold">
                                           {st.lines}
                                         </span>
                                       {/if}
 
                                       {#if st.command}
-                                        <code class="px-1.5 py-0.2 rounded bg-[#101216] border border-[#222630] text-[10px] font-mono text-[#00e5ff] max-w-sm truncate">
+                                        <code class="px-1.5 py-0.2 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] max-w-sm truncate font-semibold">
                                           {st.command}
                                         </code>
                                       {/if}
 
                                       {#if st.repeatCount && st.repeatCount > 1}
-                                        <span class="inline-flex items-center px-1.5 py-0.2 rounded-full bg-[#00e5ff]/15 border border-[#00e5ff]/30 text-[9px] font-mono font-bold text-[#00e5ff]" title={`Perintah dijalankan ${st.repeatCount} kali`}>
+                                        <span class="inline-flex items-center px-1.5 py-0.2 rounded-full bg-[#FF5500]/15 border border-[#FF5500]/30 text-[9px] font-mono font-bold text-[#FF5500]" title={`Perintah dijalankan ${st.repeatCount} kali`}>
                                           ×{st.repeatCount}
                                         </span>
                                       {/if}
                                     </div>
 
                                     {#if st.instruction}
-                                      <p class="text-[11px] text-zinc-400 italic mt-0.5">{st.instruction}</p>
+                                      <p class="text-[11px] text-[#5C6066] italic mt-0.5">{st.instruction}</p>
                                     {:else if st.detail && st.detail !== st.command}
-                                      <p class="text-[11px] text-zinc-500 mt-0.5">{st.detail}</p>
+                                      <p class="text-[11px] text-[#8C9097] mt-0.5">{st.detail}</p>
                                     {/if}
                                   </div>
                                 </div>
@@ -879,29 +844,29 @@
 
                               <!-- Active in-progress indicator while streaming -->
                               {#if msg.isStreaming}
-                                <div class="flex items-center gap-2 text-zinc-500 text-[11px] py-0.5 pl-2">
-                                  <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-pulse shrink-0"></span>
-                                  <span class="font-sans">Melanjutkan langkah berikutnya...</span>
+                                <div class="flex items-center gap-2 text-[#5C6066] text-[11px] py-0.5 pl-2">
+                                  <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-pulse shrink-0"></span>
+                                  <span class="font-sans font-medium">Melanjutkan langkah berikutnya...</span>
                                 </div>
                               {/if}
                             </div>
                           {:else if msg.tools && msg.tools.length > 0}
                             <div class="flex flex-wrap gap-1.5">
                               {#each msg.tools as tool}
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#101216] border border-[#222630] text-[10px] font-mono text-[#00e5ff]">
-                                  <Wrench class="w-2.5 h-2.5 text-[#00e5ff]" /> {tool}
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#E9E7E0] border border-[#C8C5BC] text-[10px] font-mono text-[#191B1D] font-semibold">
+                                  <Wrench class="w-2.5 h-2.5 text-[#FF5500]" /> {tool}
                                 </span>
                               {/each}
                             </div>
                           {:else if msg.isStreaming}
                             <!-- Minimalist Loading Indicator -->
-                            <div class="flex items-center gap-2.5 py-1 text-zinc-400">
+                            <div class="flex items-center gap-2.5 py-1 text-[#5C6066]">
                               <div class="flex gap-1 items-center">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-bounce [animation-delay:-0.3s]"></span>
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-bounce [animation-delay:-0.15s]"></span>
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-bounce"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-bounce [animation-delay:-0.3s]"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-bounce [animation-delay:-0.15s]"></span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#FF5500] animate-bounce"></span>
                               </div>
-                              <span class="text-[11px] text-zinc-400 font-sans">Menganalisis & merencanakan tugas...</span>
+                              <span class="text-[11px] text-[#5C6066] font-sans font-medium">Menganalisis & merencanakan tugas...</span>
                             </div>
                           {/if}
                         </div>
@@ -910,24 +875,24 @@
                   {/if}
 
                   <!-- Main Message Content -->
-                  <div class="prose-chat font-sans text-[13px] leading-relaxed">
+                  <div class="prose-chat font-sans text-[13px] leading-relaxed text-[#191B1D]">
                     {@html renderMarkdown(msg.text)}
                     {#if msg.isStreaming && msg.text}
-                      <span class="inline-block w-1.5 h-3.5 bg-[#00e5ff] animate-pulse align-middle ml-0.5 rounded-xs"></span>
+                      <span class="inline-block w-1.5 h-3.5 bg-[#FF5500] animate-pulse align-middle ml-0.5 rounded-xs"></span>
                     {/if}
                   </div>
 
                   <!-- Agent Attached Images Gallery (if any) -->
                   {#if msg.images && msg.images.length > 0}
-                    <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-[#222630]">
+                    <div class="flex flex-wrap gap-2 mt-2 pt-2 border-t border-[#C8C5BC]">
                       {#each msg.images as imgUrl}
                         <button
                           type="button"
                           onclick={() => zoomImageUrl = imgUrl}
-                          class="group/thumb relative rounded-xl overflow-hidden border border-[#222630] hover:border-[#00e5ff]/60 shadow-md bg-[#101216] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
+                          class="group/thumb relative rounded-xl overflow-hidden border border-[#C8C5BC] hover:border-[#FF5500] shadow-sm bg-[#E9E7E0] cursor-zoom-in max-w-[220px] max-h-[160px] transition"
                         >
                           <img src={imgUrl} alt="Lampiran" class="w-full h-full object-cover group-hover/thumb:scale-105 transition duration-200" />
-                          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
+                          <div class="absolute inset-0 bg-black/30 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition">
                             <Maximize2 class="w-4 h-4 text-white drop-shadow" />
                           </div>
                         </button>
@@ -939,18 +904,18 @@
 
                 <!-- Action Toolbar OUTSIDE & UNDER the bubble - Only Appears on Hover -->
                 {#if msg.text && !msg.isStreaming}
-                  <div class="flex items-center gap-1 px-1 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-150 justify-start">
+                  <div class="flex items-center gap-1 px-1 text-[#5C6066] opacity-0 group-hover:opacity-100 transition-opacity duration-150 justify-start">
                     <button
                       type="button"
                       onclick={() => handleCopy(msg.id, msg.text)}
-                      class="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-zinc-200 px-1.5 py-0.5 rounded hover:bg-zinc-800/60 transition cursor-pointer"
+                      class="flex items-center gap-1 text-[11px] text-[#5C6066] hover:text-[#191B1D] px-1.5 py-0.5 rounded hover:bg-[#DEDBD2] transition cursor-pointer"
                       title="Salin teks"
                     >
                       {#if copiedMessageId === msg.id}
-                        <Check class="w-3 h-3 text-emerald-400" />
-                        <span class="text-emerald-400 text-[10px] font-medium">Tersalin!</span>
+                        <Check class="w-3 h-3 text-emerald-600" />
+                        <span class="text-emerald-700 text-[10px] font-bold">Tersalin!</span>
                       {:else}
-                        <Copy class="w-3 h-3 text-zinc-400 hover:text-zinc-200" />
+                        <Copy class="w-3 h-3 text-[#5C6066]" />
                         <span class="text-[10px]">Salin</span>
                       {/if}
                     </button>
@@ -964,38 +929,37 @@
     {/if}
   </div>
 
-  <!-- Floating Sticky Bottom Input (Shown when messages exist) -->
-  {#if messages.length > 0}
-    <div class="absolute bottom-2 sm:bottom-4 inset-x-0 px-2 sm:px-4 pointer-events-none z-20">
-      <div 
-        role="region"
-        aria-label="Kotak Input Mengambang"
-        class="max-w-3xl mx-auto bg-[#101216]/95 backdrop-blur-xl border transition-all rounded-2xl p-2 sm:p-2.5 shadow-2xl pointer-events-auto flex flex-col gap-2 {isDragging ? 'border-[#00e5ff] bg-[#0c1a24] ring-1 ring-[#00e5ff]/40' : 'border-[#222630] focus-within:border-[#00e5ff]/60 focus-within:ring-1 focus-within:ring-[#00e5ff]/30'}"
-        onpaste={handlePaste}
-      >
+  <!-- Anchored Hardware Console Deck (Bottom Command Bar) -->
+  <div class="absolute bottom-2 sm:bottom-4 inset-x-0 px-2 sm:px-4 pointer-events-none z-20">
+    <div 
+      role="region"
+      aria-label="Kotak Input Mengambang"
+      class="max-w-3xl mx-auto bg-[#E9E7E0] border border-[#C8C5BC] rounded-2xl p-2 sm:p-2.5 shadow-lg pointer-events-auto flex flex-col gap-2 {isDragging ? 'border-[#FF5500] ring-2 ring-[#FF5500]/30' : ''}"
+      onpaste={handlePaste}
+    >
         <!-- Uploaded Image Chips Preview -->
         {#if selectedImages.length > 0}
           <div class="flex flex-wrap gap-2 px-1 pt-0.5 pb-0.5">
             {#each selectedImages as img, idx}
-              <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#161920] border border-[#222630] text-xs text-zinc-300 shadow-sm animate-in fade-in zoom-in-95 duration-150">
-                <div class="relative w-6 h-6 shrink-0 rounded-lg overflow-hidden border border-[#222630] bg-[#0c0e12]">
+              <div class="relative group/chip flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[#FCFCFA] border border-[#C8C5BC] text-xs text-[#191B1D] shadow-2xs animate-in fade-in zoom-in-95 duration-150">
+                <div class="relative w-6 h-6 shrink-0 rounded-lg overflow-hidden border border-[#C8C5BC] bg-[#DEDBD2]">
                   <img src={img.localPreviewUrl || img.url} alt={img.name} class="w-full h-full object-cover" />
                   {#if img.isUploading}
-                    <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center">
-                      <Loader2 class="w-3 h-3 animate-spin text-[#00e5ff]" />
+                    <div class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center">
+                      <Loader2 class="w-3 h-3 animate-spin text-[#FF5500]" />
                     </div>
                   {/if}
                 </div>
                 <div class="flex flex-col min-w-0 pr-1">
-                  <span class="max-w-[120px] truncate text-[11px] text-zinc-200 font-medium">{img.name}</span>
+                  <span class="max-w-[120px] truncate text-[11px] text-[#191B1D] font-semibold">{img.name}</span>
                   {#if img.isUploading}
-                    <span class="text-[9px] text-[#00e5ff] font-mono animate-pulse leading-none">Mengunggah...</span>
+                    <span class="text-[9px] text-[#FF5500] font-mono animate-pulse leading-none">Mengunggah...</span>
                   {/if}
                 </div>
                 <button
                   type="button"
                   onclick={() => removeImage(idx)}
-                  class="p-0.5 rounded-full hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition cursor-pointer shrink-0"
+                  class="p-0.5 rounded-full hover:bg-rose-100 text-[#8C9097] hover:text-rose-600 transition cursor-pointer shrink-0"
                   title="Hapus gambar"
                 >
                   <X class="w-3 h-3" />
@@ -1007,20 +971,20 @@
 
         <!-- Voice Listening / Error Banner -->
         {#if isListening}
-          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-rose-500/10 border border-rose-500/25 text-[11px] text-rose-300 animate-in fade-in">
+          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-rose-50 border border-rose-300 text-[11px] text-rose-900 animate-in fade-in">
             <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping shrink-0"></span>
-            <span class="font-medium truncate">Mendengarkan suara... Silakan bicara (klik ikon Mic lagi jika sudah selesai)</span>
-            <button type="button" onclick={stopVoiceInput} class="ml-auto text-xs px-2 py-0.5 rounded bg-rose-500/20 hover:bg-rose-500/30 text-rose-200">Selesai</button>
+            <span class="font-bold truncate">Mendengarkan suara... Silakan bicara (klik ikon Mic lagi jika sudah selesai)</span>
+            <button type="button" onclick={stopVoiceInput} class="ml-auto text-xs px-2 py-0.5 rounded bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold">Selesai</button>
           </div>
         {:else if isTranscribingVoice}
-          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-[#0c1a24] border border-[#00e5ff]/30 text-[11px] text-[#00e5ff] animate-in fade-in">
-            <Loader2 class="w-3.5 h-3.5 animate-spin text-[#00e5ff] shrink-0" />
-            <span class="font-medium">Mentranskripsi suara ke teks...</span>
+          <div class="flex items-center gap-2 px-3 py-1.5 mb-2 rounded-xl bg-orange-50 border border-orange-300 text-[11px] text-[#FF5500] animate-in fade-in font-semibold">
+            <Loader2 class="w-3.5 h-3.5 animate-spin text-[#FF5500] shrink-0" />
+            <span>Mentranskripsi suara ke teks...</span>
           </div>
         {:else if voiceError}
-          <div class="flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-xl bg-amber-500/10 border border-amber-500/25 text-[11px] text-amber-300 animate-in fade-in">
+          <div class="flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-xl bg-amber-50 border border-amber-300 text-[11px] text-amber-900 animate-in fade-in">
             <span class="truncate">⚠️ {voiceError}</span>
-            <button type="button" onclick={() => voiceError = null} class="p-0.5 hover:text-white shrink-0"><X class="w-3 h-3" /></button>
+            <button type="button" onclick={() => voiceError = null} class="p-0.5 hover:text-black shrink-0"><X class="w-3 h-3" /></button>
           </div>
         {/if}
 
@@ -1030,11 +994,11 @@
             type="button"
             onclick={() => fileInputRef?.click()}
             disabled={isBusy || isUploadingImage || isListening}
-            class="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-[#00e5ff] hover:bg-[#161920] transition cursor-pointer shrink-0 disabled:opacity-40"
+            class="p-1.5 sm:p-2 rounded-xl text-[#5C6066] hover:text-[#191B1D] hover:bg-[#DEDBD2] transition cursor-pointer shrink-0 disabled:opacity-40"
             title="Lampirkan Gambar (atau paste / drag & drop)"
           >
             {#if isUploadingImage}
-              <Loader2 class="w-4 h-4 animate-spin text-[#00e5ff]" />
+              <Loader2 class="w-4 h-4 animate-spin text-[#FF5500]" />
             {:else}
               <Paperclip class="w-4 h-4" />
             {/if}
@@ -1045,13 +1009,13 @@
             type="button"
             onclick={toggleVoiceInput}
             disabled={isBusy || isUploadingImage || isTranscribingVoice}
-            class="relative p-1.5 sm:p-2 rounded-xl transition cursor-pointer shrink-0 disabled:opacity-40 {isListening ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-[0_0_12px_#f43f5e]' : (isTranscribingVoice ? 'bg-[#0c1a24] text-[#00e5ff] border border-[#00e5ff]/35 animate-pulse' : 'text-zinc-400 hover:text-rose-400 hover:bg-[#161920]')}"
+            class="relative p-1.5 sm:p-2 rounded-xl transition cursor-pointer shrink-0 disabled:opacity-40 {isListening ? 'bg-rose-100 text-rose-600 border border-rose-300' : (isTranscribingVoice ? 'bg-orange-100 text-[#FF5500] border border-orange-300 animate-pulse' : 'text-[#5C6066] hover:text-rose-600 hover:bg-[#DEDBD2]')}"
             title={isListening ? 'Klik untuk selesai bicara' : (isTranscribingVoice ? 'Mentranskripsi suara...' : 'Perintah Suara (Speech-to-Text)')}
           >
             {#if isTranscribingVoice}
-              <Loader2 class="w-4 h-4 animate-spin text-[#00e5ff]" />
+              <Loader2 class="w-4 h-4 animate-spin text-[#FF5500]" />
             {:else if isListening}
-              <Mic class="w-4 h-4 text-rose-400 animate-pulse" />
+              <Mic class="w-4 h-4 text-rose-600 animate-pulse" />
               <span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping"></span>
             {:else}
               <Mic class="w-4 h-4" />
@@ -1063,14 +1027,14 @@
             onkeydown={handleKeyDown}
             placeholder={isListening ? "Mendengarkan suara Anda..." : (isTranscribingVoice ? "Mentranskripsi suara..." : "Tulis instruksi atau perintah terminal (misal: npx prisma..., git status, !npm i)...")}
             rows="1"
-            class="flex-1 bg-transparent text-xs text-zinc-100 placeholder-zinc-500 outline-none resize-none px-1.5 sm:px-2 py-1.5 leading-relaxed"
+            class="flex-1 bg-[#FCFCFA] border border-[#C8C5BC] rounded-xl text-xs text-[#191B1D] placeholder-[#8C9097] outline-none resize-none px-2.5 py-1.5 leading-relaxed focus:border-[#FF5500]"
           ></textarea>
 
           <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {#if isBusy}
               <button
                 onclick={onCancelTask}
-                class="p-1.5 sm:p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-400 border border-rose-500/30 transition cursor-pointer"
+                class="p-1.5 sm:p-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-700 border border-rose-300 transition cursor-pointer"
                 title="Hentikan Task"
               >
                 <StopCircle class="w-4 h-4" />
@@ -1079,7 +1043,7 @@
 
             <button
               onclick={onClearMessages}
-              class="hidden sm:flex p-2 rounded-xl hover:bg-[#161920] text-zinc-500 hover:text-zinc-300 transition cursor-pointer"
+              class="hidden sm:flex p-2 rounded-xl hover:bg-[#DEDBD2] text-[#8C9097] hover:text-[#191B1D] transition cursor-pointer"
               title="Bersihkan Percakapan"
             >
               <Trash2 class="w-4 h-4" />
@@ -1088,7 +1052,7 @@
             <button
               onclick={handleSend}
               disabled={isBusy || isUploadingImage || (!promptInput.trim() && selectedImages.length === 0)}
-              class="btn-telemetry p-1.5 sm:p-2 rounded-xl text-white font-bold transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+              class="btn-safety p-1.5 sm:p-2 rounded-xl text-white font-bold transition cursor-pointer active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ArrowUp class="w-4 h-4" />
             </button>
@@ -1096,7 +1060,6 @@
         </div>
       </div>
     </div>
-  {/if}
 
   <!-- Hidden File Input for Image Uploads -->
   <input
@@ -1123,20 +1086,20 @@
       <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
       <div 
         role="document"
-        class="relative max-w-4xl max-h-[90vh] bg-zinc-950 border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+        class="relative max-w-4xl max-h-[90vh] bg-[#FCFCFA] border border-[#C8C5BC] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
         onclick={(e) => e.stopPropagation()}
         onkeydown={(e) => e.stopPropagation()}
       >
         <!-- Modal Header -->
-        <div class="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-zinc-900/80">
-          <span class="text-xs font-mono text-zinc-300 truncate max-w-md" title={fileName}>{fileName}</span>
+        <div class="flex items-center justify-between px-4 py-2.5 border-b border-[#C8C5BC] bg-[#E9E7E0]">
+          <span class="text-xs font-mono text-[#191B1D] font-bold truncate max-w-md" title={fileName}>{fileName}</span>
           <div class="flex items-center gap-2">
             <a
               href={downloadHref}
               download={fileName}
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-telemetry text-white font-medium text-xs transition cursor-pointer"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-safety text-white font-bold text-xs transition cursor-pointer"
               title="Download gambar ini ke perangkat Anda"
             >
               <Download class="w-3.5 h-3.5" />
@@ -1145,7 +1108,7 @@
             <button
               type="button"
               onclick={() => zoomImageUrl = null}
-              class="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-rose-400 transition"
+              class="p-1.5 rounded-lg hover:bg-rose-100 text-[#5C6066] hover:text-rose-600 transition cursor-pointer"
               title="Tutup"
             >
               <X class="w-4 h-4" />

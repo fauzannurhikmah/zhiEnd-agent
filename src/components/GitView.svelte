@@ -90,26 +90,26 @@
   }
 </script>
 
-<div class="h-full flex flex-col gap-3 overflow-y-auto lg:overflow-hidden p-3 sm:p-2 md:p-1 pb-20 md:pb-1">
-  <!-- Top Bar with Cinematic Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+<div class="h-full flex flex-col gap-3 overflow-y-auto lg:overflow-hidden p-3 sm:p-2 md:p-1 pb-20 md:pb-1 text-[#191B1D]">
+  <!-- Top Bar with Industrial Hardware Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#C8C5BC] pb-3">
     <div class="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-mono">
-      <div class="flex items-center gap-1.5 text-zinc-100 font-bold px-2.5 py-1 rounded-lg bg-zinc-900 border border-white/[0.06]">
-        <GitBranch class="w-3.5 h-3.5 text-sky-400" />
+      <div class="flex items-center gap-1.5 text-[#191B1D] font-bold px-2.5 py-1 rounded-lg bg-[#E9E7E0] border border-[#C8C5BC]">
+        <GitBranch class="w-3.5 h-3.5 text-[#FF5500]" />
         <span>{gitStatus?.branch || 'HEAD'}</span>
       </div>
 
       {#if gitStatus?.remoteUrl}
-        <a href={gitStatus.remoteUrl} target="_blank" class="text-zinc-400 hover:text-white flex items-center gap-1 truncate max-w-[180px] sm:max-w-sm">
+        <a href={gitStatus.remoteUrl} target="_blank" class="text-[#5C6066] hover:text-[#191B1D] flex items-center gap-1 truncate max-w-[180px] sm:max-w-sm">
           {gitStatus.remoteUrl} <ExternalLink class="w-2.5 h-2.5" />
         </a>
       {/if}
 
       <div class="flex items-center gap-1.5 text-[11px]">
-        <span class="px-2 py-0.5 rounded-full {gitStatus?.ahead ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-bold' : 'bg-zinc-900 text-zinc-500'}">
+        <span class="px-2 py-0.5 rounded-full {gitStatus?.ahead ? 'bg-amber-100 text-amber-900 border border-amber-300 font-bold' : 'bg-[#DEDBD2] text-[#5C6066]'}">
           {gitStatus?.ahead || 0} ahead
         </span>
-        <span class="px-2 py-0.5 rounded-full {gitStatus?.behind ? 'bg-rose-500/15 text-rose-300 border border-rose-500/30 font-bold' : 'bg-zinc-900 text-zinc-500'}">
+        <span class="px-2 py-0.5 rounded-full {gitStatus?.behind ? 'bg-rose-100 text-rose-900 border border-rose-300 font-bold' : 'bg-[#DEDBD2] text-[#5C6066]'}">
           {gitStatus?.behind || 0} behind
         </span>
       </div>
@@ -119,15 +119,15 @@
     <div class="flex items-center gap-2 self-start sm:self-auto">
       <button
         onclick={onPull}
-        class="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/[0.08] text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition cursor-pointer"
+        class="btn-hardware px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer"
         title="Git Pull"
       >
-        <Download class="w-3.5 h-3.5 text-zinc-400" /> Pull
+        <Download class="w-3.5 h-3.5 text-[#5C6066]" /> Pull
       </button>
 
       <button
         onclick={onRefresh}
-        class="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-white/[0.08] text-zinc-400 hover:text-white transition cursor-pointer"
+        class="btn-hardware p-2 rounded-xl text-[#5C6066] hover:text-[#191B1D] cursor-pointer"
         title="Refresh status"
       >
         <RotateCw class="w-3.5 h-3.5" />
@@ -135,7 +135,7 @@
 
       <button
         onclick={onPush}
-        class="btn-telemetry px-4 py-1.5 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95"
+        class="btn-safety px-4 py-1.5 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 transition cursor-pointer active:scale-95"
       >
         <UploadCloud class="w-3.5 h-3.5" /> Push to GitHub
       </button>
@@ -145,33 +145,33 @@
   <!-- Split View: Files & Diff -->
   <div class="flex-1 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-3 min-h-0">
     <!-- Left: Files & Commit -->
-    <div class="flex flex-col gap-3 min-h-0 bg-zinc-950/70 border border-white/[0.08] rounded-2xl p-3.5 shadow-xl">
-      <div class="flex items-center justify-between pb-2.5 border-b border-white/[0.06]">
-        <span class="text-xs font-bold text-zinc-200">
+    <div class="flex flex-col gap-3 min-h-0 bg-[#E9E7E0] border border-[#C8C5BC] rounded-2xl p-3.5 shadow-sm">
+      <div class="flex items-center justify-between pb-2.5 border-b border-[#C8C5BC]">
+        <span class="text-xs font-bold text-[#191B1D]">
           Changes ({gitStatus?.files?.length || 0})
         </span>
 
         <div class="flex items-center gap-2 text-[11px] font-mono">
-          <button onclick={() => onStageFiles(['.'])} class="text-indigo-400 hover:underline cursor-pointer font-semibold">Stage All</button>
-          <span class="text-zinc-600">•</span>
-          <button onclick={() => onUnstageFiles(['.'])} class="text-zinc-500 hover:underline cursor-pointer">Unstage</button>
+          <button onclick={() => onStageFiles(['.'])} class="text-[#FF5500] hover:underline cursor-pointer font-bold">Stage All</button>
+          <span class="text-[#C8C5BC]">•</span>
+          <button onclick={() => onUnstageFiles(['.'])} class="text-[#5C6066] hover:underline cursor-pointer font-medium">Unstage</button>
         </div>
       </div>
 
       <!-- Files list -->
       <div class="flex-1 overflow-y-auto flex flex-col gap-1 pr-1 font-mono text-xs">
         {#if !gitStatus?.files || gitStatus.files.length === 0}
-          <div class="flex flex-col items-center justify-center h-full text-zinc-500 text-xs py-8 gap-1.5 font-sans">
-            <Check class="w-6 h-6 text-emerald-400/80 mb-1" />
-            <span class="font-medium text-zinc-300">Working tree clean</span>
-            <span class="text-[11px] text-zinc-600">Tidak ada file yang berubah.</span>
+          <div class="flex flex-col items-center justify-center h-full text-[#5C6066] text-xs py-8 gap-1.5 font-sans">
+            <Check class="w-6 h-6 text-emerald-600 mb-1" />
+            <span class="font-bold text-[#191B1D]">Working tree clean</span>
+            <span class="text-[11px] text-[#8C9097]">Tidak ada file yang berubah.</span>
           </div>
         {:else}
           {#each gitStatus.files as file}
             <button
               type="button"
               onclick={() => handleSelectFile(file.path, file.staged)}
-              class="w-full flex items-center justify-between p-2 rounded-xl text-left transition cursor-pointer {selectedFile === file.path ? 'bg-indigo-600/20 border border-indigo-500/40 text-indigo-200 shadow-sm' : 'text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-200'}"
+              class="w-full flex items-center justify-between p-2 rounded-xl text-left transition cursor-pointer {selectedFile === file.path ? 'bg-[#FCFCFA] border border-[#C8C5BC] text-[#191B1D] font-bold shadow-xs' : 'text-[#5C6066] hover:bg-[#DEDBD2] hover:text-[#191B1D]'}"
             >
               <div class="flex items-center gap-2 min-w-0">
                 <span
@@ -191,10 +191,10 @@
                       else onStageFiles([file.path]);
                     }
                   }}
-                  class="cursor-pointer text-zinc-500 hover:text-white"
+                  class="cursor-pointer text-[#8C9097] hover:text-[#191B1D]"
                 >
                   {#if file.staged}
-                    <CheckSquare class="w-3.5 h-3.5 text-emerald-400" />
+                    <CheckSquare class="w-3.5 h-3.5 text-[#FF5500]" />
                   {:else}
                     <Square class="w-3.5 h-3.5" />
                   {/if}
@@ -202,7 +202,7 @@
                 <span class="truncate text-[11px]">{file.path}</span>
               </div>
 
-              <span class="text-[9px] uppercase px-1.5 py-0.2 rounded font-bold {file.status === 'untracked' ? 'bg-amber-500/20 text-amber-300' : (file.status === 'added' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-sky-500/20 text-sky-300')}">
+              <span class="text-[9px] uppercase px-1.5 py-0.2 rounded font-bold {file.status === 'untracked' ? 'bg-amber-100 text-amber-900 border border-amber-300' : (file.status === 'added' ? 'bg-emerald-100 text-emerald-900 border border-emerald-300' : 'bg-orange-100 text-orange-900 border border-orange-300')}">
                 {file.status[0]}
               </span>
             </button>
@@ -210,16 +210,16 @@
         {/if}
       </div>
 
-      <!-- Commit form with gradient CTA -->
-      <div class="border-t border-white/[0.06] pt-3 flex flex-col gap-2">
+      <!-- Commit form -->
+      <div class="border-t border-[#C8C5BC] pt-3 flex flex-col gap-2">
         <div class="flex items-center justify-between text-[11px]">
-          <span class="text-zinc-400 font-semibold">Commit message</span>
+          <span class="text-[#5C6066] font-bold">Commit message</span>
           <button
             onclick={handleAiCommit}
             disabled={isGeneratingAiMsg || !gitStatus?.files?.length}
-            class="text-indigo-400 hover:text-indigo-300 hover:underline flex items-center gap-1 font-semibold cursor-pointer disabled:opacity-40"
+            class="text-[#FF5500] hover:underline flex items-center gap-1 font-bold cursor-pointer disabled:opacity-40"
           >
-            <Sparkles class="w-3 h-3 text-indigo-400" />
+            <Sparkles class="w-3 h-3 text-[#FF5500]" />
             {isGeneratingAiMsg ? 'Merumuskan...' : 'AI Generate'}
           </button>
         </div>
@@ -228,13 +228,13 @@
           bind:value={commitMessage}
           placeholder="e.g. fix: update responsive layout navbar"
           rows="2"
-          class="bg-zinc-900/80 border border-zinc-800 focus:border-indigo-500 rounded-xl p-2 text-xs text-zinc-200 placeholder-zinc-500 outline-none resize-none transition"
+          class="bg-[#FCFCFA] border border-[#C8C5BC] focus:border-[#FF5500] rounded-xl p-2 text-xs text-[#191B1D] placeholder-[#8C9097] outline-none resize-none transition shadow-2xs"
         ></textarea>
 
         <button
           onclick={handleCommit}
           disabled={isCommitting || !commitMessage.trim()}
-          class="btn-telemetry w-full py-2 rounded-xl disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95"
+          class="btn-safety w-full py-2 rounded-xl disabled:opacity-40 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95"
         >
           {isCommitting ? 'Committing...' : 'Commit Changes'}
         </button>
@@ -242,17 +242,17 @@
     </div>
 
     <!-- Right: Diff Viewer -->
-    <div class="flex flex-col min-h-0 bg-zinc-950/80 border border-white/[0.08] rounded-2xl p-4 overflow-hidden shadow-xl">
-      <div class="flex items-center justify-between pb-2.5 border-b border-white/[0.06] text-xs font-mono">
-        <span class="text-zinc-200 font-semibold truncate">
+    <div class="flex flex-col min-h-0 bg-[#FCFCFA] border border-[#C8C5BC] rounded-2xl p-4 overflow-hidden shadow-sm">
+      <div class="flex items-center justify-between pb-2.5 border-b border-[#C8C5BC] text-xs font-mono">
+        <span class="text-[#191B1D] font-bold truncate">
           {selectedFile ? selectedFile : 'Pilih file untuk diff'}
         </span>
-        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#E9E7E0] text-[#5C6066] border border-[#C8C5BC] font-semibold">
           Diff Viewer
         </span>
       </div>
 
-      <div class="flex-1 overflow-y-auto pt-3 font-mono text-xs leading-relaxed text-zinc-300 whitespace-pre overflow-x-auto">
+      <div class="flex-1 overflow-y-auto pt-3 font-mono text-xs leading-relaxed text-[#191B1D] whitespace-pre overflow-x-auto">
         {activeDiff || 'Tidak ada perubahan yang dipilih.'}
       </div>
     </div>

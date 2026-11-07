@@ -25,24 +25,24 @@
     ></button>
 
     <!-- Modal Box -->
-    <div class="relative w-full max-w-sm rounded-2xl bg-zinc-900/95 border border-white/[0.08] shadow-2xl p-5 flex flex-col gap-4 text-center z-10 animate-in zoom-in-95 duration-200">
+    <div class="relative w-full max-w-sm rounded-2xl bg-[#FCFCFA] border border-[#C8C5BC] shadow-2xl p-5 flex flex-col gap-4 text-center z-10 animate-in zoom-in-95 duration-200 text-[#191B1D]">
       
       <!-- Close icon button -->
       <button 
         type="button"
         onclick={() => dialog.closeNotice()}
-        class="absolute top-3.5 right-3.5 p-1 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800 transition cursor-pointer"
+        class="absolute top-3.5 right-3.5 p-1 rounded-lg text-[#8C9097] hover:text-[#191B1D] hover:bg-[#E9E7E0] transition cursor-pointer"
         title="Tutup"
       >
         <X class="w-4 h-4" />
       </button>
 
-      <!-- Icon Header with Glow -->
+      <!-- Icon Header -->
       <div class="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center {
-        dialog.notice.type === 'success' ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.25)]' :
-        dialog.notice.type === 'error' ? 'bg-rose-500/15 border border-rose-500/30 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.25)]' :
-        dialog.notice.type === 'warning' ? 'bg-amber-500/15 border border-amber-500/30 text-amber-400 shadow-[0_0_20px_rgba(251,191,36,0.25)]' :
-        'bg-indigo-500/15 border border-indigo-500/30 text-indigo-400 shadow-[0_0_20px_rgba(99,102,241,0.25)]'
+        dialog.notice.type === 'success' ? 'bg-emerald-100 border border-emerald-300 text-emerald-800' :
+        dialog.notice.type === 'error' ? 'bg-rose-100 border border-rose-300 text-rose-800' :
+        dialog.notice.type === 'warning' ? 'bg-amber-100 border border-amber-300 text-amber-800' :
+        'bg-orange-100 border border-orange-300 text-[#FF5500]'
       }">
         {#if dialog.notice.type === 'success'}
           <CheckCircle2 class="w-6 h-6" />
@@ -57,21 +57,21 @@
 
       <!-- Title & Message -->
       <div class="space-y-1.5 px-2">
-        <h3 class="text-sm font-bold text-zinc-100">{dialog.notice.title}</h3>
-        <p class="text-xs text-zinc-400 leading-relaxed break-words whitespace-pre-wrap">{dialog.notice.message}</p>
+        <h3 class="text-sm font-bold text-[#191B1D]">{dialog.notice.title}</h3>
+        <p class="text-xs text-[#5C6066] leading-relaxed break-words whitespace-pre-wrap">{dialog.notice.message}</p>
       </div>
 
       <!-- Single Action Button (OK / Mengerti) -->
-      <div class="pt-2 border-t border-white/[0.06]">
+      <div class="pt-2 border-t border-[#C8C5BC]">
         <button
           type="button"
           onclick={() => dialog.closeNotice()}
           class="w-full py-2.5 px-4 rounded-xl {
-            dialog.notice.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/25' :
-            dialog.notice.type === 'error' ? 'bg-rose-600 hover:bg-rose-500 shadow-rose-600/25' :
-            dialog.notice.type === 'warning' ? 'bg-amber-600 hover:bg-amber-500 shadow-amber-600/25' :
-            'btn-telemetry'
-          } text-white text-xs font-bold shadow-lg transition cursor-pointer active:scale-95"
+            dialog.notice.type === 'success' ? 'bg-emerald-600 hover:bg-emerald-500' :
+            dialog.notice.type === 'error' ? 'bg-rose-600 hover:bg-rose-500' :
+            dialog.notice.type === 'warning' ? 'bg-amber-600 hover:bg-amber-500' :
+            'btn-safety'
+          } text-white text-xs font-bold shadow-sm transition cursor-pointer active:scale-95"
         >
           {dialog.notice.buttonText || 'Mengerti'}
         </button>

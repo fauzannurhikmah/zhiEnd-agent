@@ -657,13 +657,10 @@
   }
 </script>
 
-<div class="relative flex h-screen w-screen overflow-hidden bg-[#08090C] text-[#f1f3f7] antialiased font-sans selection:bg-[#00e5ff]/20 selection:text-[#00e5ff]">
-  <!-- Cold Carbon Precision Telemetry Lighting -->
+<div class="relative flex h-screen w-screen overflow-hidden bg-[#F4F3EE] text-[#191B1D] antialiased font-sans selection:bg-[#FF5500] selection:text-white">
+  <!-- Industrial Hardware Matrix Grid -->
   <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-    <!-- Focused Overhead Telemetry Beam -->
-    <div class="absolute inset-0 telemetry-beam opacity-60"></div>
-    <!-- Precision Matrix Dot Grid -->
-    <div class="absolute inset-0 cinematic-dot-grid opacity-40"></div>
+    <div class="absolute inset-0 hardware-grid opacity-30"></div>
   </div>
 
   <!-- Minimalist Clean Sidebar -->
@@ -694,39 +691,39 @@
   <div class="relative z-10 flex-1 flex flex-col min-w-0 overflow-hidden bg-transparent">
     <!-- Top Subtle Breadcrumb Header -->
     <header class="min-h-[50px] sm:h-11 pt-2 sm:pt-0 pb-1.5 sm:pb-0 px-3 sm:px-4 glass-header flex items-center justify-between shrink-0 select-none gap-2">
-      <div class="flex items-center gap-1.5 sm:gap-2 text-xs font-mono text-zinc-400 min-w-0">
+      <div class="flex items-center gap-1.5 sm:gap-2 text-xs font-mono text-[#5C6066] min-w-0">
         <!-- Mobile Sidebar Hamburger Toggle -->
         <button
           type="button"
           onclick={() => isMobileSidebarOpen = true}
-          class="md:hidden p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition cursor-pointer shrink-0"
+          class="md:hidden p-1.5 rounded-lg text-[#5C6066] hover:text-[#191B1D] hover:bg-black/[0.05] transition cursor-pointer shrink-0"
           title="Buka Menu Sidebar"
           aria-label="Buka Menu Sidebar"
         >
-          <Menu class="w-4 h-4 text-[#00e5ff]" />
+          <Menu class="w-4 h-4 text-[#FF5500]" />
         </button>
 
-        <span class="text-zinc-500 hidden sm:inline">zhiEnd</span>
-        <span class="text-zinc-600 hidden sm:inline">/</span>
+        <span class="text-[#8C9097] hidden sm:inline">zhiEnd</span>
+        <span class="text-[#C8C5BC] hidden sm:inline">/</span>
         {#if !config?.activeProject || config.activeProject.replace(/\\/g, '/').toLowerCase() === 'd:/works'}
-          <span class="text-[#00e5ff] font-semibold flex items-center gap-1.5 truncate text-[11px] sm:text-xs">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#00e5ff] shadow-[0_0_8px_rgba(0,229,255,0.7)] shrink-0"></span>
+          <span class="text-[#FF5500] font-bold flex items-center gap-1.5 truncate text-[11px] sm:text-xs">
+            <span class="w-2 h-2 rounded-full bg-[#FF5500] shrink-0"></span>
             <span class="truncate">D:\Works (Root)</span>
           </span>
         {:else}
-          <span class="text-zinc-200 truncate max-w-[100px] xs:max-w-[140px] sm:max-w-xs text-[11px] sm:text-xs font-medium">{config?.activeProject?.split(/\\|\//).pop()}</span>
+          <span class="text-[#191B1D] truncate max-w-[100px] xs:max-w-[140px] sm:max-w-xs text-[11px] sm:text-xs font-semibold">{config?.activeProject?.split(/\\|\//).pop()}</span>
           <button
             onclick={handleResetToRoot}
-            class="px-1.5 sm:px-2 py-0.5 rounded-md bg-zinc-800/80 hover:bg-rose-500/20 text-[9px] sm:text-[10px] text-zinc-400 hover:text-rose-300 border border-white/10 hover:border-rose-500/30 transition cursor-pointer shrink-0"
+            class="px-1.5 sm:px-2 py-0.5 rounded-md bg-[#DEDBD2] hover:bg-rose-100 text-[9px] sm:text-[10px] text-[#5C6066] hover:text-rose-600 border border-[#C8C5BC] transition cursor-pointer shrink-0"
             title="Clear Workspace (Reset ke Root D:\Works)"
           >
             Clear
           </button>
         {/if}
         {#if gitStatus?.isRepo}
-          <span class="text-zinc-600 hidden md:inline">/</span>
-          <span class="hidden md:flex items-center gap-1 text-zinc-400 truncate">
-            <GitBranch class="w-3 h-3 text-zinc-500" /> {gitStatus.branch}
+          <span class="text-[#C8C5BC] hidden md:inline">/</span>
+          <span class="hidden md:flex items-center gap-1 text-[#5C6066] truncate font-medium">
+            <GitBranch class="w-3 h-3 text-[#5C6066]" /> {gitStatus.branch}
           </span>
         {/if}
       </div>
@@ -735,53 +732,53 @@
         <!-- Quick Remote Indicators -->
         <button
           onclick={() => currentTab = 'remote'}
-          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer hover:scale-105 active:scale-95 {whatsappStatus?.status === 'connected' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 animate-pulse' : 'bg-zinc-900/60 border-white/[0.06] text-zinc-400')}"
+          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer active:scale-95 {whatsappStatus?.status === 'connected' ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-50 border-amber-300 text-amber-800 animate-pulse' : 'bg-[#E9E7E0] border-[#C8C5BC] text-[#5C6066]')}"
           title="WhatsApp Remote: {whatsappStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
         >
-          <MessageSquare class="w-3 h-3 text-emerald-400" />
+          <MessageSquare class="w-3 h-3 text-emerald-600" />
           <span class="hidden sm:inline">WA</span>
-          <span class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status === 'connected' ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-400 shadow-[0_0_6px_#fbbf24]' : 'bg-zinc-600')}"></span>
+          <span class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status === 'connected' ? 'bg-emerald-500' : (whatsappStatus?.status === 'qr_ready' ? 'bg-amber-500' : 'bg-[#8C9097]')}"></span>
         </button>
 
         <button
           onclick={() => currentTab = 'remote'}
-          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer hover:scale-105 active:scale-95 {telegramStatus?.status === 'running' ? 'bg-sky-500/10 border-sky-500/30 text-sky-300' : 'bg-zinc-900/60 border-white/[0.06] text-zinc-400'}"
+          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer active:scale-95 {telegramStatus?.status === 'running' ? 'bg-sky-50 border-sky-300 text-sky-800' : 'bg-[#E9E7E0] border-[#C8C5BC] text-[#5C6066]'}"
           title="Telegram Remote: {telegramStatus?.status || 'stopped'} (Klik untuk buka Remote Hub)"
         >
-          <Send class="w-3 h-3 text-sky-400" />
+          <Send class="w-3 h-3 text-sky-600" />
           <span class="hidden sm:inline">TG</span>
-          <span class="w-1.5 h-1.5 rounded-full {telegramStatus?.status === 'running' ? 'bg-sky-400 shadow-[0_0_6px_#38bdf8]' : 'bg-zinc-600'}"></span>
+          <span class="w-1.5 h-1.5 rounded-full {telegramStatus?.status === 'running' ? 'bg-sky-500' : 'bg-[#8C9097]'}"></span>
         </button>
 
         <!-- Quick Dev Server Widget -->
         {#if devServer.isRunning}
-          <div class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <div class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-300">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <a
               href={devServer.activePorts[0]?.url || 'http://localhost:3000'}
               target="_blank"
-              class="text-xs font-mono text-emerald-300 hover:text-emerald-200 flex items-center gap-1 font-semibold"
+              class="text-xs font-mono text-emerald-800 hover:text-emerald-950 flex items-center gap-1 font-semibold"
               title="Buka Aplikasi di Browser"
             >
               <span>{devServer.activePorts[0]?.port || 3000}</span>
-              <ExternalLink class="w-3 h-3 text-emerald-400" />
+              <ExternalLink class="w-3 h-3 text-emerald-600" />
             </a>
             <button
               onclick={handleToggleDevServer}
-              class="p-1 ml-0.5 rounded hover:bg-rose-500/20 text-rose-400/80 hover:text-rose-300 transition cursor-pointer"
+              class="p-1 ml-0.5 rounded hover:bg-rose-100 text-rose-600 transition cursor-pointer"
               title="Hentikan Dev Server"
             >
-              <Square class="w-3 h-3 fill-rose-400" />
+              <Square class="w-3 h-3 fill-rose-600" />
             </button>
           </div>
         {:else}
           <button
             onclick={handleToggleDevServer}
             disabled={isStartingDev}
-            class="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-white/10 hover:border-emerald-500/40 text-zinc-300 hover:text-emerald-300 text-xs font-medium transition cursor-pointer shadow-sm active:scale-95 disabled:opacity-50"
+            class="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-lg bg-[#E9E7E0] hover:bg-[#DEDBD2] border border-[#C8C5BC] text-[#191B1D] text-xs font-medium transition cursor-pointer active:scale-95 disabled:opacity-50"
             title="Jalankan Dev Server Project Aktif"
           >
-            <Play class="w-3 h-3 text-emerald-400 fill-emerald-400" />
+            <Play class="w-3 h-3 text-emerald-600 fill-emerald-600" />
             <span class="hidden sm:inline">{isStartingDev ? 'Memulai...' : 'Jalankan Dev'}</span>
             <span class="sm:hidden">{isStartingDev ? '...' : 'Dev'}</span>
           </button>
@@ -789,7 +786,7 @@
 
         <button
           onclick={handleExecutePush}
-          class="flex items-center gap-1 px-2.5 sm:px-3.5 py-1 rounded-lg bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition cursor-pointer active:scale-95"
+          class="btn-safety px-2.5 sm:px-3.5 py-1 rounded-lg text-white text-xs font-bold transition cursor-pointer active:scale-95"
           title="Git Push to GitHub"
         >
           <UploadCloud class="w-3.5 h-3.5" />
@@ -926,42 +923,42 @@
     </main>
 
     <!-- Bottom Navigation Bar for Mobile (< md) -->
-    <nav class="md:hidden h-14 bg-zinc-950/95 border-t border-white/[0.08] backdrop-blur-2xl flex items-center justify-around px-2 z-20 shrink-0 select-none">
+    <nav class="md:hidden h-14 bg-[#E9E7E0] border-t border-[#C8C5BC] flex items-center justify-around px-2 z-20 shrink-0 select-none">
       <button
         onclick={() => currentTab = 'chat'}
-        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer {currentTab === 'chat' ? 'text-indigo-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'}"
+        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer {currentTab === 'chat' ? 'text-[#FF5500] font-bold' : 'text-[#5C6066] hover:text-[#191B1D]'}"
       >
-        <Terminal class="w-4 h-4 {currentTab === 'chat' ? 'text-indigo-400' : 'text-zinc-500'}" />
+        <Terminal class="w-4 h-4 {currentTab === 'chat' ? 'text-[#FF5500]' : 'text-[#5C6066]'}" />
         <span class="text-[10px]">Coding</span>
       </button>
 
       <button
         onclick={() => currentTab = 'git'}
-        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer relative {currentTab === 'git' ? 'text-sky-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'}"
+        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer relative {currentTab === 'git' ? 'text-[#FF5500] font-bold' : 'text-[#5C6066] hover:text-[#191B1D]'}"
       >
-        <GitBranch class="w-4 h-4 {currentTab === 'git' ? 'text-sky-400' : 'text-zinc-500'}" />
+        <GitBranch class="w-4 h-4 {currentTab === 'git' ? 'text-[#FF5500]' : 'text-[#5C6066]'}" />
         <span class="text-[10px]">Source</span>
         {#if gitStatus?.files?.length}
-          <span class="absolute top-1.5 right-[30%] w-2 h-2 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50"></span>
+          <span class="absolute top-1.5 right-[30%] w-2 h-2 rounded-full bg-[#FF5500]"></span>
         {/if}
       </button>
 
       <button
         onclick={() => currentTab = 'remote'}
-        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer relative {currentTab === 'remote' ? 'text-emerald-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'}"
+        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer relative {currentTab === 'remote' ? 'text-[#FF5500] font-bold' : 'text-[#5C6066] hover:text-[#191B1D]'}"
       >
-        <TowerControl class="w-4 h-4 {currentTab === 'remote' ? 'text-emerald-400' : 'text-zinc-500'}" />
+        <TowerControl class="w-4 h-4 {currentTab === 'remote' ? 'text-[#FF5500]' : 'text-[#5C6066]'}" />
         <span class="text-[10px]">Remote</span>
         {#if whatsappStatus?.status === 'connected' || telegramStatus?.status === 'running'}
-          <span class="absolute top-1.5 right-[30%] w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="absolute top-1.5 right-[30%] w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
         {/if}
       </button>
 
       <button
         onclick={() => currentTab = 'files'}
-        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer {currentTab === 'files' ? 'text-amber-400 font-bold' : 'text-zinc-500 hover:text-zinc-300'}"
+        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer {currentTab === 'files' ? 'text-[#FF5500] font-bold' : 'text-[#5C6066] hover:text-[#191B1D]'}"
       >
-        <FolderTree class="w-4 h-4 {currentTab === 'files' ? 'text-amber-400' : 'text-zinc-500'}" />
+        <FolderTree class="w-4 h-4 {currentTab === 'files' ? 'text-[#FF5500]' : 'text-[#5C6066]'}" />
         <span class="text-[10px]">Files</span>
       </button>
     </nav>
