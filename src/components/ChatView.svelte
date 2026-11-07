@@ -2,6 +2,7 @@
   import type { ChatMessage, AppConfig, ChatSessionItem, PersonaItem } from '../types';
   import AvatarView from './AvatarView.svelte';
   import CrtRobotMascot from './CrtRobotMascot.svelte';
+  import PixelRobotAvatarBuddy from './PixelRobotAvatarBuddy.svelte';
   import { renderMarkdown } from '../services/markdown';
   import { api } from '../services/api';
   import { 
@@ -587,14 +588,57 @@
   </div>
 
   <!-- Content Viewport -->
-  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto {messages.length === 0 ? 'p-0 flex flex-col' : 'p-4 sm:p-6 pb-28 sm:pb-32 blueprint-cad-ground'}">
+  <div bind:this={messagesContainer} class="flex-1 overflow-y-auto relative {messages.length === 0 ? 'p-0 flex flex-col' : 'p-4 sm:p-6 pb-28 sm:pb-32'} blueprint-cad-ground">
+    
+    <!-- Subtle Futuristic Retro-HUD Background Matrix (Minimalist & Non-Distracting) -->
+    <div class="absolute inset-0 pointer-events-none select-none overflow-hidden z-0 font-stencil text-[#8C9097]/25">
+      <!-- Top-Right Coordinates & System Spec -->
+      <div class="absolute top-8 right-8 text-[9px] tracking-widest text-right hidden sm:block">
+        <div>[SYS_LAT: 38.88°N // LONG: 121.04°E]</div>
+        <div class="text-[8px] text-[#A8A59C]/20">REF_CAD_MATRIX :: REV-2.4.1</div>
+      </div>
+
+      <!-- Vertical Drafting Spec Left -->
+      <div class="absolute top-28 left-4 text-[9px] [writing-mode:vertical-lr] tracking-widest uppercase hidden md:block text-[#8C9097]/20">
+        <span>CHASSIS_SPEC // AL-6061 // TOLERANCE ±0.002</span>
+      </div>
+
+      <!-- Mid-Screen Floating Architectural Notes -->
+      <div class="absolute top-[42%] left-8 text-[8px] tracking-wider hidden lg:block text-[#A8A59C]/18 max-w-[200px] leading-relaxed">
+        SECTION_03 // CAD_GROUND_STABILITY: NOMINAL.<br />
+        BUFFER_STREAM_ISOLATION: 100% OK.
+      </div>
+
+      <!-- Vertical Telemetry Right -->
+      <div class="absolute top-52 right-5 text-[8px] [writing-mode:vertical-lr] tracking-widest uppercase hidden md:block text-[#8C9097]/20">
+        <span>FREQ: 144.00MHZ :: TX/RX CHANNEL NOMINAL</span>
+      </div>
+
+      <!-- Bottom Left System Spec -->
+      <div class="absolute bottom-24 left-8 text-[9px] tracking-wider hidden sm:block text-[#8C9097]/20">
+        <div>:: AUTONOMOUS AGENT RUNTIME PROTOCOL</div>
+        <div class="text-[8px] text-[#A8A59C]/18">BUS_ID: TX-3888 // ENCRYPT: PASS_THROUGH</div>
+      </div>
+
+      <!-- Bottom Right Telemetry Memory Register -->
+      <div class="absolute bottom-28 right-10 text-[8px] tracking-widest text-right hidden lg:block text-[#A8A59C]/18">
+        <div>REG_ADDR: 0x7FFE_4A2B_0019</div>
+        <div>HEAP: 42.8MB // LEAK: 0.000%</div>
+      </div>
+
+      <!-- Subtle Corner Drafting Crosshairs -->
+      <div class="absolute top-20 left-[20%] text-[10px] text-[#A8A59C]/18">✕</div>
+      <div class="absolute top-[55%] right-[18%] text-[10px] text-[#A8A59C]/18">✕</div>
+      <div class="absolute bottom-[35%] left-[26%] text-[10px] text-[#A8A59C]/18">+</div>
+    </div>
+
     {#if messages.length === 0}
       <!-- Cyber-Industrial Blueprint Grid (CIB-Grid) Full-Bleed Cockpit Deck -->
       <div 
         role="region"
         aria-label="Blueprint Cockpit Deck"
         onmousemove={handleDeckMouseMove}
-        class="w-full flex-1 flex blueprint-cad-ground relative min-h-0"
+        class="w-full flex-1 flex relative z-10 min-h-0"
       >
         <!-- Left Technical Drafting Rail (Exact ChainGPT Labs ✕ Gutter) -->
         <div class="hidden md:flex w-11 border-r border-[#D0CEC7] bg-[#ECEAE5] flex-col items-center justify-between py-4 shrink-0 select-none">
@@ -790,7 +834,7 @@
       </div>
     {:else}
       <!-- Active Messages Stream -->
-      <div class="max-w-3xl mx-auto flex flex-col gap-5 sm:gap-6 pb-20 sm:pb-24">
+      <div class="max-w-3xl mx-auto flex flex-col gap-5 sm:gap-6 pb-20 sm:pb-24 relative z-10">
         {#each messages as msg (msg.id)}
           {#if msg.sender === 'user'}
             {@const isLastUser = msg.id === lastUserMessageId}
@@ -917,13 +961,19 @@
           {:else}
             <!-- Agent Message with Custom Avatar & Traits -->
             <div class="flex items-start gap-2.5 sm:gap-3 group w-full">
-              <!-- Avatar Persona -->
-              <div class="shrink-0 mt-0.5">
+              <!-- Avatar Persona with Attached Mini Pixel Robot Companion -->
+              <div class="shrink-0 mt-0.5 flex flex-col items-center gap-1">
                 <AvatarView
                   avatar={activePersona?.avatar}
                   name={activePersona?.name}
                   size="md"
                   className="rounded-none border border-[#D0CEC7] shadow-2xs"
+                />
+                <PixelRobotAvatarBuddy
+                  isBusy={msg.isStreaming}
+                  isUserTyping={promptInput.trim().length > 0}
+                  messageText={msg.text}
+                  personaTraits={activePersona?.traits}
                 />
               </div>
 

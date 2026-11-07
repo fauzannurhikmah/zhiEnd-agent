@@ -17,11 +17,18 @@ description: "Distinctive UI/UX Design System for zhiEnd Agent. Opinionated 'Cyb
 > 2. **Neutral Input Focus Policy (Zero Ring / Zero Orange Halo)**:
 >    - When any input, textarea, or mechanical well is focused or active, there must be NO ring, NO outline, and NO border color change to orange (`#FF5500`).
 >    - The border strictly remains neutral `#D0CEC7` (`outline: none !important; box-shadow: none !important; border-color: #D0CEC7 !important; --tw-ring-color: transparent !important`).
-> 3. **Asymmetric CAD Blueprint Ground ("Random Grid tapi Ada Keteraturan")**:
->    - Large architectural drafting bands (navbar row, headline row, partner strip row, asymmetric column partitions) on authentic matte off-white concrete chassis (`#ECEAE5`).
->    - NO dense repetitive 24px polka-dot wallpaper or 120px graph paper tiles!
->    - Features sparse asymmetrical architectural drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), dedicated technical left rail (`✕`) and right rail (`◎`), and solid orange square intersection marks (`■`).
-> 4. **Chat Box UX & Last User Prompt Editing**:
+> 3. **CAD Dot Grid & Subtle Background HUD Matrix ("Random Grid tapi Ada Keteraturan")**:
+>    - Clean architectural concrete chassis (`#ECEAE5`) with a subtle 32px CAD dot matrix grid (`radial-gradient`), layered with sparse asymmetrical drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), dedicated technical left rail (`✕`) and right rail (`◎`).
+>    - Subtle futuristic retro-HUD background text: random technical specs, drafting notes, and telemetry registers placed horizontally and vertically (`writing-mode:vertical-lr`) at very low opacity (`text-[#8C9097]/25`, `pointer-events-none`) for atmospheric depth without distracting from chat content.
+> 4. **Mini Pixel Robot Avatar Companion (`PixelRobotAvatarBuddy`)**:
+>    - Chunky mini CRT monitor (36px x 28px) mounted right under each persona chat avatar.
+>    - **Super-Expressive & Reactive States**:
+>      - **Natural Blink**: Periodic eye-blink every 3.5–5s (`● ●` -> `─ ─` -> `● ●`).
+>      - **Typing Reaction**: When user types in chat input, eyes look down towards the chat box (`▼ ▼`).
+>      - **Loading / Thinking Reaction**: Confused expression (`? ~` / brain churning) while generating.
+>      - **Hover Reaction**: Warm happy smile (`^ ^` with mini smile arc `⌣`).
+>      - **Content & Mood Detection**: Dynamically reflects the tone of the message (playful/flirty `★ <`, hacker coding `■ ■`, success `★ ★`, error `✕ ✕`, curious `• ?`).
+> 5. **Chat Box UX & Last User Prompt Editing**:
 >    - The delete/purge button must NEVER be placed in the bottom chat input box next to DISPATCH (it belongs safely in the sub-header).
 >    - The latest user message bubble features an inline `[EDIT PROMPT]` trigger allowing the user to edit their last prompt in-place and resubmit, which automatically clears the old response and regenerates an updated AI response.
 > 3. **Technical Drafting Ornaments**:

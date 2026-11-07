@@ -48,10 +48,11 @@ The standards are modularly split into two specialized skills:
   - `--crt-void`: `#101114` (Deep charcoal CRT well for dot-matrix screens & viewfinder HUD boxes)
   - `--ink-basalt`: `#111315` (High-contrast basalt black for headlines, labels, and primary text)
   - `--stencil-slate`: `#60646C` (Technical stencil metadata, sub-labels, and timestamps)
-- **Asymmetric CAD Ground ("Random Grid tapi Ada Keteraturan")**:
-  - Large architectural layout bands (navbar row, hero headline row, partner strip row, asymmetric columns) on warm off-white concrete chassis (`#ECEAE5`).
-  - Prohibits dense repetitive 24px polka-dot wallpaper or 120px graph paper tiles.
-  - Employs sparse asymmetrical drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), dedicated left technical rail (`✕`), right rail (`◎`), and corner square marks (`■`).
+- **CAD Dot Grid & Subtle Background HUD Matrix ("Random Grid tapi Ada Keteraturan")**:
+  - Warm off-white concrete chassis (`#ECEAE5`) with subtle 32px CAD dot matrix grid, sparse asymmetrical drafting rules (4.5%, 24%, 76%, 95.5% vertical columns), left rail (`✕`), and right rail (`◎`).
+  - Subtle futuristic retro-HUD background text (coordinates, drafting notes, telemetry registers) placed horizontally and vertically (`writing-mode:vertical-lr`) at very low opacity (`text-[#8C9097]/25`, `pointer-events-none`) for atmospheric depth without user distraction.
+- **Mini Pixel Robot Avatar Companion (`PixelRobotAvatarBuddy`)**:
+  - Mounted directly under the persona avatar in chat. Super-expressive states: natural blink, looking down at chat box when typing, confused expression (`? ~`) during loading, smiling on hover (`^ ^`), and content mood matching (playful `★ <`, coding `■ ■`, success `★ ★`, error `✕ ✕`, curious `• ?`).
 - **Chat UX & Prompt Revision**:
   - The delete/purge button must NEVER be in the bottom input bar next to DISPATCH (it is safely kept in the sub-header).
   - The last user chat bubble features an inline `[EDIT PROMPT]` mode, enabling prompt updates and automated AI response regeneration.
