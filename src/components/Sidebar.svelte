@@ -242,78 +242,84 @@
     </div>
 
     <!-- Navigation with Cyber-Industrial Tactical Switches -->
-    <nav class="flex flex-col gap-1 pt-2 font-tech">
+    <nav class="flex flex-col gap-1.5 pt-2 font-tech">
       <button
         onclick={() => handleTabClick("chat")}
-        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
         'chat'
-          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-xs'
-          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] border border-transparent'}"
+          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-2xs'
+          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#FCFCFA]/80 hover:border-[#D0CEC7] border border-transparent'}"
       >
         <div class="flex items-center gap-2.5">
           <Terminal
-            class="w-4 h-4 {currentTab === 'chat'
+            class="w-4 h-4 transition-transform group-hover:scale-110 {currentTab === 'chat'
               ? 'text-[#FF5500]'
               : 'text-[#60646C]'}"
           />
-          <span>[01] // CODING AGENT</span>
+          <span class="tracking-wide">[01] // CODING AGENT</span>
         </div>
         {#if currentTab === 'chat'}
-          <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+          <span class="flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+          </span>
         {/if}
       </button>
 
       <button
         onclick={() => handleTabClick("git")}
-        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
         'git'
-          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-xs'
-          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] border border-transparent'}"
+          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-2xs'
+          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#FCFCFA]/80 hover:border-[#D0CEC7] border border-transparent'}"
       >
         <div class="flex items-center gap-2.5">
           <GitBranch
-            class="w-4 h-4 {currentTab === 'git'
+            class="w-4 h-4 transition-transform group-hover:scale-110 {currentTab === 'git'
               ? 'text-[#FF5500]'
               : 'text-[#60646C]'}"
           />
-          <span>[02] // SOURCE CONTROL</span>
+          <span class="tracking-wide">[02] // SOURCE CONTROL</span>
         </div>
         {#if gitStatus?.files?.length}
           <span
-            class="px-2 py-0.5 rounded-full bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] font-stencil text-[10px] font-bold"
+            class="px-2 py-0.5 rounded bg-[#FF5500]/15 border border-[#FF5500]/30 text-[#FF5500] font-stencil text-[10px] font-bold animate-pulse"
           >
             {gitStatus.files.length}
           </span>
         {:else if currentTab === 'git'}
-          <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+          <span class="flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+          </span>
         {/if}
       </button>
 
       <button
         onclick={() => handleTabClick("remote")}
-        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
         'remote'
-          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-xs'
-          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] border border-transparent'}"
+          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-2xs'
+          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#FCFCFA]/80 hover:border-[#D0CEC7] border border-transparent'}"
       >
         <div class="flex items-center gap-2.5">
           <TowerControl
-            class="w-4 h-4 {currentTab === 'remote'
+            class="w-4 h-4 transition-transform group-hover:scale-110 {currentTab === 'remote'
               ? 'text-[#FF5500]'
               : 'text-[#60646C]'}"
           />
-          <span>[03] // REMOTE HUB</span>
+          <span class="tracking-wide">[03] // REMOTE HUB</span>
         </div>
         <div class="flex items-center gap-1.5">
           {#if whatsappStatus?.status === "connected"}
             <span
-              class="w-2 h-2 rounded-full bg-emerald-500"
+              class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
               title="WhatsApp Connected"
             ></span>
           {/if}
           {#if telegramStatus?.status === "running"}
             <span
-              class="w-2 h-2 rounded-full bg-sky-500"
+              class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"
               title="Telegram Online"
             ></span>
           {/if}
@@ -325,21 +331,24 @@
 
       <button
         onclick={() => handleTabClick("files")}
-        class="flex items-center justify-between px-3 py-2 rounded-xl text-xs transition cursor-pointer {currentTab ===
+        class="flex items-center justify-between px-3 py-2 rounded-lg text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
         'files'
-          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-xs'
-          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#E5E3DD] border border-transparent'}"
+          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-2xs'
+          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#FCFCFA]/80 hover:border-[#D0CEC7] border border-transparent'}"
       >
         <div class="flex items-center gap-2.5">
           <FolderTree
-            class="w-4 h-4 {currentTab === 'files'
+            class="w-4 h-4 transition-transform group-hover:scale-110 {currentTab === 'files'
               ? 'text-[#FF5500]'
               : 'text-[#60646C]'}"
           />
-          <span>[04] // FILES & LOGS</span>
+          <span class="tracking-wide">[04] // FILES & LOGS</span>
         </div>
         {#if currentTab === 'files'}
-          <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+          <span class="flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+          </span>
         {/if}
       </button>
     </nav>

@@ -1209,29 +1209,38 @@
       <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
       <div 
         role="document"
-        class="relative max-w-4xl max-h-[90vh] bg-[#FCFCFA] border border-[#C8C5BC] rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+        class="relative max-w-4xl max-h-[90vh] bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl overflow-hidden shadow-2xl flex flex-col font-sans"
         onclick={(e) => e.stopPropagation()}
         onkeydown={(e) => e.stopPropagation()}
       >
+        <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
+        <span class="reg-dot reg-dot-tl"></span>
+        <span class="reg-dot reg-dot-tr"></span>
+        <span class="reg-dot reg-dot-bl"></span>
+        <span class="reg-dot reg-dot-br"></span>
+
         <!-- Modal Header -->
-        <div class="flex items-center justify-between px-4 py-2.5 border-b border-[#C8C5BC] bg-[#E9E7E0]">
-          <span class="text-xs font-mono text-[#191B1D] font-bold truncate max-w-md" title={fileName}>{fileName}</span>
+        <div class="flex items-center justify-between px-4 py-2.5 border-b border-[#D0CEC7] bg-[#E5E3DD] font-tech">
+          <div class="flex items-center gap-2 max-w-md truncate">
+            <span class="text-[#FF5500] font-bold">::</span>
+            <span class="text-xs font-bold font-stencil text-[#111315] truncate uppercase" title={fileName}>{fileName}</span>
+          </div>
           <div class="flex items-center gap-2">
             <a
               href={downloadHref}
               download={fileName}
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-safety text-white font-bold text-xs transition cursor-pointer"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg btn-safety text-white font-tech font-bold uppercase tracking-wider text-xs transition cursor-pointer active:scale-95 shadow-2xs"
               title="Download gambar ini ke perangkat Anda"
             >
               <Download class="w-3.5 h-3.5" />
-              <span>Download</span>
+              <span>DOWNLOAD</span>
             </a>
             <button
               type="button"
               onclick={() => zoomImageUrl = null}
-              class="p-1.5 rounded-lg hover:bg-rose-100 text-[#5C6066] hover:text-rose-600 transition cursor-pointer"
+              class="p-1.5 rounded-lg hover:bg-[#D0CEC7]/60 text-[#5C6066] hover:text-[#111315] transition cursor-pointer"
               title="Tutup"
             >
               <X class="w-4 h-4" />

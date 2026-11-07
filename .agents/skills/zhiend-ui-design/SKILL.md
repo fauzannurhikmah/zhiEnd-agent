@@ -183,16 +183,28 @@ The application relies on 5 deliberate, non-generic retro-futuristic font famili
 ## 6. Universal Modal & Overlay Consistency (0% Dark Mode Tolerance)
 
 All dialogs, alerts, and system prompts follow the **Cyber-Industrial Blueprint Grid** modal standard:
+- **Universal Modals Inventory**:
+  - `ProjectModal.svelte`: `:: WORKSPACE DIRECTORY // MATRIX`
+  - `SettingsModal.svelte`: `:: SYSTEM CONFIGURATION // PREFERENCES`
+  - `PersonaModal.svelte`: `:: AGENT PERSONA // MATRIX REGISTRY`
+  - `PinModal.svelte`: `:: ACCESS AUTHENTICATION // PIN`
+  - `ConfirmModal.svelte`: `:: PROTOCOL CONFIRMATION`
+  - `NoticeModal.svelte`: `:: SYSTEM DISPATCH NOTICE`
+  - `PushModal.svelte`: `:: GIT DEPLOYMENT // PUSH`
+  - `Lightbox Modal`: `:: TELEMETRY ASSET // LIGHTBOX INSPECT`
 - **Frame & Geometry**:
   - Backdrop: `bg-black/60 backdrop-blur-xs`
   - Modal Chassis: `bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl shadow-2xl relative overflow-hidden`
   - 4 Corner Registration Marks (`.reg-dot`): Orange square marks (`■`) anchored at all four corners.
 - **Header Seam**:
-  - Milled putty band (`bg-[#E5E3DD] border-b border-[#D0CEC7] px-4 py-3 flex items-center justify-between`)
-  - Prefix with technical dot-matrix identifier: `:: PROTOCOL CONFIRMATION`, `:: SYSTEM DISPATCH NOTICE`, or `:: GIT DEPLOYMENT // PUSH`.
+  - Milled putty band (`bg-[#E5E3DD] border-b border-[#D0CEC7] px-4 py-3 flex items-center justify-between font-tech`)
+  - Prefix with technical dot-matrix identifier, rotating crosshair (`.crosshair-box`), and close trigger.
+- **Segmented Navigation Bays**:
+  - In multi-tab modals (`ProjectModal`, `SettingsModal`, `PersonaModal`), tabs are styled as hardware channel selectors (`bg-[#E5E3DD] border-b border-[#D0CEC7]`).
+  - Active tab: `bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs`.
 - **Button System**:
-  - Neutral / Abort: Tactile putty button (`bg-[#E5E3DD] hover:bg-[#D0CEC7] text-[#111315] font-tech font-bold uppercase tracking-wider`).
-  - Action / Destructive: Laser orange or hazard crimson trigger (`btn-safety` / `bg-rose-600 hover:bg-rose-700 text-white`).
+  - Neutral / Abort: Tactile putty button (`btn-hardware` / `bg-[#E5E3DD] hover:bg-[#D0CEC7] text-[#111315] font-tech font-bold uppercase tracking-wider`).
+  - Action / Destructive: Laser orange or hazard crimson trigger (`btn-safety` / `bg-rose-600 hover:bg-rose-700 text-white font-tech font-bold uppercase tracking-wider`).
 - **Telemetry Shells (`PushModal.svelte`)**:
   - Embedded console stream resides inside a recessed CRT Void well (`#101114`) with scanline pattern, displaying phosphor green/emerald log text.
 
@@ -208,14 +220,20 @@ To make the retro-futuristic interface deeply tactile and alive without generic 
      - Clamped pupil shift: translates up to ±8px horizontally and ±6px vertically.
      - Natural idle drift: Micro-floats gently when the cursor is stationary.
      - Direct hover reaction: Dilates or transforms into happy arcs (`◠  ◠`).
-2. **Interactive Drafting Crosshair Reticle**:
-   - Header crosshairs (`.crosshair-box`) smoothly rotate 45° on hover (`hover:rotate-45 cursor-crosshair transition-transform duration-300`).
-3. **Dynamic Reticle HUD Coordinates**:
+2. **Reactive 4-Bar Equalizer & Telemetry Activity Meter (Navbar)**:
+   - Top navbar features a 4-bar hardware telemetry meter (`emerald`, `amber`, `safety orange`).
+   - Dynamically dances with real-time computational activity during agent task execution (`isAgentBusy`), and shifts levels tactfully on mouse hover.
+3. **Tactical Sidebar Switches with Live Status Diodes**:
+   - Sidebar navigation buttons feature mechanical keyboard depression (`active:scale-[0.98] active:translate-y-0.5`).
+   - Active tab features a softly pulsing green micro-LED diode (`bg-emerald-500 animate-pulse`) paired with the solid orange registration mark (`■`).
+4. **Interactive Drafting Crosshair Reticles**:
+   - Header and modal crosshairs (`.crosshair-box`) smoothly rotate 45° with tactile precision on hover (`hover:rotate-45 cursor-crosshair transition-transform duration-300`).
+5. **Dynamic Reticle HUD Coordinates**:
    - The telemetry viewfinder tracks deck cursor coordinates in real time: `┌ RETICLE [042, 180] ┐`.
    - Subtle scanning light wave pulses across the viewfinder screen.
-4. **Tactile Soundbank Bays**:
+6. **Tactile Soundbank Bays**:
    - Bottom macro bays feature physical keyboard switch kinetics (`active:scale-[0.98] active:translate-y-0.5 active:bg-[#E5E3DD] transition-all`).
-5. **Proportional Action Triggers & Navbar Rhythm**:
+7. **Proportional Action Triggers & Navbar Rhythm**:
    - Navbar action triggers maintain strict vertical proportion (`h-8` / 32px height) across all items.
    - Primary deployment triggers (e.g. `Push to GitHub`) are styled with `.btn-safety` at matching height, preserving visual balance.
 
@@ -225,9 +243,11 @@ To make the retro-futuristic interface deeply tactile and alive without generic 
 
 - [ ] Does the UI strictly embody the **Cyber-Industrial Blueprint Grid** aesthetic from the ChainGPT Labs reference?
 - [ ] Are 1px architectural grid seams (`#D0CEC7`) cleanly partitioning all modules?
-- [ ] Are corner registration dots (`■` orange squares) visible on key module bays and modals?
+- [ ] Are corner registration dots (`■` orange squares) visible on all module bays and all 7 modals?
 - [ ] Does the CRT robot mascot have an animated glowing bevel, reactive dot-matrix eyes, and **cursor pupil tracking**?
-- [ ] Are all modals (`ConfirmModal`, `NoticeModal`, `PushModal`) styled with corner registration dots and 0% dark mode on outer chassis?
+- [ ] Does the top navbar feature the reactive 4-bar activity equalizer meter?
+- [ ] Do sidebar buttons possess tactile click depression and green pulsing LED diodes?
+- [ ] Are all modals (`ProjectModal`, `SettingsModal`, `PersonaModal`, `PinModal`, `ConfirmModal`, `NoticeModal`, `PushModal`) styled with corner registration dots and 0% dark mode on outer chassis?
 - [ ] Are action buttons (including navbar Push button) balanced and proportional at `h-8`?
 - [ ] Is the 4-bay partner-style horizontal macro strip present on the dashboard?
 - [ ] Is the canvas free of dark mode, neon purple/blue, and generic SaaS slop?

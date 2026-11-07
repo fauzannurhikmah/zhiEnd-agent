@@ -872,14 +872,24 @@
         {/if}
       </div>
 
-      <!-- Center Blueprint Telemetry Marker (ChainGPT Labs Style) -->
+      <!-- Center Blueprint Telemetry Marker & Reactive Equalizer Activity Meter -->
       <div
-        class="hidden lg:flex items-center gap-2 text-[10px] font-stencil text-[#8C9097]"
+        class="hidden lg:flex items-center gap-2.5 text-[10px] font-stencil text-[#8C9097] px-2.5 py-1 rounded-lg bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xs group hover:border-[#FF5500] transition-colors"
+        title="Bus Activity Telemetry & Audio/Runtime Meter"
       >
-        <span class="text-[#FF5500]">::</span>
-        <span>COORD: 0x3888</span>
+        <span class="text-[#FF5500] font-bold">::</span>
+        <span>BUS: NOMINAL</span>
         <span class="text-[#D0CEC7]">|</span>
-        <span class="text-emerald-700 font-bold">BUS: NOMINAL</span>
+        
+        <!-- Interactive 4-Bar Hardware Activity Equalizer -->
+        <div class="flex items-end gap-0.5 h-3.5 w-6 pb-0.5" aria-label="Runtime Telemetry Equalizer">
+          <span class="w-1 bg-emerald-500 rounded-2xs transition-all duration-300 {isAgentBusy ? 'h-3 animate-bounce' : 'h-1.5 group-hover:h-2.5'}"></span>
+          <span class="w-1 bg-emerald-500 rounded-2xs transition-all duration-300 {isAgentBusy ? 'h-2 animate-pulse' : 'h-2.5 group-hover:h-3'}"></span>
+          <span class="w-1 bg-[#FFAA00] rounded-2xs transition-all duration-300 {isAgentBusy ? 'h-3 animate-ping' : 'h-1 group-hover:h-2'}"></span>
+          <span class="w-1 bg-[#FF5500] rounded-2xs transition-all duration-300 {isAgentBusy ? 'h-3.5 animate-bounce' : 'h-2 group-hover:h-1'}"></span>
+        </div>
+        
+        <span class="text-[#5C6066]">0x3888</span>
       </div>
 
       <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">

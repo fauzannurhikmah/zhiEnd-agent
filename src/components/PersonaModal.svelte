@@ -415,56 +415,62 @@
 
 {#if isOpen}
   <div
-    class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
+    class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200"
   >
     <div
-      class="w-full max-w-2xl bg-[#FCFCFA] border border-[#D0CEC7] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] font-sans animate-in zoom-in-95 duration-200"
+      class="w-full max-w-2xl bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[85vh] font-sans animate-in zoom-in-95 duration-200 relative"
     >
-      <!-- Header -->
+      <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
+      <span class="reg-dot reg-dot-tl"></span>
+      <span class="reg-dot reg-dot-tr"></span>
+      <span class="reg-dot reg-dot-bl"></span>
+      <span class="reg-dot reg-dot-br"></span>
+
+      <!-- Top Architectural Drafting Header Seam -->
       <div
-        class="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-[#D0CEC7] flex items-center justify-between shrink-0 bg-[#ECEAE5]"
+        class="px-4 py-3 border-b border-[#D0CEC7] flex items-center justify-between shrink-0 bg-[#ECEAE5] font-tech"
       >
-        <div class="flex items-center gap-2.5">
-          <div
-            class="w-8 h-8 rounded-lg bg-[#FF5500] text-white flex items-center justify-center font-bold shadow-xs"
-          >
-            <Bot class="w-4 h-4" />
-          </div>
-          <div>
-            <h3 class="text-sm sm:text-base font-bold text-[#191B1D] tracking-tight uppercase font-mono">
-              Karakter & Persona AI
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="crosshair-box w-6 h-6 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair shrink-0"></span>
+          <div class="min-w-0">
+            <h3 class="text-xs sm:text-sm font-bold text-[#111315] tracking-wider flex items-center gap-2 truncate uppercase">
+              <span>:: AGENT PERSONA // MATRIX REGISTRY</span>
             </h3>
-            <p class="text-[11px] text-[#5C6066]">
-              Pilih karakter atau tautkan model AI (OpenAI, Grok, Qwen, DeepSeek, Gemini)
+            <p class="text-[10px] text-[#5C6066] font-grotesk truncate">
+              Katalog persona kecerdasan buatan, model runtime terintegrasi & system prompt
             </p>
           </div>
         </div>
 
-        <button
-          type="button"
-          onclick={onClose}
-          class="p-1.5 rounded-lg text-[#5C6066] hover:text-[#191B1D] hover:bg-[#E5E3DD] transition cursor-pointer"
-        >
-          <X class="w-4 h-4" />
-        </button>
+        <div class="flex items-center gap-2 shrink-0">
+          <span class="hidden sm:inline font-stencil text-[10px] text-[#8C9097]">REGISTRY: {personas.length} UNITS</span>
+          <button
+            type="button"
+            onclick={onClose}
+            class="p-1.5 rounded-lg text-[#5C6066] hover:text-[#111315] hover:bg-[#D0CEC7]/60 transition-colors cursor-pointer"
+            title="Tutup Registry"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      <!-- Navigation Tabs -->
+      <!-- Segmented Cyber-Industrial Navigation Bays -->
       <div
-        class="flex items-center px-4 sm:px-6 pt-2.5 border-b border-[#D0CEC7] text-xs gap-3 sm:gap-4 shrink-0 bg-[#ECEAE5]"
+        class="flex items-center px-3 sm:px-4 py-2 border-b border-[#D0CEC7] text-xs font-tech font-bold gap-2 shrink-0 bg-[#E5E3DD]"
       >
         <button
           type="button"
           onclick={() => {
             activeTab = "list";
           }}
-          class="pb-2.5 sm:pb-3 px-2.5 sm:px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
+          class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 uppercase tracking-wider transition-all active:scale-95 cursor-pointer {activeTab ===
           'list'
-            ? 'border-[#FF5500] text-[#FF5500] font-bold'
-            : 'border-transparent text-[#5C6066] hover:text-[#191B1D]'}"
+            ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs'
+            : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
         >
           <Bot class="w-3.5 h-3.5" />
-          <span>Daftar Persona ({personas.length})</span>
+          <span>DAFTAR PERSONA ({personas.length})</span>
         </button>
 
         <button
@@ -475,23 +481,23 @@
             }
             activeTab = "create";
           }}
-          class="pb-2.5 sm:pb-3 px-2.5 sm:px-3 border-b-2 font-medium transition cursor-pointer flex items-center gap-1.5 {activeTab ===
+          class="px-3 py-1.5 rounded-lg flex items-center gap-1.5 uppercase tracking-wider transition-all active:scale-95 cursor-pointer {activeTab ===
           'create'
-            ? 'border-[#FF5500] text-[#FF5500] font-bold'
-            : 'border-transparent text-[#5C6066] hover:text-[#191B1D]'}"
+            ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#D0CEC7] shadow-2xs'
+            : 'text-[#5C6066] hover:text-[#111315] hover:bg-[#ECEAE5]'}"
         >
           {#if editingPersonaId}
             <Pencil class="w-3.5 h-3.5 text-[#FF5500]" />
-            <span>Edit Persona</span>
+            <span>EDIT PERSONA</span>
           {:else}
             <Plus class="w-3.5 h-3.5" />
-            <span>Buat Persona Baru</span>
+            <span>BUAT PERSONA BARU</span>
           {/if}
         </button>
       </div>
 
       <!-- Content Area -->
-      <div class="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-3 sm:space-y-4 bg-[#F4F3EE]">
+      <div class="flex-1 overflow-y-auto p-3.5 sm:p-5 space-y-3 sm:space-y-4 bg-[#ECEAE5]">
         {#if activeTab === "list"}
           <!-- Personas Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -499,9 +505,9 @@
               {@const isSelected = activePersonaId === p.id}
               {@const modelInfo = getModelDetails(p.preferred_model)}
               <div
-                class="p-3 sm:p-3.5 rounded-xl border transition flex flex-col justify-between gap-3 group relative {isSelected
-                  ? 'bg-orange-50/70 border-[#FF5500] shadow-xs'
-                  : 'bg-[#FCFCFA] hover:bg-[#ECEAE5]/60 border-[#D0CEC7] hover:border-[#8C9097]'}"
+                class="p-3 sm:p-3.5 rounded-xl border transition-all flex flex-col justify-between gap-3 group relative active:scale-[0.99] shadow-2xs {isSelected
+                  ? 'bg-[#FCFCFA] border-[#FF5500]'
+                  : 'bg-[#FCFCFA] hover:border-[#A8A59C] border-[#D0CEC7]'}"
               >
                 <div class="flex flex-col gap-2.5">
                   <div class="flex items-start justify-between gap-2">
@@ -511,24 +517,24 @@
                         avatar={p.avatar}
                         name={p.name}
                         size="md"
-                        className="rounded-xl shrink-0 ring-1 ring-[#D0CEC7]"
+                        className="rounded-lg shrink-0 ring-1 ring-[#D0CEC7]"
                       />
 
                       <div class="flex flex-col min-w-0 flex-1">
                         <h4
-                          class="text-xs font-bold text-[#191B1D] flex items-center gap-1.5 min-w-0"
+                          class="text-xs font-bold text-[#111315] font-tech uppercase tracking-wide flex items-center gap-1.5 min-w-0"
                         >
-                          <span class="truncate font-bold">{p.name}</span>
+                          <span class="truncate">{p.name}</span>
                           {#if p.is_default}
                             <span
-                              class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] shrink-0 font-bold"
-                              >Bawaan</span
+                              class="text-[9px] font-stencil px-1.5 py-0.5 rounded bg-[#ECEAE5] text-[#5C6066] border border-[#D0CEC7] shrink-0 font-bold"
+                              >DEFAULT</span
                             >
                           {/if}
                         </h4>
 
                         <!-- Model AI Badge with Provider color -->
-                        <div class="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono border {modelInfo.color} w-fit max-w-full font-bold">
+                        <div class="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[9px] font-stencil border {modelInfo.color} w-fit max-w-full font-bold">
                           <span class="w-1.5 h-1.5 rounded-full {modelInfo.dotColor} shrink-0"></span>
                           <span class="truncate">{modelInfo.label}: {modelInfo.name}</span>
                         </div>
@@ -540,7 +546,7 @@
                       <button
                         type="button"
                         onclick={() => startEditPersona(p)}
-                        class="p-1 rounded-lg text-[#5C6066] hover:text-[#FF5500] hover:bg-orange-100 transition cursor-pointer"
+                        class="p-1 rounded text-[#5C6066] hover:text-[#FF5500] hover:bg-[#E5E3DD] transition cursor-pointer"
                         title="Edit persona ini"
                       >
                         <Pencil class="w-3.5 h-3.5" />
@@ -550,7 +556,7 @@
                         <button
                           type="button"
                           onclick={() => onDeletePersona(p.id)}
-                          class="p-1 rounded-lg text-[#5C6066] hover:text-rose-600 hover:bg-rose-100 transition cursor-pointer"
+                          class="p-1 rounded text-[#5C6066] hover:text-rose-600 hover:bg-rose-100 transition cursor-pointer"
                           title="Hapus persona custom ini"
                         >
                           <Trash2 class="w-3.5 h-3.5" />
@@ -562,15 +568,15 @@
                   <!-- Traits Badge if present -->
                   {#if p.traits}
                     <div
-                      class="text-[10px] text-[#5C6066] font-mono px-2 py-1 rounded-lg bg-[#ECEAE5] border border-[#D0CEC7] truncate font-bold"
+                      class="text-[10px] text-[#5C6066] font-stencil px-2 py-1 rounded bg-[#E5E3DD] border border-[#D0CEC7] truncate font-bold"
                     >
-                      ✨ {p.traits}
+                      :: {p.traits}
                     </div>
                   {/if}
 
                   <!-- Preview System Prompt -->
                   <p
-                    class="text-[11px] text-[#5C6066] line-clamp-2 leading-relaxed bg-[#FCFCFA] p-2 rounded-xl border border-[#D0CEC7]"
+                    class="text-[11px] text-[#5C6066] font-grotesk line-clamp-2 leading-relaxed bg-[#FCFCFA] p-2 rounded-lg border border-[#D0CEC7]"
                   >
                     {p.system_prompt}
                   </p>
@@ -583,15 +589,15 @@
                     onSelectPersona(p);
                     onClose();
                   }}
-                  class="w-full py-1.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer {isSelected
-                    ? 'bg-orange-100 text-[#FF5500] border border-[#FF5500]'
+                  class="w-full py-1.5 rounded-lg text-xs font-tech font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95 {isSelected
+                    ? 'bg-[#FCFCFA] text-[#FF5500] border border-[#FF5500] shadow-2xs'
                     : 'btn-hardware'}"
                 >
                   {#if isSelected}
-                    <Check class="w-3 h-3 text-[#FF5500]" />
-                    <span>Aktif Digunakan</span>
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>AKTIF DIGUNAKAN</span>
                   {:else}
-                    <span>Gunakan Persona Ini</span>
+                    <span>GUNAKAN PERSONA INI</span>
                   {/if}
                 </button>
               </div>
@@ -955,9 +961,9 @@
               <button
                 type="button"
                 onclick={cancelForm}
-                class="btn-hardware px-4 py-2 rounded-xl text-[#191B1D] text-xs font-bold transition cursor-pointer shadow-xs"
+                class="btn-hardware px-4 py-2 rounded-lg text-[#111315] text-xs font-tech font-bold uppercase tracking-wider transition cursor-pointer shadow-2xs active:scale-95"
               >
-                Batal
+                BATAL
               </button>
 
               <button
@@ -966,14 +972,14 @@
                 disabled={isSubmitting ||
                   !newName.trim() ||
                   !newSystemPrompt.trim()}
-                class="btn-safety px-4 py-2 rounded-xl disabled:opacity-40 text-white text-xs font-bold shadow-xs transition cursor-pointer active:scale-95 flex items-center gap-1.5"
+                class="btn-safety px-4 py-2 rounded-lg disabled:opacity-40 text-white text-xs font-tech font-bold uppercase tracking-wider shadow-2xs transition cursor-pointer active:scale-95 flex items-center gap-1.5"
               >
                 {#if editingPersonaId}
                   <Save class="w-3.5 h-3.5" />
-                  <span>Simpan Perubahan</span>
+                  <span>SIMPAN PERUBAHAN</span>
                 {:else}
                   <Plus class="w-3.5 h-3.5" />
-                  <span>Simpan Persona</span>
+                  <span>SIMPAN PERSONA</span>
                 {/if}
               </button>
             </div>
