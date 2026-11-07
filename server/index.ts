@@ -843,9 +843,10 @@ app.post('/api/agent/chat', async (c) => {
     : getOrCreateDefaultSession(workingDir);
   const targetSessionId = targetSession.id;
 
+  const effectivePersonaId = body.personaId || targetSession?.persona_id || 'persona-default';
   let sessionPersonaModel: string | undefined;
-  if (targetSession?.persona_id) {
-    const p = getPersonaById(targetSession.persona_id);
+  if (effectivePersonaId) {
+    const p = getPersonaById(effectivePersonaId);
     if (p?.preferred_model) sessionPersonaModel = p.preferred_model;
   }
 
@@ -863,6 +864,7 @@ app.post('/api/agent/chat', async (c) => {
     conversationId: body.conversationId || targetSession.conversation_id || undefined,
     continueLast: body.continueLast,
     sessionId: targetSessionId,
+    personaId: effectivePersonaId,
     images: Array.isArray(body.images) ? body.images : []
   }).catch(err => {
     console.error('Agent execution error:', err);

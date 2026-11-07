@@ -225,8 +225,8 @@ export const api = {
     return res.json();
   },
 
-  async sendChat(prompt: string, model?: string, conversationId?: string, sessionId?: string, images?: string[]): Promise<{ success: boolean; error?: string }> {
-    const payload = JSON.stringify({ prompt, model, conversationId, sessionId, images: images || [] });
+  async sendChat(prompt: string, model?: string, conversationId?: string, sessionId?: string, images?: string[], personaId?: string): Promise<{ success: boolean; error?: string }> {
+    const payload = JSON.stringify({ prompt, model, conversationId, sessionId, images: images || [], personaId });
     const maxAttempts = 4;
     let lastError: any = null;
 

@@ -350,8 +350,10 @@
     try {
       const res = await api.getChatMessages(sessionId);
       if (res.messages && res.messages.length > 0) {
+        const session = chatSessions.find((s) => s.id === sessionId);
         messages = res.messages.map((m: any) => {
-          const matchedPersona = m.persona_id ? personas.find((p) => p.id === m.persona_id) : null;
+          const effectivePersonaId = m.persona_id || session?.persona_id || 'persona-default';
+          const matchedPersona = (effectivePersonaId && personas.find((p) => p.id === effectivePersonaId)) || personas.find((p) => p.is_default) || personas[0];
           return {
             id: m.id,
             sender: m.sender,
@@ -362,9 +364,9 @@
             thought: m.thought || "",
             images: m.images || [],
             isStreaming: false,
-            persona_id: m.persona_id || null,
-            persona_name: matchedPersona?.name || null,
-            persona_avatar: matchedPersona?.avatar || null,
+            persona_id: effectivePersonaId,
+            persona_name: matchedPersona?.name || 'ZHIEND CORE',
+            persona_avatar: matchedPersona?.avatar || '🤖',
             persona_traits: matchedPersona?.traits || null,
             model_used: m.model_used || null,
           };
@@ -733,6 +735,7 @@
         undefined,
         activeSessionId || undefined,
         images,
+        activePersona?.id,
       );
     } catch (e: any) {
       isAgentBusy = false;

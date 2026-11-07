@@ -923,7 +923,7 @@
             </div>
           {:else}
             <!-- Agent Message with Custom Avatar & Traits (Persisted per message history) -->
-            {@const msgPersona = (msg.persona_id && personas?.find(p => p.id === msg.persona_id)) || (msg.persona_name ? { id: msg.persona_id, name: msg.persona_name, avatar: msg.persona_avatar, traits: msg.persona_traits, preferred_model: msg.model_used } : activePersona)}
+            {@const msgPersona = (msg.persona_id && personas?.find(p => p.id === msg.persona_id)) || (msg.persona_name ? { id: msg.persona_id, name: msg.persona_name, avatar: msg.persona_avatar, traits: msg.persona_traits, preferred_model: msg.model_used } : null) || personas?.find(p => p.id === (msg.persona_id || 'persona-default')) || personas?.find(p => p.is_default) || personas?.[0]}
             <div class="flex items-start gap-2.5 sm:gap-3 group w-full">
               <!-- Avatar Persona with Attached Mini Pixel Robot Companion -->
               <div class="shrink-0 mt-0.5 flex flex-col items-center gap-1">
