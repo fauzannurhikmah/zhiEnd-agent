@@ -182,21 +182,52 @@ The application relies on 5 deliberate, non-generic retro-futuristic font famili
 
 ## 6. Universal Modal & Overlay Consistency (0% Dark Mode Tolerance)
 
-- All modals (`ProjectModal`, `SettingsModal`, `PersonaModal`, etc.) follow the exact same blueprint matrix:
-  - Backdrop: `bg-black/60 backdrop-blur-sm`
-  - Modal Shell: `bg-[#FCFCFA] border border-[#D0CEC7] rounded-2xl shadow-2xl`
-  - Header & Tab Bays: `bg-[#E5E3DD] border-b border-[#D0CEC7]`
-  - Stencil Accent: `w-8 h-8 rounded-lg bg-[#FF5500] text-white font-bold`
-  - Input Wells: `bg-[#FCFCFA] border border-[#D0CEC7] focus:border-[#FF5500]`
-  - Corner Registration Dots: Orange square marks on modal panels.
+All dialogs, alerts, and system prompts follow the **Cyber-Industrial Blueprint Grid** modal standard:
+- **Frame & Geometry**:
+  - Backdrop: `bg-black/60 backdrop-blur-xs`
+  - Modal Chassis: `bg-[#FCFCFA] border border-[#D0CEC7] rounded-xl shadow-2xl relative overflow-hidden`
+  - 4 Corner Registration Marks (`.reg-dot`): Orange square marks (`■`) anchored at all four corners.
+- **Header Seam**:
+  - Milled putty band (`bg-[#E5E3DD] border-b border-[#D0CEC7] px-4 py-3 flex items-center justify-between`)
+  - Prefix with technical dot-matrix identifier: `:: PROTOCOL CONFIRMATION`, `:: SYSTEM DISPATCH NOTICE`, or `:: GIT DEPLOYMENT // PUSH`.
+- **Button System**:
+  - Neutral / Abort: Tactile putty button (`bg-[#E5E3DD] hover:bg-[#D0CEC7] text-[#111315] font-tech font-bold uppercase tracking-wider`).
+  - Action / Destructive: Laser orange or hazard crimson trigger (`btn-safety` / `bg-rose-600 hover:bg-rose-700 text-white`).
+- **Telemetry Shells (`PushModal.svelte`)**:
+  - Embedded console stream resides inside a recessed CRT Void well (`#101114`) with scanline pattern, displaying phosphor green/emerald log text.
 
 ---
 
-## 7. Pre-Delivery Checklist
+## 7. Interactive Micro/Macro Animations & Tactile Kinetics
+
+To make the retro-futuristic interface deeply tactile and alive without generic AI animations, use deliberate purposeful kinetics:
+
+1. **Cursor Pupil Tracking (CRT Robot Mascot)**:
+   - The robot mascot's dot-matrix eyes reactively track the user's cursor across the entire screen:
+     - Vector offset: `dx = cursorX - monitorCenterX`, `dy = cursorY - monitorCenterY`.
+     - Clamped pupil shift: translates up to ±8px horizontally and ±6px vertically.
+     - Natural idle drift: Micro-floats gently when the cursor is stationary.
+     - Direct hover reaction: Dilates or transforms into happy arcs (`◠  ◠`).
+2. **Interactive Drafting Crosshair Reticle**:
+   - Header crosshairs (`.crosshair-box`) smoothly rotate 45° on hover (`hover:rotate-45 cursor-crosshair transition-transform duration-300`).
+3. **Dynamic Reticle HUD Coordinates**:
+   - The telemetry viewfinder tracks deck cursor coordinates in real time: `┌ RETICLE [042, 180] ┐`.
+   - Subtle scanning light wave pulses across the viewfinder screen.
+4. **Tactile Soundbank Bays**:
+   - Bottom macro bays feature physical keyboard switch kinetics (`active:scale-[0.98] active:translate-y-0.5 active:bg-[#E5E3DD] transition-all`).
+5. **Proportional Action Triggers & Navbar Rhythm**:
+   - Navbar action triggers maintain strict vertical proportion (`h-8` / 32px height) across all items.
+   - Primary deployment triggers (e.g. `Push to GitHub`) are styled with `.btn-safety` at matching height, preserving visual balance.
+
+---
+
+## 8. Pre-Delivery Checklist
 
 - [ ] Does the UI strictly embody the **Cyber-Industrial Blueprint Grid** aesthetic from the ChainGPT Labs reference?
 - [ ] Are 1px architectural grid seams (`#D0CEC7`) cleanly partitioning all modules?
-- [ ] Are corner registration dots (`■` orange squares) visible on key module bays?
-- [ ] Does the CRT robot mascot have an animated glowing bevel and reactive dot-matrix eyes (`● ●`)?
+- [ ] Are corner registration dots (`■` orange squares) visible on key module bays and modals?
+- [ ] Does the CRT robot mascot have an animated glowing bevel, reactive dot-matrix eyes, and **cursor pupil tracking**?
+- [ ] Are all modals (`ConfirmModal`, `NoticeModal`, `PushModal`) styled with corner registration dots and 0% dark mode on outer chassis?
+- [ ] Are action buttons (including navbar Push button) balanced and proportional at `h-8`?
 - [ ] Is the 4-bay partner-style horizontal macro strip present on the dashboard?
 - [ ] Is the canvas free of dark mode, neon purple/blue, and generic SaaS slop?

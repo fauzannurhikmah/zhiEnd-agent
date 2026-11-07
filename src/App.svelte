@@ -817,10 +817,10 @@
       <div
         class="flex items-center gap-1.5 sm:gap-2.5 text-xs text-[#5C6066] min-w-0"
       >
-        <!-- Drafting Crosshair Mark from Blueprint Reference -->
+        <!-- Drafting Crosshair Mark with Interactive Rotation -->
         <div
-          class="hidden sm:inline-flex crosshair-box w-6 h-6 shrink-0"
-          title="Blueprint Drafting Reticle"
+          class="hidden sm:inline-flex crosshair-box w-6 h-6 shrink-0 transition-transform duration-300 hover:rotate-45 cursor-crosshair"
+          title="Drafting Reticle"
         ></div>
 
         <!-- Mobile Sidebar Hamburger Toggle -->
@@ -886,16 +886,16 @@
         <!-- Quick Remote Indicators -->
         <button
           onclick={() => (currentTab = "remote")}
-          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer active:scale-95 {whatsappStatus?.status ===
+          class="h-8 flex items-center gap-1.5 px-2.5 rounded-lg border text-xs font-stencil transition cursor-pointer active:scale-95 {whatsappStatus?.status ===
           'connected'
             ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
             : whatsappStatus?.status === 'qr_ready'
               ? 'bg-amber-50 border-amber-300 text-amber-800 animate-pulse'
-              : 'bg-[#E9E7E0] border-[#C8C5BC] text-[#5C6066]'}"
+              : 'bg-[#FCFCFA] border-[#D0CEC7] text-[#60646C] hover:bg-[#E5E3DD]'}"
           title="WhatsApp Remote: {whatsappStatus?.status ||
             'stopped'} (Klik untuk buka Remote Hub)"
         >
-          <MessageSquare class="w-3 h-3 text-emerald-600" />
+          <MessageSquare class="w-3.5 h-3.5 text-emerald-600" />
           <span class="hidden sm:inline">WA</span>
           <span
             class="w-1.5 h-1.5 rounded-full {whatsappStatus?.status ===
@@ -909,14 +909,14 @@
 
         <button
           onclick={() => (currentTab = "remote")}
-          class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg border text-xs font-mono transition cursor-pointer active:scale-95 {telegramStatus?.status ===
+          class="h-8 flex items-center gap-1.5 px-2.5 rounded-lg border text-xs font-stencil transition cursor-pointer active:scale-95 {telegramStatus?.status ===
           'running'
             ? 'bg-sky-50 border-sky-300 text-sky-800'
-            : 'bg-[#E9E7E0] border-[#C8C5BC] text-[#5C6066]'}"
+            : 'bg-[#FCFCFA] border-[#D0CEC7] text-[#60646C] hover:bg-[#E5E3DD]'}"
           title="Telegram Remote: {telegramStatus?.status ||
             'stopped'} (Klik untuk buka Remote Hub)"
         >
-          <Send class="w-3 h-3 text-sky-600" />
+          <Send class="w-3.5 h-3.5 text-sky-600" />
           <span class="hidden sm:inline">TG</span>
           <span
             class="w-1.5 h-1.5 rounded-full {telegramStatus?.status ===
@@ -929,14 +929,14 @@
         <!-- Quick Dev Server Widget -->
         {#if devServer.isRunning}
           <div
-            class="flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-300"
+            class="h-8 flex items-center gap-1.5 px-2.5 rounded-lg bg-emerald-50 border border-emerald-300 font-stencil"
           >
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
             ></span>
             <a
               href={devServer.activePorts[0]?.url || "http://localhost:3000"}
               target="_blank"
-              class="text-xs font-mono text-emerald-800 hover:text-emerald-950 flex items-center gap-1 font-semibold"
+              class="text-xs text-emerald-800 hover:text-emerald-950 flex items-center gap-1 font-semibold"
               title="Buka Aplikasi di Browser"
             >
               <span>{devServer.activePorts[0]?.port || 3000}</span>
@@ -944,7 +944,7 @@
             </a>
             <button
               onclick={handleToggleDevServer}
-              class="p-1 ml-0.5 rounded hover:bg-rose-100 text-rose-600 transition cursor-pointer"
+              class="p-0.5 ml-0.5 rounded hover:bg-rose-100 text-rose-600 transition cursor-pointer"
               title="Hentikan Dev Server"
             >
               <Square class="w-3 h-3 fill-rose-600" />
@@ -954,24 +954,26 @@
           <button
             onclick={handleToggleDevServer}
             disabled={isStartingDev}
-            class="flex items-center gap-1 px-2 sm:px-3 py-1 rounded-lg bg-[#E9E7E0] hover:bg-[#DEDBD2] border border-[#C8C5BC] text-[#191B1D] text-xs font-medium transition cursor-pointer active:scale-95 disabled:opacity-50"
+            class="h-8 flex items-center gap-1.5 px-3 rounded-lg bg-[#FCFCFA] hover:bg-[#E5E3DD] border border-[#D0CEC7] text-[#111315] text-xs font-tech font-bold uppercase transition cursor-pointer active:scale-95 disabled:opacity-50"
             title="Jalankan Dev Server Project Aktif"
           >
             <Play class="w-3 h-3 text-emerald-600 fill-emerald-600" />
             <span class="hidden sm:inline"
-              >{isStartingDev ? "Memulai..." : "Jalankan Dev"}</span
+              >{isStartingDev ? "MEMULAI..." : "DEV SERVER"}</span
             >
-            <span class="sm:hidden">{isStartingDev ? "..." : "Dev"}</span>
+            <span class="sm:hidden">{isStartingDev ? "..." : "DEV"}</span>
           </button>
         {/if}
 
+        <!-- Proportional Push to GitHub Action Button -->
         <button
           onclick={handleExecutePush}
-          class="btn-safety px-2.5 sm:px-3.5 py-1 rounded-lg text-white text-xs font-bold transition cursor-pointer active:scale-95"
+          class="btn-safety h-8 px-3.5 sm:px-4 rounded-lg text-white font-tech font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition cursor-pointer active:translate-y-0.5 shadow-2xs hover:shadow-xs"
           title="Git Push to GitHub"
         >
           <UploadCloud class="w-3.5 h-3.5" />
-          <span class="hidden sm:inline">Push</span>
+          <span class="hidden sm:inline">PUSH // GIT</span>
+          <span class="sm:hidden">PUSH</span>
         </button>
       </div>
     </header>

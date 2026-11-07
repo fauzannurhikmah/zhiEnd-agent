@@ -94,6 +94,16 @@
   let audioChunks: Blob[] = [];
   let voiceError = $state<string | null>(null);
 
+  // HUD Cockpit Live Coordinate Tracking
+  let hudCoord = $state({ x: 420, y: 180 });
+  function handleDeckMouseMove(e: MouseEvent) {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    hudCoord = {
+      x: Math.max(0, Math.round(e.clientX - rect.left)),
+      y: Math.max(0, Math.round(e.clientY - rect.top))
+    };
+  }
+
   function toggleVoiceInput() {
     if (isListening) {
       stopVoiceInput();
@@ -572,7 +582,12 @@
   <div bind:this={messagesContainer} class="flex-1 overflow-y-auto {messages.length === 0 ? 'p-0 flex flex-col' : 'p-4 sm:p-6 pb-28 sm:pb-32 blueprint-grid'}">
     {#if messages.length === 0}
       <!-- Cyber-Industrial Blueprint Grid (CIB-Grid) Full-Bleed Cockpit Deck -->
-      <div class="w-full flex-1 flex flex-col justify-between blueprint-grid p-4 sm:p-6 lg:p-8 relative">
+      <div 
+        role="region"
+        aria-label="Blueprint Cockpit Deck"
+        onmousemove={handleDeckMouseMove}
+        class="w-full flex-1 flex flex-col justify-between blueprint-grid p-4 sm:p-6 lg:p-8 relative"
+      >
         <!-- 4 Corner Registration Marks (Solid Orange Squares ■) -->
         <span class="reg-dot reg-dot-tl"></span>
         <span class="reg-dot reg-dot-tr"></span>
@@ -582,7 +597,7 @@
         <!-- Top Drafting Header Seam -->
         <div class="flex items-center justify-between pb-3 mb-2 border-b border-[#D0CEC7] font-tech text-[11px] text-[#5C6066]">
           <div class="flex items-center gap-2">
-            <span class="crosshair-box w-5 h-5 text-[10px] inline-flex items-center justify-center"></span>
+            <span class="crosshair-box w-5 h-5 text-[10px] inline-flex items-center justify-center hover:rotate-45 transition-transform duration-300 cursor-crosshair"></span>
             <span class="font-bold tracking-wider text-[#111315]">ZHIEND // AUTONOMOUS AGENT RUNTIME</span>
             <span class="text-[#FF5500] font-bold">■ LABS DRAFTING MATRIX</span>
           </div>
@@ -652,13 +667,16 @@
 
           <!-- Right Cell (Col 9-12): Viewfinder Telemetry Box -->
           <div class="lg:col-span-3">
-            <div class="viewfinder-box p-4 rounded-xl text-white font-stencil flex flex-col gap-3 shadow-xl">
-              <div class="flex items-center justify-between text-[10px] text-[#8C9097] border-b border-white/10 pb-2">
-                <span class="text-[#FFAA00] font-tech font-bold tracking-wider">┌ TELEMETRY ┐</span>
+            <div class="viewfinder-box p-4 rounded-xl text-white font-stencil flex flex-col gap-3 shadow-xl relative overflow-hidden group">
+              <!-- Animated Scanning Wave Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#FF5500]/10 to-transparent pointer-events-none animate-pulse"></div>
+
+              <div class="flex items-center justify-between text-[10px] text-[#8C9097] border-b border-white/10 pb-2 relative z-10">
+                <span class="text-[#FFAA00] font-tech font-bold tracking-wider">┌ RETICLE [{hudCoord.x.toString().padStart(3, '0')},{hudCoord.y.toString().padStart(3, '0')}] ┐</span>
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               </div>
               
-              <div class="space-y-2 text-[11px]">
+              <div class="space-y-2 text-[11px] relative z-10">
                 <div class="flex justify-between items-center text-zinc-400">
                   <span>BUS:</span>
                   <span class="text-emerald-400 font-bold">ONLINE</span>
@@ -677,9 +695,9 @@
                 </div>
               </div>
 
-              <div class="mt-1 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] text-zinc-500">
+              <div class="mt-1 pt-2 border-t border-white/10 flex items-center justify-between text-[9px] text-zinc-500 relative z-10">
                 <span>NODE: TX-3888</span>
-                <span class="text-[#FF5500] font-tech">└ RETICLE ┘</span>
+                <span class="text-[#FF5500] font-tech tracking-wider group-hover:text-emerald-400 transition-colors">└ TARGET LOCKED ┘</span>
               </div>
             </div>
           </div>
@@ -698,7 +716,7 @@
               <button
                 type="button"
                 onclick={() => setPrompt(s.prompt)}
-                class="p-3 bg-[#FCFCFA] hover:bg-[#ECEAE5] border border-transparent hover:border-[#D0CEC7] rounded-lg flex flex-col justify-between gap-2.5 transition text-left cursor-pointer group"
+                class="p-3 bg-[#FCFCFA] hover:bg-[#ECEAE5] active:bg-[#E5E3DD] active:scale-[0.98] active:translate-y-0.5 border border-transparent hover:border-[#D0CEC7] rounded-lg flex flex-col justify-between gap-2.5 transition-all text-left cursor-pointer group"
               >
                 <div class="flex items-center justify-between w-full">
                   <span class="text-[9px] font-stencil font-bold px-1.5 py-0.5 rounded bg-white group-hover:bg-[#FF5500] text-[#5C6066] group-hover:text-white border border-[#D0CEC7] transition">

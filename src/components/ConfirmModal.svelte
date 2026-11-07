@@ -58,7 +58,7 @@
 <svelte:window onkeydown={handleKeyDown} />
 
 {#if activeIsOpen}
-  <div class="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-in fade-in duration-150">
+  <div class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-in fade-in duration-150">
     <!-- Click outside to cancel -->
     <button 
       type="button"
@@ -68,34 +68,45 @@
       aria-label="Tutup modal"
     ></button>
 
-    <!-- Modal Box -->
-    <div class="relative w-full max-w-sm rounded-2xl bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl p-5 flex flex-col gap-4 text-center z-10 animate-in zoom-in-95 duration-200 text-[#191B1D]">
+    <!-- Cyber-Industrial Confirmation Modal Box -->
+    <div class="relative w-full max-w-sm rounded-xl bg-[#FCFCFA] border border-[#D0CEC7] shadow-2xl p-5 flex flex-col gap-4 text-center z-10 animate-in zoom-in-95 duration-200 text-[#111315] font-tech">
+      <!-- 4 Corner Registration Marks -->
+      <span class="reg-dot reg-dot-tl"></span>
+      <span class="reg-dot reg-dot-tr"></span>
+      <span class="reg-dot reg-dot-bl"></span>
+      <span class="reg-dot reg-dot-br"></span>
       
-      <!-- Close icon button -->
-      <button 
-        type="button"
-        onclick={handleCancelAction}
-        class="absolute top-3.5 right-3.5 p-1 rounded-lg text-[#8C9097] hover:text-[#191B1D] hover:bg-[#ECEAE5] transition cursor-pointer"
-        title="Tutup"
-      >
-        <X class="w-4 h-4" />
-      </button>
+      <!-- Top Drafting Seam -->
+      <div class="flex items-center justify-between pb-2 border-b border-[#D0CEC7] text-[10px] text-[#60646C]">
+        <span class="flex items-center gap-1 font-bold">
+          <span class="w-1.5 h-1.5 {activeVariant === 'danger' ? 'bg-rose-500' : (activeVariant === 'warning' ? 'bg-amber-500' : 'bg-[#FF5500]')}"></span>
+          :: PROTOCOL CONFIRMATION
+        </span>
+        <button 
+          type="button"
+          onclick={handleCancelAction}
+          class="p-0.5 rounded text-[#8C9097] hover:text-[#111315] hover:bg-[#E5E3DD] transition cursor-pointer"
+          title="Tutup"
+        >
+          <X class="w-3.5 h-3.5" />
+        </button>
+      </div>
 
       <!-- Icon Header -->
-      <div class="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center {activeVariant === 'danger' ? 'bg-rose-100 border border-rose-300 text-rose-700' : activeVariant === 'warning' ? 'bg-amber-100 border border-amber-300 text-amber-700' : 'bg-orange-100 border border-orange-300 text-[#FF5500]'}">
+      <div class="w-12 h-12 rounded-xl mx-auto flex items-center justify-center {activeVariant === 'danger' ? 'bg-rose-100 border border-rose-300 text-rose-600' : activeVariant === 'warning' ? 'bg-amber-100 border border-amber-300 text-amber-600' : 'bg-orange-100 border border-orange-300 text-[#FF5500]'}">
         {#if activeVariant === 'danger'}
-          <Trash2 class="w-6 h-6" />
+          <Trash2 class="w-5 h-5 animate-pulse" />
         {:else if activeVariant === 'warning'}
-          <AlertTriangle class="w-6 h-6" />
+          <AlertTriangle class="w-5 h-5 animate-bounce" />
         {:else}
-          <HelpCircle class="w-6 h-6" />
+          <HelpCircle class="w-5 h-5" />
         {/if}
       </div>
 
       <!-- Title & Message -->
-      <div class="space-y-1.5 px-1">
-        <h3 class="text-sm font-bold text-[#191B1D]">{activeTitle}</h3>
-        <p class="text-xs text-[#5C6066] leading-relaxed">{activeMessage}</p>
+      <div class="space-y-1 px-1">
+        <h3 class="text-sm font-bold text-[#111315] uppercase tracking-wider">{activeTitle}</h3>
+        <p class="text-xs text-[#60646C] font-grotesk leading-relaxed">{activeMessage}</p>
       </div>
 
       <!-- Action Buttons -->
@@ -103,7 +114,7 @@
         <button
           type="button"
           onclick={handleCancelAction}
-          class="btn-hardware flex-1 py-2 px-3 rounded-xl text-xs font-semibold cursor-pointer active:scale-95"
+          class="btn-hardware flex-1 h-9 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer active:translate-y-0.5"
         >
           {activeCancelText}
         </button>
@@ -111,7 +122,7 @@
         <button
           type="button"
           onclick={handleConfirmAction}
-          class="flex-1 py-2 px-3 rounded-xl {activeVariant === 'danger' ? 'bg-rose-600 hover:bg-rose-500 shadow-sm' : activeVariant === 'warning' ? 'bg-amber-600 hover:bg-amber-500 shadow-sm' : 'btn-safety'} text-white text-xs font-bold shadow-sm transition cursor-pointer active:scale-95"
+          class="flex-1 h-9 rounded-lg {activeVariant === 'danger' ? 'bg-rose-600 hover:bg-rose-500 shadow-sm' : activeVariant === 'warning' ? 'bg-amber-600 hover:bg-amber-500 shadow-sm' : 'btn-safety'} text-white text-xs font-bold uppercase tracking-wider shadow-sm transition cursor-pointer active:translate-y-0.5"
         >
           {activeConfirmText}
         </button>

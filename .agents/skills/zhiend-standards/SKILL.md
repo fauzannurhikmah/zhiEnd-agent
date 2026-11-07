@@ -68,12 +68,16 @@ The standards are modularly split into two specialized skills:
   - `.btn-safety`: Vivid safety hazard orange (`#FF5500`) tactile switch.
   - `.bubble-user-hardware`: Alabaster bay with safety orange micro-tab.
   - `.bubble-agent-hardware`: Engineered putty deck with mechanical telemetry logger.
+- **Interactive Micro/Macro Kinetics & Cursor Eye Tracking**:
+  - CRT Robot Mascot Pupil Tracking: Reactively computes cursor vector to translate pupils smoothly across the screen, with idle micro-drift and direct hover happy arc state (`◠  ◠`).
+  - Interactive Reticle & HUD Coordinates: Dynamic cursor coordinate tracking (`┌ RETICLE [042, 180] ┐`), rotating drafting crosshairs (`hover:rotate-45 cursor-crosshair`), and tactile soundbank pad clicks (`active:scale-[0.98] active:translate-y-0.5`).
+  - Balanced Action Triggers: Strict vertical proportion (`h-8` / 32px height) for navbar buttons and Git Push triggers (`.btn-safety`).
 - **Universal Modal Consistency (0% Dark Mode Tolerance)**:
-  - Every single modal (`ProjectModal`, `SettingsModal`, `PersonaModal`, `ConfirmModal`, `NoticeModal`, `PinModal`, `PushModal`), popover, and lightbox is 100% TE-IFI.
-  - Zero tolerance for `bg-zinc-950`, `bg-zinc-900`, `border-indigo`, or `text-indigo`.
-  - Structured as alabaster chassis (`#FCFCFA`) with putty concrete headers (`#E9E7E0`), safety orange stencils (`#FF5500`), and tactile action keys.
+  - Every single modal (`ConfirmModal`, `NoticeModal`, `PushModal`, `ProjectModal`, `SettingsModal`, `PersonaModal`, `PinModal`), popover, and lightbox is 100% compliant with the CIB-Grid matrix.
+  - Framed with 4 corner registration marks `■` (`.reg-dot`), top drafting seams (`:: PROTOCOL CONFIRMATION`), alabaster ground (`#FCFCFA`), and putty headers (`#E5E3DD`).
+  - Terminal streams (`PushModal`) reside strictly inside a recessed CRT Void well (`#101114`) with green phosphor readout.
 - **Instrument Cockpit Layout Architecture (Anti-AI-Slop Formations)**:
   - Ban on generic 2x2 SaaS card kits, centered hero clichés, and duplicate center prompt boxes.
-  - Required Layout: Machined machine nameplate (`TX-3888`), EP-133 style 4-pad hardware macro soundbank matrix, real-time telemetry registers, and a permanently anchored bottom hardware control deck (`hardware-well`).
-- **Typography & Voice**: Technical grotesque + monospace (DIN/Space Grotesk), pure sentence case, line lengths < 75 characters, authentic hardware labels (`Bay 01`, `Port :3888`).
+  - Required Layout: 3-column architectural blueprint cockpit, 4-bay partner-style horizontal macro strip (`[01 // AUDIT]`, `[02 // RECON]`, `[03 // DEBUG]`, `[04 // SHIP]`), real-time telemetry registers, and a permanently anchored bottom control console.
+- **Typography & Voice**: Technical grotesque + monospace (Syne 900 display, Chakra Petch tech, Silkscreen pixel, Space Grotesk body, JetBrains Mono stencil), line lengths < 75 characters.
 - **Accessibility & Quality**: High WCAG AAA contrast (basalt on chalk bone), tactile `:active` press mechanics, zero emoji icons (100% Lucide SVG), and touch targets ≥ 44×44px.
