@@ -1236,7 +1236,17 @@
         {:else if voiceError}
           <div class="flex items-center justify-between gap-2 px-3 py-1.5 mb-2 rounded-none bg-amber-50 border border-amber-300 text-[11px] text-amber-900 animate-in fade-in font-stencil">
             <span class="truncate">⚠️ {voiceError}</span>
-            <button type="button" onclick={() => voiceError = null} class="p-0.5 hover:text-black shrink-0"><X class="w-3 h-3" /></button>
+            <div class="flex items-center gap-2 shrink-0">
+              <button 
+                type="button" 
+                onclick={startVoiceInput} 
+                class="px-2 py-0.5 rounded-none bg-amber-200 hover:bg-amber-300 border border-amber-400 text-[10px] font-bold text-amber-950 transition cursor-pointer font-stencil"
+                title="Minta izin mikrofon ulang"
+              >
+                COBA LAGI
+              </button>
+              <button type="button" onclick={() => voiceError = null} class="p-0.5 hover:text-black shrink-0"><X class="w-3 h-3" /></button>
+            </div>
           </div>
         {/if}
 

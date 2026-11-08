@@ -2,6 +2,7 @@ node_modules/
 dist/
 data/baileys_auth/
 data/uploads/*
+public/img/*
 data/*.db*
 data/*.db-shm
 data/*.db-wal
