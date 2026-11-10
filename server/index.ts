@@ -41,8 +41,13 @@ import {
   getOrCreateDefaultSession,
   saveBase64Avatar,
   saveChatUploadedFile,
-  updateChatSessionConversationId
+  updateChatSessionConversationId,
+  getAllConnectors,
+  getConnectorById,
+  saveConnector,
+  deleteConnector
 } from './db/database';
+import { testConnector, executeConnectorAction } from './connectors/index';
 
 const app = new Hono();
 
@@ -1207,6 +1212,90 @@ app.post('/api/bots/:platform/persona', async (c) => {
   return c.json({ success: true, platform, personaId });
 });
 
+// ==========================================
+// MCV / MCP Connectors Hub API Routes
+// ==========================================
+app.get('/api/connectors', (c) => {
+  const list = getAllConnectors();
+  const safeList = list.map(item => ({
+    ...item,
+    hasAuthToken: Boolean(item.auth_token),
+    auth_token: item.auth_token ? '••••••••' + (item.auth_token.length > 4 ? item.auth_token.slice(-4) : '') : ''
+  }));
+  return c.json({ success: true, connectors: safeList });
+});
+
+app.get('/api/connectors/:id', (c) => {
+  const id = c.req.param('id');
+  const conn = getConnectorById(id);
+  if (!conn) return c.json({ success: false, error: 'Connector tidak ditemukan' }, 404);
+  return c.json({
+    success: true,
+    connector: {
+      ...conn,
+      hasAuthToken: Boolean(conn.auth_token),
+      auth_token: conn.auth_token ? '••••••••' + (conn.auth_token.length > 4 ? conn.auth_token.slice(-4) : '') : ''
+    }
+  });
+});
+
+app.post('/api/connectors', async (c) => {
+  let body: any = {};
+  try {
+    body = await c.req.json();
+  } catch {
+    try {
+      body = JSON.parse(await c.req.text());
+    } catch {}
+  }
+
+  if (!body.name || !body.type) {
+    return c.json({ success: false, error: 'Field "name" dan "type" wajib diisi' }, 400);
+  }
+
+  // If token is masked placeholder, keep existing token
+  if (body.id && body.auth_token && body.auth_token.startsWith('••••')) {
+    const existing = getConnectorById(body.id);
+    body.auth_token = existing?.auth_token || '';
+  }
+
+  const saved = saveConnector(body);
+  return c.json({ success: true, connector: saved });
+});
+
+app.delete('/api/connectors/:id', (c) => {
+  const id = c.req.param('id');
+  const ok = deleteConnector(id);
+  return c.json({ success: ok });
+});
+
+app.post('/api/connectors/:id/test', async (c) => {
+  const id = c.req.param('id');
+  const conn = getConnectorById(id);
+  if (!conn) return c.json({ success: false, error: 'Connector tidak ditemukan' }, 404);
+
+  const testResult = await testConnector(conn);
+  return c.json({ success: testResult.success, result: testResult });
+});
+
+app.post('/api/connectors/:id/execute', async (c) => {
+  const id = c.req.param('id');
+  let body: any = {};
+  try {
+    body = await c.req.json();
+  } catch {
+    try {
+      body = JSON.parse(await c.req.text());
+    } catch {}
+  }
+
+  const action = body.action;
+  if (!action) return c.json({ success: false, error: 'Parameter "action" wajib diisi' }, 400);
+
+  const res = await executeConnectorAction(id, action, body.params || {});
+  return c.json(res);
+});
+
 function getFileMime(filePath: string): string {
   const ext = path.extname(filePath).toLowerCase();
   switch (ext) {
@@ -1412,7 +1501,28 @@ app.get('/api/media/file', (c) => {
 const distDir = path.join(__dirname, '..', 'dist');
 const publicDir = path.join(__dirname, '..', 'public');
 
-// Serve any static file from dist or public with full decodeURI support
+// Vite Dev Server Detector (Enables instant hot reload on port 3888 during dev)
+let isViteRunning = false;
+async function checkViteAlive(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 800);
+    const res = await fetch('http://127.0.0.1:5173/@vite/client', {
+      method: 'HEAD',
+      signal: controller.signal
+    });
+    clearTimeout(timer);
+    isViteRunning = res.status === 200 || res.status === 304;
+    return isViteRunning;
+  } catch {
+    isViteRunning = false;
+    return false;
+  }
+}
+checkViteAlive();
+setInterval(checkViteAlive, 3000);
+
+// Serve any static file or proxy to Vite dev server with full decodeURI support
 app.use('*', async (c, next) => {
   const reqPath = c.req.path;
   // Ignore API, uploads, preview, and socket routes
@@ -1425,10 +1535,41 @@ app.use('*', async (c, next) => {
     return next();
   }
 
+  // 1. Hot Reload Proxy to Vite Dev Server (port 5173) if active
+  if (isViteRunning) {
+    try {
+      const url = new URL(c.req.url);
+      const targetUrl = `http://127.0.0.1:5173${url.pathname}${url.search}`;
+      const headers = new Headers(c.req.raw.headers);
+      headers.set('host', '127.0.0.1:5173');
+      headers.delete('accept-encoding');
+
+      const reqInit: RequestInit = {
+        method: c.req.method,
+        headers
+      };
+      if (!['GET', 'HEAD'].includes(c.req.method)) {
+        reqInit.body = await c.req.raw.arrayBuffer();
+      }
+
+      const proxyRes = await fetch(targetUrl, reqInit);
+      const resHeaders = new Headers(proxyRes.headers);
+      resHeaders.delete('content-encoding');
+      resHeaders.delete('content-length');
+
+      return new Response(proxyRes.body, {
+        status: proxyRes.status,
+        headers: resHeaders
+      });
+    } catch {
+      // If Vite proxy failed, fallback to local static dist/
+    }
+  }
+
   try {
     const decodedPath = decodeURIComponent(reqPath.replace(/^\/+/, ''));
     if (decodedPath) {
-      // 1. Check in dist directory
+      // 2. Check in dist directory
       const distCandidate = path.join(distDir, decodedPath);
       if (fs.existsSync(distCandidate) && fs.statSync(distCandidate).isFile()) {
         const mime = getFileMime(distCandidate);
@@ -1439,7 +1580,7 @@ app.use('*', async (c, next) => {
         });
       }
 
-      // 2. Fallback check in public directory
+      // 3. Fallback check in public directory
       const publicCandidate = path.join(publicDir, decodedPath);
       if (fs.existsSync(publicCandidate) && fs.statSync(publicCandidate).isFile()) {
         const mime = getFileMime(publicCandidate);
@@ -1458,12 +1599,20 @@ app.use('*', async (c, next) => {
 });
 
 // Single Page Application (SPA) entrypoint fallback
-app.get('*', (c) => {
+app.get('*', async (c) => {
+  if (isViteRunning) {
+    try {
+      const proxyRes = await fetch('http://127.0.0.1:5173/');
+      const html = await proxyRes.text();
+      return c.html(html, proxyRes.status as any);
+    } catch {}
+  }
+
   const indexHtmlPath = path.join(distDir, 'index.html');
   if (fs.existsSync(indexHtmlPath)) {
     return c.html(fs.readFileSync(indexHtmlPath, 'utf-8'));
   }
-  return c.text('Build not found. Please run npm run build.', 404);
+  return c.text('Build not found. Please run npm run dev or npm run build.', 404);
 });
 
 // Start Server & WebSocket
@@ -1565,3 +1714,19 @@ console.log(`   👉 Local:   http://localhost:${PORT}`);
 console.log(`   👉 LAN:     http://${tunnelManager.getLocalIP()}:${PORT}`);
 console.log(`   📁 Project: ${config.activeProject}`);
 console.log(`===============================================`);
+
+// Clean Graceful Shutdown for TSX watch and Ctrl+C
+const gracefulShutdown = () => {
+  console.log('\n[Server] Shutting down gracefully...');
+  if (io) {
+    try { io.close(); } catch {}
+  }
+  try {
+    (server as any)?.close?.();
+  } catch {}
+  process.exit(0);
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
+

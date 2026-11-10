@@ -1,4 +1,4 @@
-﻿<script lang="ts">
+<script lang="ts">
   import type {
     AppConfig,
     GitStatus,
@@ -19,6 +19,7 @@
     Plus,
     X,
     Trash2,
+    Blocks,
   } from "lucide-svelte";
 
   let {
@@ -43,7 +44,7 @@
     isMobileOpen = false,
     onCloseMobile,
   }: {
-    currentTab: "chat" | "git" | "remote" | "files";
+    currentTab: "chat" | "git" | "remote" | "files" | "connectors";
     config: AppConfig | null;
     gitStatus: GitStatus | null;
     telegramStatus: TelegramStatus | null;
@@ -55,7 +56,7 @@
     historyScope?: "workspace" | "global";
     isMobileOpen?: boolean;
     onCloseMobile?: () => void;
-    onSelectTab: (tab: "chat" | "git" | "remote" | "files") => void;
+    onSelectTab: (tab: "chat" | "git" | "remote" | "files" | "connectors") => void;
     onOpenProjectModal: () => void;
     onOpenSettingsModal: () => void;
     onResetToRoot: () => void;
@@ -65,7 +66,7 @@
     onToggleScope?: (scope: "workspace" | "global") => void;
   } = $props();
 
-  function handleTabClick(tab: "chat" | "git" | "remote" | "files") {
+  function handleTabClick(tab: "chat" | "git" | "remote" | "files" | "connectors") {
     onSelectTab(tab);
     if (onCloseMobile) onCloseMobile();
   }
@@ -345,6 +346,29 @@
           <span class="tracking-wide">[04] // FILES & LOGS</span>
         </div>
         {#if currentTab === 'files'}
+          <span class="flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"></span>
+            <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
+          </span>
+        {/if}
+      </button>
+
+      <button
+        onclick={() => handleTabClick("connectors")}
+        class="flex items-center justify-between px-3 py-2 rounded-none text-xs transition-all cursor-pointer active:scale-[0.98] active:translate-y-0.5 group {currentTab ===
+        'connectors'
+          ? 'bg-[#FCFCFA] text-[#111315] font-bold border border-[#D0CEC7] shadow-2xs'
+          : 'text-[#60646C] hover:text-[#111315] hover:bg-[#FCFCFA]/80 hover:border-[#D0CEC7] border border-transparent'}"
+      >
+        <div class="flex items-center gap-2.5">
+          <Blocks
+            class="w-4 h-4 transition-transform group-hover:scale-110 {currentTab === 'connectors'
+              ? 'text-[#FF5500]'
+              : 'text-[#60646C]'}"
+          />
+          <span class="tracking-wide">[05] // CONNECTORS HUB</span>
+        </div>
+        {#if currentTab === 'connectors'}
           <span class="flex items-center gap-1">
             <span class="w-1.5 h-1.5 rounded-none bg-emerald-500 animate-pulse"></span>
             <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>

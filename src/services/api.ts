@@ -1,4 +1,14 @@
-import type { AppConfig, GitStatus, CommitInfo, TunnelStatus, TelegramStatus, WhatsAppStatus, FileItem } from '../types';
+import type { 
+  AppConfig, 
+  GitStatus, 
+  CommitInfo, 
+  TunnelStatus, 
+  TelegramStatus, 
+  WhatsAppStatus, 
+  FileItem,
+  ConnectorItem,
+  ConnectorActionResult
+} from '../types';
 
 export const PIN_STORAGE_KEY = 'zhiend_security_pin';
 
@@ -544,5 +554,83 @@ export const api = {
       body: JSON.stringify(data)
     });
     return res.json();
+  },
+
+  // MCV / MCP Connectors Hub
+  async getConnectors(): Promise<{ success: boolean; connectors: ConnectorItem[] }> {
+    try {
+      const res = await fetch('/api/connectors', { headers: getHeaders() });
+      if (!res.ok) {
+        return { success: false, connectors: [] };
+      }
+      return await res.json();
+    } catch (err) {
+      console.warn('[API] getConnectors error:', err);
+      return { success: false, connectors: [] };
+    }
+  },
+
+  async getConnector(id: string): Promise<{ success: boolean; connector?: ConnectorItem; error?: string }> {
+    try {
+      const res = await fetch(`/api/connectors/${id}`, { headers: getHeaders() });
+      return await res.json();
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async saveConnector(data: Partial<ConnectorItem>): Promise<{ success: boolean; connector?: ConnectorItem; error?: string }> {
+    try {
+      const res = await fetch('/api/connectors', {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async deleteConnector(id: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      const res = await fetch(`/api/connectors/${id}`, {
+        method: 'DELETE',
+        headers: getHeaders()
+      });
+      return await res.json();
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async testConnector(id: string): Promise<{ success: boolean; result?: any; error?: string }> {
+    try {
+      const res = await fetch(`/api/connectors/${id}/test`, {
+        method: 'POST',
+        headers: getHeaders()
+      });
+      return await res.json();
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async executeConnectorAction(id: string, action: string, params: Record<string, any> = {}): Promise<ConnectorActionResult> {
+    try {
+      const res = await fetch(`/api/connectors/${id}/execute`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ action, params })
+      });
+      return await res.json();
+    } catch (err: any) {
+      return {
+        success: false,
+        connectorId: id,
+        action,
+        error: err.message
+      };
+    }
   }
 };

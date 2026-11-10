@@ -10,7 +10,9 @@ import {
   PersonaItem, 
   ChatSessionItem, 
   ChatMessageRecord, 
-  BotIntegrationRecord 
+  BotIntegrationRecord,
+  ConnectorRecord,
+  ConnectorStatus
 } from '../types';
 
 export const DB_DIR = path.join(__dirname, '..', '..', 'data');
@@ -121,10 +123,33 @@ function initTables(db: Database.Database): void {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- 8. MCV / MCP Connectors Hub
+    CREATE TABLE IF NOT EXISTS connectors (
+      id TEXT PRIMARY KEY,
+      type TEXT NOT NULL,
+      name TEXT NOT NULL,
+      base_url TEXT NOT NULL,
+      auth_type TEXT NOT NULL DEFAULT 'bearer',
+      auth_token TEXT,
+      settings_json TEXT,
+      is_enabled INTEGER DEFAULT 1,
+      last_tested_at DATETIME,
+      last_status TEXT DEFAULT 'untested',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_messages_session ON messages(session_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_workspace ON chat_sessions(workspace_id);
     CREATE INDEX IF NOT EXISTS idx_workspaces_active ON workspaces(is_active);
+    CREATE INDEX IF NOT EXISTS idx_connectors_type ON connectors(type);
   `);
+
+  try {
+    initDefaultConnectors(db);
+  } catch (e) {
+    console.warn('[DB] Failed to init default connectors:', e);
+  }
 
   try {
     db.prepare('ALTER TABLE personas ADD COLUMN traits TEXT').run();
@@ -1391,3 +1416,191 @@ export function rollbackLastUserMessage(sessionId: string, specificIds?: string[
     return false;
   }
 }
+
+// ==========================================
+// MCV / MCP CONNECTORS HUB HELPERS
+// ==========================================
+
+function initDefaultConnectors(db: Database.Database): void {
+  const count = db.prepare('SELECT COUNT(*) as cnt FROM connectors').get() as { cnt: number };
+  if (count && count.cnt > 0) return;
+
+  const defaults = [
+    {
+      id: 'conn-sehati-kanban',
+      type: 'kanban',
+      name: 'Sehati Desk Kanban',
+      base_url: 'https://sehatidesk.sehatierp.com',
+      auth_type: 'bearer',
+      auth_token: '',
+      settings_json: JSON.stringify({
+        kanbanUrl: 'https://sehatidesk.sehatierp.com/tasks?view=kanban',
+        apiPath: '/api/tasks',
+        boardName: 'Sehati Desk Tasks',
+        statuses: ['Todo', 'In Progress', 'Testing', 'Done']
+      }),
+      is_enabled: 1,
+      last_status: 'untested'
+    },
+    {
+      id: 'conn-notion',
+      type: 'notion',
+      name: 'Notion Workspace',
+      base_url: 'https://api.notion.com/v1',
+      auth_type: 'bearer',
+      auth_token: '',
+      settings_json: JSON.stringify({
+        notionVersion: '2022-06-28',
+        defaultDatabaseId: ''
+      }),
+      is_enabled: 1,
+      last_status: 'untested'
+    },
+    {
+      id: 'conn-gmail',
+      type: 'gmail',
+      name: 'Gmail & Workspace',
+      base_url: 'https://gmail.googleapis.com/gmail/v1',
+      auth_type: 'oauth2',
+      auth_token: '',
+      settings_json: JSON.stringify({
+        userEmail: 'me',
+        autoMarkAsRead: false
+      }),
+      is_enabled: 1,
+      last_status: 'untested'
+    },
+    {
+      id: 'conn-calendar',
+      type: 'calendar',
+      name: 'Google Calendar',
+      base_url: 'https://www.googleapis.com/calendar/v3',
+      auth_type: 'oauth2',
+      auth_token: '',
+      settings_json: JSON.stringify({
+        calendarId: 'primary',
+        timeZone: 'Asia/Jakarta'
+      }),
+      is_enabled: 1,
+      last_status: 'untested'
+    },
+    {
+      id: 'conn-mcp-universal',
+      type: 'mcp',
+      name: 'Universal MCP Server (Stdio/SSE)',
+      base_url: 'stdio://',
+      auth_type: 'none',
+      auth_token: '',
+      settings_json: JSON.stringify({
+        transport: 'stdio',
+        command: 'npx',
+        args: ['-y', '@modelcontextprotocol/server-filesystem', 'd:/Works']
+      }),
+      is_enabled: 1,
+      last_status: 'untested'
+    }
+  ];
+
+  const insert = db.prepare(`
+    INSERT INTO connectors (id, type, name, base_url, auth_type, auth_token, settings_json, is_enabled, last_status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  const runMany = db.transaction(() => {
+    for (const c of defaults) {
+      insert.run(c.id, c.type, c.name, c.base_url, c.auth_type, c.auth_token, c.settings_json, c.is_enabled, c.last_status);
+    }
+  });
+
+  runMany();
+}
+
+export function getAllConnectors(): ConnectorRecord[] {
+  const db = getDb();
+  const rows = db.prepare('SELECT * FROM connectors ORDER BY created_at ASC').all() as any[];
+  return rows.map(r => ({
+    ...r,
+    is_enabled: Boolean(r.is_enabled)
+  }));
+}
+
+export function getConnectorById(id: string): ConnectorRecord | null {
+  const db = getDb();
+  const row = db.prepare('SELECT * FROM connectors WHERE id = ?').get(id) as any;
+  if (!row) return null;
+  return {
+    ...row,
+    is_enabled: Boolean(row.is_enabled)
+  };
+}
+
+export function saveConnector(data: Partial<ConnectorRecord> & { id?: string; name: string; type: any }): ConnectorRecord {
+  const db = getDb();
+  const id = data.id || `conn-${data.type}-${crypto.randomBytes(4).toString('hex')}`;
+  const now = new Date().toISOString();
+
+  const existing = getConnectorById(id);
+  if (existing) {
+    db.prepare(`
+      UPDATE connectors
+      SET name = ?,
+          base_url = ?,
+          auth_type = ?,
+          auth_token = COALESCE(?, auth_token),
+          settings_json = ?,
+          is_enabled = ?,
+          last_status = COALESCE(?, last_status),
+          last_tested_at = COALESCE(?, last_tested_at),
+          updated_at = ?
+      WHERE id = ?
+    `).run(
+      data.name,
+      data.base_url || existing.base_url,
+      data.auth_type || existing.auth_type,
+      data.auth_token !== undefined ? data.auth_token : existing.auth_token,
+      data.settings_json !== undefined ? data.settings_json : existing.settings_json,
+      data.is_enabled !== undefined ? (data.is_enabled ? 1 : 0) : (existing.is_enabled ? 1 : 0),
+      data.last_status || existing.last_status,
+      data.last_tested_at || existing.last_tested_at,
+      now,
+      id
+    );
+  } else {
+    db.prepare(`
+      INSERT INTO connectors (
+        id, type, name, base_url, auth_type, auth_token, settings_json, is_enabled, last_status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      id,
+      data.type,
+      data.name,
+      data.base_url || '',
+      data.auth_type || 'bearer',
+      data.auth_token || '',
+      data.settings_json || '{}',
+      data.is_enabled !== undefined ? (data.is_enabled ? 1 : 0) : 1,
+      data.last_status || 'untested',
+      now,
+      now
+    );
+  }
+
+  return getConnectorById(id)!;
+}
+
+export function deleteConnector(id: string): boolean {
+  const db = getDb();
+  const res = db.prepare('DELETE FROM connectors WHERE id = ?').run(id);
+  return res.changes > 0;
+}
+
+export function updateConnectorTestResult(id: string, status: ConnectorStatus, lastTestedAt?: string): void {
+  const db = getDb();
+  const testedAt = lastTestedAt || new Date().toISOString();
+  db.prepare(`
+    UPDATE connectors 
+    SET last_status = ?, last_tested_at = ?, updated_at = ?
+    WHERE id = ?
+  `).run(status, testedAt, testedAt, id);
+}
+

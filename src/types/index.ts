@@ -201,4 +201,34 @@ export interface ChatSessionItem {
   message_count?: number;
 }
 
+export type ConnectorType = 'kanban' | 'notion' | 'gmail' | 'calendar' | 'mcp' | 'custom';
+export type ConnectorAuthType = 'bearer' | 'basic' | 'oauth2' | 'api_key' | 'cookie' | 'session' | 'none';
+export type ConnectorStatus = 'online' | 'offline' | 'error' | 'untested';
+
+export interface ConnectorItem {
+  id: string;
+  type: ConnectorType;
+  name: string;
+  base_url: string;
+  auth_type: ConnectorAuthType;
+  auth_token?: string;
+  hasAuthToken?: boolean;
+  settings_json?: string;
+  is_enabled: boolean;
+  last_tested_at?: string | null;
+  last_status?: ConnectorStatus;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ConnectorActionResult {
+  success: boolean;
+  connectorId: string;
+  action: string;
+  data?: any;
+  error?: string;
+  latencyMs?: number;
+}
+
+
 

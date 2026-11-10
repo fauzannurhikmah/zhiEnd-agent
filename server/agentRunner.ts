@@ -4,7 +4,15 @@ import path from 'path';
 import os from 'os';
 import { EventEmitter } from 'events';
 import { AppConfig, AgentTask } from './types';
-import { getWorkspaceContext, getCustomRootWorkspace, getChatSessionById, getPersonaById, getSessionHistoryContext, updateChatSessionConversationId } from './db/database';
+import { 
+  getWorkspaceContext, 
+  getCustomRootWorkspace, 
+  getChatSessionById, 
+  getPersonaById, 
+  getSessionHistoryContext, 
+  updateChatSessionConversationId,
+  getAllConnectors 
+} from './db/database';
 import { parseDirectCommand, spawnDirectCommand } from './directCommandRunner';
 import { isExternalModel, runExternalLLM } from './llmRunner';
 
@@ -140,7 +148,31 @@ ${formattedPaths.map(p => `• File Gambar: "${p}"`).join('\n')}
       ? `${historyContext.historyText}\n`
       : '';
 
-    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}${imagesContext}${chatHistorySnippet}
+    // Ambil konektor MCV/MCP yang aktif
+    let connectorsContext = '';
+    try {
+      const activeConns = getAllConnectors().filter(c => c.is_enabled);
+      if (activeConns.length > 0) {
+        connectorsContext = `\n[Hub Konektor Eksternal / MCV & MCP yang Terhubung]:
+Sistem memiliki koneksi ke aplikasi pihak ketiga berikut yang DAPAT Anda gunakan secara langsung:
+${activeConns.map(c => `• [${c.type.toUpperCase()}] ${c.name} (ID: "${c.id}") - Base URL: ${c.base_url}`).join('\n')}
+
+CARA MENGAKSES & MENJALANKAN AKSI KONEKTOR:
+Gunakan tool run_command untuk mengeksekusi script CLI connector:
+- Cek / ambil task Kanban: npx tsx server/connectors/cli.ts run conn-sehati-kanban get_tasks
+- Buat task Kanban baru:   npx tsx server/connectors/cli.ts run conn-sehati-kanban create_task '{"title":"Judul Task","status":"Todo"}'
+- Pindah status task:      npx tsx server/connectors/cli.ts run conn-sehati-kanban update_task_status '{"taskId":"SH-101","status":"Done"}'
+- Cari data di Notion:     npx tsx server/connectors/cli.ts run conn-notion search '{"query":"dokumen"}'
+- Buat halaman Notion:     npx tsx server/connectors/cli.ts run conn-notion create_page '{"title":"Catatan Baru","content":"Isi teks..."}'
+- Cari email di Gmail:     npx tsx server/connectors/cli.ts run conn-gmail search_emails '{"query":"is:unread"}'
+- Buat draft email Gmail:  npx tsx server/connectors/cli.ts run conn-gmail create_draft '{"to":"target@email.com","subject":"Subjek","body":"Halo..."}'
+- Cek jadwal Kalender:     npx tsx server/connectors/cli.ts run conn-calendar list_events
+- Test koneksi:            npx tsx server/connectors/cli.ts test <connectorId>
+(PANDUAN: Jika pengguna bertanya atau meminta manipulasi data kanban task, email, notion, atau jadwal, SELALU jalankan CLI di atas untuk berinteraksi secara real-time!)\n`;
+      }
+    } catch {}
+
+    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}${connectorsContext}${imagesContext}${chatHistorySnippet}
 [Panduan Operasional Sistem & Efisiensi Eksekusi]:
 1. ATURAN EFISIENSI EKSEKUSI (Zero Redundancy):
    - JANGAN PERNAH menjalankan perintah terminal/powershell atau membaca file yang sama berulang kali jika sudah berhasil 1 kali! Hanya boleh mengulang HANYA JIKA perintah sebelumnya error/gagal dan Anda perlu memperbaiki parameternya.

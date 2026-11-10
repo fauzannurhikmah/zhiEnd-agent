@@ -20,6 +20,7 @@
   import GitView from "./components/GitView.svelte";
   import RemoteView from "./components/RemoteView.svelte";
   import FileLogsView from "./components/FileLogsView.svelte";
+  import ConnectorsView from "./components/ConnectorsView.svelte";
   import SettingsModal from "./components/SettingsModal.svelte";
   import ProjectModal from "./components/ProjectModal.svelte";
   import PushModal from "./components/PushModal.svelte";
@@ -41,10 +42,11 @@
     Terminal,
     TowerControl,
     FolderTree,
+    Blocks,
   } from "lucide-svelte";
 
   // Navigation tab
-  let currentTab = $state<"chat" | "git" | "remote" | "files">("chat");
+  let currentTab = $state<"chat" | "git" | "remote" | "files" | "connectors">("chat");
   let isMobileSidebarOpen = $state(false);
 
   // Application Data States
@@ -1188,6 +1190,8 @@
             (projectFiles = (await api.getProjectFiles()).files || [])}
           onClearLogs={() => (systemLogs = [])}
         />
+      {:else if currentTab === "connectors"}
+        <ConnectorsView />
       {/if}
     </main>
 
@@ -1263,6 +1267,21 @@
             : 'text-[#5C6066]'}"
         />
         <span class="text-[10px]">Files</span>
+      </button>
+
+      <button
+        onclick={() => (currentTab = "connectors")}
+        class="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition cursor-pointer {currentTab ===
+        'connectors'
+          ? 'text-[#FF5500] font-bold'
+          : 'text-[#5C6066] hover:text-[#191B1D]'}"
+      >
+        <Blocks
+          class="w-4 h-4 {currentTab === 'connectors'
+            ? 'text-[#FF5500]'
+            : 'text-[#5C6066]'}"
+        />
+        <span class="text-[10px]">Connectors</span>
       </button>
     </nav>
   </div>
