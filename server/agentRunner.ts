@@ -172,7 +172,20 @@ Gunakan tool run_command untuk mengeksekusi script CLI connector:
       }
     } catch {}
 
-    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}${connectorsContext}${imagesContext}${chatHistorySnippet}
+    const isSehatiErp = /sehati/i.test(workingDir) || fs.existsSync(path.join(workingDir, 'config', 'db.ts'));
+    let sehatiDbContext = '';
+    if (isSehatiErp) {
+      sehatiDbContext = `\n[🚨 PERINGATAN KRUSIAL PROJEK ERP SEHATI - ANTI-STUCK DATABASE]:
+Projek ini merupakan bagian dari ekosistem ERP Sehati yang memakai database 'erp_sehati_all' dengan connection pool MySQL2 ('./config/db.ts').
+1. DILARANG KERAS menjalankan perintah terminal atau inline node/tsx script (seperti: npx tsx -e "import executeQuery from './config/db'...") untuk sekadar mengecek database! Connection pool MySQL2 akan membiarkan socket TCP aktif dan membuat terminal STUCK/HANG SELAMANYA hingga pengguna membatalkan task.
+2. SELURUH SKEMA 108 TABEL ERP SEHATI SUDAH ADA DI FILE LOKAL:
+   File dump skema: "D:/Works/Sehati/erp-finance/db/erp_sehati_all (1).sql"
+   (Termasuk tabel: account, customer, supplier, product, transaction, allocation, branch, dll.)
+3. CARA CEK SKEMA SECARA STATIS: Gunakan tool read_file atau pencarian teks pada file SQL di atas untuk melihat nama tabel, nama kolom, tipe data, dan relasi secara instan tanpa perlu menjalankan kode apapun.
+4. CARA CEK FORMAT QUERY: Teliti query SQL yang sudah ada di file 'pages/api/**/*.ts'.\n`;
+    }
+
+    const promptWithContext = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${sehatiDbContext}${personaStr}${connectorsContext}${imagesContext}${chatHistorySnippet}
 [Panduan Operasional Sistem & Efisiensi Eksekusi]:
 1. ATURAN EFISIENSI EKSEKUSI (Zero Redundancy):
    - JANGAN PERNAH menjalankan perintah terminal/powershell atau membaca file yang sama berulang kali jika sudah berhasil 1 kali! Hanya boleh mengulang HANYA JIKA perintah sebelumnya error/gagal dan Anda perlu memperbaiki parameternya.
@@ -208,6 +221,15 @@ Gunakan tool run_command untuk mengeksekusi script CLI connector:
         ![Deskripsi Gambar](path/ke/file_gambar.png)
      b. DILARANG KERAS menyertakan teks '📁 Lokasi File:' atau mencantumkan path lokal di dalam teks respon. Tampilan harus bersih dan rapi tanpa teks lokasi file.
      c. Pengguna akan mengunduh gambar langsung dengan mengklik gambar tersebut di antarmuka Web UI.
+6. ATURAN MUTLAK PENGECEKAN DATABASE & ANTI-HANG (Zero Database Lock & Anti-Stuck):
+   - DILARANG KERAS menjalankan perintah terminal atau script inline node/tsx (seperti: 'npx tsx -e "import executeQuery from ./config/db"', 'node -e "require(./config/db)"' atau sejenisnya) untuk sekadar memeriksa struktur database, skema tabel, atau nama kolom!
+   - PENYEBAB STUCK/HANG: Mengimpor helper database (seperti './config/db' dengan 'mysql2.createPool', 'pg', 'knex') otomatis membuka connection pool socket TCP aktif yang TIDAK BISA KELUAR (EXIT) secara otomatis. Ini menyebabkan proses terminal MENGGANTUNG (STUCK SELAMANYA) hingga pengguna terpaksa membatalkan tugas.
+   - CARA RESMI & CEPAT UNTUK CEK STRUKTUR DATABASE:
+     a. BACA FILE SQL DUMP / SKEMA LOKAL: Gunakan tool read_file langsung ke file dump SQL lokal yang ada di workspace (contoh: di folder 'db/*.sql', 'database/*.sql', atau file 'prisma/schema.prisma'). Semua skema tabel, kolom, tipe data, dan relasi SUDAH LENGKAP di sana tanpa perlu menjalankan kode apapun.
+     b. BACA QUERY DI FILE API EKSISTING: Periksa file di 'pages/api/...' atau 'services/...' yang sudah ada untuk meniru query SELECT/INSERT/UPDATE dan kolom yang valid.
+     c. JIKA PENGGUNA EKSPLISIT MEMINTA MENJALANKAN QUERY LIVE KE DATABASE:
+        Script WAJIB menutup koneksi atau memanggil process.exit(0) di blok finally, dan WAJIB dipasangi safety timeout agar tidak pernah hang:
+        npx tsx -e "import executeQuery from './config/db'; (async () => { try { const r = await executeQuery(...); console.log(JSON.stringify(r)); } catch(e){ console.error(e); } finally { process.exit(0); } })(); setTimeout(() => process.exit(0), 4000);"
 
 Permintaan Pengguna:
 ${options.prompt}`;
@@ -740,6 +762,7 @@ ${options.prompt}`;
     const port = this.config.port || 3888;
     const publicTunnelUrl = (this.getTunnelUrl ? this.getTunnelUrl() : null) || this.config.tunnel?.publicUrl || '';
     const rootDir = getCustomRootWorkspace();
+    const targetPersonaId = options.personaId || (options.sessionId ? getChatSessionById(options.sessionId)?.persona_id : null) || 'persona-default';
 
     this.activeTask = {
       id: taskId,

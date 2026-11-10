@@ -138,24 +138,55 @@ export class KanbanConnector implements ConnectorExecutor {
     return '';
   }
 
+  private getUserDisplayName(connector: ConnectorRecord, settings: any): string {
+    if (settings.displayName) return settings.displayName;
+    if (settings.name) return settings.name;
+    const email = settings.email || settings.username || '';
+    if (email.toLowerCase().includes('fauzan')) return 'Fauzan Nur Hikmah';
+    if (email) {
+      const prefix = email.split('@')[0];
+      return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+    }
+    return 'Fauzan Nur Hikmah';
+  }
+
   public async executeAction(connector: ConnectorRecord, action: string, params: Record<string, any> = {}): Promise<ConnectorActionResult> {
     const start = Date.now();
     const parsedSettings = connector.settings_json ? JSON.parse(connector.settings_json) : {};
+    const currentUser = this.getUserDisplayName(connector, parsedSettings);
 
     try {
       switch (action.toLowerCase()) {
         case 'get_tasks':
         case 'list_tasks':
         case 'tasks': {
-          const tasks = await this.fetchTasks(connector, parsedSettings, params);
+          const allTasks = await this.fetchTasks(connector, parsedSettings, params);
+          const filter = (params.filter || '').toLowerCase();
+          const onlyMe = params.onlyMe === true || params.me === true || filter === 'me' || filter === 'my' || filter === 'my_tasks';
+
+          const myTasks = allTasks.filter(t => 
+            t.assignee && (
+              t.assignee.toLowerCase().includes(currentUser.toLowerCase()) ||
+              t.assignee.toLowerCase().includes('fauzan') ||
+              t.assignee.toLowerCase().includes(parsedSettings.email?.split('@')[0]?.toLowerCase() || '___')
+            )
+          );
+
+          const displayedTasks = onlyMe ? myTasks : (params.assignee ? allTasks.filter(t => t.assignee?.toLowerCase() === params.assignee.toLowerCase()) : allTasks);
+
           return {
             success: true,
             connectorId: connector.id,
             action,
             data: {
               board: parsedSettings.boardName || 'Sehati Desk Tasks',
-              count: tasks.length,
-              tasks
+              currentUser,
+              totalCount: allTasks.length,
+              myTasksCount: myTasks.length,
+              count: displayedTasks.length,
+              filterApplied: onlyMe ? 'Only My Tasks' : (params.assignee ? `Assignee: ${params.assignee}` : 'All Tasks'),
+              tasks: displayedTasks,
+              myTasks: myTasks
             },
             latencyMs: Date.now() - start
           };
@@ -322,7 +353,9 @@ export class KanbanConnector implements ConnectorExecutor {
       // Fallback: If custom API endpoint is not yet configured or returned HTML, provide standard structure
     }
 
-    // Default template items for Sehati Desk Kanban
+    // Default template items for Sehati Desk Kanban (Menggunakan nama akun login pengguna)
+    const currentUser = this.getUserDisplayName(connector, settings);
+
     return [
       {
         id: 'SH-101',
@@ -330,7 +363,7 @@ export class KanbanConnector implements ConnectorExecutor {
         description: 'Verifikasi endpoint permission dan roles di sehatidesk.sehatierp.com',
         status: 'In Progress',
         priority: 'high',
-        assignee: 'Zhien',
+        assignee: currentUser,
         url: 'https://sehatidesk.sehatierp.com/tasks?view=kanban'
       },
       {
@@ -339,7 +372,7 @@ export class KanbanConnector implements ConnectorExecutor {
         description: 'Integrasi reminder task otomatis ke WhatsApp bot nomor terdaftar',
         status: 'Todo',
         priority: 'medium',
-        assignee: 'AI Agent',
+        assignee: currentUser,
         url: 'https://sehatidesk.sehatierp.com/tasks?view=kanban'
       },
       {
@@ -358,6 +391,7 @@ export class KanbanConnector implements ConnectorExecutor {
     const baseUrl = connector.base_url.replace(/\/+$/, '');
     const apiPath = settings.apiPath || '/api/tasks';
     const targetUrl = `${baseUrl}${apiPath}`;
+    const currentUser = this.getUserDisplayName(connector, settings);
 
     const headers: Record<string, string> = {
       ...this.buildHeaders(connector),
@@ -384,7 +418,7 @@ export class KanbanConnector implements ConnectorExecutor {
       description: params.description || '',
       status: params.status || 'Todo',
       priority: params.priority || 'medium',
-      assignee: params.assignee || 'Zhien',
+      assignee: params.assignee || currentUser,
       url: `${connector.base_url}/tasks?view=kanban`,
       createdAt: new Date().toISOString()
     };

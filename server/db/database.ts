@@ -792,7 +792,8 @@ export function getWorkspaceContext(workspaceIdOrPath: string): WorkspaceContext
   `).get(workspaceIdOrPath) as any;
 
   if (!row) {
-    const ws = db.prepare('SELECT id FROM workspaces WHERE lower(path) = lower(?)').get(workspaceIdOrPath) as { id: string } | undefined;
+    const norm = path.resolve(workspaceIdOrPath);
+    const ws = db.prepare('SELECT id FROM workspaces WHERE lower(path) = lower(?)').get(norm) as { id: string } | undefined;
     if (ws) {
       row = db.prepare('SELECT * FROM workspace_contexts WHERE workspace_id = ?').get(ws.id) as any;
     }
@@ -860,11 +861,60 @@ export function autoIndexWorkspaceContext(workingDir: string): void {
     let devPort = 3000;
     const keyFiles: string[] = [];
 
-    const candidates = ['index.html', 'package.json', 'src/App.svelte', 'src/App.tsx', 'src/main.ts', 'src/index.ts', 'server/index.ts', 'app/page.tsx'];
+    const candidates = [
+      'index.html', 'package.json', 'src/App.svelte', 'src/App.tsx', 'src/main.ts', 
+      'src/index.ts', 'server/index.ts', 'app/page.tsx', 'prisma/schema.prisma',
+      'config/db.ts', 'config/database.ts', 'lib/db.ts', 'src/db.ts'
+    ];
     for (const c of candidates) {
       if (fs.existsSync(path.join(workingDir, c))) {
         keyFiles.push(c);
       }
+    }
+
+    // Auto-detect Database SQL dumps in db/ or database/
+    const sqlDumps: string[] = [];
+    for (const dbDirName of ['db', 'database', 'sql']) {
+      const fullDbDir = path.join(workingDir, dbDirName);
+      if (fs.existsSync(fullDbDir) && fs.statSync(fullDbDir).isDirectory()) {
+        try {
+          const files = fs.readdirSync(fullDbDir);
+          for (const f of files) {
+            if (f.toLowerCase().endsWith('.sql')) {
+              const relSql = `${dbDirName}/${f}`;
+              sqlDumps.push(relSql);
+              keyFiles.push(relSql);
+            }
+          }
+        } catch {}
+      }
+    }
+
+    // Ekosistem ERP Sehati: Jika subprojek tidak memiliki file dump sendiri, hubungkan ke master dump erp_sehati_all
+    const isSehatiErp = /sehati/i.test(workingDir) || fs.existsSync(path.join(workingDir, 'config', 'db.ts'));
+    const masterSehatiSql = 'D:/Works/Sehati/erp-finance/db/erp_sehati_all (1).sql';
+    if (sqlDumps.length === 0 && isSehatiErp && fs.existsSync(masterSehatiSql)) {
+      sqlDumps.push(masterSehatiSql);
+      keyFiles.push(masterSehatiSql);
+    }
+
+    let archSummary = '';
+    let customRules = '';
+
+    if (sqlDumps.length > 0 || fs.existsSync(path.join(workingDir, 'config/db.ts')) || fs.existsSync(path.join(workingDir, 'prisma/schema.prisma'))) {
+      const dbInfoParts: string[] = [];
+      if (sqlDumps.length > 0) {
+        dbInfoParts.push(`File dump skema database: ${sqlDumps.join(', ')}`);
+      }
+      if (fs.existsSync(path.join(workingDir, 'config/db.ts'))) {
+        dbInfoParts.push(`Database connection pool helper: config/db.ts`);
+      }
+      if (fs.existsSync(path.join(workingDir, 'prisma/schema.prisma'))) {
+        dbInfoParts.push(`Prisma schema: prisma/schema.prisma`);
+      }
+
+      archSummary = dbInfoParts.join(' | ');
+      customRules = `PENTING (ANTI-STUCK DATABASE): Skema database LENGKAP (108 tabel ERP: account, customer, supplier, transaction, dll.) sudah ada di file lokal: ${sqlDumps.join(', ') || 'file skema'}. SELALU gunakan tool read_file untuk memeriksa struktur tabel dan kolom dari file dump SQL ini secara statis. DILARANG KERAS mengeksekusi script terminal atau inline node/tsx seperti 'npx tsx -e "import executeQuery from ./config/db"' untuk mengecek database, karena connection pool TCP akan memblokir proses selamanya (stuck/hang).`;
     }
 
     if (fs.existsSync(pkgPath)) {
@@ -879,6 +929,8 @@ export function autoIndexWorkspaceContext(workingDir: string): void {
       if (deps['tailwindcss']) techList.push('Tailwind CSS');
       if (deps['hono']) techList.push('Hono');
       if (deps['prisma'] || deps['@prisma/client']) techList.push('Prisma');
+      if (deps['mysql2']) techList.push('MySQL (mysql2)');
+      if (deps['pg']) techList.push('PostgreSQL');
       tech = techList.length > 0 ? techList.join(', ') : 'Node.js App';
 
       if (fs.existsSync(path.join(workingDir, 'pnpm-lock.yaml'))) pkgMgr = 'pnpm';
@@ -894,7 +946,9 @@ export function autoIndexWorkspaceContext(workingDir: string): void {
       package_manager: pkgMgr,
       dev_command: devCmd,
       dev_port: devPort,
-      key_files: keyFiles
+      architecture_summary: archSummary || undefined,
+      key_files: keyFiles,
+      custom_rules: customRules || undefined
     });
   } catch (err) {
     console.warn('Auto indexing context error:', err);
