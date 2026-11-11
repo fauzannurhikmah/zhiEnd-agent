@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, tick } from 'svelte';
+  import { onMount, tick, onDestroy } from 'svelte';
   import type { FileItem } from '../types';
   import { api } from '../services/api';
   import { dialog } from '../services/dialog.svelte';
@@ -21,9 +21,23 @@
     Columns,
     FileCode,
     ChevronRight,
-    ChevronDown
+    ChevronDown,
+    Hash,
+    Palette
   } from 'lucide-svelte';
   import SubtleHudMatrix from './SubtleHudMatrix.svelte';
+
+  // CodeMirror 6 Modules
+  import { EditorView, basicSetup } from 'codemirror';
+  import { EditorState, Compartment } from '@codemirror/state';
+  import { keymap } from '@codemirror/view';
+  import { search, searchKeymap, openSearchPanel, gotoLine } from '@codemirror/search';
+  import { oneDark } from '@codemirror/theme-one-dark';
+  import { javascript } from '@codemirror/lang-javascript';
+  import { html } from '@codemirror/lang-html';
+  import { css } from '@codemirror/lang-css';
+  import { json } from '@codemirror/lang-json';
+  import { sql } from '@codemirror/lang-sql';
 
   let {
     files,
@@ -37,7 +51,7 @@
     onClearLogs: () => void;
   } = $props();
 
-  // View Layout Mode: 'split' (Editor + Logs side-by-side or stacked), 'editor' (Full code editor), 'logs' (Full Telemetry Stream)
+  // View Layout Mode
   let viewMode = $state<'split' | 'editor' | 'logs'>('split');
 
   // Selected file state
@@ -52,7 +66,7 @@
   let fileSize = $state<number>(0);
   let fileModifiedAt = $state<string>('');
 
-  // Cursor coordinates & editor metrics
+  // Cursor coordinates
   let cursorLine = $state<number>(1);
   let cursorCol = $state<number>(1);
 
@@ -60,12 +74,122 @@
   let searchQuery = $state<string>('');
   let expandedFolders = $state<Set<string>>(new Set(['src', 'server', 'pages', 'components']));
 
-  // DOM elements
-  let textareaEl = $state<HTMLTextAreaElement | null>(null);
-  let lineNumbersEl = $state<HTMLDivElement | null>(null);
+  // CodeMirror Container & Instance
+  let editorHostEl = $state<HTMLDivElement | null>(null);
+  let editorView: EditorView | null = null;
+  const languageConf = new Compartment();
 
   const isDirty = $derived(selectedFile !== null && fileContent !== originalContent);
   const lineCount = $derived(fileContent ? fileContent.split('\n').length : 1);
+
+  // Custom Cyber-Industrial Theme extension
+  const cyberIndustrialTheme = EditorView.theme({
+    '&': {
+      backgroundColor: '#101114',
+      color: '#DCDAD4',
+      height: '100%',
+      fontSize: '12px',
+      fontFamily: 'JetBrains Mono, Menlo, Monaco, Consolas, monospace'
+    },
+    '.cm-scroller': {
+      overflow: 'auto',
+      fontFamily: 'inherit'
+    },
+    '.cm-content': {
+      caretColor: '#FF5500',
+      padding: '12px 0'
+    },
+    '.cm-cursor, .cm-dropCursor': {
+      borderLeftColor: '#FF5500',
+      borderLeftWidth: '2px'
+    },
+    '&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection': {
+      backgroundColor: 'rgba(255, 85, 0, 0.28) !important'
+    },
+    '.cm-gutters': {
+      backgroundColor: '#14161A',
+      color: '#555963',
+      borderRight: '1px solid #2A2B30',
+      paddingRight: '6px'
+    },
+    '.cm-activeLineGutter': {
+      backgroundColor: 'transparent',
+      color: '#FF5500',
+      fontWeight: 'bold'
+    },
+    '.cm-activeLine': {
+      backgroundColor: 'rgba(255, 255, 255, 0.03)'
+    },
+    // Search Panel styling (Match Cyber-Industrial Blueprint)
+    '.cm-panel.cm-search': {
+      backgroundColor: '#191B20',
+      color: '#ECEAE5',
+      borderBottom: '1px solid #FF5500',
+      padding: '6px 12px',
+      fontFamily: 'inherit'
+    },
+    '.cm-panel.cm-search input': {
+      backgroundColor: '#101114',
+      color: '#ECEAE5',
+      border: '1px solid #2A2B30',
+      outline: 'none',
+      padding: '2px 6px',
+      fontSize: '11px',
+      borderRadius: '0px'
+    },
+    '.cm-panel.cm-search input:focus': {
+      borderColor: '#FF5500'
+    },
+    '.cm-panel.cm-search button': {
+      backgroundColor: '#22242B',
+      color: '#ECEAE5',
+      border: '1px solid #2A2B30',
+      padding: '2px 8px',
+      fontSize: '11px',
+      borderRadius: '0px',
+      cursor: 'pointer',
+      margin: '0 2px'
+    },
+    '.cm-panel.cm-search button:hover': {
+      backgroundColor: '#FF5500',
+      color: '#FFFFFF'
+    },
+    '.cm-panel.cm-search label': {
+      color: '#8C9097',
+      fontSize: '11px',
+      marginLeft: '6px'
+    }
+  }, { dark: true });
+
+  function getLanguageExtension(filename: string) {
+    const ext = filename.split('.').pop()?.toLowerCase() || '';
+    switch (ext) {
+      case 'ts':
+      case 'tsx':
+        return javascript({ typescript: true, jsx: true });
+      case 'js':
+      case 'jsx':
+      case 'mjs':
+      case 'cjs':
+        return javascript({ jsx: true });
+      case 'svelte':
+        return html();
+      case 'html':
+      case 'htm':
+        return html();
+      case 'css':
+      case 'scss':
+      case 'less':
+        return css();
+      case 'json':
+      case 'jsonc':
+        return json();
+      case 'sql':
+        return sql();
+      default:
+        return [];
+    }
+  }
 
   function getFileIcon(name: string) {
     const ext = name.split('.').pop()?.toLowerCase();
@@ -89,11 +213,85 @@
     expandedFolders = next;
   }
 
+  function attachEditor(node: HTMLElement) {
+    editorHostEl = node;
+    if (selectedFile && !isBinary) {
+      initOrUpdateEditor(fileContent, selectedFile.name);
+    }
+    return {
+      update() {
+        if (selectedFile && !isBinary && !editorView) {
+          initOrUpdateEditor(fileContent, selectedFile.name);
+        }
+      },
+      destroy() {
+        if (editorView) {
+          editorView.destroy();
+          editorView = null;
+        }
+        editorHostEl = null;
+      }
+    };
+  }
+
+  function initOrUpdateEditor(content: string, filename: string) {
+    if (!editorHostEl) return;
+
+    if (editorView) {
+      editorView.destroy();
+      editorView = null;
+    }
+
+    const startState = EditorState.create({
+      doc: content,
+      extensions: [
+        basicSetup,
+        oneDark,
+        cyberIndustrialTheme,
+        languageConf.of(getLanguageExtension(filename)),
+        search({ top: true }),
+        keymap.of([
+          ...searchKeymap,
+          {
+            key: 'Mod-s',
+            run: () => {
+              handleSaveFile();
+              return true;
+            }
+          },
+          {
+            key: 'Mod-g',
+            run: (view) => {
+              gotoLine(view);
+              return true;
+            }
+          }
+        ]),
+        EditorView.updateListener.of((update) => {
+          if (update.docChanged) {
+            fileContent = update.state.doc.toString();
+          }
+          if (update.selectionSet || update.docChanged) {
+            const pos = update.state.selection.main.head;
+            const line = update.state.doc.lineAt(pos);
+            cursorLine = line.number;
+            cursorCol = pos - line.from + 1;
+          }
+        })
+      ]
+    });
+
+    editorView = new EditorView({
+      state: startState,
+      parent: editorHostEl
+    });
+  }
+
   async function openFile(f: { path: string; name: string }) {
     if (selectedFile?.path === f.path) return;
 
     if (isDirty) {
-      const confirmLeave = confirm(`File "${selectedFile?.name}" memiliki perubahan yang belum disimpan. Tetap buka file "${f.name}"?`);
+      const confirmLeave = confirm(`File "${selectedFile?.name}" memiliki perubahan yang belum disimpan. Buka "${f.name}"?`);
       if (!confirmLeave) return;
     }
 
@@ -115,13 +313,6 @@
         if (viewMode === 'logs') {
           viewMode = 'split';
         }
-
-        await tick();
-        if (textareaEl) {
-          textareaEl.scrollTop = 0;
-          textareaEl.selectionStart = 0;
-          textareaEl.selectionEnd = 0;
-        }
       } else {
         fileError = res.error || 'Gagal memuat isi file.';
         fileContent = '';
@@ -131,6 +322,11 @@
       fileError = err.message || 'Koneksi error saat membaca file.';
     } finally {
       isLoadingContent = false;
+    }
+
+    await tick();
+    if (!isBinary && selectedFile && editorHostEl) {
+      initOrUpdateEditor(fileContent, f.name);
     }
   }
 
@@ -166,81 +362,26 @@
     await openFile(current);
   }
 
-  function handleEditorScroll() {
-    if (textareaEl && lineNumbersEl) {
-      lineNumbersEl.scrollTop = textareaEl.scrollTop;
+  function handleTriggerSearch() {
+    if (editorView) {
+      openSearchPanel(editorView);
     }
   }
 
-  function updateCursorCoordinates() {
-    if (!textareaEl) return;
-    const pos = textareaEl.selectionStart;
-    const textBefore = fileContent.substring(0, pos);
-    const lines = textBefore.split('\n');
-    cursorLine = lines.length;
-    cursorCol = (lines[lines.length - 1]?.length || 0) + 1;
-  }
-
-  function handleEditorKeyDown(e: KeyboardEvent) {
-    // 1. Ctrl+S or Cmd+S -> Instant Save
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-      e.preventDefault();
-      handleSaveFile();
-      return;
+  function handleTriggerGotoLine() {
+    if (editorView) {
+      gotoLine(editorView);
     }
-
-    // 2. Tab key indentation (2 spaces)
-    if (e.key === 'Tab') {
-      e.preventDefault();
-      if (!textareaEl) return;
-
-      const start = textareaEl.selectionStart;
-      const end = textareaEl.selectionEnd;
-
-      if (e.shiftKey) {
-        // Shift+Tab -> Outdent
-        const text = fileContent;
-        const lineStart = text.lastIndexOf('\n', start - 1) + 1;
-        if (text.substring(lineStart, lineStart + 2) === '  ') {
-          fileContent = text.substring(0, lineStart) + text.substring(lineStart + 2);
-          tick().then(() => {
-            if (textareaEl) {
-              textareaEl.selectionStart = Math.max(lineStart, start - 2);
-              textareaEl.selectionEnd = Math.max(lineStart, end - 2);
-              updateCursorCoordinates();
-            }
-          });
-        }
-      } else {
-        // Tab -> Indent 2 spaces
-        fileContent = fileContent.substring(0, start) + '  ' + fileContent.substring(end);
-        tick().then(() => {
-          if (textareaEl) {
-            textareaEl.selectionStart = textareaEl.selectionEnd = start + 2;
-            updateCursorCoordinates();
-          }
-        });
-      }
-      return;
-    }
-
-    // Update cursor position on any key
-    tick().then(updateCursorCoordinates);
   }
 
   function insertQuickSnippet(snippet: string) {
-    if (!textareaEl) return;
-    const start = textareaEl.selectionStart;
-    const end = textareaEl.selectionEnd;
-    fileContent = fileContent.substring(0, start) + snippet + fileContent.substring(end);
-    tick().then(() => {
-      if (textareaEl) {
-        const newPos = start + snippet.length;
-        textareaEl.focus();
-        textareaEl.selectionStart = textareaEl.selectionEnd = newPos;
-        updateCursorCoordinates();
-      }
+    if (!editorView) return;
+    const { from, to } = editorView.state.selection.main;
+    editorView.dispatch({
+      changes: { from, to, insert: snippet },
+      selection: { anchor: from + snippet.length }
     });
+    editorView.focus();
   }
 
   function filterTree(items: FileItem[], query: string): FileItem[] {
@@ -268,6 +409,13 @@
   }
 
   const displayedFiles = $derived(filterTree(files || [], searchQuery));
+
+  onDestroy(() => {
+    if (editorView) {
+      editorView.destroy();
+      editorView = null;
+    }
+  });
 </script>
 
 <div class="h-full flex flex-col md:grid md:grid-cols-[280px_1fr] gap-3 overflow-hidden pb-16 md:pb-0 p-3 sm:p-4 text-[#111315] font-tech blueprint-cad-ground bg-[#ECEAE5] relative select-none">
@@ -461,7 +609,7 @@
           <FileCode class="w-3.5 h-3.5" />
           <span>EDITOR</span>
           {#if isDirty}
-            <span class="w-1.5 h-1.5 bg-[#FF5500] rounded-full animate-ping"></span>
+            <span class="w-1.5 h-1.5 bg-laser-orange rounded-full animate-ping"></span>
           {/if}
         </button>
 
@@ -481,9 +629,31 @@
         </button>
       </div>
 
-      <!-- Right Active File Pill or Save Button -->
+      <!-- Right Active File Actions & Save Button -->
       <div class="flex items-center gap-2">
-        {#if selectedFile}
+        {#if selectedFile && !isBinary}
+          <!-- Search in Code (Ctrl+F) Trigger -->
+          <button
+            onclick={handleTriggerSearch}
+            class="px-2 py-1 text-xs font-bold uppercase tracking-wider bg-[#ECEAE5] border border-[#D0CEC7] text-[#111315] hover:border-[#FF5500] hover:text-[#FF5500] cursor-pointer transition flex items-center gap-1"
+            title="Cari kodingan / teks (Ctrl+F)"
+          >
+            <Search class="w-3 h-3 text-[#FF5500]" />
+            <span class="hidden sm:inline">CARI</span>
+            <span class="text-[9px] font-mono text-[#8C9097] hidden md:inline">[CTRL+F]</span>
+          </button>
+
+          <!-- Goto Line (Ctrl+G) Trigger -->
+          <button
+            onclick={handleTriggerGotoLine}
+            class="px-2 py-1 text-xs font-bold uppercase tracking-wider bg-[#ECEAE5] border border-[#D0CEC7] text-[#111315] hover:border-[#FF5500] hover:text-[#FF5500] cursor-pointer transition flex items-center gap-1"
+            title="Lompat ke baris tertentu (Ctrl+G)"
+          >
+            <Hash class="w-3 h-3 text-[#FF5500]" />
+            <span class="hidden sm:inline">BARIS</span>
+            <span class="text-[9px] font-mono text-[#8C9097] hidden md:inline">[CTRL+G]</span>
+          </button>
+
           <!-- Dirty / Saved Badge -->
           <div class="flex items-center gap-1.5 font-stencil text-[10px]">
             {#if isDirty}
@@ -538,7 +708,7 @@
     <!-- Workspace Viewport Bays -->
     <div class="flex-1 flex flex-col md:flex-row gap-2.5 overflow-hidden min-h-0">
       <!-- -------------------------------------------------------- -->
-      <!-- BAY 1: REAL-TIME CODE EDITOR                             -->
+      <!-- BAY 1: SYNTAX-HIGHLIGHTED CODE EDITOR                    -->
       <!-- -------------------------------------------------------- -->
       {#if viewMode === 'editor' || viewMode === 'split'}
         <section
@@ -565,7 +735,7 @@
               </div>
 
               <div class="flex items-center gap-3 text-[10px] text-[#8C9097] shrink-0 font-mono">
-                <span>LN {cursorLine}, COL {cursorCol}</span>
+                <span class="text-emerald-400">LN {cursorLine}, COL {cursorCol}</span>
                 <span class="hidden sm:inline">|</span>
                 <span class="hidden sm:inline">{lineCount} LINES</span>
                 <span class="hidden sm:inline">|</span>
@@ -597,34 +767,12 @@
               <p class="text-[#8C9097] max-w-md">{fileContent}</p>
             </div>
           {:else if selectedFile}
-            <!-- Code Canvas with Line Numbers Gutter -->
-            <div class="relative flex-1 flex overflow-hidden font-stencil text-xs leading-relaxed crt-screen">
-              <!-- Line Numbers Gutter -->
-              <div
-                bind:this={lineNumbersEl}
-                class="w-11 shrink-0 bg-[#14161A] text-[#555963] select-none text-right pr-2.5 pt-3 overflow-hidden font-mono text-[11px] border-r border-[#2A2B30]"
-              >
-                {#each Array(lineCount) as _, idx}
-                  <div class="h-5 leading-5 {cursorLine === idx + 1 ? 'text-[#FF5500] font-bold' : ''}">
-                    {idx + 1}
-                  </div>
-                {/each}
-              </div>
-
-              <!-- Main Code Textarea Input Well -->
-              <textarea
-                bind:this={textareaEl}
-                bind:value={fileContent}
-                onscroll={handleEditorScroll}
-                onkeydown={handleEditorKeyDown}
-                onclick={updateCursorCoordinates}
-                onkeyup={updateCursorCoordinates}
-                spellcheck="false"
-                autocomplete="off"
-                autocapitalize="off"
-                class="flex-1 bg-transparent text-[#E5E3DD] p-3 pl-3 outline-none resize-none overflow-auto font-stencil text-[11px] leading-5 whitespace-pre tab-4 border-none focus:ring-0 selection:bg-[#FF5500] selection:text-white"
-              ></textarea>
-            </div>
+            <!-- CodeMirror 6 Mount Node with One Dark Theme & Syntax Highlighting -->
+            <div
+              use:attachEditor
+              bind:this={editorHostEl}
+              class="relative flex-1 overflow-hidden font-stencil text-xs crt-screen h-full w-full"
+            ></div>
 
             <!-- Mobile Quick Helper Toolbar -->
             <div class="bg-[#14161A] border-t border-[#2A2B30] p-1.5 flex items-center gap-1 overflow-x-auto shrink-0 select-none">
@@ -651,13 +799,15 @@
                 STANDBY :: CODE EDITOR
               </h3>
               <p class="text-[11px] font-stencil text-[#8C9097] max-w-sm mb-4 leading-relaxed">
-                Pilih file dari panel Project Blueprint di sisi kiri untuk membuka dan mengedit kode secara langsung dengan sinkronisasi realtime.
+                Pilih file dari panel Project Blueprint di sisi kiri untuk membuka dan mengedit kode secara langsung dengan syntax highlighting & pencarian interaktif.
               </p>
-              <div class="flex items-center gap-2 text-[10px] font-mono text-[#60646C] bg-[#14161A] px-3 py-1.5 border border-[#2A2B30]">
+              <div class="flex flex-wrap items-center justify-center gap-2 text-[10px] font-mono text-[#8C9097] bg-[#14161A] px-3 py-1.5 border border-[#2A2B30]">
                 <span class="text-[#FF5500] font-bold">SHORTCUT:</span>
                 <span>Ctrl+S (Save)</span>
                 <span>•</span>
-                <span>Tab (Indent 2 spasi)</span>
+                <span>Ctrl+F (Cari Kodingan)</span>
+                <span>•</span>
+                <span>Ctrl+G (Lompat Baris)</span>
               </div>
             </div>
           {/if}
@@ -727,3 +877,14 @@
     </div>
   </main>
 </div>
+
+<style>
+  :global(.cm-editor) {
+    height: 100% !important;
+    outline: none !important;
+  }
+  :global(.cm-scroller) {
+    overflow: auto !important;
+    font-family: inherit !important;
+  }
+</style>
