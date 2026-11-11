@@ -219,6 +219,7 @@
   let isProjectModalOpen = $state(false);
   let isPinModalOpen = $state(false);
   let isPushModalOpen = $state(false);
+  let isPulling = $state(false);
   let pushStatus = $state<"idle" | "running" | "success" | "error">("idle");
   let pushLogs = $state("");
 
@@ -1267,16 +1268,26 @@
             }
           }}
           onPush={handleExecutePush}
+          {isPulling}
           onPull={async () => {
-            const res = await api.pull();
-            if (res.success) {
-              dialog.showSuccess(
-                "Git Pull Sukses:\n" + (res.stdout || "Up to date"),
-              );
-            } else {
-              dialog.showError("Git Pull Gagal:\n" + (res.error || res.stderr));
+            if (isPulling) return;
+            isPulling = true;
+            try {
+              const res = await api.pull();
+              if (res.success) {
+                dialog.showSuccess(
+                  "Git Pull Sukses:\n" + (res.stdout || "Up to date"),
+                );
+              } else {
+                dialog.showError("Git Pull Gagal:\n" + (res.error || res.stderr));
+              }
+              gitStatus = await api.getGitStatus();
+              commits = (await api.getRecentCommits()).commits || [];
+            } catch (err: any) {
+              dialog.showError("Git Pull Gagal:\n" + err.message);
+            } finally {
+              isPulling = false;
             }
-            gitStatus = await api.getGitStatus();
           }}
           onGenerateAiCommit={async () => {
             const res = await api.generateAiCommit();

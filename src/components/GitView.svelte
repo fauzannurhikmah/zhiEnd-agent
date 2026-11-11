@@ -11,12 +11,14 @@
     Check, 
     CheckSquare, 
     Square, 
-    ExternalLink 
+    ExternalLink,
+    Loader2
   } from 'lucide-svelte';
 
   let {
     gitStatus,
     commits,
+    isPulling = false,
     onRefresh,
     onStageFiles,
     onUnstageFiles,
@@ -28,12 +30,13 @@
   }: {
     gitStatus: GitStatus | null;
     commits: CommitInfo[];
-    onRefresh: () => void;
+    isPulling?: boolean;
+    onRefresh: () => void | Promise<void>;
     onStageFiles: (files: string[]) => void;
     onUnstageFiles: (files: string[]) => void;
     onCommit: (message: string) => Promise<boolean>;
     onPush: () => void;
-    onPull: () => void;
+    onPull: () => void | Promise<void>;
     onGenerateAiCommit: () => Promise<string>;
     onLoadDiff: (file: string, staged: boolean) => Promise<string>;
   } = $props();
@@ -43,6 +46,30 @@
   let commitMessage = $state('');
   let isGeneratingAiMsg = $state(false);
   let isCommitting = $state(false);
+  let localPulling = $state(false);
+  let isRefreshing = $state(false);
+
+  const pulling = $derived(isPulling || localPulling);
+
+  async function handlePull() {
+    if (pulling) return;
+    localPulling = true;
+    try {
+      await onPull();
+    } finally {
+      localPulling = false;
+    }
+  }
+
+  async function handleRefresh() {
+    if (isRefreshing) return;
+    isRefreshing = true;
+    try {
+      await onRefresh();
+    } finally {
+      isRefreshing = false;
+    }
+  }
 
   $effect(() => {
     if (gitStatus?.files && gitStatus.files.length > 0 && !selectedFile) {
@@ -117,24 +144,39 @@
           {gitStatus?.behind || 0} behind
         </span>
       </div>
+
+      {#if pulling}
+        <div class="flex items-center gap-1.5 px-2.5 py-0.5 bg-orange-50 border border-[#FF5500] text-[#FF5500] text-[11px] font-stencil font-bold animate-pulse">
+          <Loader2 class="w-3 h-3 animate-spin shrink-0 text-[#FF5500]" />
+          <span>INGRESS // PULLING FROM REMOTE...</span>
+        </div>
+      {/if}
     </div>
 
     <!-- Actions -->
     <div class="flex items-center gap-2 self-start sm:self-auto">
       <button
-        onclick={onPull}
-        class="btn-hardware px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5 cursor-pointer uppercase"
-        title="Git Pull"
+        onclick={handlePull}
+        disabled={pulling}
+        class="btn-hardware px-3 py-1.5 rounded-none text-xs font-bold flex items-center gap-1.5 uppercase transition-all {pulling ? 'border-[#FF5500] text-[#FF5500] bg-orange-50/50 cursor-wait' : 'cursor-pointer text-[#111315]'}"
+        title={pulling ? "Sedang melakukan Git Pull..." : "Git Pull"}
       >
-        <Download class="w-3.5 h-3.5 text-[#60646C]" /> Pull
+        {#if pulling}
+          <Loader2 class="w-3.5 h-3.5 animate-spin text-[#FF5500]" />
+          <span>PULLING...</span>
+        {:else}
+          <Download class="w-3.5 h-3.5 text-[#60646C]" />
+          <span>PULL</span>
+        {/if}
       </button>
 
       <button
-        onclick={onRefresh}
-        class="btn-hardware p-2 rounded-none text-[#60646C] hover:text-[#111315] cursor-pointer"
+        onclick={handleRefresh}
+        disabled={isRefreshing}
+        class="btn-hardware p-2 rounded-none text-[#60646C] hover:text-[#111315] transition cursor-pointer {isRefreshing ? 'border-[#FF5500] text-[#FF5500]' : ''}"
         title="Refresh status"
       >
-        <RotateCw class="w-3.5 h-3.5" />
+        <RotateCw class="w-3.5 h-3.5 {isRefreshing ? 'animate-spin text-[#FF5500]' : ''}" />
       </button>
 
       <button
