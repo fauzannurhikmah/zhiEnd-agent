@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, tick, onDestroy } from 'svelte';
-  import type { FileItem } from '../types';
+  import { type FileItem, sortFileItems } from '../types';
   import { api } from '../services/api';
   import { dialog } from '../services/dialog.svelte';
   import {
@@ -26,6 +26,7 @@
     Palette
   } from 'lucide-svelte';
   import SubtleHudMatrix from './SubtleHudMatrix.svelte';
+  import FileTreeNode from './FileTreeNode.svelte';
 
   // CodeMirror 6 Modules
   import { EditorView, basicSetup } from 'codemirror';
@@ -203,12 +204,27 @@
     return ext.toUpperCase();
   }
 
-  function toggleFolder(folderPath: string) {
+  onMount(() => {
+    onRefreshFiles?.();
+  });
+
+  async function toggleFolder(folderPath: string, folderItem?: FileItem) {
     const next = new Set(expandedFolders);
     if (next.has(folderPath)) {
       next.delete(folderPath);
     } else {
       next.add(folderPath);
+      // If folder children are missing or empty, lazily load live contents directly from server disk
+      if (folderItem && (!folderItem.children || folderItem.children.length === 0)) {
+        try {
+          const res = await api.getDirectoryFiles(folderPath);
+          if (res?.files && res.files.length > 0) {
+            folderItem.children = sortFileItems(res.files);
+          }
+        } catch (e) {
+          console.warn('Failed to load directory files on demand:', folderPath, e);
+        }
+      }
     }
     expandedFolders = next;
   }
@@ -385,16 +401,17 @@
   }
 
   function filterTree(items: FileItem[], query: string): FileItem[] {
-    if (!query.trim()) return items;
+    const sorted = sortFileItems(items);
+    if (!query.trim()) return sorted;
     const q = query.toLowerCase();
 
     function matchItem(item: FileItem): FileItem | null {
       if (!item.isDirectory) {
         return item.name.toLowerCase().includes(q) ? item : null;
       }
-      const matchingChildren = (item.children || [])
+      const matchingChildren = sortFileItems((item.children || [])
         .map(matchItem)
-        .filter((c): c is FileItem => c !== null);
+        .filter((c): c is FileItem => c !== null));
 
       if (matchingChildren.length > 0 || item.name.toLowerCase().includes(q)) {
         return {
@@ -405,10 +422,10 @@
       return null;
     }
 
-    return items.map(matchItem).filter((i): i is FileItem => i !== null);
+    return sortFileItems(sorted.map(matchItem).filter((i): i is FileItem => i !== null));
   }
 
-  const displayedFiles = $derived(filterTree(files || [], searchQuery));
+  const displayedFiles = $derived(sortFileItems(filterTree(files || [], searchQuery)));
 
   onDestroy(() => {
     if (editorView) {
@@ -474,101 +491,15 @@
         </div>
       {:else}
         {#each displayedFiles as item (item.path)}
-          <!-- Root Level Item -->
-          {#if item.isDirectory}
-            {@const isExp = expandedFolders.has(item.path)}
-            <div>
-              <button
-                onclick={() => toggleFolder(item.path)}
-                class="w-full flex items-center gap-1.5 py-1 px-1.5 rounded-none hover:bg-[#ECEAE5] cursor-pointer text-[#111315] text-left transition"
-              >
-                {#if isExp}
-                  <ChevronDown class="w-3 h-3 text-[#60646C]" />
-                  <FolderOpen class="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                {:else}
-                  <ChevronRight class="w-3 h-3 text-[#60646C]" />
-                  <Folder class="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                {/if}
-                <span class="font-bold truncate">{item.name}/</span>
-              </button>
-
-              <!-- Level 1 Children -->
-              {#if isExp && item.children && item.children.length > 0}
-                <div class="pl-3.5 border-l border-[#D0CEC7] ml-2 flex flex-col gap-0.5 my-0.5">
-                  {#each item.children as c1 (c1.path)}
-                    {#if c1.isDirectory}
-                      {@const isC1Exp = expandedFolders.has(c1.path)}
-                      <div>
-                        <button
-                          onclick={() => toggleFolder(c1.path)}
-                          class="w-full flex items-center gap-1.5 py-0.5 px-1 rounded-none hover:bg-[#ECEAE5] cursor-pointer text-[#60646C] hover:text-[#111315] text-left transition"
-                        >
-                          {#if isC1Exp}
-                            <ChevronDown class="w-2.5 h-2.5 text-[#8C9097]" />
-                            <FolderOpen class="w-3 h-3 text-amber-600/80 shrink-0" />
-                          {:else}
-                            <ChevronRight class="w-2.5 h-2.5 text-[#8C9097]" />
-                            <Folder class="w-3 h-3 text-amber-600/80 shrink-0" />
-                          {/if}
-                          <span class="font-medium truncate">{c1.name}/</span>
-                        </button>
-
-                        <!-- Level 2 Children -->
-                        {#if isC1Exp && c1.children && c1.children.length > 0}
-                          <div class="pl-3 border-l border-[#D0CEC7] ml-1.5 flex flex-col gap-0.5 my-0.5">
-                            {#each c1.children as c2 (c2.path)}
-                              {#if !c2.isDirectory}
-                                {@const isC2Selected = selectedFile?.path === c2.path}
-                                {@const IconC2 = getFileIcon(c2.name)}
-                                <button
-                                  onclick={() => openFile(c2)}
-                                  class="w-full flex items-center gap-1.5 py-0.5 px-1 rounded-none cursor-pointer transition text-left {isC2Selected
-                                    ? 'bg-[#E5E3DD] text-[#FF5500] font-bold border-l-2 border-[#FF5500]'
-                                    : 'text-[#60646C] hover:bg-[#ECEAE5] hover:text-[#111315]'}"
-                                >
-                                  <IconC2 class="w-3 h-3 shrink-0 {isC2Selected ? 'text-[#FF5500]' : 'text-[#8C9097]'}" />
-                                  <span class="truncate">{c2.name}</span>
-                                </button>
-                              {:else}
-                                <div class="flex items-center gap-1 py-0.5 px-1 text-[#8C9097] text-[10px]">
-                                  <Folder class="w-2.5 h-2.5" />
-                                  <span class="truncate">{c2.name}/</span>
-                                </div>
-                              {/if}
-                            {/each}
-                          </div>
-                        {/if}
-                      </div>
-                    {:else}
-                      {@const isC1Selected = selectedFile?.path === c1.path}
-                      {@const IconC1 = getFileIcon(c1.name)}
-                      <button
-                        onclick={() => openFile(c1)}
-                        class="w-full flex items-center gap-1.5 py-0.5 px-1 rounded-none cursor-pointer transition text-left {isC1Selected
-                          ? 'bg-[#E5E3DD] text-[#FF5500] font-bold border-l-2 border-[#FF5500]'
-                          : 'text-[#60646C] hover:bg-[#ECEAE5] hover:text-[#111315]'}"
-                      >
-                        <IconC1 class="w-3 h-3 shrink-0 {isC1Selected ? 'text-[#FF5500]' : 'text-[#8C9097]'}" />
-                        <span class="truncate">{c1.name}</span>
-                      </button>
-                    {/if}
-                  {/each}
-                </div>
-              {/if}
-            </div>
-          {:else}
-            {@const isRootSelected = selectedFile?.path === item.path}
-            {@const RootIcon = getFileIcon(item.name)}
-            <button
-              onclick={() => openFile(item)}
-              class="w-full flex items-center gap-1.5 py-1 px-1.5 rounded-none cursor-pointer transition text-left {isRootSelected
-                ? 'bg-[#E5E3DD] text-[#FF5500] font-bold border-l-2 border-[#FF5500]'
-                : 'text-[#111315] hover:bg-[#ECEAE5]'}"
-            >
-              <RootIcon class="w-3.5 h-3.5 shrink-0 {isRootSelected ? 'text-[#FF5500]' : 'text-[#FF5500]'}" />
-              <span class="truncate">{item.name}</span>
-            </button>
-          {/if}
+          <FileTreeNode
+            {item}
+            depth={0}
+            {expandedFolders}
+            {selectedFile}
+            onToggleFolder={toggleFolder}
+            onOpenFile={openFile}
+            {getFileIcon}
+          />
         {/each}
       {/if}
     </div>

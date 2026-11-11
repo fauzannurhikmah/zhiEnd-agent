@@ -147,6 +147,17 @@ export interface FileItem {
   children?: FileItem[] | null;
 }
 
+export function sortFileItems(items: FileItem[]): FileItem[] {
+  return [...items].sort((a, b) => {
+    // 1. Directories first, files last
+    if (a.isDirectory !== b.isDirectory) {
+      return a.isDirectory ? -1 : 1;
+    }
+    // 2. Natural case-insensitive alphabetical sort
+    return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+  });
+}
+
 export interface ScannedProject {
   name: string;
   path: string;

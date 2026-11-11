@@ -737,34 +737,130 @@ app.post('/api/voice/transcribe', async (c) => {
 
 
 app.get('/api/projects/files', (c) => {
-  const activeProj = config.activeProject;
+  const cfg = loadConfig();
+  const activeProj = cfg.activeProject;
   if (!fs.existsSync(activeProj)) {
     return c.json({ error: 'Project path not found' }, 404);
   }
 
-  function readDirRecursive(dir: string, maxDepth: number = 2, currentDepth: number = 0): FileItem[] {
+  const ignoredFolders = new Set([
+    'node_modules',
+    '.git',
+    '.gemini',
+    'dist',
+    'build',
+    '.agents',
+    '.next',
+    '.turbo',
+    '.cache',
+    '.output',
+    '.nuxt',
+    '.svelte-kit',
+    'coverage',
+    '.idea',
+    '.vscode',
+  ]);
+
+  function readDirRecursive(dir: string, maxDepth: number = 10, currentDepth: number = 0): FileItem[] {
     if (currentDepth > maxDepth) return [];
     try {
       const items = fs.readdirSync(dir, { withFileTypes: true });
-      return items
-        .filter(item => !['node_modules', '.git', '.gemini', 'dist', 'build', '.agents'].includes(item.name))
-        .map(item => {
-          const fullPath = path.join(dir, item.name);
-          const relPath = path.relative(activeProj, fullPath);
-          return {
-            name: item.name,
-            path: relPath,
-            isDirectory: item.isDirectory(),
-            children: item.isDirectory() ? readDirRecursive(fullPath, maxDepth, currentDepth + 1) : null
-          };
+      const result: FileItem[] = [];
+
+      // Sort: Directories first, then files alphabetically
+      items.sort((a, b) => {
+        if (a.isDirectory() === b.isDirectory()) {
+          return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+        }
+        return a.isDirectory() ? -1 : 1;
+      });
+
+      for (const item of items) {
+        if (ignoredFolders.has(item.name)) continue;
+        if (item.name.startsWith('.git') || item.name === '$RECYCLE.BIN') continue;
+
+        const fullPath = path.join(dir, item.name);
+        const relPath = path.relative(activeProj, fullPath).replace(/\\/g, '/');
+
+        result.push({
+          name: item.name,
+          path: relPath,
+          isDirectory: item.isDirectory(),
+          children: item.isDirectory() ? readDirRecursive(fullPath, maxDepth, currentDepth + 1) : null
         });
+      }
+
+      // Strictly sort: Folders first, files last, alphabetically A-Z
+      result.sort((a, b) => {
+        if (a.isDirectory !== b.isDirectory) {
+          return a.isDirectory ? -1 : 1;
+        }
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+      });
+
+      return result;
     } catch {
       return [];
     }
   }
 
-  const tree = readDirRecursive(activeProj);
-  return c.json({ projectPath: activeProj, files: tree });
+  const tree = readDirRecursive(activeProj, 10);
+  return c.json({ projectPath: activeProj.replace(/\\/g, '/'), files: tree });
+});
+
+app.get('/api/projects/directory', (c) => {
+  const dirParam = c.req.query('path') || '';
+  const cfg = loadConfig();
+  const activeProj = cfg.activeProject;
+
+  const targetDir = path.resolve(activeProj, dirParam);
+  if (!targetDir.toLowerCase().startsWith(path.resolve(activeProj).toLowerCase())) {
+    return c.json({ error: 'Access denied: outside active project' }, 403);
+  }
+
+  if (!fs.existsSync(targetDir)) {
+    return c.json({ error: 'Directory not found' }, 404);
+  }
+
+  try {
+    const items = fs.readdirSync(targetDir, { withFileTypes: true });
+    items.sort((a, b) => {
+      if (a.isDirectory() === b.isDirectory()) {
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+      }
+      return a.isDirectory() ? -1 : 1;
+    });
+
+    const ignoredFolders = new Set(['node_modules', '.git', '.gemini', 'dist', 'build', '.agents', '.next', '.turbo', '.cache']);
+    const result: FileItem[] = [];
+
+    for (const item of items) {
+      if (ignoredFolders.has(item.name)) continue;
+      if (item.name.startsWith('.git') || item.name === '$RECYCLE.BIN') continue;
+
+      const fullPath = path.join(targetDir, item.name);
+      const relPath = path.relative(activeProj, fullPath).replace(/\\/g, '/');
+
+      result.push({
+        name: item.name,
+        path: relPath,
+        isDirectory: item.isDirectory(),
+        children: item.isDirectory() ? [] : null
+      });
+    }
+
+    // Strictly sort: Folders first, files last, alphabetically A-Z
+    result.sort((a, b) => {
+      if (a.isDirectory !== b.isDirectory) {
+        return a.isDirectory ? -1 : 1;
+      }
+      return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+    });
+
+    return c.json({ path: dirParam.replace(/\\/g, '/'), files: result });
+  } catch (err: any) {
+    return c.json({ error: err.message }, 500);
+  }
 });
 
 // File Content & Live Code Editor APIs

@@ -1043,6 +1043,11 @@
     onSelectTab={(tab) => {
       currentTab = tab;
       isMobileSidebarOpen = false;
+      if (tab === "files") {
+        api.getProjectFiles().then((res) => {
+          if (res?.files) projectFiles = res.files;
+        });
+      }
     }}
     onOpenProjectModal={() => {
       isProjectModalOpen = true;

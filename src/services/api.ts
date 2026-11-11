@@ -100,6 +100,13 @@ export const api = {
     return res.json();
   },
 
+  async getDirectoryFiles(dirPath: string): Promise<{ path: string; files: FileItem[] }> {
+    const res = await fetch(`/api/projects/directory?path=${encodeURIComponent(dirPath)}`, {
+      headers: getHeaders()
+    });
+    return res.json();
+  },
+
   async getFileContent(filePath: string): Promise<{
     success: boolean;
     path?: string;
