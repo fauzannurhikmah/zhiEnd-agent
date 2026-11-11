@@ -48,11 +48,26 @@
     Moon,
     Bell,
     BellOff,
+    PanelLeftClose,
+    PanelLeftOpen,
   } from "lucide-svelte";
 
   // Navigation tab
   let currentTab = $state<"chat" | "git" | "remote" | "files" | "connectors">("chat");
   let isMobileSidebarOpen = $state(false);
+
+  // Compact Sidebar toggle state with localStorage persistence
+  let isSidebarCompact = $state(
+    localStorage.getItem("zhiend_sidebar_compact") === "true",
+  );
+
+  function handleToggleSidebarCompact() {
+    isSidebarCompact = !isSidebarCompact;
+    localStorage.setItem(
+      "zhiend_sidebar_compact",
+      isSidebarCompact ? "true" : "false",
+    );
+  }
 
   // Theme management (Dark Mode with Circular Radial Transition)
   let isDark = $state(false);
@@ -1021,6 +1036,8 @@
     onToggleTheme={handleToggleTheme}
     {isSoundEnabled}
     onToggleSound={handleToggleSound}
+    isCompact={isSidebarCompact}
+    onToggleCompact={handleToggleSidebarCompact}
     isMobileOpen={isMobileSidebarOpen}
     onCloseMobile={() => (isMobileSidebarOpen = false)}
     onSelectTab={(tab) => {
@@ -1059,6 +1076,21 @@
           class="hidden sm:inline-flex crosshair-box w-6 h-6 shrink-0 transition-transform duration-300 hover:rotate-45 cursor-crosshair"
           title="Drafting Reticle"
         ></div>
+
+        <!-- Desktop Sidebar Compact Toggle -->
+        <button
+          type="button"
+          onclick={handleToggleSidebarCompact}
+          class="hidden md:flex p-1.5 rounded-none text-[#5C6066] hover:text-[#111315] hover:bg-[#D0CEC7]/40 border border-transparent hover:border-[#D0CEC7] transition cursor-pointer"
+          title={isSidebarCompact ? "Perluas Sidebar (Expand)" : "Persempit Sidebar (Compact Mode)"}
+          aria-label="Toggle Sidebar Compact Mode"
+        >
+          {#if isSidebarCompact}
+            <PanelLeftOpen class="w-4 h-4 text-[#FF5500]" />
+          {:else}
+            <PanelLeftClose class="w-4 h-4" />
+          {/if}
+        </button>
 
         <!-- Mobile Sidebar Hamburger Toggle -->
         <button
