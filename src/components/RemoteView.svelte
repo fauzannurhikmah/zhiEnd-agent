@@ -216,7 +216,7 @@
   <SubtleHudMatrix />
 
   <!-- Header Title -->
-  <div class="max-w-6xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3 border border-[#D0CEC7] bg-[#ECEAE5] p-3.5 shadow-2xs relative z-10">
+  <div class="max-w-6xl mx-auto mb-6 flex flex-col md:flex-row md:items-center justify-between gap-3 border border-[#D0CEC7] bg-[#FCFCFA] p-3.5 shadow-2xs relative z-10">
     <span class="reg-dot reg-dot-tl"></span>
     <span class="reg-dot reg-dot-tr"></span>
     <div>
@@ -233,10 +233,10 @@
       </p>
     </div>
     <div class="flex items-center gap-2 font-stencil text-[10px] shrink-0">
-      <span class="px-2.5 py-1 bg-[#FCFCFA] border border-[#D0CEC7] text-[#111315] font-bold">
+      <span class="px-2.5 py-1 bg-white border border-[#D0CEC7] text-[#111315] font-bold shadow-2xs">
         PORT: 3888
       </span>
-      <span class="px-2.5 py-1 bg-emerald-100 border border-emerald-300 text-emerald-800 font-bold flex items-center gap-1">
+      <span class="px-2.5 py-1 bg-emerald-100 border border-emerald-300 text-emerald-800 font-bold flex items-center gap-1 shadow-2xs">
         <span class="w-1.5 h-1.5 bg-emerald-500 animate-pulse"></span>
         BUS ONLINE
       </span>
@@ -248,7 +248,7 @@
     <!-- ========================================== -->
     <!-- CARD 1: WhatsApp Remote -->
     <!-- ========================================== -->
-    <div class="bg-[#ECEAE5] border border-[#D0CEC7] rounded-none p-5 flex flex-col gap-4 shadow-sm transition-all relative text-[#191B1D]">
+    <div class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-5 flex flex-col gap-4 shadow-2xs transition-all relative text-[#191B1D]">
       <span class="reg-dot reg-dot-tl"></span>
       <span class="reg-dot reg-dot-tr"></span>
       <span class="reg-dot reg-dot-bl"></span>
@@ -320,7 +320,7 @@
               <button
                 type="button"
                 onclick={() => selectPersona('whatsapp', p.id)}
-                class="w-full text-left px-2.5 py-2 rounded-none flex items-center justify-between gap-2 transition cursor-pointer {p.id === waActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#ECEAE5] text-[#191B1D]'}"
+                class="w-full text-left px-2.5 py-2 rounded-none flex items-center justify-between gap-2 transition cursor-pointer {p.id === waActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#F2EFE9] text-[#191B1D]'}"
               >
                 <div class="flex items-center gap-2 min-w-0">
                   <div class="w-6 h-6 rounded-none overflow-hidden shrink-0 border border-[#D0CEC7] bg-[#E5E3DD] flex items-center justify-center">
@@ -453,7 +453,7 @@
                 type="text"
                 bind:value={waAllowedInput}
                 placeholder="628123456789, 628987654321"
-                class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-none px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#D0CEC7] shadow-xs"
+                class="flex-1 bg-white border border-[#D0CEC7] rounded-none px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#D0CEC7] shadow-2xs"
               />
               <button
                 onclick={handleSaveWaNumbers}
@@ -469,18 +469,18 @@
 
       <!-- Command Quick Reference -->
       <div class="border-t border-[#D0CEC7] pt-2 text-[10px] text-[#5C6066] font-mono flex flex-wrap gap-1">
-        <span class="px-1.5 py-0.5 rounded-none bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!code</span>
-        <span class="px-1.5 py-0.5 rounded-none bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!persona</span>
-        <span class="px-1.5 py-0.5 rounded-none bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!git</span>
-        <span class="px-1.5 py-0.5 rounded-none bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!commit</span>
-        <span class="px-1.5 py-0.5 rounded-none bg-[#ECEAE5] border border-[#D0CEC7] text-[#191B1D] font-bold">!push</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-bold shadow-2xs">!code</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-bold shadow-2xs">!persona</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-bold shadow-2xs">!git</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-bold shadow-2xs">!commit</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-bold shadow-2xs">!push</span>
       </div>
     </div>
 
     <!-- ========================================== -->
     <!-- CARD 2: Telegram Remote -->
     <!-- ========================================== -->
-    <div class="bg-[#ECEAE5] border border-[#D0CEC7] rounded-none p-5 flex flex-col gap-4 shadow-sm transition-all relative text-[#191B1D]">
+    <div class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-5 flex flex-col gap-4 shadow-2xs transition-all relative text-[#191B1D]">
       <span class="reg-dot reg-dot-tl"></span>
       <span class="reg-dot reg-dot-tr"></span>
       <span class="reg-dot reg-dot-bl"></span>
@@ -547,7 +547,7 @@
               <button
                 type="button"
                 onclick={() => selectPersona('telegram', p.id)}
-                class="w-full text-left px-2.5 py-2 rounded-none flex items-center justify-between gap-2 transition cursor-pointer {p.id === tgActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#ECEAE5] text-[#191B1D]'}"
+                class="w-full text-left px-2.5 py-2 rounded-none flex items-center justify-between gap-2 transition cursor-pointer {p.id === tgActivePersonaId ? 'bg-[#FF5500]/10 text-[#FF5500] border border-[#FF5500]/30 font-bold' : 'hover:bg-[#F2EFE9] text-[#191B1D]'}"
               >
                 <div class="flex items-center gap-2 min-w-0">
                   <div class="w-6 h-6 rounded-none overflow-hidden shrink-0 border border-[#D0CEC7] bg-[#E5E3DD] flex items-center justify-center">
@@ -653,11 +653,11 @@
                 type="text"
                 bind:value={tgAllowedInput}
                 placeholder="12345678, @username"
-                class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-none px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#D0CEC7]"
+                class="flex-1 bg-white border border-[#D0CEC7] rounded-none px-2.5 py-1.5 text-xs text-[#191B1D] font-mono outline-none focus:border-[#D0CEC7] shadow-2xs"
               />
               <button
                 onclick={handleSaveTgConfig}
-                class="btn-hardware px-3 py-1.5 rounded-none text-xs font-bold cursor-pointer active:scale-95"
+                class="btn-hardware px-3 py-1.5 rounded-none text-xs font-bold cursor-pointer active:scale-95 shadow-xs"
               >
                 Simpan
               </button>
@@ -669,18 +669,18 @@
 
       <!-- Command Quick Reference -->
       <div class="border-t border-[#D0CEC7] pt-2 text-[10px] text-[#5C6066] font-mono flex flex-wrap gap-1">
-        <span class="px-1.5 py-0.5 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/code</span>
-        <span class="px-1.5 py-0.5 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/persona</span>
-        <span class="px-1.5 py-0.5 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/git</span>
-        <span class="px-1.5 py-0.5 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/commit</span>
-        <span class="px-1.5 py-0.5 rounded-none bg-[#FCFCFA] border border-[#D0CEC7] text-[#191B1D] font-semibold">/push</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-semibold shadow-2xs">/code</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-semibold shadow-2xs">/persona</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-semibold shadow-2xs">/git</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-semibold shadow-2xs">/commit</span>
+        <span class="px-1.5 py-0.5 rounded-none bg-white border border-[#D0CEC7] text-[#191B1D] font-semibold shadow-2xs">/push</span>
       </div>
     </div>
 
     <!-- ========================================== -->
     <!-- CARD 3: Public Tunnel & LAN -->
     <!-- ========================================== -->
-    <div class="bg-[#ECEAE5] border border-[#D0CEC7] rounded-none p-5 flex flex-col gap-4 shadow-sm transition-all relative text-[#191B1D]">
+    <div class="bg-[#FCFCFA] border border-[#D0CEC7] rounded-none p-5 flex flex-col gap-4 shadow-2xs transition-all relative text-[#191B1D]">
       <span class="reg-dot reg-dot-tl"></span>
       <span class="reg-dot reg-dot-tr"></span>
       <span class="reg-dot reg-dot-bl"></span>
@@ -708,7 +708,7 @@
         <span class="text-[11px] text-[#191B1D] font-bold flex items-center gap-1.5 font-stencil">
           <span>:: 1. AKSES WI-FI LOKAL (HP & LAPTOP):</span>
         </span>
-        <div class="flex items-center justify-between bg-[#FCFCFA] p-2.5 rounded-none border border-[#D0CEC7] text-xs font-mono text-[#191B1D]">
+        <div class="flex items-center justify-between bg-white p-2.5 rounded-none border border-[#D0CEC7] text-xs font-mono text-[#191B1D] shadow-2xs">
           <span class="truncate">{tunnelStatus?.localUrl || 'http://localhost:3888'}</span>
           <button
             onclick={() => copyText(tunnelStatus?.localUrl || '', 'local')}
@@ -725,7 +725,7 @@
       <div class="flex flex-col gap-1.5 pt-1">
         <span class="text-[11px] text-[#191B1D] font-bold font-stencil">:: 2. AKSES LUAR INTERNET (PUBLIC TUNNEL):</span>
         {#if tunnelStatus?.status === 'connected' && tunnelStatus.publicUrl}
-          <div class="flex items-center justify-between bg-[#FCFCFA] p-2.5 rounded-none border border-[#FF5500]/40 text-xs font-mono text-[#FF5500] font-bold">
+          <div class="flex items-center justify-between bg-white p-2.5 rounded-none border border-[#FF5500]/40 text-xs font-mono text-[#FF5500] font-bold shadow-2xs">
             <span class="truncate">{tunnelStatus.publicUrl}</span>
             <button
               onclick={() => copyText(tunnelStatus?.publicUrl || '', 'public')}
@@ -755,7 +755,7 @@
               type="text"
               bind:value={customSubdomain}
               placeholder="zhiend-agent"
-              class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-none px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#D0CEC7]"
+              class="flex-1 bg-white border border-[#D0CEC7] rounded-none px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#D0CEC7] shadow-2xs"
             />
             <button
               disabled={isStartingTunnel}
@@ -792,7 +792,7 @@
             type="password"
             bind:value={securityPinInput}
             placeholder="Ketik PIN (misal: 1234)"
-            class="flex-1 bg-[#FCFCFA] border border-[#D0CEC7] rounded-none px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#D0CEC7]"
+            class="flex-1 bg-white border border-[#D0CEC7] rounded-none px-3 py-2 text-xs text-[#191B1D] font-mono outline-none focus:border-[#D0CEC7] shadow-2xs"
           />
           <button
             onclick={handleSavePin}
@@ -811,7 +811,7 @@
   <!-- ========================================== -->
   <!-- BOTTOM DECK: Live Packet Stream Terminal Deck -->
   <!-- ========================================== -->
-  <div class="max-w-6xl mx-auto mt-6 border border-[#D0CEC7] bg-[#ECEAE5] p-4 relative shadow-sm text-[#191B1D]">
+  <div class="max-w-6xl mx-auto mt-6 border border-[#D0CEC7] bg-[#FCFCFA] p-4 relative shadow-2xs text-[#191B1D]">
     <span class="reg-dot reg-dot-tl"></span>
     <span class="reg-dot reg-dot-tr"></span>
     <span class="reg-dot reg-dot-bl"></span>
