@@ -470,8 +470,18 @@ export const api = {
 
   // Database: Personas AI
   async getPersonas(): Promise<{ personas: any[] }> {
-    const res = await fetch('/api/personas', { headers: getHeaders() });
-    return res.json();
+    try {
+      const res = await fetch('/api/personas', { headers: getHeaders() });
+      if (!res.ok) {
+        console.warn('[API] /api/personas returned status:', res.status);
+        return { personas: [] };
+      }
+      const data = await res.json();
+      return { personas: Array.isArray(data?.personas) ? data.personas : [] };
+    } catch (err) {
+      console.warn('[API] /api/personas network error:', err);
+      return { personas: [] };
+    }
   },
 
   async createPersona(data: { name: string; avatar?: string; traits?: string; system_prompt: string; preferred_model?: string }): Promise<any> {

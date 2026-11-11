@@ -302,21 +302,50 @@
   });
 
   async function refreshAll() {
+    // 1. Fetch Core State First (Personas, Config, Chat Sessions)
+    try {
+      const pRes = await api.getPersonas();
+      if (pRes?.personas && Array.isArray(pRes.personas) && pRes.personas.length > 0) {
+        personas = pRes.personas;
+      }
+    } catch (e) {
+      console.warn("Failed to load personas:", e);
+    }
+
     try {
       config = await api.getConfig();
-      gitStatus = await api.getGitStatus();
-      commits = (await api.getRecentCommits()).commits || [];
-      tunnelStatus = await api.getNetworkInfo();
-      telegramStatus = await api.getTelegramStatus();
-      whatsappStatus = await api.getWhatsAppStatus();
-      projectFiles = (await api.getProjectFiles()).files || [];
-      await checkDevServer();
-      const pRes = await api.getPersonas();
-      personas = pRes.personas || [];
+    } catch (e) {
+      console.warn("Failed to load config:", e);
+    }
+
+    try {
       await loadSessions(false);
     } catch (e) {
-      console.error("Error refreshing state:", e);
+      console.warn("Failed to load sessions:", e);
     }
+
+    // 2. Fetch Auxiliary States in parallel (independent so none can block personas/sessions)
+    try {
+      const [gitRes, commitRes, tunnelRes, tgRes, waRes, filesRes] = await Promise.allSettled([
+        api.getGitStatus(),
+        api.getRecentCommits(),
+        api.getNetworkInfo(),
+        api.getTelegramStatus(),
+        api.getWhatsAppStatus(),
+        api.getProjectFiles(),
+      ]);
+
+      if (gitRes.status === "fulfilled" && gitRes.value) gitStatus = gitRes.value;
+      if (commitRes.status === "fulfilled" && commitRes.value?.commits) commits = commitRes.value.commits;
+      if (tunnelRes.status === "fulfilled" && tunnelRes.value) tunnelStatus = tunnelRes.value;
+      if (tgRes.status === "fulfilled" && tgRes.value) telegramStatus = tgRes.value;
+      if (waRes.status === "fulfilled" && waRes.value) whatsappStatus = waRes.value;
+      if (filesRes.status === "fulfilled" && filesRes.value?.files) projectFiles = filesRes.value.files;
+    } catch (e) {
+      console.warn("Auxiliary state error:", e);
+    }
+
+    checkDevServer();
   }
 
   async function handleSelectPersona(persona: PersonaItem) {
@@ -596,7 +625,12 @@
   }
 
   function initSocket() {
-    socket = io();
+    socket = io({
+      extraHeaders: {
+        "Bypass-Tunnel-Reminder": "true"
+      },
+      transports: ["polling", "websocket"]
+    });
 
     socket.on("connect", () => {
       addLog("Socket connected to backend.");

@@ -123,10 +123,20 @@ const whatsappBot = new WhatsAppBotManager({
 });
 
 // Global Middleware
-app.use('*', cors({ origin: '*' }));
+app.use('*', cors({
+  origin: '*',
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowHeaders: ['Content-Type', 'Authorization', 'x-security-pin', 'Bypass-Tunnel-Reminder', 'bypass-tunnel-reminder', 'Accept', 'Origin'],
+  exposeHeaders: ['Content-Length', 'Content-Type']
+}));
 
 // Security PIN Middleware for /api/*
 app.use('/api/*', async (c, next) => {
+  // Always allow CORS preflight requests
+  if (c.req.method === 'OPTIONS') {
+    return next();
+  }
+
   const path = c.req.path;
   if (
     path === '/api/auth/status' ||
