@@ -755,6 +755,107 @@ app.get('/api/projects/files', (c) => {
   return c.json({ projectPath: activeProj, files: tree });
 });
 
+// File Content & Live Code Editor APIs
+app.get('/api/projects/file-content', (c) => {
+  const relPath = c.req.query('path');
+  if (!relPath) return c.json({ success: false, error: 'Path file wajib diberikan.' }, 400);
+
+  const activeProj = config.activeProject;
+  const fullPath = path.resolve(activeProj, relPath);
+
+  // Path traversal security check
+  if (!fullPath.toLowerCase().startsWith(path.resolve(activeProj).toLowerCase())) {
+    return c.json({ success: false, error: 'Akses ditolak: Path di luar project active.' }, 403);
+  }
+
+  if (!fs.existsSync(fullPath)) {
+    return c.json({ success: false, error: `File tidak ditemukan: ${relPath}` }, 404);
+  }
+
+  const stat = fs.statSync(fullPath);
+  if (stat.isDirectory()) {
+    return c.json({ success: false, error: 'Path merujuk ke folder, bukan file.' }, 400);
+  }
+
+  if (stat.size > 5 * 1024 * 1024) {
+    return c.json({ success: false, error: 'Ukuran file terlalu besar untuk editor (> 5MB).' }, 400);
+  }
+
+  const ext = path.extname(fullPath).toLowerCase();
+  const binaryExts = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.pdf', '.exe', '.dll', '.zip', '.tar', '.gz', '.mp3', '.mp4', '.woff', '.woff2', '.ttf'];
+  if (binaryExts.includes(ext)) {
+    return c.json({
+      success: true,
+      path: relPath,
+      isBinary: true,
+      size: stat.size,
+      modifiedAt: stat.mtime.toISOString(),
+      content: `[File Biner: format ${ext} (${(stat.size / 1024).toFixed(1)} KB) tidak dapat diedit langsung dalam text editor]`
+    });
+  }
+
+  try {
+    const content = fs.readFileSync(fullPath, 'utf-8');
+    return c.json({
+      success: true,
+      path: relPath,
+      content,
+      size: stat.size,
+      modifiedAt: stat.mtime.toISOString(),
+      isBinary: false
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: `Gagal membaca file: ${err.message}` }, 500);
+  }
+});
+
+app.post('/api/projects/file-save', async (c) => {
+  let body: any;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ success: false, error: 'Payload JSON tidak valid.' }, 400);
+  }
+
+  const relPath = body?.path;
+  const content = body?.content;
+
+  if (!relPath || typeof content !== 'string') {
+    return c.json({ success: false, error: 'Field "path" dan "content" wajib diisi.' }, 400);
+  }
+
+  const activeProj = config.activeProject;
+  const fullPath = path.resolve(activeProj, relPath);
+
+  // Path traversal security check
+  if (!fullPath.toLowerCase().startsWith(path.resolve(activeProj).toLowerCase())) {
+    return c.json({ success: false, error: 'Akses ditolak: Path di luar project active.' }, 403);
+  }
+
+  try {
+    const dir = path.dirname(fullPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(fullPath, content, 'utf-8');
+    const stat = fs.statSync(fullPath);
+
+    const logMsg = `[FileEditor] Berhasil menyimpan file: "${relPath}" (${(stat.size / 1024).toFixed(1)} KB)`;
+    console.log(logMsg);
+    io?.emit('system_log', logMsg);
+
+    return c.json({
+      success: true,
+      message: `File "${relPath}" berhasil disimpan.`,
+      path: relPath,
+      size: stat.size,
+      modifiedAt: stat.mtime.toISOString()
+    });
+  } catch (err: any) {
+    return c.json({ success: false, error: `Gagal menyimpan file: ${err.message}` }, 500);
+  }
+});
+
 // Git APIs
 app.get('/api/git/status', async (c) => {
   const status = await gitManager.getStatus(config.activeProject);

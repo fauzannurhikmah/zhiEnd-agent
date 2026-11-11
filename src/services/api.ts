@@ -100,6 +100,45 @@ export const api = {
     return res.json();
   },
 
+  async getFileContent(filePath: string): Promise<{
+    success: boolean;
+    path?: string;
+    content?: string;
+    size?: number;
+    modifiedAt?: string;
+    isBinary?: boolean;
+    error?: string;
+  }> {
+    try {
+      const res = await fetch(`/api/projects/file-content?path=${encodeURIComponent(filePath)}`, {
+        headers: getHeaders()
+      });
+      return await res.json();
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async saveFileContent(filePath: string, content: string): Promise<{
+    success: boolean;
+    message?: string;
+    path?: string;
+    size?: number;
+    modifiedAt?: string;
+    error?: string;
+  }> {
+    try {
+      const res = await fetch('/api/projects/file-save', {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ path: filePath, content })
+      });
+      return await res.json();
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  },
+
   // Dev Server Controls
   async getDevServerStatus(): Promise<{ project: string; activePorts: { port: number; url: string }[]; isRunning: boolean }> {
     const res = await fetch('/api/project/dev-server/status', { headers: getHeaders() });
