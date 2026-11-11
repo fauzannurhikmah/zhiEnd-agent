@@ -41,6 +41,8 @@ export interface RunOptions {
   sessionId?: string;
   personaId?: string;
   images?: string[];
+  source?: string;
+  isUtility?: boolean;
 }
 
 export class AgentRunner extends EventEmitter {
@@ -235,17 +237,21 @@ Projek ini merupakan bagian dari ekosistem ERP Sehati yang memakai database 'erp
 Permintaan Pengguna:
 ${options.prompt}`;
 
+    const effectivePrompt = options.isUtility ? options.prompt : promptWithContext;
+
     const args: string[] = [
-      '-p', promptWithContext,
+      '-p', effectivePrompt,
       '--output-format', 'stream-json',
       '--dangerously-skip-permissions',
       '--model', selectedModel
     ];
 
-    if (effectiveConversationId) {
-      args.push('--conversation', effectiveConversationId);
-    } else if (options.continueLast) {
-      args.push('-c');
+    if (!options.isUtility) {
+      if (effectiveConversationId) {
+        args.push('--conversation', effectiveConversationId);
+      } else if (options.continueLast) {
+        args.push('-c');
+      }
     }
 
     const taskId = 'task_' + Date.now();
@@ -257,10 +263,12 @@ ${options.prompt}`;
       startTime: Date.now(),
       status: 'running',
       response: '',
-      conversationId: effectiveConversationId || null,
+      conversationId: options.isUtility ? null : (effectiveConversationId || null),
       toolsExecuted: [],
       sessionId: options.sessionId,
       personaId: targetPersonaId,
+      source: options.source || (options.isUtility ? 'utility' : 'web'),
+      isUtility: options.isUtility || false,
       images: options.images || []
     };
 
@@ -271,6 +279,8 @@ ${options.prompt}`;
       model: selectedModel,
       sessionId: options.sessionId,
       personaId: targetPersonaId,
+      source: options.source || (options.isUtility ? 'utility' : 'web'),
+      isUtility: options.isUtility || false,
       images: options.images || []
     });
 
@@ -383,11 +393,13 @@ ${options.prompt}`;
           this.activeTask.generatedImages = genImages;
 
           const finishedTask = { ...this.activeTask };
-          if (finishedTask.conversationId && finishedTask.sessionId) {
-            updateChatSessionConversationId(finishedTask.sessionId, finishedTask.conversationId);
+          if (!finishedTask.isUtility) {
+            if (finishedTask.conversationId && finishedTask.sessionId) {
+              updateChatSessionConversationId(finishedTask.sessionId, finishedTask.conversationId);
+            }
+            this.history.unshift(finishedTask);
+            if (this.history.length > 50) this.history.pop();
           }
-          this.history.unshift(finishedTask);
-          if (this.history.length > 50) this.history.pop();
 
           this.emit('task_end', {
             id: finishedTask.id,
@@ -404,6 +416,8 @@ ${options.prompt}`;
             thought: finishedTask.thought || '',
             sessionId: finishedTask.sessionId,
             personaId: finishedTask.personaId,
+            source: finishedTask.source || 'web',
+            isUtility: !!finishedTask.isUtility,
             images: options.images || [], // Hanya gambar yang diunggah oleh pengguna
             generatedImages: genImages
           });
@@ -460,7 +474,9 @@ ${options.prompt}`;
           this.emit('agent_delta', {
             taskId,
             delta: step.text_delta,
-            accumulated: this.activeTask.response
+            accumulated: this.activeTask.response,
+            sessionId: this.activeTask.sessionId,
+            source: this.activeTask.source || 'web'
           });
         }
 
@@ -612,6 +628,8 @@ ${options.prompt}`;
 
         this.emit('agent_step', {
           taskId,
+          sessionId: this.activeTask.sessionId,
+          source: this.activeTask.source || 'web',
           stepIndex: step.step_index,
           stepType: step.step_type,
           toolName: step.tool_name || step.tool_info?.name,
@@ -647,6 +665,7 @@ ${options.prompt}`;
       conversationId: options.conversationId || null,
       toolsExecuted: [`run_command: ${command}`],
       sessionId: options.sessionId,
+      isUtility: options.isUtility || false,
       images: options.images || []
     };
 
@@ -656,6 +675,7 @@ ${options.prompt}`;
       project: workingDir,
       model: '⚡ Direct CLI',
       sessionId: options.sessionId,
+      isUtility: options.isUtility || false,
       images: options.images || []
     });
 
@@ -706,8 +726,10 @@ ${options.prompt}`;
         });
 
         const finishedTask = { ...this.activeTask };
-        this.history.unshift(finishedTask);
-        if (this.history.length > 50) this.history.pop();
+        if (!finishedTask.isUtility) {
+          this.history.unshift(finishedTask);
+          if (this.history.length > 50) this.history.pop();
+        }
 
         this.emit('task_end', {
           id: finishedTask.id,
@@ -728,6 +750,7 @@ ${options.prompt}`;
           thought: `Mengeksekusi perintah terminal langsung tanpa loop AI untuk efisiensi maksimum.`,
           sessionId: finishedTask.sessionId,
           personaId: finishedTask.personaId,
+          isUtility: !!finishedTask.isUtility,
           images: finishedTask.images || []
         });
 
@@ -773,10 +796,12 @@ ${options.prompt}`;
       startTime: Date.now(),
       status: 'running',
       response: '',
-      conversationId: options.conversationId || null,
+      conversationId: options.isUtility ? null : (options.conversationId || null),
       toolsExecuted: [],
       sessionId: options.sessionId,
       personaId: targetPersonaId,
+      source: options.source || (options.isUtility ? 'utility' : 'web'),
+      isUtility: options.isUtility || false,
       images: options.images || []
     };
 
@@ -787,13 +812,17 @@ ${options.prompt}`;
       model: selectedModel,
       sessionId: options.sessionId,
       personaId: targetPersonaId,
+      source: options.source || (options.isUtility ? 'utility' : 'web'),
+      isUtility: options.isUtility || false,
       images: options.images || []
     });
 
     const abortController = new AbortController();
     this.currentAbortController = abortController;
 
-    const systemPrompt = `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}
+    const systemPrompt = options.isUtility
+      ? 'You are a precise, concise developer utility assistant. Return only the requested output without conversational filler or markdown fences unless specifically requested.'
+      : `[Konteks Workspace: "${workingDir}"]${cachedContextStr}${personaStr}
 [Panduan Operasional Sistem]:
 1. Anda adalah asisten AI coding cerdas untuk zhiEnd Agent yang beroperasi langsung di project: "${workingDir}".
 2. Root direktori default untuk project baru adalah ${rootDir}.
@@ -804,7 +833,7 @@ ${options.prompt}`;
       const result = await runExternalLLM({
         prompt: options.prompt,
         systemPrompt,
-        history: historyMessages,
+        history: options.isUtility ? [] : historyMessages,
         modelId: selectedModel,
         config: this.config,
         images: options.images,
@@ -841,7 +870,7 @@ ${options.prompt}`;
       this.activeTask.thought = result.thought;
 
       // Otomatis lampirkan link live preview & public tunnel jika permintaan adalah menjalankan projek
-      const isRunReq = /jalankan|running|run|start.*proje?k/i.test(options.prompt);
+      const isRunReq = !options.isUtility && /jalankan|running|run|start.*proje?k/i.test(options.prompt);
       if (isRunReq && !this.activeTask.response.includes('/preview/')) {
         const previewLocal = `http://localhost:5173/preview/`;
         const previewLan = `http://${localIp}:${port}/preview/`;
@@ -883,8 +912,10 @@ ${options.prompt}`;
       this.activeTask.generatedImages = genImages;
 
       const finishedTask = { ...this.activeTask };
-      this.history.unshift(finishedTask);
-      if (this.history.length > 50) this.history.pop();
+      if (!finishedTask.isUtility) {
+        this.history.unshift(finishedTask);
+        if (this.history.length > 50) this.history.pop();
+      }
 
       this.emit('task_end', {
         id: finishedTask.id,
@@ -901,6 +932,8 @@ ${options.prompt}`;
         thought: finishedTask.thought || '',
         sessionId: finishedTask.sessionId,
         personaId: finishedTask.personaId,
+        source: finishedTask.source || 'web',
+        isUtility: !!finishedTask.isUtility,
         images: options.images || [],
         generatedImages: genImages
       });

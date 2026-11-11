@@ -14,7 +14,7 @@ import { AppConfig, WhatsAppStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
 import { voiceService } from '../voiceService';
-import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, saveMessageToDb, getOrCreateDefaultSession, getAllProjectsList } from '../db/database';
+import { getPersonas, getPersonaById, saveConfigToDb, saveChatUploadedFile, saveMessageToDb, getOrCreateDefaultSession, getOrCreateRemoteSession, getAllProjectsList } from '../db/database';
 import { extractGeneratedImages } from './telegramBot';
 
 export interface WhatsAppBotOptions {
@@ -769,13 +769,13 @@ export class WhatsAppBotManager extends EventEmitter {
       text: `🤖 *${personaDisplay} Memproses...*\n📁 Project: \`${activeProj}\`\n💬 Instruksi: "${codingPrompt.slice(0, 100)}..."${imageNote}\n_Mohon tunggu sebentar..._`
     });
 
-    // Sesi target di SQLite
-    let targetSessionId = 'default';
+    // Dedicated isolated remote session for WhatsApp (Option 1: Isolasi Sesi Remote)
+    let targetSessionId = 'sess-remote-wa';
     try {
-      const targetSession = getOrCreateDefaultSession(activeProj);
-      targetSessionId = targetSession.id;
+      const remoteSession = getOrCreateRemoteSession('whatsapp', activeProj, activePersonaId);
+      targetSessionId = remoteSession.id;
     } catch (e) {
-      console.error('Failed to resolve WhatsApp session:', e);
+      console.error('Failed to resolve WhatsApp remote session:', e);
     }
 
     try {
@@ -785,7 +785,8 @@ export class WhatsAppBotManager extends EventEmitter {
         sessionId: targetSessionId,
         personaId: activePersonaId,
         model: activePersona?.preferred_model || this.config.antigravity?.defaultModel,
-        images: images && images.length > 0 ? images : undefined
+        images: images && images.length > 0 ? images : undefined,
+        source: 'whatsapp'
       });
 
       const rawResp = result.response || '(Tugas selesai tanpa respon teks)';

@@ -528,7 +528,9 @@ ATURAN OUTPUT:
     const result = await agentRunner.run({
       prompt,
       cwd: config.activeProject || 'D:\\Works',
-      model: body.preferred_model || 'gemini-3.8-flash-low'
+      model: body.preferred_model || 'gemini-3.8-flash-low',
+      source: 'persona_generator',
+      isUtility: true
     });
     const text = result.response?.trim() || '';
     const cleanText = text.replace(/^```[a-z]*\n?|```$/gi, '').trim();
@@ -919,7 +921,9 @@ app.post('/api/git/ai-commit-msg', async (c) => {
     const result = await agentRunner.run({
       prompt,
       cwd: config.activeProject,
-      model: 'gemini-3.8-flash-low'
+      model: 'gemini-3.8-flash-low',
+      source: 'git_commit',
+      isUtility: true
     });
     const cleanMsg = result.response?.trim().split('\n')[0] || 'chore: update codebase';
     return c.json({ message: cleanMsg.replace(/^["'`]|["'`]$/g, '') });
@@ -1742,14 +1746,36 @@ try {
     } catch {}
   });
 
-  agentRunner.on('task_start', (data) => io?.emit('agent_task_start', data));
-  agentRunner.on('agent_init', (data) => io?.emit('agent_init', data));
-  agentRunner.on('agent_delta', (data) => io?.emit('agent_delta', data));
-  agentRunner.on('agent_step', (data) => io?.emit('agent_step', data));
-  agentRunner.on('agent_result', (data) => io?.emit('agent_result', data));
-  agentRunner.on('agent_raw', (data) => io?.emit('agent_raw', data));
-  agentRunner.on('agent_stderr', (data) => io?.emit('agent_stderr', data));
+  agentRunner.on('task_start', (data) => {
+    if (data?.isUtility) return;
+    io?.emit('agent_task_start', data);
+  });
+  agentRunner.on('agent_init', (data) => {
+    if (agentRunner.activeTask?.isUtility) return;
+    io?.emit('agent_init', data);
+  });
+  agentRunner.on('agent_delta', (data) => {
+    if (agentRunner.activeTask?.isUtility) return;
+    io?.emit('agent_delta', data);
+  });
+  agentRunner.on('agent_step', (data) => {
+    if (agentRunner.activeTask?.isUtility) return;
+    io?.emit('agent_step', data);
+  });
+  agentRunner.on('agent_result', (data) => {
+    if (agentRunner.activeTask?.isUtility) return;
+    io?.emit('agent_result', data);
+  });
+  agentRunner.on('agent_raw', (data) => {
+    if (agentRunner.activeTask?.isUtility) return;
+    io?.emit('agent_raw', data);
+  });
+  agentRunner.on('agent_stderr', (data) => {
+    if (agentRunner.activeTask?.isUtility) return;
+    io?.emit('agent_stderr', data);
+  });
   agentRunner.on('task_end', (data: AgentTask) => {
+    if (data?.isUtility) return;
     io?.emit('agent_task_end', data);
     broadcastDevServerStatus();
     setTimeout(() => broadcastDevServerStatus(), 2000);
@@ -1782,8 +1808,14 @@ try {
       console.error('Failed to auto-save chat message to SQLite:', e);
     }
   });
-  agentRunner.on('task_cancelled', (data) => io?.emit('agent_task_cancelled', data));
-  agentRunner.on('task_error', (data) => io?.emit('agent_task_error', data));
+  agentRunner.on('task_cancelled', (data) => {
+    if (data?.isUtility || agentRunner.activeTask?.isUtility) return;
+    io?.emit('agent_task_cancelled', data);
+  });
+  agentRunner.on('task_error', (data) => {
+    if (data?.isUtility || agentRunner.activeTask?.isUtility) return;
+    io?.emit('agent_task_error', data);
+  });
 
   whatsappBot.on('qr', (data) => io?.emit('whatsapp_qr', data));
   whatsappBot.on('status_change', (data) => io?.emit('whatsapp_status', data));

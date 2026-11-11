@@ -607,9 +607,18 @@
     });
 
     socket.on("agent_task_start", (data) => {
+      if (data?.isUtility) return;
       isAgentBusy = true;
       notificationService.notifyTaskStart();
-      addLog(`[Task Started] ${data.prompt.slice(0, 60)}...`);
+      const srcLabel = data.source && data.source !== "web" ? ` [${data.source.toUpperCase()}]` : "";
+      addLog(`[Task Started${srcLabel}] ${data.prompt.slice(0, 60)}...`);
+
+      // Option 1: Isolate remote session from interfering with currently active browser chat session
+      if (data.sessionId && activeSessionId && data.sessionId !== activeSessionId) {
+        loadSessions(false);
+        return;
+      }
+
       const currentPersona = data.personaId 
         ? personas.find((p) => p.id === data.personaId) 
         : activePersona;
@@ -634,6 +643,10 @@
     });
 
     socket.on("agent_delta", (data) => {
+      if (data?.isUtility) return;
+      if (data.sessionId && activeSessionId && data.sessionId !== activeSessionId) {
+        return;
+      }
       if (!messages.length) return;
       const last = messages[messages.length - 1];
       if (last.sender === "agent") {
@@ -643,6 +656,10 @@
     });
 
     socket.on("agent_step", (data) => {
+      if (data?.isUtility) return;
+      if (data.sessionId && activeSessionId && data.sessionId !== activeSessionId) {
+        return;
+      }
       const toolLabel = data.toolDesc || data.toolName;
       if (messages.length) {
         const last = messages[messages.length - 1];
@@ -690,6 +707,9 @@
     });
 
     socket.on("agent_raw", (data) => {
+      if (data.sessionId && activeSessionId && data.sessionId !== activeSessionId) {
+        return;
+      }
       if (messages.length && data.text) {
         const last = messages[messages.length - 1];
         if (last.sender === "agent" && !last.text) {
@@ -700,7 +720,21 @@
     });
 
     socket.on("agent_task_end", (data) => {
+      if (data?.isUtility) return;
       isAgentBusy = false;
+      addLog(`[Task Completed] Status: ${data.status} in ${data.duration}`);
+      notificationService.notifyTaskComplete({
+        prompt: data.prompt,
+        summary: data.response
+      });
+      api.getGitStatus().then((st) => (gitStatus = st));
+      setTimeout(() => loadSessions(false), 500);
+
+      // If finished task belongs to isolated remote session, do not modify currently active messages
+      if (data.sessionId && activeSessionId && data.sessionId !== activeSessionId) {
+        return;
+      }
+
       if (messages.length) {
         const last = messages[messages.length - 1];
         if (last.sender === "agent") {
@@ -730,13 +764,6 @@
           messages = [...messages];
         }
       }
-      addLog(`[Task Completed] Status: ${data.status} in ${data.duration}`);
-      notificationService.notifyTaskComplete({
-        prompt: data.prompt,
-        summary: data.response
-      });
-      api.getGitStatus().then((st) => (gitStatus = st));
-      setTimeout(() => loadSessions(false), 500);
     });
 
     socket.on("agent_task_cancelled", () => {

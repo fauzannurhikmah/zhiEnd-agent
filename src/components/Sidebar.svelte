@@ -433,6 +433,7 @@
         {#if chatSessions && chatSessions.length > 0}
           {#each chatSessions as sess (sess.id)}
             {@const isActive = activeSessionId === sess.id}
+            {@const isRemote = sess.id.startsWith('sess-remote-') || sess.title.includes('[Remote]')}
             <div
               class="group/item flex items-center justify-between px-2 py-1.5 rounded-none transition cursor-pointer {isActive
                 ? 'bg-[#FCFCFA] border border-[#D0CEC7] text-[#111315] font-bold shadow-xs'
@@ -447,8 +448,13 @@
                 class="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
                 title={sess.title}
               >
-                <span class="text-[9px] font-pixel {isActive ? 'text-[#FF5500]' : 'text-[#8C9097]'}">■</span>
-                <span class="text-xs truncate flex-1">{sess.title}</span>
+                <span class="text-[9px] font-pixel {isActive ? 'text-[#FF5500]' : (isRemote ? 'text-sky-500' : 'text-[#8C9097]')}">■</span>
+                <span class="text-xs truncate flex-1 {isRemote ? 'text-sky-700 dark:text-sky-400 font-semibold' : ''}">{sess.title}</span>
+                {#if isRemote}
+                  <span class="text-[8px] px-1 py-0.2 rounded-none bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-mono font-bold uppercase shrink-0">
+                    REMOTE
+                  </span>
+                {/if}
                 {#if sess.message_count && sess.message_count > 0}
                   <span
                     class="text-[9px] px-1.5 py-0.2 rounded-none font-mono {isActive

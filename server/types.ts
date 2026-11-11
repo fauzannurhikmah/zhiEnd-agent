@@ -117,6 +117,8 @@ export interface AgentTask {
   thought?: string;
   sessionId?: string;
   personaId?: string | null;
+  source?: string;
+  isUtility?: boolean;
   images?: string[];
   generatedImages?: string[];
 }

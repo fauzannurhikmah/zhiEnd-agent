@@ -1088,15 +1088,15 @@ export function getChatSessions(workspacePathOrId?: string | null): ChatSessionI
   const params: any[] = [];
 
   if (workspacePathOrId === null) {
-    query += ` WHERE s.workspace_id IS NULL `;
+    query += ` WHERE (s.workspace_id IS NULL OR s.id LIKE 'sess-remote-%') `;
   } else if (workspacePathOrId !== undefined) {
     const norm = path.resolve(workspacePathOrId);
     const ws = db.prepare('SELECT id FROM workspaces WHERE lower(path) = lower(?) OR lower(path) = lower(?) OR id = ?').get(workspacePathOrId, norm, workspacePathOrId) as { id: string } | undefined;
     if (ws) {
-      query += ` WHERE (s.workspace_id = ? OR s.workspace_id = ? OR s.workspace_id = ?) `;
+      query += ` WHERE (s.workspace_id = ? OR s.workspace_id = ? OR s.workspace_id = ? OR s.id LIKE 'sess-remote-%') `;
       params.push(ws.id, workspacePathOrId, norm);
     } else {
-      query += ` WHERE (s.workspace_id = ? OR s.workspace_id = ?) `;
+      query += ` WHERE (s.workspace_id = ? OR s.workspace_id = ? OR s.id LIKE 'sess-remote-%') `;
       params.push(workspacePathOrId, norm);
     }
   }
@@ -1115,6 +1115,59 @@ export function getChatSessions(workspacePathOrId?: string | null): ChatSessionI
     updated_at: r.updated_at,
     message_count: r.message_count || 0
   }));
+}
+
+export function getOrCreateRemoteSession(
+  platform: 'whatsapp' | 'telegram',
+  workspacePath?: string | null,
+  personaId?: string | null
+): ChatSessionItem {
+  const db = getDb();
+  let wsId: string | null = null;
+  if (workspacePath && workspacePath.toLowerCase() !== 'd:\\works') {
+    const norm = path.resolve(workspacePath);
+    const ws = db.prepare('SELECT id FROM workspaces WHERE lower(path) = lower(?) OR lower(path) = lower(?) OR id = ?').get(workspacePath, norm, workspacePath) as { id: string } | undefined;
+    if (ws) {
+      wsId = ws.id;
+    }
+  }
+
+  const prefix = platform === 'whatsapp' ? 'wa' : 'tg';
+  const sessionId = `sess-remote-${prefix}`;
+  const platformName = platform === 'whatsapp' ? 'WhatsApp' : 'Telegram';
+  const title = `📱 [Remote] ${platformName} Bot`;
+
+  let session = db.prepare('SELECT * FROM chat_sessions WHERE id = ?').get(sessionId) as any;
+  if (!session) {
+    db.prepare(`
+      INSERT INTO chat_sessions (id, workspace_id, persona_id, title)
+      VALUES (?, ?, ?, ?)
+    `).run(sessionId, wsId, personaId || 'persona-default', title);
+
+    session = {
+      id: sessionId,
+      workspace_id: wsId,
+      persona_id: personaId || 'persona-default',
+      title,
+      conversation_id: null,
+      is_pinned: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+  } else {
+    db.prepare('UPDATE chat_sessions SET workspace_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(wsId, sessionId);
+  }
+
+  return {
+    id: session.id,
+    workspace_id: session.workspace_id,
+    persona_id: session.persona_id,
+    title: session.title,
+    conversation_id: session.conversation_id || null,
+    is_pinned: Boolean(session.is_pinned),
+    created_at: session.created_at,
+    updated_at: session.updated_at
+  };
 }
 
 export function getOrCreateDefaultSession(workspacePath?: string | null): ChatSessionItem {

@@ -5,7 +5,7 @@ import path from 'path';
 import { AppConfig, TelegramStatus } from '../types';
 import { AgentRunner } from '../agentRunner';
 import { GitManager } from '../gitManager';
-import { getPersonas, getPersonaById, saveConfigToDb, loadConfigFromDb, saveChatUploadedFile, getOrCreateDefaultSession, saveMessageToDb, getAllProjectsList } from '../db/database';
+import { getPersonas, getPersonaById, saveConfigToDb, loadConfigFromDb, saveChatUploadedFile, getOrCreateDefaultSession, getOrCreateRemoteSession, saveMessageToDb, getAllProjectsList } from '../db/database';
 import { getSafePersonaEmoji, formatForWhatsApp } from './whatsappBot';
 import { voiceService } from '../voiceService';
 
@@ -497,13 +497,13 @@ export class TelegramBotManager extends EventEmitter {
           { parse_mode: 'Markdown' }
         );
 
-        // Sesi target di SQLite
-        let targetSessionId = 'default';
+        // Dedicated isolated remote session for Telegram (Option 1: Isolasi Sesi Remote)
+        let targetSessionId = 'sess-remote-tg';
         try {
-          const targetSession = getOrCreateDefaultSession(activeProj);
-          targetSessionId = targetSession.id;
+          const remoteSession = getOrCreateRemoteSession('telegram', activeProj, activePersonaId);
+          targetSessionId = remoteSession.id;
         } catch (e) {
-          console.error('Failed to resolve Telegram session:', e);
+          console.error('Failed to resolve Telegram remote session:', e);
         }
 
         try {
@@ -513,7 +513,8 @@ export class TelegramBotManager extends EventEmitter {
             sessionId: targetSessionId,
             personaId: activePersonaId,
             model: activePersona?.preferred_model || this.config.antigravity?.defaultModel,
-            images: images || []
+            images: images || [],
+            source: 'telegram'
           });
 
           const rawResp = result.response || '(Tugas selesai tanpa output teks)';
