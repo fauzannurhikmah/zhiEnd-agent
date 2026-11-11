@@ -20,6 +20,10 @@
     X,
     Trash2,
     Blocks,
+    Sun,
+    Moon,
+    Bell,
+    BellOff,
   } from "lucide-svelte";
 
   let {
@@ -33,6 +37,10 @@
     chatSessions = [],
     activeSessionId = null,
     historyScope = "workspace",
+    isDark = false,
+    onToggleTheme,
+    isSoundEnabled = true,
+    onToggleSound,
     onSelectTab,
     onOpenProjectModal,
     onOpenSettingsModal,
@@ -54,6 +62,10 @@
     chatSessions?: ChatSessionItem[];
     activeSessionId?: string | null;
     historyScope?: "workspace" | "global";
+    isDark?: boolean;
+    onToggleTheme?: (e: MouseEvent) => void;
+    isSoundEnabled?: boolean;
+    onToggleSound?: () => void;
     isMobileOpen?: boolean;
     onCloseMobile?: () => void;
     onSelectTab: (tab: "chat" | "git" | "remote" | "files" | "connectors") => void;
@@ -314,15 +326,26 @@
         <div class="flex items-center gap-1.5">
           {#if whatsappStatus?.status === "connected"}
             <span
-              class="w-2 h-2 rounded-none bg-emerald-500 animate-pulse"
-              title="WhatsApp Connected"
-            ></span>
+              class="text-[9px] px-1 py-0.2 rounded-none bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-mono font-bold"
+              title="WhatsApp Connected & Online"
+            >
+              WA
+            </span>
+          {:else if whatsappStatus?.status === "qr_ready"}
+            <span
+              class="text-[9px] px-1 py-0.2 rounded-none bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-mono font-bold animate-pulse"
+              title="WhatsApp Scan QR"
+            >
+              WA:QR
+            </span>
           {/if}
           {#if telegramStatus?.status === "running"}
             <span
-              class="w-2 h-2 rounded-none bg-sky-500 animate-pulse"
+              class="text-[9px] px-1 py-0.2 rounded-none bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 font-mono font-bold"
               title="Telegram Online"
-            ></span>
+            >
+              TG
+            </span>
           {/if}
           {#if currentTab === 'remote'}
             <span class="w-1.5 h-1.5 bg-[#FF5500]"></span>
@@ -498,9 +521,9 @@
     </div>
   </div>
 
-  <!-- Bottom: Tunnel status & Settings -->
+  <!-- Bottom: Tunnel status & Quick System Preferences Panel -->
   <div
-    class="p-3 border-t border-[#D0CEC7] flex items-center justify-between bg-[#E5E3DD] text-xs font-stencil"
+    class="p-2.5 border-t border-[#D0CEC7] flex items-center justify-between bg-[#E5E3DD] text-xs font-stencil"
   >
     <div class="flex items-center gap-1.5 text-[11px] text-[#5C6066]">
       <span
@@ -508,17 +531,50 @@
           ? 'bg-[#FF5500]'
           : 'bg-[#8C9097]'}"
       ></span>
-      <span class="truncate max-w-[120px] font-bold text-[#111315]">
+      <span class="truncate max-w-[95px] font-bold text-[#111315]">
         {tunnelStatus?.status === "connected" ? "Public Live" : "Local :3888"}
       </span>
     </div>
 
-    <button
-      onclick={onOpenSettingsModal}
-      class="p-2 rounded-none hover:bg-[#D0CEC7] text-[#5C6066] hover:text-[#111315] transition cursor-pointer"
-      title="Pengaturan Sistem"
-    >
-      <SettingsIcon class="w-3.5 h-3.5" />
-    </button>
+    <!-- Quick Utility Switches: Theme, Chime, Settings -->
+    <div class="flex items-center gap-1">
+      {#if onToggleTheme}
+        <button
+          onclick={onToggleTheme}
+          class="w-7 h-7 flex items-center justify-center rounded-none border border-transparent hover:border-[#D0CEC7] dark:hover:border-[#3F4554] hover:bg-[#FCFCFA] dark:hover:bg-[#1E2026] text-[#60646C] hover:text-[#111315] dark:text-[#9BA1AD] dark:hover:text-[#F7F6F2] transition-all cursor-pointer active:scale-90"
+          title={isDark ? "Ganti ke Mode Terang (Light Mode)" : "Ganti ke Mode Gelap (Dark Mode)"}
+          aria-label="Toggle Theme"
+        >
+          {#if isDark}
+            <Sun class="w-3.5 h-3.5 text-amber-400 fill-amber-400 transition-transform hover:rotate-45" />
+          {:else}
+            <Moon class="w-3.5 h-3.5 text-[#60646C] hover:text-indigo-600 transition-colors" />
+          {/if}
+        </button>
+      {/if}
+
+      {#if onToggleSound}
+        <button
+          onclick={onToggleSound}
+          class="w-7 h-7 flex items-center justify-center rounded-none border border-transparent hover:border-[#D0CEC7] dark:hover:border-[#3F4554] hover:bg-[#FCFCFA] dark:hover:bg-[#1E2026] text-[#60646C] hover:text-[#111315] dark:text-[#9BA1AD] dark:hover:text-[#F7F6F2] transition-all cursor-pointer active:scale-90"
+          title={isSoundEnabled ? "Notifikasi Suara: AKTIF (Klik untuk mute)" : "Notifikasi Suara: MUTE (Klik untuk aktifkan)"}
+          aria-label="Toggle Sound"
+        >
+          {#if isSoundEnabled}
+            <Bell class="w-3.5 h-3.5 text-[#FF5500] fill-[#FF5500]/20" />
+          {:else}
+            <BellOff class="w-3.5 h-3.5 text-[#8C9097] hover:text-[#111315] dark:hover:text-[#F7F6F2]" />
+          {/if}
+        </button>
+      {/if}
+
+      <button
+        onclick={onOpenSettingsModal}
+        class="w-7 h-7 flex items-center justify-center rounded-none border border-transparent hover:border-[#D0CEC7] dark:hover:border-[#3F4554] hover:bg-[#FCFCFA] dark:hover:bg-[#1E2026] text-[#60646C] hover:text-[#111315] dark:text-[#9BA1AD] dark:hover:text-[#F7F6F2] transition-all cursor-pointer active:scale-90 group/settings"
+        title="Pengaturan Sistem"
+      >
+        <SettingsIcon class="w-3.5 h-3.5 transition-transform duration-300 group-hover/settings:rotate-90" />
+      </button>
+    </div>
   </div>
 </aside>

@@ -983,6 +983,10 @@
     {chatSessions}
     {activeSessionId}
     {historyScope}
+    {isDark}
+    onToggleTheme={handleToggleTheme}
+    {isSoundEnabled}
+    onToggleSound={handleToggleSound}
     isMobileOpen={isMobileSidebarOpen}
     onCloseMobile={() => (isMobileSidebarOpen = false)}
     onSelectTab={(tab) => {
@@ -1091,57 +1095,13 @@
         <span class="text-[#5C6066]">0x3888</span>
       </div>
 
-      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        <!-- Quick Remote Indicators -->
-        <button
-          onclick={() => (currentTab = "remote")}
-          class="h-8 flex items-center gap-1.5 px-2.5 rounded-none border text-xs font-stencil transition cursor-pointer active:scale-95 {whatsappStatus?.status ===
-          'connected'
-            ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-            : whatsappStatus?.status === 'qr_ready'
-              ? 'bg-amber-50 border-amber-300 text-amber-800 animate-pulse'
-              : 'bg-[#FCFCFA] border-[#D0CEC7] text-[#60646C] hover:bg-[#E5E3DD]'}"
-          title="WhatsApp Remote: {whatsappStatus?.status ||
-            'stopped'} (Klik untuk buka Remote Hub)"
-        >
-          <MessageSquare class="w-3.5 h-3.5 text-emerald-600" />
-          <span class="hidden sm:inline">WA</span>
-          <span
-            class="w-1.5 h-1.5 rounded-none {whatsappStatus?.status ===
-            'connected'
-              ? 'bg-emerald-500'
-              : whatsappStatus?.status === 'qr_ready'
-                ? 'bg-amber-500'
-                : 'bg-[#8C9097]'}"
-          ></span>
-        </button>
-
-        <button
-          onclick={() => (currentTab = "remote")}
-          class="h-8 flex items-center gap-1.5 px-2.5 rounded-none border text-xs font-stencil transition cursor-pointer active:scale-95 {telegramStatus?.status ===
-          'running'
-            ? 'bg-sky-50 border-sky-300 text-sky-800'
-            : 'bg-[#FCFCFA] border-[#D0CEC7] text-[#60646C] hover:bg-[#E5E3DD]'}"
-          title="Telegram Remote: {telegramStatus?.status ||
-            'stopped'} (Klik untuk buka Remote Hub)"
-        >
-          <Send class="w-3.5 h-3.5 text-sky-600" />
-          <span class="hidden sm:inline">TG</span>
-          <span
-            class="w-1.5 h-1.5 rounded-none {telegramStatus?.status ===
-            'running'
-              ? 'bg-sky-500'
-              : 'bg-[#8C9097]'}"
-          ></span>
-        </button>
-
+      <div class="flex items-center gap-2 shrink-0">
         <!-- Quick Dev Server Widget -->
         {#if devServer.isRunning}
           <div
             class="h-8 flex items-center gap-1.5 px-2.5 rounded-none bg-emerald-50 border border-emerald-300 font-stencil"
           >
-            <span class="w-2 h-2 rounded-none bg-emerald-500 animate-pulse"
-            ></span>
+            <span class="w-2 h-2 rounded-none bg-emerald-500 animate-pulse"></span>
             <a
               href={devServer.activePorts[0]?.url || "http://localhost:3000"}
               target="_blank"
@@ -1183,40 +1143,6 @@
           <UploadCloud class="w-3.5 h-3.5" />
           <span class="hidden sm:inline">PUSH // GIT</span>
           <span class="sm:hidden">PUSH</span>
-        </button>
-
-        <!-- Circular Transition Theme Toggle Switch (Sharp 90° Hardware Frame) -->
-        <button
-          onclick={handleToggleTheme}
-          class="h-8 flex items-center gap-1.5 px-2.5 rounded-none bg-[#FCFCFA] hover:bg-[#E5E3DD] border border-[#D0CEC7] text-[#111315] text-xs font-tech font-bold uppercase transition cursor-pointer active:scale-95 shadow-2xs"
-          title={isDark ? "Ganti ke Mode Terang (Light Mode)" : "Ganti ke Mode Gelap (Dark Mode)"}
-          aria-label="Toggle Theme"
-        >
-          {#if isDark}
-            <Sun class="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span class="hidden sm:inline">LIGHT</span>
-          {:else}
-            <Moon class="w-3.5 h-3.5 text-slate-700 fill-slate-700" />
-            <span class="hidden sm:inline">DARK</span>
-          {/if}
-        </button>
-
-        <!-- Background Audio Chime & Desktop Alert Switch -->
-        <button
-          onclick={handleToggleSound}
-          class="h-8 flex items-center gap-1.5 px-2.5 rounded-none bg-[#FCFCFA] hover:bg-[#E5E3DD] border border-[#D0CEC7] text-[#111315] text-xs font-tech font-bold uppercase transition cursor-pointer active:scale-95 shadow-2xs"
-          title={isSoundEnabled
-            ? "Notifikasi Suara & Background: AKTIF (Klik untuk mute)"
-            : "Notifikasi Suara & Background: NONAKTIF (Klik untuk aktifkan)"}
-          aria-label="Toggle Background Sound & Notification"
-        >
-          {#if isSoundEnabled}
-            <Bell class="w-3.5 h-3.5 text-[#FF5500]" />
-            <span class="hidden sm:inline">CHIME</span>
-          {:else}
-            <BellOff class="w-3.5 h-3.5 text-[#8C9097]" />
-            <span class="hidden sm:inline text-[#8C9097]">MUTE</span>
-          {/if}
         </button>
       </div>
     </header>
