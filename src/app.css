@@ -17,6 +17,22 @@
     --crt-void: #101114;
   }
 
+  html.dark {
+    --chassis-bone: #16171B;
+    --deck-putty: #242730;
+    --bed-magnesium: #2A2E38;
+    --well-alabaster: #1E2026;
+    --seam-milled: #2E323C;
+    --seam-dark: #3F4554;
+    --safety-orange: #FF5500;
+    --safety-orange-hover: #FF6A1A;
+    --hazard-mustard: #FFAA00;
+    --ink-basalt: #EAECEF;
+    --stencil-grey: #9BA1AD;
+    --stencil-light: #6C727E;
+    --crt-void: #121317;
+  }
+
   body {
     background-color: var(--chassis-bone);
     color: var(--ink-basalt);
@@ -709,3 +725,474 @@ select:active,
 .animate-osc-2 { animation: oscPulse 0.7s infinite ease-in-out 0.25s; }
 .animate-osc-3 { animation: oscPulse 0.7s infinite ease-in-out 0.4s; }
 .animate-osc-4 { animation: oscPulse 0.7s infinite ease-in-out 0.55s; }
+
+/* ------------------------------------------------------------- */
+/* CIRCULAR VIEW TRANSITIONS (THEME TOGGLE ANIMATION)            */
+/* ------------------------------------------------------------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Expanding dark circle over light view */
+html.theme-transition-to-dark::view-transition-old(root) {
+  z-index: 1;
+}
+html.theme-transition-to-dark::view-transition-new(root) {
+  z-index: 99999;
+}
+
+/* Shrinking dark circle back to toggle button revealing light view */
+html.theme-transition-to-light::view-transition-old(root) {
+  z-index: 99999;
+}
+html.theme-transition-to-light::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* ------------------------------------------------------------- */
+/* MODERN DARK THEME OVERRIDES (WARM GRAPHITE & TITANIUM SLATE)  */
+/* Strictly avoiding pitch black (#000000) for visual comfort    */
+/* ------------------------------------------------------------- */
+html.dark body {
+  background-color: #16171B;
+  color: #EAECEF;
+}
+
+/* Blueprint CAD ground & grid in dark mode */
+html.dark .blueprint-grid {
+  background-color: #16171B !important;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px) !important;
+}
+
+html.dark .blueprint-cad-ground {
+  background-color: #16171B !important;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(
+      to right,
+      transparent 0%,
+      transparent 4.5%,
+      rgba(255, 255, 255, 0.06) 4.5%,
+      rgba(255, 255, 255, 0.06) 4.6%,
+      transparent 4.6%,
+      transparent 24%,
+      rgba(255, 255, 255, 0.04) 24%,
+      rgba(255, 255, 255, 0.04) 24.1%,
+      transparent 24.1%,
+      transparent 76%,
+      rgba(255, 255, 255, 0.04) 76%,
+      rgba(255, 255, 255, 0.04) 76.1%,
+      transparent 76.1%,
+      transparent 95.5%,
+      rgba(255, 255, 255, 0.06) 95.5%,
+      rgba(255, 255, 255, 0.06) 95.6%,
+      transparent 95.6%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      transparent 56px,
+      rgba(255, 255, 255, 0.06) 56px,
+      rgba(255, 255, 255, 0.06) 57px,
+      transparent 57px,
+      transparent 220px,
+      rgba(255, 255, 255, 0.04) 220px,
+      rgba(255, 255, 255, 0.04) 221px,
+      transparent 221px,
+      transparent 620px,
+      rgba(255, 255, 255, 0.05) 620px,
+      rgba(255, 255, 255, 0.05) 621px,
+      transparent 621px,
+      transparent 100%
+    ) !important;
+}
+
+/* Background mappings */
+html.dark .bg-\[\#ECEAE5\],
+html.dark [class*="bg-[#ECEAE5]"] {
+  background-color: #16171B !important;
+}
+
+html.dark .bg-\[\#FCFCFA\],
+html.dark [class*="bg-[#FCFCFA]"] {
+  background-color: #1E2026 !important;
+}
+
+html.dark .bg-\[\#F7F6F2\],
+html.dark [class*="bg-[#F7F6F2]"] {
+  background-color: #22252C !important;
+}
+
+html.dark .bg-\[\#F4F3EE\],
+html.dark [class*="bg-[#F4F3EE]"] {
+  background-color: #22252C !important;
+}
+
+html.dark .bg-\[\#F4F3EF\],
+html.dark [class*="bg-[#F4F3EF]"] {
+  background-color: #242730 !important;
+}
+
+html.dark .bg-\[\#E5E3DD\],
+html.dark [class*="bg-[#E5E3DD]"] {
+  background-color: #242730 !important;
+}
+
+html.dark .bg-\[\#DEDBD2\],
+html.dark [class*="bg-[#DEDBD2]"] {
+  background-color: #2A2E38 !important;
+}
+
+html.dark .bg-\[\#DCDAD4\],
+html.dark [class*="bg-[#DCDAD4]"] {
+  background-color: #2A2E38 !important;
+}
+
+html.dark .bg-\[\#E9E7E0\],
+html.dark [class*="bg-[#E9E7E0]"] {
+  background-color: #1E2026 !important;
+}
+
+/* Explicit white background replacements */
+html.dark .bg-white:not([class*="/"]),
+html.dark [class~="bg-white"] {
+  background-color: #1E2026 !important;
+}
+
+html.dark .bg-white\/70,
+html.dark [class*="bg-white/70"] {
+  background-color: rgba(22, 23, 27, 0.85) !important;
+}
+
+html.dark .bg-zinc-100,
+html.dark [class*="bg-zinc-100"] {
+  background-color: #242730 !important;
+}
+
+/* Border mappings */
+html.dark .border-\[\#D0CEC7\],
+html.dark [class*="border-[#D0CEC7]"] {
+  border-color: #2E323C !important;
+}
+
+html.dark .border-\[\#C8C5BC\],
+html.dark [class*="border-[#C8C5BC]"] {
+  border-color: #2E323C !important;
+}
+
+html.dark .border-\[\#A8A59C\],
+html.dark [class*="border-[#A8A59C]"] {
+  border-color: #3F4554 !important;
+}
+
+html.dark .border-\[\#E5E3DD\],
+html.dark [class*="border-[#E5E3DD]"] {
+  border-color: #2E323C !important;
+}
+
+html.dark .border-\[\#B0ADA4\],
+html.dark [class*="border-[#B0ADA4]"] {
+  border-color: #3F4554 !important;
+}
+
+html.dark .border-\[\#191B1D\],
+html.dark [class*="border-[#191B1D]"] {
+  border-color: #3F4554 !important;
+}
+
+html.dark .border-zinc-300,
+html.dark [class*="border-zinc-300"] {
+  border-color: #3F4554 !important;
+}
+
+html.dark .divide-\[\#D0CEC7\] > * + *,
+html.dark .divide-\[\#C8C5BC\] > * + * {
+  border-color: #2E323C !important;
+}
+
+/* Typography mappings */
+html.dark .text-\[\#111315\],
+html.dark .text-\[\#191B1D\],
+html.dark .text-\[\#444850\],
+html.dark [class*="text-[#111315]"],
+html.dark [class*="text-[#191B1D]"],
+html.dark [class*="text-[#444850]"] {
+  color: #EAECEF !important;
+}
+
+html.dark .text-\[\#60646C\],
+html.dark .text-\[\#5C6066\],
+html.dark .text-\[\#7A7E85\],
+html.dark .text-\[\#71717a\],
+html.dark .text-\[\#666\],
+html.dark [class*="text-[#60646C]"],
+html.dark [class*="text-[#5C6066]"] {
+  color: #9BA1AD !important;
+}
+
+html.dark .text-\[\#8C9097\],
+html.dark .text-\[\#9A9EA6\],
+html.dark .text-zinc-500,
+html.dark [class*="text-[#8C9097]"],
+html.dark [class*="text-zinc-500"] {
+  color: #6C727E !important;
+}
+
+/* Hover state overrides */
+html.dark .hover\:bg-white:hover,
+html.dark [class*="hover:bg-white"]:hover {
+  background-color: #2A2E38 !important;
+}
+
+html.dark .hover\:bg-\[\#E5E3DD\]:hover,
+html.dark .hover\:bg-\[\#ECEAE5\]:hover,
+html.dark .hover\:bg-\[\#FCFCFA\]:hover,
+html.dark .hover\:bg-\[\#F4F3EF\]:hover,
+html.dark .hover\:bg-\[\#F7F6F2\]:hover {
+  background-color: #2E333F !important;
+}
+
+html.dark .hover\:border-\[\#A8A59C\]:hover {
+  border-color: #52596B !important;
+}
+
+/* Status & Alert Badges in Dark Mode (Glow Pill Styling) */
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-100,
+html.dark [class*="bg-emerald-50"],
+html.dark [class*="bg-emerald-100"] {
+  background-color: rgba(16, 185, 129, 0.16) !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
+  color: #34D399 !important;
+}
+html.dark .text-emerald-700,
+html.dark .text-emerald-800,
+html.dark .text-emerald-900,
+html.dark .text-emerald-950 {
+  color: #34D399 !important;
+}
+
+html.dark .bg-amber-50,
+html.dark .bg-amber-100,
+html.dark .bg-amber-200,
+html.dark [class*="bg-amber-50"],
+html.dark [class*="bg-amber-100"] {
+  background-color: rgba(245, 158, 11, 0.16) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #FBBF24 !important;
+}
+html.dark .text-amber-700,
+html.dark .text-amber-800,
+html.dark .text-amber-900,
+html.dark .text-amber-950 {
+  color: #FBBF24 !important;
+}
+
+html.dark .bg-rose-50,
+html.dark .bg-rose-100,
+html.dark .bg-rose-200,
+html.dark [class*="bg-rose-50"],
+html.dark [class*="bg-rose-100"] {
+  background-color: rgba(244, 63, 94, 0.16) !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
+  color: #FB7185 !important;
+}
+html.dark .text-rose-700,
+html.dark .text-rose-800,
+html.dark .text-rose-900 {
+  color: #FB7185 !important;
+}
+
+html.dark .bg-sky-50,
+html.dark .bg-sky-100,
+html.dark [class*="bg-sky-50"],
+html.dark [class*="bg-sky-100"] {
+  background-color: rgba(56, 189, 248, 0.16) !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+  color: #38BDF8 !important;
+}
+html.dark .text-sky-700,
+html.dark .text-sky-800,
+html.dark .text-sky-950 {
+  color: #38BDF8 !important;
+}
+
+html.dark .bg-orange-50,
+html.dark .bg-orange-100,
+html.dark [class*="bg-orange-50"],
+html.dark [class*="bg-orange-100"] {
+  background-color: rgba(255, 85, 0, 0.16) !important;
+  border-color: rgba(255, 85, 0, 0.35) !important;
+  color: #FF7733 !important;
+}
+html.dark .text-orange-900 {
+  color: #FF7733 !important;
+}
+
+/* Keyboard keys */
+html.dark kbd {
+  background-color: #22252C !important;
+  border-color: #2E323C !important;
+  color: #EAECEF !important;
+}
+
+/* Form inputs & textareas */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  background-color: #141519 !important;
+  color: #EAECEF !important;
+  border-color: #2E323C !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #6C727E !important;
+}
+
+/* Industrial design system components */
+html.dark .hardware-panel,
+html.dark .carbon-panel,
+html.dark .glass-panel {
+  background: #1E2026 !important;
+  border-color: #2E323C !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+html.dark .hardware-panel:hover,
+html.dark .carbon-panel:hover,
+html.dark .glass-panel:hover {
+  border-color: #3F4554 !important;
+}
+
+html.dark .hardware-panel-raised,
+html.dark .carbon-panel-raised,
+html.dark .glass-panel-elevated {
+  background: #1E2026 !important;
+  border-color: #3F4554 !important;
+  box-shadow:
+    0 16px 48px -4px rgba(0, 0, 0, 0.55),
+    0 2px 8px rgba(0, 0, 0, 0.35) !important;
+}
+
+html.dark .hardware-well,
+html.dark .carbon-input,
+html.dark .glass-input {
+  background: #141519 !important;
+  border-color: #2E323C !important;
+  color: #EAECEF !important;
+}
+
+html.dark .carbon-subtle,
+html.dark .glass-panel-subtle {
+  background: #242730 !important;
+  border-color: #2E323C !important;
+}
+
+html.dark .carbon-card,
+html.dark .glass-card {
+  background: #1E2026 !important;
+  border-color: #2E323C !important;
+  border-bottom: 2px solid #3F4554 !important;
+}
+
+html.dark .carbon-card:hover,
+html.dark .glass-card:hover {
+  background: #242730 !important;
+  border-color: #3F4554 !important;
+}
+
+html.dark .btn-hardware,
+html.dark .btn-tool,
+html.dark .glass-btn-secondary {
+  background: #1E2026 !important;
+  border-color: #2E323C !important;
+  color: #EAECEF !important;
+}
+
+html.dark .btn-hardware:hover,
+html.dark .btn-tool:hover,
+html.dark .glass-btn-secondary:hover {
+  background: #2A2E38 !important;
+  border-color: #3F4554 !important;
+  color: #FFFFFF !important;
+}
+
+html.dark .btn-hardware:active,
+html.dark .btn-tool:active,
+html.dark .glass-btn-secondary:active {
+  background: #242730 !important;
+}
+
+html.dark .carbon-pill,
+html.dark .hardware-badge,
+html.dark .glass-pill {
+  background: #242730 !important;
+  border-color: #2E323C !important;
+  color: #9BA1AD !important;
+}
+
+html.dark .carbon-tab-active,
+html.dark .glass-tab-active {
+  background: #1E2026 !important;
+  border-color: #2E323C !important;
+  border-left: 3px solid #FF5500 !important;
+  color: #FFFFFF !important;
+}
+
+html.dark .bubble-user,
+html.dark .bubble-user-hardware,
+html.dark .glass-bubble-user {
+  background: #1E2026 !important;
+  border-color: #2E323C !important;
+  border-right: 3px solid #FF5500 !important;
+  color: #EAECEF !important;
+}
+
+html.dark .bubble-agent,
+html.dark .bubble-agent-hardware,
+html.dark .glass-bubble-agent {
+  background: #1E2026 !important;
+  border-color: #2E323C !important;
+  color: #EAECEF !important;
+}
+
+html.dark .glass-header,
+html.dark .glass-sidebar,
+html.dark .glass-nav-mobile {
+  background: #16171B !important;
+  border-color: #2E323C !important;
+}
+
+html.dark .crosshair-box {
+  background: #1E2026 !important;
+  border-color: #2E323C !important;
+}
+
+html.dark .crosshair-box::before,
+html.dark .crosshair-box::after {
+  background: #2E323C !important;
+}
+
+html.dark .crt-shell {
+  background: #1E2026 !important;
+  border-color: #2E323C !important;
+  box-shadow:
+    0 16px 36px -8px rgba(0, 0, 0, 0.45),
+    0 2px 6px rgba(0, 0, 0, 0.25) !important;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #1C1E24 !important;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #3F4554 !important;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #FF5500 !important;
+}

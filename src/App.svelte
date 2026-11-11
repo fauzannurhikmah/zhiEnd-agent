@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { io, Socket } from "socket.io-client";
   import type {
     AppConfig,
@@ -43,11 +43,94 @@
     TowerControl,
     FolderTree,
     Blocks,
+    Sun,
+    Moon,
   } from "lucide-svelte";
 
   // Navigation tab
   let currentTab = $state<"chat" | "git" | "remote" | "files" | "connectors">("chat");
   let isMobileSidebarOpen = $state(false);
+
+  // Theme management (Dark Mode with Circular Radial Transition)
+  let isDark = $state(false);
+
+  function applyThemeMode(dark: boolean) {
+    isDark = dark;
+    if (dark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("zhiend_theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("zhiend_theme", "light");
+    }
+  }
+
+  async function handleToggleTheme(e: MouseEvent) {
+    const targetIsDark = !isDark;
+    const x = e.clientX || window.innerWidth / 2;
+    const y = e.clientY || 40;
+    const endRadius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    // Fallback if View Transitions API is not supported
+    if (!(document as any).startViewTransition) {
+      applyThemeMode(targetIsDark);
+      return;
+    }
+
+    const transitionClass = targetIsDark
+      ? "theme-transition-to-dark"
+      : "theme-transition-to-light";
+    document.documentElement.classList.add(transitionClass);
+
+    const transition = (document as any).startViewTransition(async () => {
+      applyThemeMode(targetIsDark);
+      await tick();
+    });
+
+    try {
+      await transition.ready;
+      if (targetIsDark) {
+        // Expanding circular mask outward until full screen
+        const anim = document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${endRadius}px at ${x}px ${y}px)`,
+            ],
+          },
+          {
+            duration: 520,
+            easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+            pseudoElement: "::view-transition-new(root)",
+          }
+        );
+        await anim.finished;
+      } else {
+        // Shrinking circular mask inward down to toggle button
+        const anim = document.documentElement.animate(
+          {
+            clipPath: [
+              `circle(${endRadius}px at ${x}px ${y}px)`,
+              `circle(0px at ${x}px ${y}px)`,
+            ],
+          },
+          {
+            duration: 520,
+            easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+            pseudoElement: "::view-transition-old(root)",
+          }
+        );
+        await anim.finished;
+      }
+    } catch (err) {
+      console.warn("Theme transition error:", err);
+    } finally {
+      document.documentElement.classList.remove(transitionClass);
+    }
+  }
 
   // Application Data States
   let config = $state<AppConfig | null>(null);
@@ -152,6 +235,14 @@
   let socket: Socket | null = null;
 
   onMount(async () => {
+    // 0. Initialize Theme
+    const savedTheme = localStorage.getItem("zhiend_theme");
+    if (savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      applyThemeMode(true);
+    } else {
+      applyThemeMode(false);
+    }
+
     // 1. PIN Auth check
     let needsAuth = false;
     try {
@@ -1041,6 +1132,22 @@
           <UploadCloud class="w-3.5 h-3.5" />
           <span class="hidden sm:inline">PUSH // GIT</span>
           <span class="sm:hidden">PUSH</span>
+        </button>
+
+        <!-- Circular Transition Theme Toggle Switch (Sharp 90° Hardware Frame) -->
+        <button
+          onclick={handleToggleTheme}
+          class="h-8 flex items-center gap-1.5 px-2.5 rounded-none bg-[#FCFCFA] hover:bg-[#E5E3DD] border border-[#D0CEC7] text-[#111315] text-xs font-tech font-bold uppercase transition cursor-pointer active:scale-95 shadow-2xs"
+          title={isDark ? "Ganti ke Mode Terang (Light Mode)" : "Ganti ke Mode Gelap (Dark Mode)"}
+          aria-label="Toggle Theme"
+        >
+          {#if isDark}
+            <Sun class="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <span class="hidden sm:inline">LIGHT</span>
+          {:else}
+            <Moon class="w-3.5 h-3.5 text-slate-700 fill-slate-700" />
+            <span class="hidden sm:inline">DARK</span>
+          {/if}
         </button>
       </div>
     </header>
