@@ -29,6 +29,7 @@
   import NoticeModal from "./components/NoticeModal.svelte";
   import PersonaModal from "./components/PersonaModal.svelte";
   import { dialog } from "./services/dialog.svelte";
+  import { notificationService } from "./services/notificationService";
 
   import {
     UploadCloud,
@@ -45,6 +46,8 @@
     Blocks,
     Sun,
     Moon,
+    Bell,
+    BellOff,
   } from "lucide-svelte";
 
   // Navigation tab
@@ -129,6 +132,21 @@
       console.warn("Theme transition error:", err);
     } finally {
       document.documentElement.classList.remove(transitionClass);
+    }
+  }
+
+  // Background Sound & Desktop Notification Alert State
+  let isSoundEnabled = $state(notificationService.soundEnabled);
+
+  async function handleToggleSound() {
+    isSoundEnabled = !isSoundEnabled;
+    notificationService.setSoundEnabled(isSoundEnabled);
+    if (isSoundEnabled) {
+      await notificationService.requestDesktopPermission();
+      notificationService.playChime("success");
+      dialog.showSuccess("Notifikasi suara & alert background aktif.");
+    } else {
+      dialog.showWarning("Notifikasi suara dinonaktifkan.");
     }
   }
 
@@ -590,6 +608,7 @@
 
     socket.on("agent_task_start", (data) => {
       isAgentBusy = true;
+      notificationService.notifyTaskStart();
       addLog(`[Task Started] ${data.prompt.slice(0, 60)}...`);
       const currentPersona = data.personaId 
         ? personas.find((p) => p.id === data.personaId) 
@@ -712,12 +731,17 @@
         }
       }
       addLog(`[Task Completed] Status: ${data.status} in ${data.duration}`);
+      notificationService.notifyTaskComplete({
+        prompt: data.prompt,
+        summary: data.response
+      });
       api.getGitStatus().then((st) => (gitStatus = st));
       setTimeout(() => loadSessions(false), 500);
     });
 
     socket.on("agent_task_cancelled", () => {
       isAgentBusy = false;
+      notificationService.resetTitle();
       addLog("[Task Cancelled]");
       if (messages.length) {
         const last = messages[messages.length - 1];
@@ -1147,6 +1171,24 @@
           {:else}
             <Moon class="w-3.5 h-3.5 text-slate-700 fill-slate-700" />
             <span class="hidden sm:inline">DARK</span>
+          {/if}
+        </button>
+
+        <!-- Background Audio Chime & Desktop Alert Switch -->
+        <button
+          onclick={handleToggleSound}
+          class="h-8 flex items-center gap-1.5 px-2.5 rounded-none bg-[#FCFCFA] hover:bg-[#E5E3DD] border border-[#D0CEC7] text-[#111315] text-xs font-tech font-bold uppercase transition cursor-pointer active:scale-95 shadow-2xs"
+          title={isSoundEnabled
+            ? "Notifikasi Suara & Background: AKTIF (Klik untuk mute)"
+            : "Notifikasi Suara & Background: NONAKTIF (Klik untuk aktifkan)"}
+          aria-label="Toggle Background Sound & Notification"
+        >
+          {#if isSoundEnabled}
+            <Bell class="w-3.5 h-3.5 text-[#FF5500]" />
+            <span class="hidden sm:inline">CHIME</span>
+          {:else}
+            <BellOff class="w-3.5 h-3.5 text-[#8C9097]" />
+            <span class="hidden sm:inline text-[#8C9097]">MUTE</span>
           {/if}
         </button>
       </div>

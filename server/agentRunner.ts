@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { spawn, ChildProcess } from 'child_process';
 import readline from 'readline';
 import path from 'path';
